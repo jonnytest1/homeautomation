@@ -1,0 +1,43 @@
+{
+    "name": "nodets",
+    "version": "1.0.1",
+    "description": "node",
+    "main": "index.ts",
+    "dependencies": {
+        "dotenv": "",
+        "express": "",
+        "express-ws": "^4.0.0",
+        "firebase-admin": "^9.1.0",
+        "hibernatets": "^1.0.41",
+        "mariadb": "",
+        "node-fetch": "^2.6.0",
+        "nodemon": "^2.0.4",
+        "typescript": "",
+        "websocket": "^1.0.32"
+    },
+    "devDependencies": {
+        "@types/firebase": "^3.2.1",
+        "@types/express": "",
+        "ts-node": "",
+        "tslint": ""
+    },
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "author": "",
+    "license": "ISC",
+    "styleext": "less",
+    "nodemonConfig": {
+        "execMap": {
+            "ts": "npm install && node -r ts-node/register"
+        },
+        "verbose": true,
+        "ignore": [
+            "public/*",
+            "angular/*",
+            "pc-receiver/*",
+            "package-lock.json"
+        ],
+        "delay": "0"
+    }
+}

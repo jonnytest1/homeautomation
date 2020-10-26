@@ -1,0 +1,35 @@
+<mat-card autosaving-provider
+          [dataRef]="data.id"
+          resource="connection"
+          dataRefName="itemRef">
+  <mat-card-title>
+    {{data.id}}
+    <button mat-icon-button
+            class="right"
+            (click)="deleteConnection()"
+            aria-label="Example icon button with a vertical three dot icon">
+      <mat-icon>delete</mat-icon>
+    </button>
+  </mat-card-title>
+  <mat-card-content>
+    <div class="content">
+      <div>
+        ssfjsoig jsio gjswoi egjois jgoisj go9sj dgosgjosogjoo<br>
+        ssfjsoig jsio gjswoi egjois jgoisj go9sj dgosgjosogjoo<br>
+        ssfjsoig jsio gjswoi egjois jgoisj go9sj dgosgjosogjoo<br>
+        ssfjsoig jsio gjswoi egjois jgoisj go9sj dgosgjosogjoo<br>
+        ssfjsoig jsio gjswoi egjois jgoisj go9sj dgosgjosogjoo<br>
+        ssfjsoig jsio gjswoi egjois jgoisj go9sj dgosgjosogjoo<br>
+        ssfjsoig jsio gjswoi egjois jgoisj go9sj dgosgjosogjoo<br>
+        ssfjsoig jsio gjswoi egjois jgoisj go9sj dgosgjosogjoo<br>
+        ssfjsoig jsio gjswoi egjois jgoisj go9sj dgosgjosogjoo<br>
+      </div>
+      <code-editor [(ngModel)]="data.transformation"
+                   [codetitle]="title$|async"
+                   autosaving
+                   name=transformation
+                   placeholder="// code"></code-editor>
+    </div>
+
+  </mat-card-content>
+</mat-card>

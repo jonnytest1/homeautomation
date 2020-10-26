@@ -1,0 +1,53 @@
+<form>
+  <mat-card autosaving-provider
+            [dataRef]="data.deviceKey"
+            resource="sender"
+            dataRefName="itemRef">
+    <mat-card-title>
+      <mat-form-field class="example-full-width">
+        <input [(ngModel)]="data.name"
+               matInput
+               placeholder="Name"
+               name=name
+               autosaving>
+      </mat-form-field>
+      <div class="id right">
+        {{data.id}} {{data.deviceKey}} <br>
+        <div class="center">
+          <button class="right"
+                  color="primary"
+                  (click)="testSend()"
+                  mat-flat-button>
+            Test
+          </button>
+          <button mat-icon-button
+                  class="right"
+                  (click)="displayBattery()"
+                  aria-label="battery display">
+            <mat-icon>battery_unknown</mat-icon>
+          </button>
+
+
+        </div>
+
+
+
+
+      </div>
+    </mat-card-title>
+    <mat-card-content>
+      <div class="content">
+        <mat-form-field class="description">
+          <textarea matInput
+                    class="description"
+                    name=description
+                    multiple
+                    autosaving
+                    maxlength=512
+                    placeholder="description"
+                    [(ngModel)]="data.description"></textarea>
+        </mat-form-field>
+      </div>
+    </mat-card-content>
+  </mat-card>
+</form>

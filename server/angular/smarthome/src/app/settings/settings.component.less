@@ -1,0 +1,44 @@
+
+.content-wrapper{
+    height: 100%;
+    flex: 1;
+    display: flex;
+    justify-content: center;
+
+
+    td{
+        vertical-align: top;
+    
+        .list-item{
+            display: inline-flex;
+            flex-direction: row;
+            align-items: center;
+    
+            mat-card{
+                margin: 4px 0px;
+                &.editable{
+                    min-width: 200px;
+                }
+
+                &.sender{
+                   
+                   
+                }
+
+                .mat-card-subtitle {
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                    width: 400px;
+
+                    max-height: 3em;
+                    line-height: 1em;
+                }
+            }
+
+
+            mat-icon.active{
+                color: green;
+            }
+        }
+    }
+}

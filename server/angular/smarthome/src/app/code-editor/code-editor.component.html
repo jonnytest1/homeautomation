@@ -1,0 +1,9 @@
+<div *ngIf="codetitle"
+     class="title">{{codetitle}}</div>
+<div *ngFor="let error of generalErrors"
+     class="error"
+     [innerHTML]="error">
+</div>
+<div #codeEditor
+     class="codeeditorref"></div>
+<!--<button (click)="fs(codeEditor)">fs</button>-->

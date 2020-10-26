@@ -1,0 +1,62 @@
+<div class="content-wrapper"
+     (click)="wrapperClick()">
+  <table>
+    <tr>
+      <th>
+        Senders
+      </th>
+      <th>
+        Connections
+      </th>
+      <th>
+        Receivers
+      </th>
+    </tr>
+    <tr>
+      <td>
+        <mat-list>
+          <div *ngFor="let item of senders"
+               mat-list-item>
+            <div class="list-item">
+              <mat-card class="sender"
+                        [attr.item]="item.id"
+                        (click)="setActive(item,$event)">
+                <mat-card-title>
+                  {{item.id}} {{item.name}}
+                </mat-card-title>
+                <mat-card-subtitle>
+                  {{item.description}}
+                </mat-card-subtitle>
+              </mat-card>
+              <mat-icon [class.active]="connectionHandler && connectionHandler.addingSender===item"
+                        (click)="senderAddClick(item);$event.stopPropagation()">add_box</mat-icon>
+            </div>
+          </div>
+
+        </mat-list>
+      </td>
+      <td>
+        <canvas #canvas></canvas>
+      </td>
+      <td>
+        <mat-list>
+          <div mat-list-item
+               *ngFor="let item of receivers">
+            <div class="list-item">
+              <mat-card [attr.item]="item.id"
+                        (click)="receiverClick(item);$event.stopPropagation()"
+                        class="receiver">
+                <mat-card-title>
+                  {{item.name}}
+                </mat-card-title>
+                <mat-card-subtitle>
+                  {{item.description}}
+                </mat-card-subtitle>
+              </mat-card>
+            </div>
+          </div>
+        </mat-list>
+      </td>
+    </tr>
+  </table>
+</div>
