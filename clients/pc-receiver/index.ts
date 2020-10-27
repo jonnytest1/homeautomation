@@ -1,12 +1,12 @@
-
-import { MessageHandling } from './services/message-handling';
 import registration from './services/registration';
 const express = require('express');
 import { Express } from 'express';
-import { ExpressWs } from '../express-ws-type';
+import { ExpressWs } from '../../server/express-ws-type';
 import { NotificationHandler } from './services/notification-handler';
 
-registration.register()
+const serverIp = process.env.serverip || '192.168.178.54'
+
+registration.register(serverIp)
     .then(() => {
         const app: ExpressWs = express();
         var expressWs = require('express-ws')(app);

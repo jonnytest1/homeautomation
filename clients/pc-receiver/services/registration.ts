@@ -6,17 +6,17 @@ class Registration {
 
     readonly deviceKey = 'pc-receiver';
 
-    async register(): Promise<void> {
+    async register(ip): Promise<void> {
         try {
             const httpsAgent = new https.Agent({
                 rejectUnauthorized: false,
             });
-            const response = await fetch('https://192.168.178.54/nodets/rest/receiver', {
+            const response = await fetch(`https://${ip}/nodets/rest/receiver`, {
                 agent: httpsAgent,
             });
             const receivers = await response.json();
             if (!receivers.some(receiver => receiver.deviceKey === this.deviceKey)) {
-                const saveResponse = await fetch('https://192.168.178.54/nodets/rest/receiver', {
+                const saveResponse = await fetch(`https://${ip}/nodets/rest/receiver`, {
                     method: 'POST',
                     agent: httpsAgent,
                     headers: {

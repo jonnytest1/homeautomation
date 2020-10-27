@@ -1,4 +1,4 @@
-import { Websocket } from '../../express-ws-type';
+import { Websocket } from '../../../server/express-ws-type';
 
 const notifier = require('node-notifier');
 var player = require('play-sound')({
