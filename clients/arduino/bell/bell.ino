@@ -17,9 +17,9 @@ void setup()
     Serial.begin(115200);
     //delay(100); //Take some time to open up the Serial Monitor
     pinMode(VOLTAGE_PIN, INPUT);
-    switch (esp_sleep_get_touchpad_wakeup_status())
+    switch (esp_sleep_get_wakeup_cause())
     {
-    case 5:
+    case ESP_SLEEP_WAKEUP_EXT0:
         Serial.println("Touch detected on GPIO 12");
         onBell();
         break;
@@ -28,8 +28,7 @@ void setup()
         registerSender();
         break;
     }
-    touchAttachInterrupt(T5, longPress, 40);
-    esp_sleep_enable_touchpad_wakeup();
+    esp_sleep_enable_ext0_wakeup(GPIO_NUM_12, 1);
     esp_deep_sleep_start();
 }
 
