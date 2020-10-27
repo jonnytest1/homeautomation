@@ -1,2 +1,4 @@
 node_modules
 public
+creds.h
+/server/.vscode/sftp.json

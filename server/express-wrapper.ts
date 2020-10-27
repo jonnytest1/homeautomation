@@ -83,7 +83,7 @@ export async function initialize(rootpath: string, options?: {
 
     app.use((req, res, next) => {
         const forwardedFor = req.headers.http_x_forwarded_for;
-        if (!forwardedFor || typeof forwardedFor !== 'string' || !forwardedFor.startsWith('192.168.178')) {
+        if ((!forwardedFor || typeof forwardedFor !== 'string' || !forwardedFor.startsWith('192.168.178')) && process.env.DEBUG !== "true") {
             res.status(403).send();
             return;
         }

@@ -13,15 +13,6 @@
             "localRoot": "${workspaceFolder}",
             "remoteRoot": "/var/node"
         },
-        /*  {
-            "type": "node",
-            "request": "attach",
-            "name": "Attach to server",
-            "address": "192.168.178.54",
-            "port": 14748,
-            "localRoot": "${workspaceFolder}",
-            "remoteRoot": "/var/node"
-        },*/
         {
             "type": "node",
             "request": "launch",
@@ -34,22 +25,6 @@
             ],
             "args": [
                 "${workspaceFolder}\\index.ts"
-            ],
-            "restart": true,
-        },
-        {
-            "type": "node",
-            "request": "launch",
-            "name": "launch local receiver",
-            //"program": "${workspaceFolder}\\index.ts",
-            "autoAttachChildProcesses": true,
-            "cwd": "${workspaceFolder}\\pc-receiver",
-            "runtimeArgs": [
-                "-r",
-                "ts-node/register"
-            ],
-            "args": [
-                "${workspaceFolder}\\pc-receiver\\index.ts"
             ],
             "restart": true,
         }

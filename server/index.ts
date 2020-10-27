@@ -1,7 +1,8 @@
 import { config } from 'dotenv';
 import { updateDatabase } from 'hibernatets';
 import { initialize } from './express-wrapper';
-//import * as express from 'express';
+const https = require('https');
+const fetch = require('node-fetch');
 
 console.log('server.ts iniz');
 
@@ -36,16 +37,21 @@ updateDatabase(__dirname + '/models')
                     if (redirected) {
                         const url = new URL(`${req.protocol}://${req.get('host')}${req.originalUrl}`);
                         url.host = redirected;
+                        const body = req.headers['content-type'] ? JSON.stringify(req.body) : req.body
+                        console.log(`redirecting to ${url.href} with ${req.method} - ${body}`)
+
                         fetch(url.href, {
                             method: req.method,
                             headers: {
                                 'content-type': req.headers['content-type'] ? req.headers['content-type'] : undefined
                             },
-                            body: req.body
+                            body: body
                         })
-                            .then(r => r.text()
-                                .then(t => res.status(r.status)
-                                    .send(t)));
+                            .then(r => {
+                                return r.text()
+                                    .then(t => res.status(r.status)
+                                        .send(t));
+                            });
 
                     } else {
                         next();
@@ -54,6 +60,16 @@ updateDatabase(__dirname + '/models')
             },
             allowCors: true,
             public: __dirname + '/public'
+        }).then(() => {
+            if (process.env.DEBUG) {
+                console.log("set redirection")
+                fetch("https://192.168.178.54/nodets/redirect?port=8080", {
+                    method: "POST",
+                    agent: new https.Agent({
+                        rejectUnauthorized: false
+                    })
+                })
+            }
         });
     });
 
