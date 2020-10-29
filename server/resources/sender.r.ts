@@ -29,10 +29,14 @@ export class SenderResource {
                     .send();
             }
         } catch (e) {
-            logKibana('ERROR', 'error in trigger', e);
+            console.error(e)
+            logKibana('ERROR', { message: 'error in trigger', sender: sender.id, data: JSON.stringify(req.body) }, e);
         }
         sender.events.push(new EventHistory(req.body));
-        sender.batteryEntries.push(new BatteryLevel(req.body.a_read1, req.body.a_read2, req.body.a_read3));
+        const batteryLevel = new BatteryLevel(req.body.a_read1, req.body.a_read2, req.body.a_read3);
+        if (batteryLevel.level !== -1) {
+            sender.batteryEntries.push(batteryLevel);
+        }
         res.send();
     }
 

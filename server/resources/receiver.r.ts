@@ -30,18 +30,4 @@ class ReceiverResource {
         const receivers = await load(Receiver, 'true = true');
         res.send(receivers);
     }
-
-    /*@PUT({ path: '' })
-    async update(req, res) {
-        const receiver = await load(Receiver, s => s.deviceKey = req.body.itemRef, [], { first: true });
-        if (!receiver) {
-            return res.status(404)
-                .send();
-
-        }
-        await assign(receiver, req.body);
-        await queries(receiver);
-        res.send(receiver);
-    }*/
-
 }

@@ -22,10 +22,14 @@ class FireBAseMessaging {
                 }
             });
     }
-    async sendNotification(token, payload: admin.messaging.NotificationMessagePayload) {
+    async sendNotification(token, payload: any) {
         return this.app.messaging()
             .sendToDevice(token, {
-                notification: payload
+
+                data: {
+                    data: JSON.stringify(payload)
+                },
+                notification: payload.notification
             });
     }
 
