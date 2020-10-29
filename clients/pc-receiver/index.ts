@@ -5,8 +5,8 @@ import { ExpressWs } from '../../server/express-ws-type';
 import { NotificationHandler } from './services/notification-handler';
 
 const serverIp = process.env.serverip || '192.168.178.54'
-
-registration.register(serverIp)
+const listenOnPort = process.env.listenport || '12345'
+registration.register(serverIp, +listenOnPort)
     .then(() => {
         const app: ExpressWs = express();
         var expressWs = require('express-ws')(app);
@@ -32,7 +32,7 @@ registration.register(serverIp)
             }
         });
 
-        app.listen(13579, '', () => {
-            console.log('started server on localhost with port 13579');
+        app.listen(+listenOnPort, '', () => {
+            console.log(`started server on localhost with port ${listenOnPort}`);
         });
     });

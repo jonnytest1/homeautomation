@@ -17,10 +17,17 @@ export class EventHistory {
     @column()
     checked: 'true' | 'false' = 'false';
 
+    @column({
+        type: "number",
+        size: "large"
+    })
+    timestamp
+
     constructor(data?) {
         if (data) {
             this.type = 'trigger';
             this.data = JSON.stringify(data);
+            this.timestamp = Date.now()
         }
     }
 }

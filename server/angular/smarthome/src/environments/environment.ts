@@ -4,7 +4,7 @@
 
 export const environment = {
   production: false,
-  prefixPath: 'https://192.168.178.54/nodets/'
+  prefixPath: 'http://localhost:8080/'
 };
 
 /*

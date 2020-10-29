@@ -1,10 +1,12 @@
 import { column, mapping, primary, table } from 'hibernatets';
+import { autosaveable } from '../express-db-wrapper';
 import { firebasemessageing } from '../resources/firebasemessaging';
 import ws from '../resources/websocketmessaging';
 import { logKibana } from '../util/log';
 import { settable } from '../util/settable';
 
 @table()
+@autosaveable
 export class Receiver {
 
     @column()
@@ -14,9 +16,6 @@ export class Receiver {
     @settable
     @column()
     firebaseToken: string;
-
-    @settable
-    transformation: string;
 
     @primary()
     id;

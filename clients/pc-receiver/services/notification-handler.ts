@@ -18,6 +18,7 @@ export class NotificationHandler {
     }
 
     show(ws: Websocket) {
+        console.log(new Date(), this.data.notification.title)
         if (this.data.notification.sound && typeof this.data.notification.sound === 'string') {
             const args = ['--intf', 'dummy', '--no-loop', '--play-and-exit'];
             if (this.data.notification.volume) {

@@ -22,14 +22,14 @@ export function settable(target: any, propertyKey: string) {
     objR.__setters.push({ key: propertyKey });
 }
 
-export function assign(obj: any, data) {
+export async function assign(obj: any, data) {
     const objR = obj as { __setters?: Array<Setter> };
     const errorCollector = {};
     if (objR.__setters) {
         for (let key of objR.__setters) {
             if (key.key in data) {
                 if (key.validation) {
-                    const errorObj = key.validation.bind(objR)(data[key.key]);
+                    const errorObj = await key.validation.bind(objR)(data[key.key]);
                     if (errorObj) {
                         errorCollector[key.key] = errorObj;
                     } else {

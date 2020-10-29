@@ -1,6 +1,7 @@
 
 import { column, mapping, Mappings, primary, primaryOptions, table } from 'hibernatets';
 import { runInNewContext } from 'vm';
+import { autosaveable } from '../express-db-wrapper';
 import { settable, settableValidator } from '../util/settable';
 import { Receiver } from './receiver';
 
@@ -8,10 +9,10 @@ import { Receiver } from './receiver';
  * @this {instanceof Connection}
  * @param transformation
  */
-function validateTransformation(this: Connection, transformation: String) {
+async function validateTransformation(this: Connection, transformation: String) {
     let obj;
     try {
-        obj = this.transform(null, transformation);
+        obj = await this.transform(null, transformation);
     } catch (e) {
         let stacklines = e.stack.split('\n');
         stacklines.shift();
@@ -28,6 +29,7 @@ function validateTransformation(this: Connection, transformation: String) {
     }
 }
 
+@autosaveable
 @table()
 export class Connection {
 
@@ -38,7 +40,9 @@ export class Connection {
     receiver: Receiver;
 
     @settableValidator(validateTransformation)
-    @column()
+    @column({
+        size: "large"
+    })
     transformation: string;
 
     @column()
@@ -52,6 +56,9 @@ export class Connection {
 
     async execute(data: any): Promise<number> {
         data = await this.transform(data, this.transformation);
+        if (data === false) {
+            return;
+        }
         return this.receiver.send(data);
     }
 
@@ -67,7 +74,7 @@ export class Connection {
         return Object.keys(this.getContext(null));
     }
 
-    transform(data: any, transformation): any {
+    async transform(data: any, transformation): Promise<any> {
         if (transformation) {
             const context = this.getContext(data);
             const methodCall = Object.keys(context)

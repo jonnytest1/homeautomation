@@ -1,10 +1,12 @@
 import { column, mapping, Mappings, primary, primaryOptions, table } from 'hibernatets';
+import { autosaveable } from '../express-db-wrapper';
 import { settable } from '../util/settable';
 import { BatteryLevel } from './battery';
 import { Connection } from './connection';
 import { EventHistory } from './event';
 
 @table()
+@autosaveable
 export class Sender {
 
     @primary()

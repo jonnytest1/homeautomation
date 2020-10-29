@@ -23,21 +23,6 @@ export class ConnectionResource {
         res.send(connection);
     }
 
-    @PUT({ path: '' })
-    async update(req: HttpRequest, res: HttpResponse) {
-        const connection = await load(Connection, +req.body.itemRef);
-
-        const errors = assign(connection, req.body);
-        if (errors) {
-            res.status(400)
-                .send(errors);
-            return;
-        }
-
-        await queries(connection);
-        res.send(connection);
-    }
-
     @GET({
         path: 'key'
     })

@@ -7,7 +7,7 @@ import { ExpressWs, Websocket } from './express-ws-type';
 export type HttpRequest = Request;
 export type HttpResponse = Response;
 
-const resources: Array<{
+export const resources: Array<{
     type: 'get' | 'post' | 'delete' | 'put' | 'ws',
     path: string
     target: any

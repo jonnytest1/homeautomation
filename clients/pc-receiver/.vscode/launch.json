@@ -15,6 +15,30 @@
                 "-r",
                 "ts-node/register"
             ],
+            "env": {
+                "serverip": "192.168.178.48",
+                "listenport": "12356"
+            },
+            "args": [
+                "${workspaceFolder}\\index.ts"
+            ],
+            "restart": true,
+        },
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "prod launch local receiver",
+            //"program": "${workspaceFolder}\\index.ts",
+            "autoAttachChildProcesses": true,
+            "cwd": "${workspaceFolder}",
+            "runtimeArgs": [
+                "-r",
+                "ts-node/register"
+            ],
+            "env": {
+                "serverip": "192.168.178.54",
+                "listenport": "13579"
+            },
             "args": [
                 "${workspaceFolder}\\index.ts"
             ],

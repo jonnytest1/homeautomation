@@ -18,7 +18,7 @@ class ReceiverResource {
                 receiver.ip += `:${req.body.port}`;
             }
         }
-        assign(receiver, req.body);
+        await assign(receiver, req.body);
         await save(receiver);
         res.send(receiver);
     }
@@ -31,7 +31,7 @@ class ReceiverResource {
         res.send(receivers);
     }
 
-    @PUT({ path: '' })
+    /*@PUT({ path: '' })
     async update(req, res) {
         const receiver = await load(Receiver, s => s.deviceKey = req.body.itemRef, [], { first: true });
         if (!receiver) {
@@ -39,9 +39,9 @@ class ReceiverResource {
                 .send();
 
         }
-        assign(receiver, req.body);
+        await assign(receiver, req.body);
         await queries(receiver);
         res.send(receiver);
-    }
+    }*/
 
 }

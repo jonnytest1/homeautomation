@@ -6,7 +6,7 @@ class Registration {
 
     readonly deviceKey = 'pc-receiver';
 
-    async register(ip): Promise<void> {
+    async register(ip, port): Promise<void> {
         try {
             const httpsAgent = new https.Agent({
                 rejectUnauthorized: false,
@@ -24,7 +24,7 @@ class Registration {
                     },
                     body: JSON.stringify({
                         deviceKey: this.deviceKey,
-                        port: '13579',
+                        port,
                         type: 'wss',
                         name: 'PC Receiver',
                         description: 'Receiver located on the local machine for advanced permissions'
@@ -37,7 +37,7 @@ class Registration {
             }
         } catch (e) {
             console.error(e);
-            await new Promise(res => setTimeout(res, 5000)).then(this.register.bind(this));
+            await new Promise(res => setTimeout(res, 5000)).then(this.register.bind(this, ip, port));
         }
     }
 

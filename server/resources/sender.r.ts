@@ -67,23 +67,11 @@ export class SenderResource {
             return;
         }
         const sender = new Sender();
-        assign(sender, req.body);
+        await assign(sender, req.body);
         await save(sender);
         res.send(sender);
     }
 
-    @PUT({ path: '' })
-    async update(req, res) {
-        const sender = await load(Sender, s => s.deviceKey = req.body.itemRef, [], { first: true });
-        if (!sender) {
-            return res.status(404)
-                .send();
-
-        }
-        assign(sender, req.body);
-        await queries(sender);
-        res.send(sender);
-    }
 
     @GET({
         path: ''
