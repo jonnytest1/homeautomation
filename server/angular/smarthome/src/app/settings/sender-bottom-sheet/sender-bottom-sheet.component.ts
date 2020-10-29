@@ -21,7 +21,7 @@ export class SenderBottomSheetComponent implements OnInit {
   }
   displayBattery() {
     this.dialog.open(BatteryComponent, {
-      data: this.data.batteryEntries,
+      data: this.data,
       panelClass: 'unlimitedsnackbar',
     });
   }

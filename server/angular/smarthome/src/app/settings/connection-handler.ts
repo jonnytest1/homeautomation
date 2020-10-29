@@ -14,43 +14,8 @@ export class ConnectionHandler {
     activeSender: Sender;
     util: CanvasUtil;
 
-    constructor(private senders: Array<Sender>,
-        private receivers: Array<Receiver>,
-        private snackOpen: (data, type) => any) {
+    constructor(private snackOpen: (data, type) => any) {
 
-    }
-
-    randomize() {
-        /* for (let i = 0; i < 5; i++) {
-             this.senders.push({
-                 id: 400 + i,
-                 description: 'sdfsgsdhg sd sdg sd hgdsfh sd jfj sf jftj fsj fj fg jhfg jfgj fuj rjsdrtjudrtj  yrzh dfh ',
-                 name: `sender${i}`,
-                 connections: []
-             });
-         }*/
-
-        /* for (let i = 0; i < 3; i++) {
-             this.receivers.push({
-                 id: `${200 + i}`,
-                 description: 'sdfsgsdhg asgsd gae rha glas jgoiasjgh oöiaj öoirja göoieaj rgöoie ajoiejraoijreaoiö eiprjioe gjidrgöp',
-                 name: `receiver${i}`
-             });
-         }*/
-        const conId = 200;
-        this.senders.forEach(sender => {
-            /*this.receivers.forEach(receiver => {
-                if (Math.random() > 0.4) {
-                    if (!sender.connections) {
-                        sender.connections = [];
-                    }
-                    sender.connections.push({
-                        id: conId++,
-                        receiver: receiver
-                    });
-                }
-            });*/
-        });
     }
 
     setCanvas(nativeCanvas: HTMLCanvasElement) {
@@ -95,12 +60,12 @@ export class ConnectionHandler {
                 if (!endY || heightForSender > endY) {
                     endY = heightForSender;
                 }
-
+                const sender = this.activeSender;
                 this.util.line({
                     from: { x: 'center', y: heightForSender },
                     to: { x: this.util.width - 12, y: heightForSender },
                     click: (event: MouseEvent) => {
-                        this.snackOpen(connection, ConnectionBottomsheetComponent);
+                        this.snackOpen({ con: connection, sender }, ConnectionBottomsheetComponent);
                         event.stopPropagation();
                     }
                 });

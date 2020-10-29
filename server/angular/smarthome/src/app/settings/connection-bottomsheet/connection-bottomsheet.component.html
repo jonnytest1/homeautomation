@@ -1,9 +1,9 @@
 <mat-card autosaving-provider
-          [dataRef]="data.id"
+          [dataRef]="data.con.id"
           resource="connection"
           dataRefName="itemRef">
   <mat-card-title>
-    {{data.id}}
+    {{data.con.id}}
     <button mat-icon-button
             class="right"
             (click)="deleteConnection()"
@@ -24,7 +24,7 @@
         ssfjsoig jsio gjswoi egjois jgoisj go9sj dgosgjosogjoo<br>
         ssfjsoig jsio gjswoi egjois jgoisj go9sj dgosgjosogjoo<br>
       </div>
-      <code-editor [(ngModel)]="data.transformation"
+      <code-editor [(ngModel)]="data.con.transformation"
                    [codetitle]="title$|async"
                    autosaving
                    name=transformation

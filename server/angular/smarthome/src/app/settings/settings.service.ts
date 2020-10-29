@@ -9,6 +9,7 @@ import { Receiver, Sender } from './interfaces';
 export class SettingsService {
 
 
+
     constructor(private http: HttpClient) {
 
     }
@@ -30,9 +31,14 @@ export class SettingsService {
             map(keys => `context: ${keys.join(', ')}`)
         );
     }
+    deleteConneciton(id: number) {
+        return this.http.delete(`${environment.prefixPath}rest/connection?itemRef=${id}`)
+    }
+
 
     testSend(deviceKey) {
         const dataObj = {
+            testsend: true,
             deviceKey: deviceKey,
             a_read1: -1,
             a_read2: -1,
