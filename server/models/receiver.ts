@@ -54,6 +54,7 @@ export class Receiver {
         if (response.failureCount > 0) {
             logKibana('ERROR', 'error sending firebase to receiver');
         }
+        // this.firebaseToken = response.results[0].canonicalRegistrationToken;
         return response.failureCount;
     }
 }
