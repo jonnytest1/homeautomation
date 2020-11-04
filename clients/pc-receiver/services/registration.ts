@@ -1,24 +1,17 @@
+import { fetchHttps } from '../util/request';
 
-const fetch = require('node-fetch');
-
-const https = require('https');
 class Registration {
 
     readonly deviceKey = 'pc-receiver';
 
     async register(ip, port): Promise<void> {
         try {
-            const httpsAgent = new https.Agent({
-                rejectUnauthorized: false,
-            });
-            const response = await fetch(`https://${ip}/nodets/rest/receiver`, {
-                agent: httpsAgent,
-            });
+
+            const response = await fetchHttps(`${ip}rest/receiver`);
             const receivers = await response.json();
             if (!receivers.some(receiver => receiver.deviceKey === this.deviceKey)) {
-                const saveResponse = await fetch(`https://${ip}/nodets/rest/receiver`, {
+                const saveResponse = await fetchHttps(`${ip}rest/receiver`, {
                     method: 'POST',
-                    agent: httpsAgent,
                     headers: {
                         'content-type': 'application/json'
                     },

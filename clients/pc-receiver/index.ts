@@ -28,7 +28,7 @@ registration.register(serverIp, +listenOnPort)
                 console.error(e);
             }
             if (data.notification) {
-                new NotificationHandler(data).show(ws);
+                new NotificationHandler(data, serverIp).show(ws);
             }
         });
 

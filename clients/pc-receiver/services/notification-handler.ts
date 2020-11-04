@@ -1,5 +1,6 @@
 import { Websocket } from '../../../server/express-ws-type';
-
+import { promises, existsSync } from "fs"
+import { fetchHttps } from '../util/request';
 const notifier = require('node-notifier');
 var player = require('play-sound')({
     player: 'C:\\Program Files\\VideoLAN\\VLC\\vlc.exe',
@@ -10,16 +11,29 @@ export class NotificationHandler {
     audio;
     data: any;
 
-    readonly prefixPath = 'D:\\vm\\dockervm\\storage\\tpscripts\\pi\\tampermonkey\\nodets\\pc-receiver\\services\\sounds\\';
+    readonly prefixPath = 'D:\\Jonathan\\Projects\\node\\homeautomation\\clients\\pc-receiver\\services\\sounds\\';
 
-    constructor(data) {
+    constructor(data, private serverIp) {
         this.data = data;
 
     }
 
-    show(ws: Websocket) {
+    async show(ws: Websocket) {
         console.log(new Date(), this.data.notification.title)
         if (this.data.notification.sound && typeof this.data.notification.sound === 'string') {
+            if (!existsSync(this.prefixPath + this.data.notification.sound)) {
+                const response = await fetchHttps(`${this.serverIp}rest/auto/sound/bykey/${this.data.notification.sound}`)
+                if (response.status != 200) {
+                    ws.send("failure getting sound");
+                    return;
+                }
+                const responseBlob = (await response.json())[0];
+                const charCodeArray: Array<number> = responseBlob.bytes.split(",")
+                    .map(c => +c)
+                await promises.writeFile(this.prefixPath + this.data.notification.sound, Uint8Array.from(charCodeArray))
+            }
+
+
             const args = ['--intf', 'dummy', '--no-loop', '--play-and-exit'];
             if (this.data.notification.volume) {
                 args.push(`--mmdevice-volume=0.1`);

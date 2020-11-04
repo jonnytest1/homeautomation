@@ -16,7 +16,7 @@
                 "ts-node/register"
             ],
             "env": {
-                "serverip": "192.168.178.48",
+                "serverip": "http://127.0.0.1:8080/",
                 "listenport": "12356"
             },
             "args": [
@@ -36,7 +36,7 @@
                 "ts-node/register"
             ],
             "env": {
-                "serverip": "192.168.178.54",
+                "serverip": "https://192.168.178.54/nodets/",
                 "listenport": "13579"
             },
             "args": [
