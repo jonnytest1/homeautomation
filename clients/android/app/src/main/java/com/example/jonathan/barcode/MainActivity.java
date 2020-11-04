@@ -1,26 +1,20 @@
 package com.example.jonathan.barcode;
 
+import android.Manifest;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
-import android.os.Looper;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.Toast;
 
-import com.example.jonathan.barcode.http.CustomHttp;
-import com.example.jonathan.barcode.http.CustomResponse;
+import com.example.jonathan.barcode.service.BarcodeSender;
 import com.google.zxing.Result;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.io.IOException;
 import java.time.Instant;
-import java.util.Base64;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import me.dm7.barcodescanner.zxing.ZXingScannerView;
 
 public class MainActivity extends AppCompatActivity implements ZXingScannerView.ResultHandler {
@@ -32,11 +26,20 @@ public class MainActivity extends AppCompatActivity implements ZXingScannerView.
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         //setContentView(R.layout.activity_main);
-        Toolbar toolbar = findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
-
+       // Toolbar toolbar = findViewById(R.id.toolbar);
+      //  setSupportActionBar(toolbar);
+        if(ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA)!= PackageManager.PERMISSION_GRANTED){
+           ActivityCompat.requestPermissions(this,new String[]{Manifest.permission.CAMERA},1);
+        };
         mScannerView = new ZXingScannerView(this);   // Programmatically initialize the scanner view
         setContentView(mScannerView);
+      /*  try {
+            new Thread(() -> {
+                new Registration(getApplicationContext()).checkRegistration();
+            }).run();
+        }catch(Exception e){
+            Log.e("xfghfgh","",e);
+        }*/
     }
 
     @Override
@@ -81,49 +84,10 @@ public class MainActivity extends AppCompatActivity implements ZXingScannerView.
         // Do something with the result here
         if(lastSend.isBefore(Instant.now().minusSeconds(5))){
             lastSend=Instant.now();
-            final JSONObject jsonObject = new JSONObject();
-            try {
-                jsonObject.put("application", "android timer");
-                jsonObject.put("Severity", "TIMER");
-                jsonObject.put("timestamp", Instant.now().toString());
-                jsonObject.put("message", rawResult.getText());
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-            final String result=rawResult.getText();
+
 
             final Context applicationContext = getBaseContext();
-            new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    Looper.prepare();
-                    String decoded = Base64.getEncoder().encodeToString(jsonObject.toString().getBytes());
-                    try {
-                        CustomResponse response = new CustomHttp().target("https://192.168.178.54/nodets/rest/timer").request().post(result, "text/plain");
-                        final String responseText=response.getContent();
-                        if (response.getResponseCode() != 200) {
-                            if(response.getResponseCode()==404){
-                                runOnUiThread(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        Toast.makeText(applicationContext, "didnt find timer for "+result, Toast.LENGTH_SHORT).show();
-                                    }
-                                });
-                            }
-                            Log.v("idk", response.getContent()); // Prints scan results
-                        }else {
-                            runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    Toast.makeText(applicationContext, responseText.trim(), Toast.LENGTH_SHORT).show();
-                                }
-                            });
-                        }
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }).start();
+            new Thread(new BarcodeSender(rawResult,applicationContext)).start();
         }
         // If you would like to resume scanning, call this method below:
         mScannerView.resumeCameraPreview(this);

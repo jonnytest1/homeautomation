@@ -1,5 +1,9 @@
 package com.example.jonathan.barcode.http;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -46,6 +50,10 @@ public class CustomResponse {
 
 	public String getContent() {
 		return content;
+	}
+
+	public JsonNode getJsonContent() throws JsonProcessingException {
+		return new ObjectMapper().readTree(content);
 	}
 
 	private String readEntity() throws IOException {
