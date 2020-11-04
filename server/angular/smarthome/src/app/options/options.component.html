@@ -1,0 +1,47 @@
+<div class="container"
+     (click)="error=undefined">
+    <h3>Sounds</h3>
+
+    <div *ngIf="error"
+         class="error">{{error}}</div>
+    <div class="sound"
+         *ngFor="let f of sounds">
+
+        {{f.key}} <audio controls
+               [src]="f.url">
+            <source [src]="f.url"
+                    type="audio/mp3">
+            Your browser does not support the audio element.
+        </audio>
+        <br>
+    </div>
+    <form #form="ngForm">
+
+        <mat-form-field>
+            <mat-label>SoundKey</mat-label>
+            <input matInput
+                   name="soundKey"
+                   [(ngModel)]="addingSound.key" />
+
+        </mat-form-field>
+
+        <ngx-dropzone (change)="onDrop($event)">
+            <ngx-dropzone-label>{{ soundName|| 'Drop Sound File here'}}
+                <div class="divider"
+                     *ngIf="!this.addingSound.file && !this.addingSound.url"></div>
+                <div class=inputWrapper
+                     *ngIf="!this.addingSound.file && !this.addingSound.url"
+                     (drop)="linkDrop($event)">
+                    or link here
+                </div>
+
+            </ngx-dropzone-label>
+
+        </ngx-dropzone>
+
+        <button mat-icon-button
+                (click)="addFile();$event.stopPropagation()">
+            <mat-icon>add_circle</mat-icon>
+        </button>
+    </form>
+</div>
