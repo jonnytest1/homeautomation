@@ -5,5 +5,14 @@
      [innerHTML]="error">
 </div>
 <div #codeEditor
-     class="codeeditorref"></div>
-<!--<button (click)="fs(codeEditor)">fs</button>-->
+     class="codeeditorref">
+     <button (click)="fs(codeEditor)"
+             class="fsButton"
+             mat-icon-button>
+          <mat-icon class="white-icon"
+                    fill="white">{{isFullscreeen(codeEditor)? 'fullscreen_exit':'fullscreen'}}</mat-icon>
+
+     </button>
+     <mat-icon [ngClass]="{hidden:!recentlySaved}"
+               class="white-icon savedIcon">save</mat-icon>
+</div>

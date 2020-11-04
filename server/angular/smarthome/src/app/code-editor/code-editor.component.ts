@@ -17,7 +17,7 @@ export const CUSTOM_INPUT_CONTROL_VALUE_ACCESSOR: any = {
 @Component({
   selector: 'code-editor',
   templateUrl: './code-editor.component.html',
-  styleUrls: ['./code-editor.component.css'],
+  styleUrls: ['./code-editor.component.less'],
   providers: [CUSTOM_INPUT_CONTROL_VALUE_ACCESSOR],
 })
 export class CodeEditorComponent implements OnInit, ControlValueAccessor {
@@ -41,6 +41,8 @@ export class CodeEditorComponent implements OnInit, ControlValueAccessor {
   cachedValue;
   ngModel: NgModel;
   generalErrors: Array<string>;
+
+  recentlySaved = false;
   constructor(private injector: Injector, private cdr: ChangeDetectorRef) { }
   writeValue(obj: any): void {
     if (!this.codeMirror) {
@@ -72,8 +74,16 @@ export class CodeEditorComponent implements OnInit, ControlValueAccessor {
 
   }
 
+  isFullscreeen(ref) {
+    return document.fullscreenElement == ref
+  }
+
   fs(ref) {
-    ref.requestFullscreen();
+    if (this.isFullscreeen(ref)) {
+      document.exitFullscreen()
+    } else {
+      ref.requestFullscreen();
+    }
   }
   ngAfterViewInit() {
     require('codemirror/mode/javascript/javascript.js');
@@ -156,14 +166,27 @@ export class CodeEditorComponent implements OnInit, ControlValueAccessor {
   private setControlHandler() {
     this.ngModel = this.injector.get(NgModel);
 
+    let beforeValidation = false;
+
     this.codeMirror.on('change', (e, change) => {
+      beforeValidation = true;
+      this.ngModel.control.markAsTouched({ onlySelf: true })
       this.ngModel.control.setErrors(null);
       this.codeMirror.getAllMarks()
         .forEach(mark => { mark.clear(); });
       this.onChange(this.toStorageCode(this.codeMirror.getValue()));
+      beforeValidation = false;
     });
 
     this.ngModel.statusChanges.subscribe(change => {
+      if (change == "VALID" && this.ngModel.control.value && !beforeValidation) {
+        this.recentlySaved = true
+        setTimeout(() => {
+          this.recentlySaved = false;
+          this.cdr.detectChanges()
+        }, 500)
+      }
+
       this.generalErrors = [];
       this.cdr.markForCheck();
       if (this.ngModel.errors) {
@@ -177,7 +200,7 @@ export class CodeEditorComponent implements OnInit, ControlValueAccessor {
     let hasGeneralError = false;
     Object.keys(errors)
       .forEach(errorKey => {
-        hasGeneralError = hasGeneralError || this.setError(errorKey, errors);
+        hasGeneralError = this.setError(errorKey, errors) || hasGeneralError;
       });
 
 
@@ -186,36 +209,27 @@ export class CodeEditorComponent implements OnInit, ControlValueAccessor {
 
   private setError(errorKey: string, errors: any): boolean {
     let foundLine = false;
-    this.codeMirror.eachLine((lineel) => {
-      try {
-        const index = lineel.text.indexOf(errorKey);
-        if (index > -1) {
-          foundLine = true;
+    try {
+      const pos = JSON.parse(errorKey);
+      const token = this.codeMirror.getTokenAt({ line: pos.row - 1, ch: pos.character })
 
-          const marker = this.codeMirror.markText(
-            { line: lineel.lineNo(), ch: index },
-            { line: lineel.lineNo(), ch: index + errorKey.length }, {
-            attributes: {
-              title: errors[errorKey],
-            },
-            css: 'text-decoration: underline red;'
-          });
-
-        }
-      } catch (e) {
-        console.error(e);
-      }
-    });
-
-    if (!foundLine) {
+      const marker = this.codeMirror.markText(
+        { line: pos.row - 1, ch: token.start },
+        { line: pos.row - 1, ch: token.end }, {
+        attributes: {
+          title: errors[errorKey],
+        },
+        css: 'text-decoration: underline red;'
+      });
+      return false;
+    } catch (e) {
       this.generalErrors.push(errors[errorKey].replace('\n', '<br>'));
       return true;
     }
-    return false;
   }
 
   toDisplayCode(code: string) {
-    return `${code || 'function(data,transformation,receiver){\n\n// code here \n\n}'}`;
+    return `${code || '(NULL)'}`;
   }
 
   toStorageCode(code: string) {

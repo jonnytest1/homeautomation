@@ -17,7 +17,7 @@ export interface CodeEditor {
     })
     getCursor(): MArkerPos
 
-    getTokenAt(p: MArkerPos)
+    getTokenAt(p: MArkerPos): Token
     registerHelper(type: string, name: string, value)
     setCursor(pos: SelecitonPos, opts?)
 
@@ -26,6 +26,26 @@ export interface CodeEditor {
     lastLine(): number
 
     indentSelection(method: "smart")
+}
+
+type languageType = "property" | "variable"
+
+interface Token {
+
+    state: {
+        cc: Array<Function>
+        context: any,
+        /**
+         * offset from left
+         */
+        indented: number
+
+        lastType: languageType
+    }
+    end: number
+    start: number,
+    string: string
+    type: languageType
 }
 
 interface SelecitonPos extends MArkerPos {
