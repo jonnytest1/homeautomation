@@ -1,5 +1,6 @@
 
 import * as admin from 'firebase-admin';
+import { SenderResponse } from '../models/connection-response';
 
 class FireBAseMessaging {
     private app: admin.app.App;
@@ -22,10 +23,9 @@ class FireBAseMessaging {
                 }
             });
     }
-    async sendNotification(token, payload: any) {
+    async sendNotification(token, payload: SenderResponse) {
         return this.app.messaging()
             .sendToDevice(token, {
-
                 data: {
                     data: JSON.stringify(payload)
                 },

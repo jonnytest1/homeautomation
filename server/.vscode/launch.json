@@ -26,7 +26,6 @@
             "args": [
                 "${workspaceFolder}\\index.ts"
             ],
-            "restart": true,
         }
     ]
 }

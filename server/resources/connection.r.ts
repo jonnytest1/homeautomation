@@ -3,6 +3,7 @@ import { GET, HttpRequest, HttpResponse, Path, POST, PUT } from '../express-wrap
 import { Connection } from '../models/connection';
 import { Receiver } from '../models/receiver';
 import { Sender } from '../models/sender';
+import { Transformation } from '../models/transformation';
 import { assign } from '../util/settable';
 
 @Path('connection')
@@ -28,7 +29,7 @@ export class ConnectionResource {
     })
 
     async getKeys(req: HttpRequest, res: HttpResponse) {
-        const connection = await load(Connection, +req.query.itemRef);
+        const connection = await load(Connection, +req.query.itemRef, [], { deep: ["transformer"] });
         res.send(connection.getContextKeys());
     }
 }

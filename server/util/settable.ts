@@ -4,30 +4,32 @@ interface Setter {
     validation?(value: any): Promise<string>;
 }
 
+const setters: { [key: string]: Array<{ key: string, validation?: Function }> } = {}
+
 export function settableValidator(validationFunction) {
     return (target: any, propertyKey: string) => {
         const objR = target as { __setters?: Array<Setter> };
-        if (!objR.__setters) {
-            objR.__setters = [];
+        if (!setters[target.constructor]) {
+            setters[target.constructor] = [];
         }
-        objR.__setters.push({ key: propertyKey, validation: validationFunction });
+        setters[target.constructor].push({ key: propertyKey, validation: validationFunction });
     };
 }
 
 export function settable(target: any, propertyKey: string) {
     const objR = target as { __setters?: Array<Setter> };
-    if (!objR.__setters) {
-        objR.__setters = [];
+    if (!setters[target.constructor]) {
+        setters[target.constructor] = [];
     }
-    objR.__setters.push({ key: propertyKey });
+    setters[target.constructor].push({ key: propertyKey });
 }
 
 export async function assign(obj: any, data) {
     const objR = obj as { __setters?: Array<Setter> };
     const errorCollector = {};
-    if (objR.__setters) {
-        for (let key of objR.__setters) {
-            if (key.key in data) {
+    if (setters[obj.constructor]) {
+        for (let key of setters[obj.constructor]) {
+            if (Object.keys(data).map(k => k.split(".")[0]).includes(key.key)) {
                 if (key.validation) {
                     const errorObj = await key.validation.bind(objR)(data[key.key]);
                     if (errorObj) {

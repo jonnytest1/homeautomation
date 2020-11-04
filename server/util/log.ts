@@ -1,6 +1,6 @@
 const fetch = require('node-fetch');
 import { btoa } from './btoaatob';
-export function logKibana(level: 'INFO' | 'ERROR' | 'DEBUG', message: string | Object, error?) {
+export async function logKibana(level: 'INFO' | 'ERROR' | 'DEBUG', message: string | Object, error?) {
     error = { ...error };
     let jsonData: { [key: string]: string } = {
         Severity: level,
@@ -13,7 +13,11 @@ export function logKibana(level: 'INFO' | 'ERROR' | 'DEBUG', message: string | O
             jsonData.message = message['message'];
             delete message['message'];
             for (let i in message) {
-                jsonData[i] = message[i];
+                if (typeof message[i] != "number" && typeof message[i] !== "string") {
+                    jsonData[i] = JSON.stringify(message[i])
+                } else {
+                    jsonData[i] = message[i];
+                }
             }
         } else {
             jsonData.message = JSON.stringify(message);
@@ -21,13 +25,14 @@ export function logKibana(level: 'INFO' | 'ERROR' | 'DEBUG', message: string | O
     } else {
         jsonData.message = message;
     }
-    if (error) {
+    if (error && Object.keys(error).length > 0) {
         jsonData.error_message = error.message;
         jsonData.error_stacktrace = error.stack;
         delete error.message;
         delete error.stack;
         jsonData = { ...jsonData, ...error };
     }
+    console.log(jsonData);
     fetch(`https://pi4.e6azumuvyiabvs9s.myfritz.net/tm/libs/log/index.php`, {
         method: 'POST',
         headers: {

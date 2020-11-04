@@ -4,6 +4,7 @@ import { promises } from 'fs';
 import { Http2ServerRequest } from 'http2';
 import { join } from 'path';
 import { ExpressWs, Websocket } from './express-ws-type';
+import { ResponseCodeError } from './util/express-util.ts/response-code-error';
 export type HttpRequest = Request;
 export type HttpResponse = Response;
 
@@ -90,6 +91,7 @@ export async function initialize(rootpath: string, options?: {
         next();
     });
 
+    resources.sort((r1, r2) => r1.path > r2.path ? 1 : -1)
     for (let resource of resources) {
         const filePath = resource.target.constructor.path ? '/' + resource.target.constructor.path : '';
         const resourcePath = resource.path.startsWith('/') || resource.path === '' ? resource.path : '/' + resource.path;
@@ -105,6 +107,9 @@ export async function initialize(rootpath: string, options?: {
                 try {
                     await resource.callback(req, res);
                 } catch (e) {
+                    if (e instanceof ResponseCodeError) {
+                        return res.status(e.code).send(e.reason);
+                    }
                     console.error(e);
                     res.status(500)
                         .send(e);

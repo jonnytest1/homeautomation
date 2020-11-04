@@ -4,6 +4,7 @@ import { firebasemessageing } from '../resources/firebasemessaging';
 import ws from '../resources/websocketmessaging';
 import { logKibana } from '../util/log';
 import { settable } from '../util/settable';
+import { SenderResponse } from './connection-response';
 
 @table()
 @autosaveable
@@ -40,7 +41,7 @@ export class Receiver {
 
     }
 
-    async send(data: any): Promise<number> {
+    async send(data: SenderResponse): Promise<number> {
         if (this.type == 'ws') {
             return ws.sendWebsocket(this.ip, data);
         }
@@ -52,9 +53,14 @@ export class Receiver {
         console.log(`sending push notification for ${this.name}`);
         const response = await firebasemessageing.sendNotification(this.firebaseToken, data);
         if (response.failureCount > 0) {
-            logKibana('ERROR', 'error sending firebase to receiver');
+            logKibana('ERROR', {
+                message: 'error sending firebase to receiver',
+                reason: JSON.stringify(response.results)
+            });
         }
-        // this.firebaseToken = response.results[0].canonicalRegistrationToken;
+
+        console.log(this.firebaseToken, response.results[0].canonicalRegistrationToken)
+        // this.firebaseToken = 
         return response.failureCount;
     }
 }

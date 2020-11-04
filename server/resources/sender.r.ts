@@ -7,7 +7,11 @@ import { Receiver } from '../models/receiver';
 import { Sender } from '../models/sender';
 import { logKibana } from '../util/log';
 import { assign } from '../util/settable';
-
+import { DataBaseBase } from "hibernatets/mariadb-base"
+import { loadOne } from '../express-db-wrapper';
+import { Transformation } from '../models/transformation';
+import { ResponseCodeError } from '../util/express-util.ts/response-code-error';
+import { Transformer } from '../models/transformer';
 @Path('sender')
 export class SenderResource {
 
@@ -16,44 +20,59 @@ export class SenderResource {
     })
     async trigger(req: HttpRequest, res: HttpResponse) {
         console.log(`trigger request `);
-        const sender = await load(Sender, s => s.deviceKey = req.body.deviceKey, [], { first: true, deep: ['connections', 'receiver' as any] });
-        if (!sender) {
-            res.status(404)
-                .send();
-            return;
-        }
+        const sender = await loadOne(Sender, s => s.deviceKey = req.body.deviceKey, [], {
+            deep: ['connections', 'receiver', "transformer", "transformation"]
+        });
         try {
-            const responses = await Promise.all(sender.connections.map(connection => connection.execute(req.body)));
-            if (responses.reduce((a, b) => a + b, 0) > 0) {
+            const responses = await sender.trigger(req.body);
+            if (responses.reduce<number>((a, b) => b.error ? b.error + a : a, 0) > 0) {
                 res.status(500)
                     .send();
+            } else {
+                let status = 200;
+                const statusResponse = responses.find(res => res.status);
+
+                if (statusResponse) {
+                    status = statusResponse.status;
+                }
+                res.status(status).send(responses);
             }
+
         } catch (e) {
+            if (e instanceof ResponseCodeError) {
+                throw e;
+            }
             console.error(e)
             logKibana('ERROR', { message: 'error in trigger', sender: sender.id, data: JSON.stringify(req.body) }, e);
+            res.send();
+        } finally {
+            sender.events.push(new EventHistory(req.body));
+            if (req.body.a_read1) {
+                const batteryLevel = new BatteryLevel(req.body.a_read1, req.body.a_read2, req.body.a_read3);
+                if (batteryLevel.level !== -1) {
+                    sender.batteryEntries.push(batteryLevel);
+                }
+            }
         }
-        sender.events.push(new EventHistory(req.body));
-        const batteryLevel = new BatteryLevel(req.body.a_read1, req.body.a_read2, req.body.a_read3);
-        if (batteryLevel.level !== -1) {
-            sender.batteryEntries.push(batteryLevel);
-        }
-        res.send();
     }
 
-    @POST({ path: 'test' })
-    async test(req, res) {
-        if (!req.body.devid) {
-            return res.status(400)
-                .send();
-        }
-        const sender = await load(Sender, s => s.deviceKey = req.body.devid, [], { first: true, deep: ['connections', 'receiver' as any] });
-        if (!sender) {
-            res.status(404)
-                .send();
-            return;
-        }
-        const transforms = await Promise.all(sender.connections.map(connection => connection.transform(req.body, connection.transformation)));
-        res.send(transforms);
+    @GET({
+        path: "eventkeys"
+    })
+    async getEventKeys(req: HttpRequest, res) {
+        const eventKEys = await new DataBaseBase().selectQuery<any>(
+            `SELECT DISTINCT SUBSTRING_INDEX(SUBSTRING_INDEX(\`data\`,'message":"',-1),'"',1) as evkey
+            FROM eventhistory 
+            WHERE SENDER = ?`, [req.query.id])
+        res.send(eventKEys.map(obj => obj.evkey));
+    }
+
+    @GET({
+        path: ":senderid/timers"
+    })
+    async getTimers(req: HttpRequest, res) {
+        const timers = Transformer.getActiveTimers(+req.params.senderid)
+        res.send(timers);
     }
 
     @POST({ path: '' })
@@ -63,11 +82,11 @@ export class SenderResource {
                 .send('missing deviceKey');
             return;
         }
-        let existingSender = await load(Sender, s => s.deviceKey = req.body.deviceKey);
-        if (existingSender[0]) {
+        let existingSender = await load(Sender, s => s.deviceKey = req.body.deviceKey, [], { first: true });
+        if (existingSender) {
             logKibana('INFO', `sender already exists with id ${req.body.deviceKey}`);
             res.status(409)
-                .send('sender already exists');
+                .send(existingSender);
             return;
         }
         const sender = new Sender();
@@ -84,4 +103,25 @@ export class SenderResource {
         const senders = await load(Sender, 'true = true', undefined, { deep: true });
         res.send(senders);
     }
+    @POST({
+        path: ':senderid/transformation'
+    })
+    async addTransformation(req: HttpRequest, res: HttpResponse) {
+        const sender = await load(Sender, s => s.id = +req.params.senderid, undefined, { first: true });
+        const transform = new Transformation()
+        await assign(transform, req.body);
+        sender.transformation.push(transform);
+        await queries(sender);
+        res.send(transform);
+    }
+
+    @GET({
+        path: 'key'
+    })
+
+    async getKeys(req: HttpRequest, res: HttpResponse) {
+        const connection = await load(Sender, +req.query.itemRef, [], { first: true });
+        res.send(connection.getContextKeys());
+    }
+
 }

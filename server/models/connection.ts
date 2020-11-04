@@ -1,37 +1,17 @@
-
 import { column, mapping, Mappings, primary, primaryOptions, table } from 'hibernatets';
 import { runInNewContext } from 'vm';
 import { autosaveable } from '../express-db-wrapper';
 import { settable, settableValidator } from '../util/settable';
+import { TransformationResponse } from './connection-response';
 import { Receiver } from './receiver';
+import { convertToOS, writeFileDir } from '../util/file';
+import { Transformer } from './transformer';
+import { Transformation } from './transformation';
 
-/**
- * @this {instanceof Connection}
- * @param transformation
- */
-async function validateTransformation(this: Connection, transformation: String) {
-    let obj;
-    try {
-        obj = await this.transform(null, transformation);
-    } catch (e) {
-        let stacklines = e.stack.split('\n');
-        stacklines.shift();
-        stacklines = stacklines.filter(line => line.trim().length && !line.trim()
-            .startsWith('at '));
-        return { ___: stacklines.join('\n') };
-    }
-    if (typeof obj !== 'object') {
-        return { ___: 'transformation needs to return an object' };
-    }
-
-    if (obj.title && typeof obj.title !== 'string') {
-        return { title: 'title needs to be string' };
-    }
-}
 
 @autosaveable
 @table()
-export class Connection {
+export class Connection extends Transformer {
 
     @primary()
     id: number;
@@ -39,50 +19,38 @@ export class Connection {
     @mapping(Mappings.OneToOne, Receiver)
     receiver: Receiver;
 
-    @settableValidator(validateTransformation)
-    @column({
-        size: "large"
-    })
-    transformation: string;
+    @mapping(Mappings.OneToOne, Transformation)
+    transformation: Transformation = new Transformation();
 
     @column()
     description: string;
 
     constructor(receiver?: Receiver) {
+        super()
         if (receiver) {
             this.receiver = receiver;
         }
     }
 
-    async execute(data: any): Promise<number> {
-        data = await this.transform(data, this.transformation);
-        if (data === false) {
+    async execute(data: any): Promise<TransformationResponse> {
+        const newData = await this.transform(data, this.transformation);
+        if (newData === false) {
             return;
         }
-        return this.receiver.send(data);
+        if (newData.promise) {
+            newData.promise.then((pData) => this.receiver.send(pData));
+            return newData;
+        }
+        return {
+            error: await this.receiver.send(newData)
+        };
     }
 
     getContext(data) {
         return {
-            transformation: this.transformation,
-            receiver: this.receiver,
-            data: data
+            transformation: this.transformation.transformation,
+            receiver: JSON.parse(JSON.stringify(this.receiver)),
+            ...super.getContext(data)
         };
-    }
-
-    getContextKeys() {
-        return Object.keys(this.getContext(null));
-    }
-
-    async transform(data: any, transformation): Promise<any> {
-        if (transformation) {
-            const context = this.getContext(data);
-            const methodCall = Object.keys(context)
-                .join(',');
-            data = runInNewContext(`${transformation}`, context, {
-                displayErrors: true,
-            });
-        }
-        return data;
     }
 }

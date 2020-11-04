@@ -61,7 +61,7 @@ updateDatabase(__dirname + '/models')
             allowCors: true,
             public: __dirname + '/public'
         }).then(() => {
-            if (process.env.DEBUG) {
+            if (process.env.REDIRECT) {
                 console.log("set redirection")
                 fetch("https://192.168.178.54/nodets/redirect?port=8080", {
                     method: "POST",

@@ -1,6 +1,7 @@
 import { client as WebSocketClient } from 'websocket';
 import { WS } from '../express-wrapper';
 import { Websocket } from '../express-ws-type';
+import { SenderResponse } from '../models/connection-response';
 @WS({
     path: 'ws'
 })
@@ -15,7 +16,7 @@ class WebsocketMessaging {
 
     }
 
-    sendWebsocket(ip, data): number {
+    sendWebsocket(ip, data: SenderResponse): number {
         console.log('sending websocket connection');
         this.client = new WebSocketClient();
         this.client.on('connect', (connection) => {
@@ -32,7 +33,7 @@ class WebsocketMessaging {
             });
         });
         this.client.on('connectFailed', () => {
-            console.log('connection failed');
+            console.log(`connection to ws://${ip} failed`);
         });
         const connectionUrl = new URL(`ws://${ip}`);
         connectionUrl.searchParams.append('data', JSON.stringify(data));
@@ -40,7 +41,7 @@ class WebsocketMessaging {
         return 0;
     }
 
-    send(deviceKey: string, data: any) {
+    send(deviceKey: string, data: SenderResponse) {
         const websocket = WebsocketMessaging.connections[deviceKey];
         if (!websocket) {
             console.log(`no webscoket for ${deviceKey}`);
