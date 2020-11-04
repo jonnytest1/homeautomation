@@ -1,0 +1,23 @@
+
+.container{
+  display: inline-flex;
+
+
+  mat-form-field{
+    height: 50px;
+  
+    &.transformerselection{
+      margin-right: 14px;
+    }
+  
+    &.transofrmerName{
+      margin-right:20px;
+  
+        textarea{
+          resize: none;
+          height:31px
+        }
+    }
+  }
+  
+}
