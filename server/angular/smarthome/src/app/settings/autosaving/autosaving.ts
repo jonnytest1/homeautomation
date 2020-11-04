@@ -27,6 +27,10 @@ export class AutosavingDirective {
   debounce = 1000;
 
   private timeoutId;
+
+  duringConstructor = true;
+
+  private static RequestMap = new Map<string, AbortController>()
   constructor(
     @Inject(ROOT_AUTOSAVE_PATH) private rootPath: string,
 
@@ -36,50 +40,95 @@ export class AutosavingDirective {
 
     @Optional() @Self() @Inject(NG_VALUE_ACCESSOR) private asd: ControlValueAccessor[],
     private http: HttpClient) {
-    ngModelRef.valueChanges.subscribe(newValue => {
-      if (this.ngModel === newValue) {
+
+    ngModelRef.control.setAsyncValidators(async (control) => {
+      if (this.ngModel === control.value || this.duringConstructor || control.pristine) {
+        return null;
+      }
+
+      let dataRef = this.dataRef;
+      let dataRefName = this.dataRefName
+      let resource = this.resource;
+      if (this.itemProvider) {
+
+        if (this.itemProvider.dataRef && !this.dataRef) {
+          dataRef = this.itemProvider.dataRef;
+        }
+        if (this.itemProvider.dataRefName && !this.dataRefName) {
+          dataRefName = this.itemProvider.dataRefName;
+        }
+        if (this.itemProvider.resource && !this.resource) {
+          resource = this.itemProvider.resource;
+        }
+      }
+      if (dataRef == undefined) {
         return;
       }
 
 
-      if (this.itemProvider) {
-        if (this.itemProvider.dataRef && !this.dataRef) {
-          this.dataRef = this.itemProvider.dataRef;
-        }
-        if (this.itemProvider.dataRefName && !this.dataRefName) {
-          this.dataRefName = this.itemProvider.dataRefName;
-        }
-        if (this.itemProvider.resource && !this.resource) {
-          this.resource = this.itemProvider.resource;
-        }
-      }
       if (this.timeoutId) {
         clearTimeout(this.timeoutId);
       }
+      control.markAsPending()
+      return await new Promise(res => {
+        this.timeoutId = setTimeout(async () => {
+          try {
+            this.timeoutId = undefined;
+            const id = this.getDataRef()
+            const requestKey = resource + 'PUT' + dataRef;
+            const pending = AutosavingDirective.RequestMap.get(requestKey);
+            if (pending) {
+              pending.abort();
+            }
+            const controller = new AbortController();
+            AutosavingDirective.RequestMap.set(requestKey, controller);
+            this.ngModelRef.control.markAsPending()
+            const response = await fetch(rootPath + resource, {
+              method: 'PUT',
+              headers: {
+                'content-type': 'application/json'
+              },
+              body: JSON.stringify({
+                [this.name]: control.value,
+                [dataRefName]: dataRef
+              }),
+              signal: controller.signal
+            })
+            if (response.status === 400) {
+              const errs = await response.json()
+              if (this.getDataRef() == id) {
+                res(errs);
+              }
 
-      this.timeoutId = setTimeout(() => {
-        this.timeoutId = undefined;
-        fetch(rootPath + this.resource, {
-          method: 'PUT',
-          headers: {
-            'content-type': 'application/json'
-          },
-          body: JSON.stringify({
-            [this.name]: newValue,
-            [this.dataRefName]: this.dataRef
-          })
-        }).then(res => {
-          if (res.status === 400) {
-            res.json().then(err => {
-              ngModelRef.control.setErrors(err);
-            });
+            }
 
+          } catch (e) {
+            console.error(e)
           }
-        })
-          .catch(error => { debugger; });
-      }, this.debounce);
+          res(null)
+        }, this.debounce);
+      })
+
+    });
+
+
+    ngModelRef.valueChanges.subscribe(newValue => {
+
 
 
     });
+
+    this.duringConstructor = false;
+  }
+
+
+  getDataRef() {
+    let dataRef = this.dataRef;
+    if (this.itemProvider) {
+      if (this.itemProvider.dataRef && !this.dataRef) {
+        dataRef = this.itemProvider.dataRef;
+      }
+    }
+    return dataRef;
   }
 }

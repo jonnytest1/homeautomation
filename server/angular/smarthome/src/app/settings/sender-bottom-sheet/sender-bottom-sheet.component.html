@@ -14,7 +14,10 @@
       <div class="id right">
         {{data.id}} {{data.deviceKey}} <br>
         <div class="center">
-          <button class="right"
+          <app-transformer-drop-down [data]="data"
+                                     [(transformer)]="transformer">
+          </app-transformer-drop-down>
+          <button class="right test-button"
                   color="primary"
                   (click)="testSend()"
                   mat-flat-button>
@@ -22,17 +25,23 @@
           </button>
           <button mat-icon-button
                   class="right"
+                  (click)="displayTimers()"
+                  aria-label="battery display">
+            <mat-icon>schedule</mat-icon>
+          </button>
+          <button mat-icon-button
+                  class="right"
+                  (click)="displayEvents()"
+                  aria-label="battery display">
+            <mat-icon>date_range</mat-icon>
+          </button>
+          <button mat-icon-button
+                  class="right"
                   (click)="displayBattery()"
                   aria-label="battery display">
             <mat-icon>battery_unknown</mat-icon>
           </button>
-
-
         </div>
-
-
-
-
       </div>
     </mat-card-title>
     <mat-card-content>
@@ -47,6 +56,21 @@
                     placeholder="description"
                     [(ngModel)]="data.description"></textarea>
         </mat-form-field>
+        <div autosaving-provider
+             class="codeeditor"
+             [dataRef]="transformer.id"
+             resource="transformation"
+             dataRefName="itemRef">
+
+
+          <code-editor *ngIf="transformer"
+                       [(ngModel)]="transformer.transformation"
+                       [codetitle]="title$|async"
+                       autosaving
+                       name=transformation
+                       placeholder="// code">
+          </code-editor>
+        </div>
       </div>
     </mat-card-content>
   </mat-card>

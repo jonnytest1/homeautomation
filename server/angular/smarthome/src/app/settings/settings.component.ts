@@ -46,6 +46,7 @@ export class SettingsComponent implements OnInit, AfterViewInit, OnDestroy {
           if (sender.id == sender2.id) {
             foundSender = true;
             sender2.batteryEntries = sender.batteryEntries;
+            sender2.events = sender.events;
           }
         })
         if (!foundSender) {
@@ -53,7 +54,7 @@ export class SettingsComponent implements OnInit, AfterViewInit, OnDestroy {
         }
       })
 
-    }, 3000)
+    }, 4000)
 
     Promise.all([service.getSenders().toPromise().then(senders => {
       this.senders = senders;

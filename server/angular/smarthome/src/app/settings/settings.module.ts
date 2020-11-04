@@ -19,7 +19,12 @@ import { environment } from '../../environments/environment';
 import { AutosavingDirectiveProvider } from './autosaving/autosaveProvider';
 import { CodeEditorComponent } from '../code-editor/code-editor.component';
 import { MatButtonModule } from '@angular/material/button';
+import { MatGridListModule } from '@angular/material/grid-list';
 import { MatDialogModule } from '@angular/material/dialog';
+import { MatSelectModule } from '@angular/material/select';
+import { TransformerDropDownComponent } from './sender-bottom-sheet/transformer-drop-down/transformer-drop-down.component';
+import { TimersComponent } from './sender-bottom-sheet/timers/timers.component';
+import { NgCircleProgressModule } from 'ng-circle-progress';
 @NgModule({
     declarations: [
         SettingsComponent,
@@ -28,19 +33,19 @@ import { MatDialogModule } from '@angular/material/dialog';
         ReceiverBottomsheetComponent,
         AutosavingDirective,
         AutosavingDirectiveProvider,
-        CodeEditorComponent
+        CodeEditorComponent, TransformerDropDownComponent, TimersComponent
     ],
     imports: [
         CommonModule, FormsModule,
         MatListModule,
-        MatIconModule,
-        MatCardModule,
+        MatIconModule, MatGridListModule,
+        MatCardModule, MatSelectModule, NgCircleProgressModule.forRoot(),
         MatBottomSheetModule, HttpClientModule, MatDialogModule,
         MatSnackBarModule, MatInputModule, MatButtonModule
     ],
     providers: [SettingsService, {
         provide: ROOT_AUTOSAVE_PATH,
-        useValue: environment.prefixPath + 'rest/'
+        useValue: environment.prefixPath + 'rest/auto/'
     }],
     bootstrap: []
 })

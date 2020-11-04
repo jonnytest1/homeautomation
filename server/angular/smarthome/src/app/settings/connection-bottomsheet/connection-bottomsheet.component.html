@@ -24,7 +24,8 @@
         ssfjsoig jsio gjswoi egjois jgoisj go9sj dgosgjosogjoo<br>
         ssfjsoig jsio gjswoi egjois jgoisj go9sj dgosgjosogjoo<br>
       </div>
-      <code-editor [(ngModel)]="data.con.transformation"
+      <code-editor *ngIf="data.con.transformation"
+                   [(ngModel)]="data.con.transformation.transformation"
                    [codetitle]="title$|async"
                    autosaving
                    name=transformation

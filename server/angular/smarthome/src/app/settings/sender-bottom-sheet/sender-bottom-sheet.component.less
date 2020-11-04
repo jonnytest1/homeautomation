@@ -2,22 +2,43 @@ form {
   mat-card {
     .id {
       font-size: 36px;
+       text-align: end;
     }
 
     .right {
       float: right;
-
+     
       .center {
         display: inline-flex;
         float: right;
+        font-size: 16px;
+        align-items: center;
+    
+
+        mat-form-field{
+          height: 60px;
+        }
+
+        .test-button{
+          height: 40px;
+        }
       }
     }
 
     mat-card-content {
       .content {
+
+        display: flex;
+        flex-direction: row;
+        justify-content: space-evenly;
+
         .description {
           height: 160px;
           width: 500px;
+        }
+
+        .codeeditor{
+          margin-left:8px
         }
       }
     }

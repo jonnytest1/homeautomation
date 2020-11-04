@@ -83,9 +83,14 @@ export class BatteryComponent implements OnInit, AfterViewInit {
 
 
       });
-    if (!hasErrorDisplay) {
-      dataTable[1][3] = dataTable[1][1];
+    if (dataTable[1]) {
+      if (!hasErrorDisplay) {
+        dataTable[1][3] = dataTable[1][1];
+      }
+    } else {
+      dataTable.shift()
     }
+
     return GoogleCharts.api.visualization.arrayToDataTable(dataTable);
   }
 

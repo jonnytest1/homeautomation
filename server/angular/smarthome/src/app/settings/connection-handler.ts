@@ -120,6 +120,7 @@ export class ConnectionHandler {
             }
             const newConnection: Connection = {
                 receiver: item,
+                transformation: {} as any,
                 id: highestId + 10
             };
             this.addingSender.connections.push(newConnection);
@@ -136,6 +137,7 @@ export class ConnectionHandler {
                 .then(r => r.json())
                 .then((connection: Connection) => {
                     newConnection.id = connection.id;
+                    newConnection.transformation.id = connection.transformation.id
                 });
             this.addingSender = undefined;
             return newConnection;

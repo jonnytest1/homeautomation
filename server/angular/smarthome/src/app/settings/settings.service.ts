@@ -3,15 +3,27 @@ import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { map, share, shareReplay } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
-import { Receiver, Sender } from './interfaces';
+import { Receiver, Sender, Timer, TransformFe } from './interfaces';
 
 @Injectable({ providedIn: 'root' })
 export class SettingsService {
 
 
-
     constructor(private http: HttpClient) {
 
+    }
+
+    getTimers(id: number) {
+        return this.http.get<Array<Timer>>(`${environment.prefixPath}rest/sender/${id}/timers`)
+    }
+
+
+    createTransformer(el: TransformFe, senderId) {
+        return this.http.post<TransformFe>(`${environment.prefixPath}rest/sender/${senderId}/transformation`, el)
+    }
+
+    getMissingSenderKeys(senderId: number) {
+        return this.http.get<Array<string>>(`${environment.prefixPath}rest/transformation/keys/${senderId}`)
     }
 
 
@@ -31,6 +43,14 @@ export class SettingsService {
             map(keys => `context: ${keys.join(', ')}`)
         );
     }
+
+    getSenderTitleKeys(id: number): Observable<string> {
+        return this.http.get<Array<string>>(`${environment.prefixPath}rest/sender/key?itemRef=${id}`).pipe(
+            map(keys => `context: ${keys.join(', ')}`)
+        );
+    }
+
+
     deleteConneciton(id: number) {
         return this.http.delete(`${environment.prefixPath}rest/connection?itemRef=${id}`)
     }

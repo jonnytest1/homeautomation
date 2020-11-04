@@ -9,10 +9,6 @@ const routes: Routes = [{
 }, {
   path: 'options',
   loadChildren: () => import('./options/options.module').then(m => m.OptionsModule)
-}, {
-  path: '',
-  redirectTo: 'setup',
-  pathMatch: 'prefix'
 }
 
 ];

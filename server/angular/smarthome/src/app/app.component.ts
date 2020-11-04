@@ -8,7 +8,6 @@ export class AppComponent {
   title = 'smarthome';
 
   constructor() {
-
   }
   contentOpened: boolean;
   sidenavOpened: boolean;
