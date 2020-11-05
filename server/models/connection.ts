@@ -48,7 +48,7 @@ export class Connection extends Transformer {
 
     getContext(data) {
         return {
-            transformation: this.transformation.transformation,
+            transformation: this.transformation?.transformation,
             receiver: JSON.parse(JSON.stringify(this.receiver)),
             ...super.getContext(data)
         };

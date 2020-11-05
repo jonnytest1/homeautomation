@@ -1,7 +1,7 @@
 import { column, mapping, primary, table } from 'hibernatets';
 import { autosaveable } from '../express-db-wrapper';
-import { firebasemessageing } from '../resources/firebasemessaging';
-import ws from '../resources/websocketmessaging';
+import { firebasemessageing } from '../services/firebasemessaging';
+import ws from '../services/websocketmessaging';
 import { logKibana } from '../util/log';
 import { settable } from '../util/settable';
 import { SenderResponse } from './connection-response';
@@ -58,9 +58,12 @@ export class Receiver {
                 reason: JSON.stringify(response.results)
             });
         }
-
-        console.log(this.firebaseToken, response.results[0].canonicalRegistrationToken)
-        // this.firebaseToken = 
+        if (response.results[0].canonicalRegistrationToken) {
+            logKibana("ERROR", {
+                message: "this time there was a token in the response",
+                token: response.results[0].canonicalRegistrationToken
+            })
+        }
         return response.failureCount;
     }
 }

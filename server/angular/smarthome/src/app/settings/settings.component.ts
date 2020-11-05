@@ -10,6 +10,8 @@ import { ReceiverBottomsheetComponent } from './receiver-bottomsheet/receiver-bo
 import { Receiver, Sender } from './interfaces';
 import { SenderBottomSheetComponent } from './sender-bottom-sheet/sender-bottom-sheet.component';
 import { SettingsService } from './settings.service';
+import { ActivatedRoute, Router } from '@angular/router';
+import { BottomSheetHandler } from './bottom-sheet-handler';
 
 @Component({
   selector: 'app-settings',
@@ -22,21 +24,28 @@ export class SettingsComponent implements OnInit, AfterViewInit, OnDestroy {
 
   @ViewChild('canvas')
   canvas: ElementRef<HTMLCanvasElement>;
-  snackbarRef: MatSnackBarRef<any>;
   connectionHandler: ConnectionHandler;
   receivers: any[];
   data$: Observable<[Sender[], any[]]>;
 
 
   interval
-  setActive(sender: Sender, event: MouseEvent) {
-    this.openSnackBar(sender, SenderBottomSheetComponent);
-    this.connectionHandler.setAcvtiveSender(sender);
-    event.stopPropagation();
-  }
 
-  constructor(private bottomSheet: MatBottomSheet, private snack: MatSnackBar, service: SettingsService, private cdr: ChangeDetectorRef) {
-    this.connectionHandler = new ConnectionHandler(this.openSnackBar.bind(this));
+  bottomSheetHandler: BottomSheetHandler
+
+  constructor(
+    private snack: MatSnackBar,
+    private router: Router,
+    private activeRoute: ActivatedRoute,
+    private service: SettingsService,
+    private cdr: ChangeDetectorRef) {
+
+    this.bottomSheetHandler = new BottomSheetHandler(this, this.router, this.activeRoute, snack)
+    this.connectionHandler = new ConnectionHandler(service, data => {
+      this.bottomSheetHandler.navigate("connection", data.con.id)
+      // this.openSnackBar(data, ConnectionBottomsheetComponent)
+    });
+
 
     this.interval = setInterval(async () => {
       const senders = await service.getSenders().toPromise();
@@ -56,25 +65,39 @@ export class SettingsComponent implements OnInit, AfterViewInit, OnDestroy {
 
     }, 4000)
 
-    Promise.all([service.getSenders().toPromise().then(senders => {
-      this.senders = senders;
-      return senders;
-    }),
-    service.getReceivers().toPromise().then(receivers => {
-      this.receivers = receivers;
-      return receivers;
-    })]).then(data => {
+    this.fetchData().then(() => {
       if (this.canvas) {
         this.connectionHandler.setCanvas(this.canvas.nativeElement);
       }
-      this.cdr.detectChanges();
+      setTimeout(() => {
+        this.bottomSheetHandler.checkSnackbar()
+        this.cdr.detectChanges();
+      })
+
     });
   }
+  private fetchData() {
+    return Promise.all([this.service.getSenders().toPromise().then(senders => {
+      this.senders = senders;
+    }),
+
+    this.service.getReceivers().toPromise().then(receivers => {
+      this.receivers = receivers;
+    })]);
+  }
+
+  setActive(sender: Sender, event: MouseEvent) {
+    this.bottomSheetHandler.navigate("sender", sender.id)
+    event.stopPropagation();
+  }
+
   ngOnDestroy(): void {
     clearInterval(this.interval);
+    this.bottomSheetHandler.dismiss();
   }
 
   ngOnInit() {
+
   }
 
   ngAfterViewInit() {
@@ -83,14 +106,12 @@ export class SettingsComponent implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
-  receiverClick(item: Receiver) {
-    const sender = this.connectionHandler.activeSender;
-    const newConnection = this.connectionHandler.addConnection(item);
+  async receiverClick(item: Receiver) {
+    const newConnection = await this.connectionHandler.addConnection(item);
     if (newConnection) {
-      this.connectionHandler.drawConnections();
-      this.openSnackBar({ con: newConnection, sender });
+      this.bottomSheetHandler.navigate("connection", newConnection.id)
     } else {
-      this.openSnackBar(item);
+      this.bottomSheetHandler.navigate("receiver", item.id)
     }
   }
 
@@ -102,23 +123,6 @@ export class SettingsComponent implements OnInit, AfterViewInit, OnDestroy {
     if (this.connectionHandler) {
       this.connectionHandler.reset();
     }
-    if (this.snackbarRef) {
-      this.snackbarRef.dismiss();
-      this.snackbarRef = undefined;
-    }
-  }
-  openSnackBar(config, type: ComponentType<any> = ReceiverBottomsheetComponent) {
-    if (this.snackbarRef) {
-      this.snackbarRef.dismiss();
-    }
-
-    this.snackbarRef = this.snack.openFromComponent(type, {
-      panelClass: 'unlimitedsnackbar',
-      data: config,
-    });
-
-    this.snackbarRef.onAction().subscribe(() => {
-      this.connectionHandler.drawConnections()
-    })
+    this.bottomSheetHandler.dismiss()
   }
 }

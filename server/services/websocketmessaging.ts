@@ -20,7 +20,6 @@ class WebsocketMessaging {
         console.log('sending websocket connection');
         this.client = new WebSocketClient();
         this.client.on('connect', (connection) => {
-            console.log('Connection successful');
             connection.on('error', function (error) {
                 console.log('Connection Error: ' + error.toString());
             });

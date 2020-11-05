@@ -2,6 +2,7 @@ import { AfterViewInit, Component, ElementRef, Inject, OnInit, ViewChild } from 
 import { MAT_DIALOG_DATA } from '@angular/material/dialog';
 
 import { GoogleCharts } from 'google-charts';
+import { EventHistory } from '../../../../../../../models/event';
 import { Sender } from '../../interfaces';
 @Component({
   selector: 'app-events',
@@ -43,7 +44,11 @@ export class EventsComponent implements OnInit, AfterViewInit {
     var data = new GoogleCharts.api.visualization.DataTable();
     data.addColumn('date', 'Emails Received');
     data.addColumn('timeofday', 'Time of Day');
-    data.addColumn({ type: 'string', role: 'tooltip' });
+    data.addColumn({
+      type: 'string',
+      role: 'tooltip',
+      'p': { html: true }
+    });
     this.sender.events
       .filter(ev => ev.type == "trigger" && ev.timestamp > (Date.now() - (1000 * 60 * 60 * 24 * 7)))
       .filter(ev => {
@@ -55,20 +60,7 @@ export class EventsComponent implements OnInit, AfterViewInit {
         }
       })
       .forEach(ev => {
-        let msg = '';
-        try {
-          const dt = JSON.parse(ev.data)
-          msg = dt.message;
 
-          if (msg) {
-            const tr = this.sender.transformation.find(tr => tr.transformationKey == msg);
-            if (tr) {
-              msg += " " + tr.name;
-            }
-          }
-        } catch (e) {
-
-        }
         const date = new Date(ev.timestamp);
         // const mins = new Date();
         const day = new Date();
@@ -81,17 +73,94 @@ export class EventsComponent implements OnInit, AfterViewInit {
         /// mins.setMinutes(date.getMinutes())
         // mins.setSeconds(date.getSeconds())
         const mins = [date.getHours(), date.getMinutes(), date.getSeconds()]
-        data.addRow([day, mins, `${msg}`])
+        let messgageEl = this.getMessageElement(ev);
+
+        let msg = `
+        <ul class="google-visualization-tooltip-item-list">
+          <li class="google-visualization-tooltip-item">
+            <span style="font-family:Arial;font-size:15px;color:#000000;opacity:1;margin:0;font-style:none;text-decoration:none;font-weight:none;">
+              Time of Day
+            </span>
+          </li>
+          <li class="google-visualization-tooltip-item">
+            <span style="font-family:Arial;font-size:15px;color:#000000;opacity:1;margin:0;font-style:none;text-decoration:none;font-weight:bold;">
+              ${date.toLocaleDateString()}, ${date.toLocaleTimeString()}
+            </span>
+          </li>
+          ${messgageEl}
+        </ul>`;
+
+        //
+        data.addRow([day, mins, msg])
         //dataTable.push([day, mins])
       })
     return data;//GoogleCharts.api.visualization.arrayToDataTable(dataTable);
   }
+  private getMessageElement(ev: EventHistory) {
+    try {
+      const dt = JSON.parse(ev.data);
+      const msg = dt.message;
+      if (!msg) {
+        return ''
+      }
+
+
+      let messgageEl = `
+        <li class="google-visualization-tooltip-item">
+          <table style="margin-left: -4px;">
+            <tr>
+              <td>
+                <span style="font-family:Arial;font-size:15px;color:#000000;opacity:1;margin:0;font-style:none;text-decoration:none;font-weight:none;">
+                  message
+                </span>
+              </td>
+              <td>
+                <span style="font-family:Arial;font-size:15px;color:#000000;opacity:1;margin:0;font-style:none;text-decoration:none;font-weight:bold;">
+                  ${msg}
+                </span>
+              </td>
+            </tr>
+            ${this.getTransformerElement(msg)}
+          </table>
+        </li>
+      `;
+      return messgageEl;
+    } catch (e) {
+      return ''
+    }
+  }
+
+  getTransformerElement(trKey) {
+    try {
+      const tr = this.sender.transformation.find(tr => tr.transformationKey == trKey);
+      if (tr) {
+        return `
+          <tr>
+            <td style="padding-top:8px;padding-right: 8px;">
+              <span style="font-family:Arial;font-size:15px;color:#000000;opacity:1;margin:0;font-style:none;text-decoration:none;font-weight:none;">
+                transformer
+              </span>
+            </td>
+            <td style="padding-top:8px;padding-right: 8px;">
+              <span style="font-family:Arial;font-size:15px;color:#000000;opacity:1;margin:0;font-style:none;text-decoration:none;font-weight:bold;">
+              ${tr.name}
+              </span>
+            </td>
+          </tr>`;
+      }
+      return ''
+    } catch (e) {
+      return '';
+    }
+  }
+
   drawChart(data) {
     this.chart.draw(data, {
       vAxis: { title: 'Time of Day' },
       hAxis: {
         title: "Day of Week"
       },
+      tooltip: { isHtml: true },
       seriesType: 'scatter',
       series: {
         1: { type: 'line', color: 'green' },

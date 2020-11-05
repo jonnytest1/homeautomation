@@ -25,6 +25,8 @@ import { MatSelectModule } from '@angular/material/select';
 import { TransformerDropDownComponent } from './sender-bottom-sheet/transformer-drop-down/transformer-drop-down.component';
 import { TimersComponent } from './sender-bottom-sheet/timers/timers.component';
 import { NgCircleProgressModule } from 'ng-circle-progress';
+import { RouterModule } from '@angular/router';
+import { routes } from './settings.routes';
 @NgModule({
     declarations: [
         SettingsComponent,
@@ -38,7 +40,7 @@ import { NgCircleProgressModule } from 'ng-circle-progress';
     imports: [
         CommonModule, FormsModule,
         MatListModule,
-        MatIconModule, MatGridListModule,
+        MatIconModule, MatGridListModule, RouterModule.forChild(routes),
         MatCardModule, MatSelectModule, NgCircleProgressModule.forRoot(),
         MatBottomSheetModule, HttpClientModule, MatDialogModule,
         MatSnackBarModule, MatInputModule, MatButtonModule

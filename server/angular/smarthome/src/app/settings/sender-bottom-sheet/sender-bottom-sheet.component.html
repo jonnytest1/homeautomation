@@ -15,6 +15,7 @@
         {{data.id}} {{data.deviceKey}} <br>
         <div class="center">
           <app-transformer-drop-down [data]="data"
+                                     *ngIf="data.transformationAttribute"
                                      [(transformer)]="transformer">
           </app-transformer-drop-down>
           <button class="right test-button"

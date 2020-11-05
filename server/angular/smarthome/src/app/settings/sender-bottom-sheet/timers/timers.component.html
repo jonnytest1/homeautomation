@@ -4,7 +4,7 @@
     <mat-grid-tile *ngFor="let timer of timers">
 
       <circle-progress [percent]="getPercent(timer)"
-                       [radius]="scaling"
+                       responsive="true"
                        [subtitle]="getSubtitle(timer)"
                        [outerStrokeWidth]="16"
                        [innerStrokeWidth]="8"
@@ -13,6 +13,9 @@
                        [animation]="true"
                        [animationDuration]="200">
       </circle-progress>
+    </mat-grid-tile>
+    <mat-grid-tile *ngIf="timers && !timers.length">
+      Keine aktiven Timer
     </mat-grid-tile>
   </mat-grid-list>
 </div>

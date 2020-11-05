@@ -3,10 +3,18 @@ import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { map, share, shareReplay } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
-import { Receiver, Sender, Timer, TransformFe } from './interfaces';
+import { Connection, Receiver, Sender, Timer, TransformFe } from './interfaces';
 
 @Injectable({ providedIn: 'root' })
 export class SettingsService {
+    addConnection(deviceKey: string, receiverId: number) {
+
+        return this.http.post<Connection>(`${environment.prefixPath}rest/connection`, {
+            senderId: deviceKey,
+            receiverId: receiverId
+        })
+
+    }
 
 
     constructor(private http: HttpClient) {

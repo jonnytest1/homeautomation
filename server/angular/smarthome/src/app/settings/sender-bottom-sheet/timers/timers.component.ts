@@ -31,10 +31,8 @@ export class TimersComponent implements OnInit, OnDestroy {
         const newTimers = timers.filter(timer => {
           return !this.timers.some(tm => tm.uuid === timer.uuid);
         })
-
         this.timers.push(...newTimers);
       }
-
       this.cdr.detectChanges()
     }, 500)
 
@@ -71,14 +69,14 @@ export class TimersComponent implements OnInit, OnDestroy {
   getPercent(timer: Timer) {
     const duration = timer.time - timer.start;
     this.cdr.markForCheck()
-    return 100 - Math.min(Math.round(((timer.time - Date.now()) / duration) * 100), 100)
+    return 100 - Math.max(Math.round(((timer.time - Date.now()) / duration) * 100), 0)
   }
 
 
   getSubtitle(timer: Timer) {
     const remaining = Math.round((timer.time - Date.now()) * 100) / 100;
     return [
-      `${msToTime(remaining)}`,
+      `${msToTime(Math.max(remaining, 0))}`,
       `${msToTime(Math.round((timer.time - timer.start) * 100) / 100)}`,
       `ends at ${new Date(timer.time).toTimeString().split(' ')[0]}`,
       `${this.sender.transformation.find(tr => tr.transformationKey == timer.data.message).name}`];

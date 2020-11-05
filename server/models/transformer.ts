@@ -3,7 +3,6 @@ import { runInNewContext } from 'vm';
 import { Thenable, TransformationResponse } from './connection-response';
 import { Transformation } from './transformation';
 import { v4 as uuidv4 } from 'uuid';
-import { Timer } from '../resources/timer';
 export abstract class Transformer {
 
 

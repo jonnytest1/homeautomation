@@ -5,6 +5,7 @@ import { CanvasUtil } from '../utils/context';
 import { ConnectionBottomsheetComponent } from './connection-bottomsheet/connection-bottomsheet.component';
 import { Connection, Receiver, Sender } from './interfaces';
 import { SenderBottomSheetComponent } from './sender-bottom-sheet/sender-bottom-sheet.component';
+import { SettingsService } from './settings.service';
 
 export class ConnectionHandler {
 
@@ -14,7 +15,7 @@ export class ConnectionHandler {
     activeSender: Sender;
     util: CanvasUtil;
 
-    constructor(private snackOpen: (data, type) => any) {
+    constructor(private service: SettingsService, private snackOpen: (data: { con: Connection, sender: Sender }) => void) {
 
     }
 
@@ -65,7 +66,7 @@ export class ConnectionHandler {
                     from: { x: 'center', y: heightForSender },
                     to: { x: this.util.width - 12, y: heightForSender },
                     click: (event: MouseEvent) => {
-                        this.snackOpen({ con: connection, sender }, ConnectionBottomsheetComponent);
+                        this.snackOpen({ con: connection, sender });
                         event.stopPropagation();
                     }
                 });
@@ -103,7 +104,7 @@ export class ConnectionHandler {
         }
     }
 
-    addConnection(item: Receiver): Connection {
+    async addConnection(item: Receiver): Promise<Connection> {
         if (this.addingSender) {
             if (!this.addingSender.connections) {
                 this.addingSender.connections = [];
@@ -124,22 +125,13 @@ export class ConnectionHandler {
                 id: highestId + 10
             };
             this.addingSender.connections.push(newConnection);
-            fetch(environment.prefixPath + 'rest/connection', {
-                method: 'POST',
-                headers: {
-                    'content-type': 'application/json'
-                },
-                body: JSON.stringify({
-                    senderId: this.addingSender.deviceKey,
-                    receiverId: item.id
-                })
-            })
-                .then(r => r.json())
-                .then((connection: Connection) => {
-                    newConnection.id = connection.id;
-                    newConnection.transformation.id = connection.transformation.id
-                });
+            const connection = await this.service.addConnection(this.activeSender.deviceKey, item.id).toPromise();
+
+            newConnection.id = connection.id;
+            newConnection.transformation.id = connection.transformation.id
+
             this.addingSender = undefined;
+            this.drawConnections();
             return newConnection;
         }
         this.addingSender = undefined;

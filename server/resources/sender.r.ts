@@ -19,7 +19,7 @@ export class SenderResource {
         path: 'trigger'
     })
     async trigger(req: HttpRequest, res: HttpResponse) {
-        console.log(`trigger request `);
+        console.log(`trigger request ${JSON.stringify(req.body)}`);
         const sender = await loadOne(Sender, s => s.deviceKey = req.body.deviceKey, [], {
             deep: ['connections', 'receiver', "transformer", "transformation"]
         });
@@ -46,11 +46,13 @@ export class SenderResource {
             logKibana('ERROR', { message: 'error in trigger', sender: sender.id, data: JSON.stringify(req.body) }, e);
             res.send();
         } finally {
-            sender.events.push(new EventHistory(req.body));
-            if (req.body.a_read1) {
-                const batteryLevel = new BatteryLevel(req.body.a_read1, req.body.a_read2, req.body.a_read3);
-                if (batteryLevel.level !== -1) {
-                    sender.batteryEntries.push(batteryLevel);
+            if (!req.body.testsend) {
+                sender.events.push(new EventHistory(req.body));
+                if (req.body.a_read1) {
+                    const batteryLevel = new BatteryLevel(req.body.a_read1, req.body.a_read2, req.body.a_read3);
+                    if (batteryLevel.level !== -1) {
+                        sender.batteryEntries.push(batteryLevel);
+                    }
                 }
             }
         }
@@ -84,6 +86,12 @@ export class SenderResource {
         }
         let existingSender = await load(Sender, s => s.deviceKey = req.body.deviceKey, [], { first: true });
         if (existingSender) {
+            if (req.body.a_read1) {
+                const batteryLevel = new BatteryLevel(req.body.a_read1, req.body.a_read2, req.body.a_read3);
+                if (batteryLevel.level !== -1) {
+                    existingSender.batteryEntries.push(batteryLevel);
+                }
+            }
             logKibana('INFO', `sender already exists with id ${req.body.deviceKey}`);
             res.status(409)
                 .send(existingSender);
