@@ -34,12 +34,20 @@ void setup()
 
 void registerSender()
 {
+    String vol1 = getVoltage();
+    delay(10);
+    String vol2 = getVoltage();
+    delay(10);
+    String vol3 = getVoltage();
     request("https://192.168.178.54/nodets/rest/sender",
             {{
-                "deviceKey",
-                deviceKey.c_str(),
-            }},
-            triggerHandler,false);
+                 "deviceKey",
+                 deviceKey.c_str(),
+             },
+             {"a_read1", vol1},
+             {"a_read2", vol2},
+             {"a_read3", vol3}},
+            triggerHandler, false);
 }
 
 void longPress()
@@ -54,15 +62,8 @@ void onBell()
     String vol2 = getVoltage();
     delay(10);
     String vol3 = getVoltage();
-    
-    request("https://192.168.178.54/nodets/rest/sender/trigger", {
-      {"application", "component"}, 
-      {"deviceKey",deviceKey},
-      {"Severity", "INFO"}, 
-      {"message", "bell"},
-      {"a_read1", vol1}, 
-      {"a_read2", vol2},
-      {"a_read3", vol3}}, triggerHandler,false);
+
+    request("https://192.168.178.54/nodets/rest/sender/trigger", {{"application", "component"}, {"deviceKey", deviceKey}, {"Severity", "INFO"}, {"message", "bell"}, {"a_read1", vol1}, {"a_read2", vol2}, {"a_read3", vol3}}, triggerHandler, false);
 }
 
 String getVoltage()
@@ -77,20 +78,14 @@ String getVoltage()
 
 void triggerHandler(int code, String data)
 {
-    if (code != HTTP_CODE_OK && code != 409 )
+    if (code != HTTP_CODE_OK && code != 409)
     {
         Serial.println(data);
-        request("https://pi4.e6azumuvyiabvs9s.myfritz.net/tm/libs/log/index.php", {
-          {"application", deviceKey}, 
-          {"Severity", "ERROR"}, 
-          {"message", "error in request"} ,
-          {"code", String(code) },
-          {"error", data}
-          }, NULL,true);
+        request("https://pi4.e6azumuvyiabvs9s.myfritz.net/tm/libs/log/index.php", {{"application", deviceKey}, {"Severity", "ERROR"}, {"message", "error in request"}, {"code", String(code)}, {"error", data}}, NULL, true);
     }
 }
 
-void request(const String url, const std::map<String, String> data, void (*callback)(int httpCode, String response),boolean b64)
+void request(const String url, const std::map<String, String> data, void (*callback)(int httpCode, String response), boolean b64)
 {
     WiFi.mode(WIFI_STA);
     WiFi.disconnect();
@@ -99,15 +94,18 @@ void request(const String url, const std::map<String, String> data, void (*callb
     {
         delay(100);
         Serial.println("connecting ... ");
-    }  
+    }
     HTTPClient httpf;
     httpf.begin(url);
 
-    String requestData=json(data);
-    if(b64){
-      requestData=base64_encode(requestData);
-    }else{
-      httpf.addHeader("content-type","application/json");
+    String requestData = json(data);
+    if (b64)
+    {
+        requestData = base64_encode(requestData);
+    }
+    else
+    {
+        httpf.addHeader("content-type", "application/json");
     }
     Serial.println(requestData);
     int httpCodef = httpf.POST(requestData);
