@@ -53,11 +53,17 @@ export class NotificationHandler {
         }
 
         const actions = ['do1', 'do2'];
+
+        if (!this.data.notification.body && this.data.notification.title) {
+            this.data.notification.body = this.data.notification.title;
+        }
+
         notifier.notify({
             timeout: 3,
             //
             actions: actions,
-            ...this.data.notification
+            ...this.data.notification,
+            message: this.data.notification.body
         }, (error, response: 'dismissed' | 'timeout' | (typeof actions[0]), metadata) => {
             if (error) {
                 console.error(error);
