@@ -12,7 +12,16 @@
                autosaving>
       </mat-form-field>
       <div class="id right">
-        {{data.id}} {{data.deviceKey}} <br>
+        <div class="toprow">
+          {{data.id}} {{isManual() ?'': data.deviceKey}}
+          <button mat-icon-button
+                  *ngIf="isManual()"
+                  (click)="deleteSender()"
+                  class="delete_icon">
+            <mat-icon>delete_forever</mat-icon>
+          </button>
+        </div>
+
         <div class="center">
           <app-transformer-drop-down [data]="data"
                                      *ngIf="data.transformationAttribute"
@@ -20,9 +29,9 @@
           </app-transformer-drop-down>
           <button class="right test-button"
                   color="primary"
-                  (click)="testSend()"
+                  (click)="send()"
                   mat-flat-button>
-            Test
+            {{ isManual() ? 'Trigger' : 'Test'}}
           </button>
           <button mat-icon-button
                   class="right"
@@ -57,21 +66,11 @@
                     placeholder="description"
                     [(ngModel)]="data.description"></textarea>
         </mat-form-field>
-        <div autosaving-provider
-             class="codeeditor"
-             [dataRef]="transformer.id"
-             resource="transformation"
-             dataRefName="itemRef">
 
-
-          <code-editor *ngIf="transformer"
-                       [(ngModel)]="transformer.transformation"
-                       [codetitle]="title$|async"
-                       autosaving
-                       name=transformation
-                       placeholder="// code">
-          </code-editor>
-        </div>
+        <app-transformation-editor *ngIf="transformer"
+                                   [title]="title$|async"
+                                   [transformer]="transformer">
+        </app-transformation-editor>
       </div>
     </mat-card-content>
   </mat-card>

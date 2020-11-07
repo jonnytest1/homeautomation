@@ -38,6 +38,10 @@ export class Transformation {
 async function validateTransformation(this: Transformation, transformation: string) {
     let obj;
     try {
+        if (!transformation || !transformation.length || transformation == "(NULL)") {
+            return {}
+        }
+
         const compiler = new TscCompiler()
         await compiler.prepare(transformation);
         const result = await compiler.compile()

@@ -39,7 +39,7 @@ export class ConnectionHandler {
         const width = nativeCanvas.width;
         this.util.reset();
 
-        if (!this.activeSender.connections) {
+        if (!this.activeSender || !this.activeSender.connections) {
             return;
         }
         const senders: NodeListOf<HTMLElement> = nativeCanvas.parentElement.parentElement.querySelectorAll('.sender');

@@ -98,6 +98,7 @@ export class SenderResource {
             return;
         }
         const sender = new Sender();
+        sender.transformation.push(new Transformation())
         await assign(sender, req.body);
         await save(sender);
         res.send(sender);
@@ -108,7 +109,15 @@ export class SenderResource {
         path: ''
     })
     async getSenders(req, res: HttpResponse) {
-        const senders = await load(Sender, 'true = true', undefined, { deep: true });
+        const senders = await load(Sender, 'true = true', undefined, {
+            deep: {
+                connections: "TRUE = TRUE",
+                events: "`timestamp` > UNIX_TIMESTAMP(DATE_ADD(NOW(),INTERVAL -8 DAY))",
+                batteryEntries: "TRUE = TRUE",
+                transformation: "TRUE = TRUE",
+                receiver: "TRUE = TRUE",
+            }
+        });
         res.send(senders);
     }
     @POST({

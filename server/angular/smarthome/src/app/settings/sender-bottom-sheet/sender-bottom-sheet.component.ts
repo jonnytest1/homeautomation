@@ -1,8 +1,9 @@
-import { ChangeDetectorRef, Component, Inject, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, Host, Inject, OnInit } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { MAT_SNACK_BAR_DATA, MatSnackBarRef } from '@angular/material/snack-bar';
 import { Observable } from 'rxjs';
 import { Sender, TransformFe } from '../interfaces';
+import { SettingsComponent } from '../settings.component';
 import { SettingsService } from '../settings.service';
 import { BatteryComponent } from './battery/battery.component';
 import { EventsComponent } from './events/events.component';
@@ -25,6 +26,10 @@ export class SenderBottomSheetComponent implements OnInit {
     this.transformer = this.data.transformation[0] || {}
 
     this.title$ = this.service.getSenderTitleKeys(this.data.id);
+  }
+
+  isManual() {
+    return this.data.type == "manual"
   }
 
   ngOnInit() {
@@ -50,7 +55,12 @@ export class SenderBottomSheetComponent implements OnInit {
       panelClass: 'unlimitedsnackbar',
     });
   }
-  testSend() {
-    this.service.testSend(this.data.deviceKey).toPromise();
+
+  async deleteSender() {
+    await this.service.deleteSender(this.data.id).toPromise();
+    this.snackbarRef.dismissWithAction()
+  }
+  send() {
+    this.service.send(this.data.deviceKey, this.isManual()).toPromise();
   }
 }

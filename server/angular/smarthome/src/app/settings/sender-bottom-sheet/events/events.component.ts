@@ -64,7 +64,7 @@ export class EventsComponent implements OnInit, AfterViewInit {
         const date = new Date(ev.timestamp);
         // const mins = new Date();
         const day = new Date();
-        day.setFullYear(date.getFullYear(), date.getUTCMonth(), date.getUTCDate());
+        day.setFullYear(date.getFullYear(), date.getMonth(), date.getDate());
         day.setHours(0)
         day.setMinutes(0)
         day.setSeconds(0)
@@ -156,7 +156,7 @@ export class EventsComponent implements OnInit, AfterViewInit {
 
   drawChart(data) {
     this.chart.draw(data, {
-      vAxis: { title: 'Time of Day' },
+      vAxis: { title: 'Time of Day', gridlines: { count: 12 } },
       hAxis: {
         title: "Day of Week"
       },

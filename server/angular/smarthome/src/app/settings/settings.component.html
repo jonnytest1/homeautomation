@@ -28,11 +28,18 @@
                   {{item.description}}
                 </mat-card-subtitle>
               </mat-card>
-              <mat-icon [class.active]="connectionHandler && connectionHandler.addingSender===item"
-                        (click)="senderAddClick(item);$event.stopPropagation()">add_box</mat-icon>
+              <mat-icon class="startConnection"
+                        [class.active]="connectionHandler && connectionHandler.addingSender===item"
+                        (click)="senderAddClick(item);$event.stopPropagation()">
+                add_box
+              </mat-icon>
             </div>
           </div>
-
+          <mat-list-item class="list-item iconlistitem"
+                         title="Add Manual Sender"
+                         (click)="addManualSender()">
+            <mat-icon>add_circle</mat-icon>
+          </mat-list-item>
         </mat-list>
       </td>
       <td>

@@ -9,11 +9,13 @@
       <h4> Smart Home</h4>
 
       <a mat-list-item
+         (mouseover)="$event.target.click()"
          routerLinkActive="activeRoute"
          routerLink="setup">
         Setup
       </a>
       <a mat-list-item
+         (mouseover)="$event.target.click()"
          routerLinkActive="activeRoute"
          routerLink="options">
         Options

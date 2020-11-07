@@ -1,6 +1,19 @@
-<mat-card>
+<mat-card autosaving-provider
+          [dataRef]="data.id"
+          resource="receiver"
+          dataRefName="itemRef">
   <mat-card-title>
-    {{data.id}}
+
+    <mat-form-field class="example-full-width">
+      <input [(ngModel)]="data.name"
+             matInput
+             placeholder="Name"
+             name=name
+             autosaving>
+    </mat-form-field>
+    <div class="id rightfloat">
+      {{data.id}}
+    </div>
   </mat-card-title>
   <mat-card-content>
     ssfjsoig jsio gjswoi egjois jgoisj go9sj dgosgjosogjoo<br>

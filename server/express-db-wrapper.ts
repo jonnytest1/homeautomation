@@ -81,7 +81,7 @@ export function autosaveable(target) {
             if (!req.query.itemRef) {
                 return res.status(400).send("missing 'itemRef' id key")
             }
-            const obj = await remove(target, +req.query.itemRef);
+            const obj = await remove(target, +req.query.itemRef, { deep: true });
             await queries(obj);
             res.status(200).send(`${obj}`);
         }

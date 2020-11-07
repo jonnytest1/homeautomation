@@ -41,18 +41,28 @@ export class BottomSheetHandler {
         const paramType: snackbarType = params.type;
         let type: ComponentType<any>;
         let data;
-        if (paramType == "connection") {
+        let actionDismiss
+        if (!paramType) {
+            this.settingsComponent.connectionHandler.setAcvtiveSender(null);
+        } else if (paramType == "connection") {
             if (!this.settingsComponent.senders) {
                 return
             }
             type = ConnectionBottomsheetComponent
             data = this.getConnectionData(params.id)
+            actionDismiss = () => {
+                this.settingsComponent.connectionHandler.drawConnections()
+            }
         } else if (paramType == "sender") {
             type = SenderBottomSheetComponent
             if (!this.settingsComponent.senders) {
                 return
             }
-            data = this.settingsComponent.senders.find(sender => sender.id == params.id)
+            const senderIndex = this.settingsComponent.senders.findIndex(sender => sender.id == params.id);
+            data = this.settingsComponent.senders[senderIndex]
+            actionDismiss = () => {
+                this.settingsComponent.removeSenderByIndex(senderIndex)
+            }
             this.settingsComponent.connectionHandler.setAcvtiveSender(data);
         } else if (paramType == "receiver") {
             if (!this.settingsComponent.receivers) {
@@ -64,7 +74,7 @@ export class BottomSheetHandler {
         if (!data) {
             return;
         }
-        this.openSnackBar(data, type);
+        this.openSnackBar(data, type, actionDismiss);
     }
 
     getConnectionData(conId: number) {
@@ -79,7 +89,7 @@ export class BottomSheetHandler {
         return null;
     }
 
-    openSnackBar(config, type: ComponentType<any>) {
+    openSnackBar(config, type: ComponentType<any>, actionDismiss?: Function) {
         if (this.snackbarRef) {
             this.snackbarRef.dismiss();
         }
@@ -90,7 +100,9 @@ export class BottomSheetHandler {
         });
 
         this.snackbarRef.onAction().subscribe(() => {
-            this.settingsComponent.connectionHandler.drawConnections()
+            if (actionDismiss) {
+                actionDismiss();
+            }
         })
     }
 

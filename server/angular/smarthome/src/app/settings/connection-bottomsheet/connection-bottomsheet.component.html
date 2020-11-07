@@ -24,12 +24,17 @@
         ssfjsoig jsio gjswoi egjois jgoisj go9sj dgosgjosogjoo<br>
         ssfjsoig jsio gjswoi egjois jgoisj go9sj dgosgjosogjoo<br>
       </div>
-      <code-editor *ngIf="data.con.transformation"
-                   [(ngModel)]="data.con.transformation.transformation"
+      <app-transformation-editor *ngIf="data.con.transformation"
+                                 [title]="title$|async"
+                                 [transformer]="data.con.transformation">
+
+      </app-transformation-editor>
+      <!--    <code-editor [(ngModel)]="data.con.transformation.transformation"
                    [codetitle]="title$|async"
                    autosaving
                    name=transformation
-                   placeholder="// code"></code-editor>
+                   placeholder="// code">
+      </code-editor> -->
     </div>
 
   </mat-card-content>

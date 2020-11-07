@@ -4,9 +4,14 @@ import { Observable } from 'rxjs';
 import { map, share, shareReplay } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
 import { Connection, Receiver, Sender, Timer, TransformFe } from './interfaces';
+import { v4 as uuid } from "uuid"
 
 @Injectable({ providedIn: 'root' })
 export class SettingsService {
+
+    constructor(private http: HttpClient) {
+
+    }
     addConnection(deviceKey: string, receiverId: number) {
 
         return this.http.post<Connection>(`${environment.prefixPath}rest/connection`, {
@@ -16,10 +21,20 @@ export class SettingsService {
 
     }
 
-
-    constructor(private http: HttpClient) {
-
+    addSender() {
+        return this.http.post<Sender>(`${environment.prefixPath}rest/sender`, {
+            type: "manual",
+            deviceKey: uuid()
+        })
     }
+
+
+    deleteSender(id: number) {
+        return this.http.delete<Sender>(`${environment.prefixPath}rest/auto/sender?itemRef=${id}`)
+    }
+
+
+
 
     getTimers(id: number) {
         return this.http.get<Array<Timer>>(`${environment.prefixPath}rest/sender/${id}/timers`)
@@ -64,14 +79,13 @@ export class SettingsService {
     }
 
 
-    testSend(deviceKey) {
-        const dataObj = {
-            testsend: true,
-            deviceKey: deviceKey,
-            a_read1: -1,
-            a_read2: -1,
-            a_read3: -1
+    send(deviceKey, isManual: boolean = false) {
+        const dataObj: { [key: string]: any } = {
+            deviceKey: deviceKey
         };
+        if (!isManual) {
+            dataObj.testsend = true
+        }
         return this.http.post<void>(environment.prefixPath + 'rest/sender/trigger', dataObj);
     }
 }

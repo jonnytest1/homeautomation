@@ -100,9 +100,18 @@ export class BatteryComponent implements OnInit, AfterViewInit {
     this.chart.draw(data, {
       vAxis: { title: 'level', minValue: this.smallest - 10 },
       seriesType: 'scatter',
+      pointSize: 3,
       series: {
-        1: { type: 'line', color: 'green' },
-        2: { type: 'line', color: 'red' }
+        1: {
+          type: 'line',
+          color: 'green',
+          pointSize: 1,
+        },
+        2: {
+          type: 'line',
+          color: 'red',
+          pointSize: 1,
+        }
       }
     });
   }

@@ -44,7 +44,7 @@
                 }
               ],
               "baseHref": "/nodets/",
-              "deleteOutputPath": false,
+              "deleteOutputPath": true,
               "optimization": true,
               "outputHashing": "all",
               "sourceMap": false,

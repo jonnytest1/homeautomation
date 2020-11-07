@@ -1,0 +1,15 @@
+<div autosaving-provider
+     class="codeeditor"
+     [dataRef]="transformer.id"
+     resource="transformation"
+     dataRefName="itemRef">
+
+
+  <code-editor *ngIf="transformer"
+               [(ngModel)]="transformer.transformation"
+               [codetitle]="title"
+               autosaving
+               name=transformation
+               placeholder="// code">
+  </code-editor>
+</div>

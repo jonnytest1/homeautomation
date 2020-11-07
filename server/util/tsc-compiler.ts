@@ -97,7 +97,9 @@ ${trStr}`
                 }
                 return errors;
             } else {
-                logKibana("ERROR", { message: "unhandled error" }, e)
+                logKibana("ERROR", {
+                    message: "unhandled error"
+                }, e)
             }
         }
     }

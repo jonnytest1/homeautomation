@@ -17,7 +17,7 @@ export class Sender extends Transformer {
     id: number;
 
     @mapping(Mappings.OneToMany, Connection, 'sender')
-    public connections: Array<Connection>;
+    public connections: Array<Connection> = [];
 
     @mapping(Mappings.OneToMany, BatteryLevel, 'sender')
     public batteryEntries: Array<BatteryLevel> = [];
@@ -26,7 +26,7 @@ export class Sender extends Transformer {
     public events: Array<EventHistory> = [];
 
     @mapping(Mappings.OneToMany, Transformation, 'sender')
-    transformation: Array<Transformation>
+    transformation: Array<Transformation> = []
 
     @column()
     @settable
@@ -44,13 +44,17 @@ export class Sender extends Transformer {
     @settable
     name: String;
 
+    @column()
+    @settable
+    type: "manual" | "automated" = "automated"
+
     constructor() {
         super()
     }
 
     async trigger(body) {
         let data = body;
-        let newData;
+        let newData = body;
         if (this.transformationAttribute) {
             const transformation = this.transformation.find(transform => transform.transformationKey == data[this.transformationAttribute]);
             if (transformation) {
@@ -71,7 +75,7 @@ export class Sender extends Transformer {
         if (newData === false) {
             return [];
         }
-        if (newData.promise) {
+        if (newData && newData.promise) {
             newData.promise.then((pData) => Promise.all(this.connections.map(connection => connection.execute(pData))));
             return [newData];
         }

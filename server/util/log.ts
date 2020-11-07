@@ -1,10 +1,9 @@
 const fetch = require('node-fetch');
 import { btoa } from './btoaatob';
 export async function logKibana(level: 'INFO' | 'ERROR' | 'DEBUG', message: string | Object, error?) {
-    error = { ...error };
     let jsonData: { [key: string]: string } = {
         Severity: level,
-        application: 'SmartHome',
+        application: `SmartHome${process.env.DEBUG ? '_debug' : ''}`,
     };
     if (!message && error) {
         jsonData.message = error.message;
@@ -25,12 +24,10 @@ export async function logKibana(level: 'INFO' | 'ERROR' | 'DEBUG', message: stri
     } else {
         jsonData.message = message;
     }
-    if (error && Object.keys(error).length > 0) {
+    if (error) {
+        jsonData = { ...jsonData, ...error };
         jsonData.error_message = error.message;
         jsonData.error_stacktrace = error.stack;
-        delete error.message;
-        delete error.stack;
-        jsonData = { ...jsonData, ...error };
     }
     console.log(jsonData);
     fetch(`https://pi4.e6azumuvyiabvs9s.myfritz.net/tm/libs/log/index.php`, {

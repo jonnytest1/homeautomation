@@ -75,7 +75,9 @@ export class NotificationHandler {
                     console.error(e);
                 }
             }
-            this.audio.kill();
+            if (this.audio) {
+                this.audio.kill();
+            }
         });
     }
 }

@@ -76,6 +76,19 @@ export class SettingsComponent implements OnInit, AfterViewInit, OnDestroy {
 
     });
   }
+
+  removeSenderByIndex(senderIndex: number) {
+    this.senders.splice(senderIndex, 1)
+    this.cdr.detectChanges()
+    this.bottomSheetHandler.navigate(null, null);
+  }
+
+  async addManualSender() {
+    const sender = await this.service.addSender().toPromise();
+    this.senders.push(sender);
+    this.cdr.detectChanges()
+    this.bottomSheetHandler.navigate("sender", sender.id);
+  }
   private fetchData() {
     return Promise.all([this.service.getSenders().toPromise().then(senders => {
       this.senders = senders;
@@ -123,6 +136,7 @@ export class SettingsComponent implements OnInit, AfterViewInit, OnDestroy {
     if (this.connectionHandler) {
       this.connectionHandler.reset();
     }
+    this.bottomSheetHandler.navigate(null, null)
     this.bottomSheetHandler.dismiss()
   }
 }

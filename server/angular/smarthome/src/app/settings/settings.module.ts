@@ -27,6 +27,7 @@ import { TimersComponent } from './sender-bottom-sheet/timers/timers.component';
 import { NgCircleProgressModule } from 'ng-circle-progress';
 import { RouterModule } from '@angular/router';
 import { routes } from './settings.routes';
+import { TransformationEditorComponent } from './transformation-editor/transformation-editor.component';
 @NgModule({
     declarations: [
         SettingsComponent,
@@ -35,7 +36,10 @@ import { routes } from './settings.routes';
         ReceiverBottomsheetComponent,
         AutosavingDirective,
         AutosavingDirectiveProvider,
-        CodeEditorComponent, TransformerDropDownComponent, TimersComponent
+        CodeEditorComponent,
+        TransformerDropDownComponent,
+        TimersComponent,
+        TransformationEditorComponent
     ],
     imports: [
         CommonModule, FormsModule,

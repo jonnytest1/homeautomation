@@ -1,4 +1,8 @@
 
+:host{
+    flex-grow: 1;
+}
+
 .content-wrapper{
     height: 100%;
     flex: 1;
@@ -13,9 +17,19 @@
             display: inline-flex;
             flex-direction: row;
             align-items: center;
+
+            &.iconlistitem{
+                justify-content: center;
+                cursor: pointer;
+
+                mat-icon{
+                    margin-right: 32px;
+                }
+            }
     
             mat-card{
                 margin: 4px 0px;
+                
                 &.editable{
                     min-width: 200px;
                 }
@@ -36,8 +50,12 @@
             }
 
 
-            mat-icon.active{
-                color: green;
+            mat-icon.startConnection{
+                cursor: pointer;
+
+                &.active{
+                    color: green;
+                }
             }
         }
     }
