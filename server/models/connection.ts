@@ -33,7 +33,10 @@ export class Connection extends Transformer {
     }
 
     async execute(data: any): Promise<TransformationResponse> {
-        const newData = await this.transform(data, this.transformation);
+        const dataCp = { ...data };
+        delete dataCp.promise;
+
+        const newData = await this.transform(dataCp, this.transformation);
         if (newData === false) {
             return;
         }

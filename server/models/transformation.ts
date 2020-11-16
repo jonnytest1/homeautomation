@@ -28,6 +28,8 @@ export class Transformation {
     @settable
     name
 
+    definitionFile
+
 }
 
 

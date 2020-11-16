@@ -1,5 +1,6 @@
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
+import { MonacoEditorComponent } from './monaco-editor/monaco-editor.component';
 
 const routes: Routes = [{
   path: 'setup',
@@ -7,6 +8,9 @@ const routes: Routes = [{
 }, {
   path: 'options',
   loadChildren: () => import('./options/options.module').then(m => m.OptionsModule)
+}, {
+  path: 'code',
+  component: MonacoEditorComponent
 }
 
 ];

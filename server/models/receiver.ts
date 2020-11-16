@@ -45,9 +45,13 @@ export class Receiver {
         if (this.type == 'ws') {
             return ws.sendWebsocket(this.ip, data);
         }
+
         if (!this.firebaseToken) {
             console.log(`sending websocket notification for ${this.name}`);
             ws.send(this.deviceKey, data);
+            return 0;
+        }
+        if (process.env.DEBUG) {
             return 0;
         }
         console.log(`sending push notification for ${this.name}`);

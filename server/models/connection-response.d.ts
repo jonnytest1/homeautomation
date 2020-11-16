@@ -1,33 +1,37 @@
-export interface TransformationResponse extends SenderResponse {
+
+
+
+interface TransformationRes extends SenderResponse {
     status?: number;
     error?: number;
 
-    promise?: Thenable<SenderResponse>;
 
     response?: {
         [key: string]: any
     }
 }
 
+export interface TransformationResponse extends TransformationRes {
+
+}
+
 
 export interface Thenable<T> {
 
     then<U>(cb: (res: T) => U)
-}
 
-
-interface delay {
-    <T>(time: number, res: T): Thenable<T>
-    // (time: number): Thenable<void>
+    time: number
 }
 
 declare global {
-    const delay: delay
+    type TransformationResponse = TransformationRes;
+    const delay: <T>(time: number, res: T) => Thenable<T>
 }
 
 interface SenderResponse {
+    promise?: Thenable<SenderResponse>;
     notification?: {
-        title: string
+        title?: string
         sound?: string,
         body?: string
     }

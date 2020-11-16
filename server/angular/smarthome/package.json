@@ -25,6 +25,7 @@
     "codemirror": "^5.58.1",
     "core-js": "^2.5.4",
     "google-charts": "^2.0.0",
+    "monaco-loader": "^1.0.0",
     "ng-circle-progress": "^1.6.0",
     "ngx-dropzone": "^2.2.2",
     "rxjs": "^6.5.5",

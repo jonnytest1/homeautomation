@@ -26,17 +26,25 @@ export abstract class Transformer {
         const el = this;
         return {
             data: data,
-            delay: (<T>(sekunden, obj?: T): Thenable<T | void> | T => {
-                const timerId = uuidv4()
+            delay: (<T>(sekunden: number, obj?: T): Thenable<T | void> | T => {
                 const millis = sekunden * 1000;
-                Transformer.timeouts[timerId] = { start: Date.now(), time: Date.now() + millis, obj, data: data, ref: el };
-                const promise = new Promise<any>(res => setTimeout(res, millis)).then(() => {
-                    delete Transformer.timeouts[timerId]
-                })
-                if (obj) {
-                    return promise.then(() => obj)
+                return {
+                    time: millis,
+                    then: (cb) => {
+                        const timerId = uuidv4()
+                        Transformer.timeouts[timerId] = {
+                            start: Date.now(),
+                            time: Date.now() + millis,
+                            obj,
+                            data: data,
+                            ref: el
+                        };
+                        setTimeout(() => {
+                            delete Transformer.timeouts[timerId]
+                            cb(obj);
+                        }, millis)
+                    }
                 }
-                return promise;
             }) as typeof delay
         };
     }

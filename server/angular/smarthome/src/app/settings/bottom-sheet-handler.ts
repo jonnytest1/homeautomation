@@ -43,7 +43,9 @@ export class BottomSheetHandler {
         let data;
         let actionDismiss
         if (!paramType) {
-            this.settingsComponent.connectionHandler.setAcvtiveSender(null);
+            if (this.settingsComponent.connectionHandler) {
+                this.settingsComponent.connectionHandler.setAcvtiveSender(null);
+            }
         } else if (paramType == "connection") {
             if (!this.settingsComponent.senders) {
                 return

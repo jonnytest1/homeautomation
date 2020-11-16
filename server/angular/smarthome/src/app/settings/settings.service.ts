@@ -79,13 +79,7 @@ export class SettingsService {
     }
 
 
-    send(deviceKey, isManual: boolean = false) {
-        const dataObj: { [key: string]: any } = {
-            deviceKey: deviceKey
-        };
-        if (!isManual) {
-            dataObj.testsend = true
-        }
-        return this.http.post<void>(environment.prefixPath + 'rest/sender/trigger', dataObj);
+    send(obj) {
+        return this.http.post<void>(environment.prefixPath + 'rest/sender/trigger', obj);
     }
 }

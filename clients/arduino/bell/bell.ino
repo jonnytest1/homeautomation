@@ -15,20 +15,27 @@ String deviceKey = "bell-component";
 void setup()
 {
     Serial.begin(115200);
-    //delay(100); //Take some time to open up the Serial Monitor
     pinMode(VOLTAGE_PIN, INPUT);
     switch (esp_sleep_get_wakeup_cause())
     {
     case ESP_SLEEP_WAKEUP_EXT0:
-        Serial.println("Touch detected on GPIO 12");
+        Serial.println("Touch detected on GPIO 16");
         onBell();
         break;
+    case ESP_SLEEP_WAKEUP_EXT1 : Serial.println("Wakeup caused by external signal using RTC_CNTL"); break;
+    
     default:
+        delay(100); //Take some time to open up the Serial Monitor
         Serial.println("Wakeup not by touchpad");
         registerSender();
         break;
     }
-    esp_sleep_enable_ext0_wakeup(GPIO_NUM_12, 1);
+    int GPIO_reason = esp_sleep_get_ext1_wakeup_status();
+    Serial.print("GPIO that triggered the wake up: GPIO ");
+    Serial.println((log(GPIO_reason))/log(2), 0);
+    
+    Serial.println("oing to sleep");
+    esp_sleep_enable_ext0_wakeup(GPIO_NUM_34, 1);
     esp_deep_sleep_start();
 }
 
@@ -40,14 +47,13 @@ void registerSender()
     delay(10);
     String vol3 = getVoltage();
     request("https://192.168.178.54/nodets/rest/sender",
-            {{
-                 "deviceKey",
-                 deviceKey.c_str(),
-             },
-             {"a_read1", vol1},
-             {"a_read2", vol2},
-             {"a_read3", vol3}},
-            triggerHandler, false);
+            {
+              {"deviceKey",deviceKey.c_str(), },
+              {"a_read1", vol1}, 
+              {"a_read2", vol2},
+              {"a_read3", vol3}
+            },
+            triggerHandler,false);
 }
 
 void longPress()
@@ -56,14 +62,18 @@ void longPress()
 
 void onBell()
 {
-    Serial.println("bellpress");
     String vol1 = getVoltage();
     delay(10);
     String vol2 = getVoltage();
     delay(10);
     String vol3 = getVoltage();
-
-    request("https://192.168.178.54/nodets/rest/sender/trigger", {{"application", "component"}, {"deviceKey", deviceKey}, {"Severity", "INFO"}, {"message", "bell"}, {"a_read1", vol1}, {"a_read2", vol2}, {"a_read3", vol3}}, triggerHandler, false);
+    Serial.println("bellpress");
+    request("https://192.168.178.54/nodets/rest/sender/trigger", {
+      {"deviceKey",deviceKey},
+      {"message", "bell"},
+      {"a_read1", vol1}, 
+      {"a_read2", vol2},
+      {"a_read3", vol3}}, triggerHandler,false);
 }
 
 String getVoltage()
@@ -78,34 +88,43 @@ String getVoltage()
 
 void triggerHandler(int code, String data)
 {
-    if (code != HTTP_CODE_OK && code != 409)
+    if (code != HTTP_CODE_OK && code != 409 )
     {
         Serial.println(data);
-        request("https://pi4.e6azumuvyiabvs9s.myfritz.net/tm/libs/log/index.php", {{"application", deviceKey}, {"Severity", "ERROR"}, {"message", "error in request"}, {"code", String(code)}, {"error", data}}, NULL, true);
+        request("https://pi4.e6azumuvyiabvs9s.myfritz.net/tm/libs/log/index.php", {
+          {"application", deviceKey}, 
+          {"Severity", "ERROR"}, 
+          {"message", "error in request"} ,
+          {"code", String(code) },
+          {"error", data}
+          }, NULL,true);
     }
 }
 
-void request(const String url, const std::map<String, String> data, void (*callback)(int httpCode, String response), boolean b64)
+void request(const String url, const std::map<String, String> data, void (*callback)(int httpCode, String response),boolean b64)
 {
     WiFi.mode(WIFI_STA);
     WiFi.disconnect();
     WiFi.begin(ssid, password);
+    int t=0;
     while (WiFi.status() != WL_CONNECTED)
     {
+        t++;
         delay(100);
-        Serial.println("connecting ... ");
-    }
+        Serial.println("connecting ... "+WiFi.status());
+        if(t>50){
+          Serial.print("Connecting failed");
+          return;
+        }
+    }  
     HTTPClient httpf;
     httpf.begin(url);
 
-    String requestData = json(data);
-    if (b64)
-    {
-        requestData = base64_encode(requestData);
-    }
-    else
-    {
-        httpf.addHeader("content-type", "application/json");
+    String requestData=json(data);
+    if(b64){
+      requestData=base64_encode(requestData);
+    }else{
+      httpf.addHeader("content-type","application/json");
     }
     Serial.println(requestData);
     int httpCodef = httpf.POST(requestData);

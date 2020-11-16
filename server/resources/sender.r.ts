@@ -12,6 +12,7 @@ import { loadOne } from '../express-db-wrapper';
 import { Transformation } from '../models/transformation';
 import { ResponseCodeError } from '../util/express-util.ts/response-code-error';
 import { Transformer } from '../models/transformer';
+import { TscCompiler } from '../util/tsc-compiler';
 @Path('sender')
 export class SenderResource {
 
@@ -118,6 +119,9 @@ export class SenderResource {
                 receiver: "TRUE = TRUE",
             }
         });
+        await Promise.all(senders.map(async sender => {
+            sender.transformation.forEach(tr => tr.definitionFile = TscCompiler.responseINterface)
+        }))
         res.send(senders);
     }
     @POST({

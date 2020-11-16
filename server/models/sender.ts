@@ -5,6 +5,7 @@ import { logKibana } from '../util/log';
 import { settable } from '../util/settable';
 import { BatteryLevel } from './battery';
 import { Connection } from './connection';
+import { SenderResponse, TransformationResponse } from './connection-response';
 import { EventHistory } from './event';
 import { Transformation } from './transformation';
 import { Transformer } from './transformer';
@@ -54,11 +55,12 @@ export class Sender extends Transformer {
 
     async trigger(body) {
         let data = body;
-        let newData = body;
+        let newData: TransformationResponse | false = body;
+        let usedTransformation = null;
         if (this.transformationAttribute) {
-            const transformation = this.transformation.find(transform => transform.transformationKey == data[this.transformationAttribute]);
-            if (transformation) {
-                newData = await this.transform(data, transformation);
+            usedTransformation = this.getTransformer(data);
+            if (usedTransformation) {
+                newData = await this.transform(data, usedTransformation);
             } else {
                 logKibana("INFO", {
                     message: "no transformer for message",
@@ -70,22 +72,46 @@ export class Sender extends Transformer {
                 throw new ResponseCodeError(404, "didnt find tranformation for key")
             }
         } else if (this.transformation.length) {
-            newData = await this.transform(data, this.transformation[0]);
+            usedTransformation = this.transformation[0]
+            newData = await this.transform(data, usedTransformation);
         }
         if (newData === false) {
             return [];
         }
+
         if (newData && newData.promise) {
-            newData.promise.then((pData) => Promise.all(this.connections.map(connection => connection.execute(pData))));
-            return [newData];
+            newData.response.time = newData.promise.time / (1000);
         }
-        return Promise.all(this.connections.map(connection => connection.execute(newData)))
+        return this.checkPromise(newData, usedTransformation)
+    }
+
+    private getTransformer(data: any) {
+        return this.transformation.find(transform => transform.transformationKey == data[this.transformationAttribute]);
+    }
+
+    private async checkPromise(pData: TransformationResponse, usedTransformation: Transformation) {
+        if (pData && pData.promise) {
+            pData.promise.then(sendData => this.checkPromise(sendData, usedTransformation));
+        }
+        if (pData && pData.notification) {
+            if (pData.notification.title == undefined) {
+                pData.notification.title = usedTransformation.name
+            }
+        }
+        return Promise.all(this.connections.map(connection => connection.execute(pData).then(errs => {
+            if (pData.response) {
+                errs = { ...errs, ...pData.response };
+            }
+            return errs;
+        })));
     }
 
     getContext(data: any) {
         return {
             ...super.getContext(data),
-            sender: JSON.parse(JSON.stringify(this))
+            sender: JSON.parse(JSON.stringify(this)),
+            transformer: this.getTransformer(data)
+
         }
     }
 

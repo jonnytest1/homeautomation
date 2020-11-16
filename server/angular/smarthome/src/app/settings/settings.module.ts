@@ -28,6 +28,7 @@ import { NgCircleProgressModule } from 'ng-circle-progress';
 import { RouterModule } from '@angular/router';
 import { routes } from './settings.routes';
 import { TransformationEditorComponent } from './transformation-editor/transformation-editor.component';
+import { MonacoEditorComponent } from '../monaco-editor/monaco-editor.component';
 @NgModule({
     declarations: [
         SettingsComponent,
@@ -37,6 +38,7 @@ import { TransformationEditorComponent } from './transformation-editor/transform
         AutosavingDirective,
         AutosavingDirectiveProvider,
         CodeEditorComponent,
+        MonacoEditorComponent,
         TransformerDropDownComponent,
         TimersComponent,
         TransformationEditorComponent

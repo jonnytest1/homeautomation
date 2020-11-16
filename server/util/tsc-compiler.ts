@@ -6,18 +6,9 @@ import { convertToOS, writeFileDir } from './file';
 import { join } from "path"
 import { logKibana } from './log';
 
-let responseINterface
-promises.readFile(join(__dirname, "../models/connection-response.d.ts"), "utf8").
-    then((content) => {
-        responseINterface = content
-        writeFileDir("/tmp/tsc/transform/connection-response.d.ts", responseINterface)
-    });
-
-
-
 export class TscCompiler {
 
-
+    static responseINterface
 
     readonly args = {
         "module": "commonjs",
@@ -104,3 +95,9 @@ ${trStr}`
         }
     }
 }
+
+promises.readFile(join(__dirname, "../models/connection-response.d.ts"), "utf8").
+    then((content) => {
+        TscCompiler.responseINterface = content
+        writeFileDir("/tmp/tsc/transform/connection-response.d.ts", TscCompiler.responseINterface)
+    });

@@ -61,6 +61,16 @@ export class SenderBottomSheetComponent implements OnInit {
     this.snackbarRef.dismissWithAction()
   }
   send() {
-    this.service.send(this.data.deviceKey, this.isManual()).toPromise();
+    const dataObj: { [key: string]: any } = {
+      deviceKey: this.data.deviceKey
+    };
+    if (!this.isManual()) {
+      dataObj.testsend = true
+    }
+    if (this.data.transformationAttribute && this.transformer) {
+      dataObj[this.data.transformationAttribute] = this.transformer.transformationKey
+    }
+
+    this.service.send(dataObj).toPromise();
   }
 }

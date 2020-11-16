@@ -2,6 +2,7 @@ package com.example.jonathan.barcode.http;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
@@ -18,6 +19,16 @@ public class CustomHttpRequest {
 	public CustomResponse get() throws IOException {
 		con.setRequestMethod("GET");
 		return new CustomResponse(con);
+
+	}
+
+	public InputStream getStream() throws IOException {
+		con.setRequestMethod("GET");
+		if(con.getResponseCode()==200) {
+			return con.getInputStream();
+		}else{
+			return  null;
+		}
 
 	}
 
