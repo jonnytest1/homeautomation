@@ -49,7 +49,15 @@ public class BarcodeSender implements Runnable {
             CustomResponse response = new CustomHttp().target("https://192.168.178.54/nodets/rest/sender/trigger")
                     .request().post(content.toString(), "application/json");
             final JsonNode responseNode=response.getJsonContent();
-            if (response.getResponseCode() != 200) {
+            if (response.getResponseCode() == 200) {
+                String seconds=responseNode.get(0).get("time").asText();
+                new Handler(Looper.getMainLooper()).post(new Runnable() {
+                    @Override
+                    public void run() {
+                        Toast.makeText(applicationContext, Integer.valueOf(seconds)/60 +" Minuten", Toast.LENGTH_SHORT).show();
+                    }
+                });
+            } else {
                 if(response.getResponseCode()==404){
                     new Handler(Looper.getMainLooper()).post(new Runnable() {
                         @Override
@@ -59,14 +67,6 @@ public class BarcodeSender implements Runnable {
                     });
                 }
                 Log.v("idk", response.getContent()); // Prints scan results
-            }else {
-                String sekunden=responseNode.get(0).get("response").get("time").asText();
-                new Handler(Looper.getMainLooper()).post(new Runnable() {
-                    @Override
-                    public void run() {
-                        Toast.makeText(applicationContext, Integer.valueOf(sekunden)/60 +" Minuten", Toast.LENGTH_SHORT).show();
-                    }
-                });
             }
         } catch (IOException e) {
             e.printStackTrace();
