@@ -4,12 +4,11 @@
      resource="transformation"
      dataRefName="itemRef">
 
+  <app-monaco-editor *ngIf="transformer"
+                     [(ngModel)]="transformer.transformation"
+                     [definition]="transformer.definitionFile"
+                     autosaving
+                     name=transformation>
 
-  <code-editor *ngIf="transformer"
-               [(ngModel)]="transformer.transformation"
-               [codetitle]="title"
-               autosaving
-               name=transformation
-               placeholder="// code">
-  </code-editor>
+  </app-monaco-editor>
 </div>
