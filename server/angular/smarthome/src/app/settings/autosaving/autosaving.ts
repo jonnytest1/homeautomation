@@ -1,12 +1,12 @@
 import { HttpClient } from '@angular/common/http';
-import { Directive, ElementRef, Host, HostBinding, Inject, InjectionToken, Input, Optional, Self, TemplateRef } from '@angular/core';
+import { Directive, ElementRef, Host, HostBinding, Inject, InjectionToken, Input, OnInit, Optional, Self, TemplateRef } from '@angular/core';
 import { ControlValueAccessor, NgModel, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { AutosavingDirectiveProvider } from './autosaveProvider';
 export const ROOT_AUTOSAVE_PATH = new InjectionToken<string>('AUTO_SAVE_PATH');
 @Directive({
   selector: '[autosaving]',
 })
-export class AutosavingDirective {
+export class AutosavingDirective implements OnInit {
 
   @Input()
   resource: string;
@@ -30,6 +30,8 @@ export class AutosavingDirective {
 
   duringConstructor = true;
 
+  private value;
+
   private static RequestMap = new Map<string, AbortController>()
   constructor(
     @Inject(ROOT_AUTOSAVE_PATH) private rootPath: string,
@@ -42,10 +44,10 @@ export class AutosavingDirective {
     private http: HttpClient) {
 
     ngModelRef.control.setAsyncValidators(async (control) => {
-      if (this.ngModel === control.value || this.duringConstructor || control.pristine) {
+      if (this.value === control.value || this.duringConstructor || control.pristine) {
         return null;
       }
-
+      this.value = control.value
       let dataRef = this.dataRef;
       let dataRefName = this.dataRefName
       let resource = this.resource;
@@ -119,6 +121,9 @@ export class AutosavingDirective {
     });
 
     this.duringConstructor = false;
+  }
+  ngOnInit(): void {
+    this.value = this.ngModel;
   }
 
 

@@ -15,8 +15,15 @@ export class Transformation {
     @column({
         size: "large"
     })
+
     @settableValidator(validateTransformation)
     transformation: string
+
+    @column({
+        size: "large"
+    })
+    @settable
+    tsTransformation: string
 
     @column({
         size: "medium"

@@ -5,10 +5,17 @@
      dataRefName="itemRef">
 
   <app-monaco-editor *ngIf="transformer"
-                     [(ngModel)]="transformer.transformation"
+                     [(ngModel)]="transformer.tsTransformation"
+                     [(jsCode)]="transformer.transformation"
                      [definition]="transformer.definitionFile"
                      autosaving
-                     name=transformation>
-
+                     name=tsTransformation>
   </app-monaco-editor>
+
+  <input #jsTransform
+         hidden
+         *ngIf="transformer"
+         [(ngModel)]="transformer.transformation"
+         autosaving
+         name=transformation>
 </div>
