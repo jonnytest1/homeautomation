@@ -5,16 +5,18 @@ import { map, share, shareReplay } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
 import { Connection, Receiver, Sender, Timer, TransformFe } from './interfaces';
 import { v4 as uuid } from "uuid"
+import { AbstractHttpService } from '../utils/http-service';
+import { Router } from '@angular/router';
 
 @Injectable({ providedIn: 'root' })
-export class SettingsService {
+export class SettingsService extends AbstractHttpService {
 
-    constructor(private http: HttpClient) {
-
+    constructor(http: HttpClient, router: Router) {
+        super(http, router);
     }
     addConnection(deviceKey: string, receiverId: number) {
 
-        return this.http.post<Connection>(`${environment.prefixPath}rest/connection`, {
+        return this.post<Connection>(`${environment.prefixPath}rest/connection`, {
             senderId: deviceKey,
             receiverId: receiverId
         })
@@ -22,7 +24,7 @@ export class SettingsService {
     }
 
     addSender() {
-        return this.http.post<Sender>(`${environment.prefixPath}rest/sender`, {
+        return this.post<Sender>(`${environment.prefixPath}rest/sender`, {
             type: "manual",
             deviceKey: uuid()
         })
@@ -30,28 +32,28 @@ export class SettingsService {
 
 
     deleteSender(id: number) {
-        return this.http.delete<Sender>(`${environment.prefixPath}rest/auto/sender?itemRef=${id}`)
+        return this.delete<Sender>(`${environment.prefixPath}rest/auto/sender?itemRef=${id}`)
     }
 
 
 
 
     getTimers(id: number) {
-        return this.http.get<Array<Timer>>(`${environment.prefixPath}rest/sender/${id}/timers`)
+        return this.get<Array<Timer>>(`${environment.prefixPath}rest/sender/${id}/timers`)
     }
 
 
     createTransformer(el: TransformFe, senderId) {
-        return this.http.post<TransformFe>(`${environment.prefixPath}rest/sender/${senderId}/transformation`, el)
+        return this.post<TransformFe>(`${environment.prefixPath}rest/sender/${senderId}/transformation`, el)
     }
 
     getMissingSenderKeys(senderId: number) {
-        return this.http.get<Array<string>>(`${environment.prefixPath}rest/transformation/keys/${senderId}`)
+        return this.get<Array<string>>(`${environment.prefixPath}rest/transformation/keys/${senderId}`)
     }
 
 
     getSenders() {
-        return this.http.get<Array<Sender>>(environment.prefixPath + 'rest/sender').pipe(
+        return this.get<Array<Sender>>(environment.prefixPath + 'rest/sender').pipe(
             map(senders =>
                 senders.sort((s1, s2) => s1.id > s2.id ? 1 : -1)
             )
@@ -59,27 +61,27 @@ export class SettingsService {
     }
 
     getReceivers() {
-        return this.http.get<Array<Receiver>>(environment.prefixPath + 'rest/receiver');
+        return this.get<Array<Receiver>>(environment.prefixPath + 'rest/receiver');
     }
     getTitleKeys(id): Observable<string> {
-        return this.http.get<Array<string>>(`${environment.prefixPath}rest/connection/key?itemRef=${id}`).pipe(
+        return this.get<Array<string>>(`${environment.prefixPath}rest/connection/key?itemRef=${id}`).pipe(
             map(keys => `context: ${keys.join(', ')}`)
         );
     }
 
     getSenderTitleKeys(id: number): Observable<string> {
-        return this.http.get<Array<string>>(`${environment.prefixPath}rest/sender/key?itemRef=${id}`).pipe(
+        return this.get<Array<string>>(`${environment.prefixPath}rest/sender/key?itemRef=${id}`).pipe(
             map(keys => `context: ${keys.join(', ')}`)
         );
     }
 
 
     deleteConneciton(id: number) {
-        return this.http.delete(`${environment.prefixPath}rest/connection?itemRef=${id}`)
+        return this.delete(`${environment.prefixPath}rest/connection?itemRef=${id}`)
     }
 
 
     send(obj) {
-        return this.http.post<void>(environment.prefixPath + 'rest/sender/trigger', obj);
+        return this.post<void>(environment.prefixPath + 'rest/sender/trigger', obj);
     }
 }

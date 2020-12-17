@@ -1,21 +1,25 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+import { Router } from '@angular/router';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
+import { AbstractHttpService } from '../utils/http-service';
 import { Sound } from './interface ';
 
 @Injectable()
-export class OptionsService {
+export class OptionsService extends AbstractHttpService {
 
-    constructor(private http: HttpClient) { }
+    constructor(http: HttpClient, router: Router) {
+        super(http, router);
+    }
 
     getSounds(): Observable<Array<Sound>> {
-        return this.http.get<Array<Sound>>(`${environment.prefixPath}rest/auto/sound/all`)
+        return this.get<Array<Sound>>(`${environment.prefixPath}rest/auto/sound/all`)
     }
 
     saveSound(addingSound: Sound) {
-        return this.http.post(`${environment.prefixPath}rest/auto/sound`, {
+        return this.post(`${environment.prefixPath}rest/auto/sound`, {
             key: addingSound.key,
             bytes: addingSound.bytes
         });

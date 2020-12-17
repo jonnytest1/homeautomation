@@ -60,7 +60,7 @@ export class SenderBottomSheetComponent implements OnInit {
     await this.service.deleteSender(this.data.id).toPromise();
     this.snackbarRef.dismissWithAction()
   }
-  send() {
+  async send() {
     const dataObj: { [key: string]: any } = {
       deviceKey: this.data.deviceKey
     };
@@ -71,6 +71,7 @@ export class SenderBottomSheetComponent implements OnInit {
       dataObj[this.data.transformationAttribute] = this.transformer.transformationKey
     }
 
-    this.service.send(dataObj).toPromise();
+    await this.service.send(dataObj).toPromise();
+    this.displayTimers();
   }
 }
