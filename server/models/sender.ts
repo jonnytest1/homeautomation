@@ -95,15 +95,17 @@ export class Sender extends Transformer {
         }
         if (pData && pData.notification) {
             if (pData.notification.title == undefined) {
-                pData.notification.title = usedTransformation.name
+                pData.notification.title = usedTransformation.name || this.name || ''
             }
         }
-        return Promise.all(this.connections.map(connection => connection.execute(pData).then(errs => {
-            if (pData.response) {
-                errs = { ...errs, ...pData.response };
-            }
-            return errs;
-        })));
+        return Promise.all(this.connections.map(connection => connection.execute(pData)
+            .then(errs => {
+                if (pData.response) {
+                    errs = { ...errs, ...pData.response };
+                }
+                return errs;
+            })
+        ));
     }
 
     getContext(data: any) {

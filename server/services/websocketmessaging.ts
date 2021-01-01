@@ -16,28 +16,33 @@ class WebsocketMessaging {
 
     }
 
-    sendWebsocket(ip, data: SenderResponse): number {
-        console.log('sending websocket connection');
-        this.client = new WebSocketClient();
-        this.client.on('connect', (connection) => {
-            connection.on('error', function (error) {
-                console.log('Connection Error: ' + error.toString());
-            });
-            connection.on('close', (...args) => {
-                console.log('Connection Closed');
+    sendWebsocket(ip, data: SenderResponse): Promise<string> {
+        return new Promise((resolver, err) => {
+            console.log('sending websocket connection');
+            this.client = new WebSocketClient();
+            this.client.on('connect', (connection) => {
+                connection.on('error', function (error) {
+                    console.log('Connection Error: ' + error.toString());
+                    err(error);
+                });
+                connection.on('close', (...args) => {
+                    console.log('Connection Closed');
+                    resolver(null)
 
+                });
+                connection.on('message', (data) => {
+                    console.log(`received response '${data.utf8Data}'`);
+                    resolver(data.utf8Data)
+                });
             });
-            connection.on('message', (data) => {
-                console.log(`received response '${data.utf8Data}'`);
+            this.client.on('connectFailed', () => {
+                console.log(`connection to ws://${ip} failed`);
+                err(`connection to ws://${ip} failed`);
             });
+            const connectionUrl = new URL(`ws://${ip}`);
+            connectionUrl.searchParams.append('data', JSON.stringify(data));
+            this.client.connect(connectionUrl.href, 'echo-protocol');
         });
-        this.client.on('connectFailed', () => {
-            console.log(`connection to ws://${ip} failed`);
-        });
-        const connectionUrl = new URL(`ws://${ip}`);
-        connectionUrl.searchParams.append('data', JSON.stringify(data));
-        this.client.connect(connectionUrl.href, 'echo-protocol');
-        return 0;
     }
 
     send(deviceKey: string, data: SenderResponse) {

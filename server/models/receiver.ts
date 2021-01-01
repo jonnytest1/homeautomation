@@ -43,7 +43,18 @@ export class Receiver {
 
     async send(data: SenderResponse): Promise<number> {
         if (this.type == 'ws') {
-            return ws.sendWebsocket(this.ip, data);
+            ws.sendWebsocket(this.ip, data)
+                .then(response => {
+                    if (response === "dismissed") {
+                        if (data.attributes && data.attributes.messageId) {
+                            firebasemessageing.sendNotification(this.firebaseToken, {
+                                type: "removeNotification",
+                                id: data.attributes.messageId
+                            })
+                        }
+                    }
+                })
+            return 0;
         }
 
         if (!this.firebaseToken) {
@@ -62,11 +73,17 @@ export class Receiver {
                 reason: JSON.stringify(response.results)
             });
         }
-        if (response.results[0].canonicalRegistrationToken) {
-            logKibana("ERROR", {
-                message: "this time there was a token in the response",
-                token: response.results[0].canonicalRegistrationToken
-            })
+
+        if (response.results[0]) {
+            if (response.results[0].canonicalRegistrationToken) {
+                logKibana("ERROR", {
+                    message: "this time there was a token in the response",
+                    token: response.results[0].canonicalRegistrationToken
+                })
+            }
+            if (response.results[0].messageId) {
+                data.attributes = { ...data.attributes, messageId: response.results[0].messageId }
+            }
         }
         return response.failureCount;
     }

@@ -1,12 +1,12 @@
-
-const time = 60 * 12;
+const time = 60 * 10;
 ({
     response: {
-        time
+        time,
+        test: true
     },
     promise: delay(time, {
         notification: {
-            title: "Nudeln !!!!"
+            body: "PreHeated"
         }
     })
-}) 
+});
