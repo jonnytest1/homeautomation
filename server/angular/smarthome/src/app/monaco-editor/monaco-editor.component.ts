@@ -123,25 +123,33 @@ export class MonacoEditorComponent implements OnInit, OnDestroy, ControlValueAcc
       let errors = model.getAllDecorations()
         .filter(dec => dec.options.className == "squiggly-error");
       const text = this.sandbox.getModel().getValue();
-      if (!errors.length) {
-        const js = await this.sandbox.getRunnableJS();
-        if (text !== `({\n\n}) as TransformationResponse`) {
-          this.jsCodeChange.emit(js);
-          this.onChange(text);
-        }
-      }
+      this.saveCode(errors, text);
       if (text != this.previousText) {
         this.previousText = text
-        this.ast = await this.sandbox.getAST();
+        if (!this.ast) {
+          this.ast = await this.sandbox.getAST();
+        }
+        this.decorators = []
         this.checkFnc(this.ast);
       }
     });
     this.sandbox.editor.focus();
   }
 
+  private async saveCode(errors: any, text: any) {
+    if (!errors.length) {
+      const js = await this.sandbox.getRunnableJS();
+      if (text !== `({\n\n}) as TransformationResponse`) {
+        this.jsCodeChange.emit(js);
+        this.onChange(text);
+      }
+    }
+  }
+
   async checkFnc(element) {
     if (element.arguments) {
       this.addFunctionHighlighting(element.expression);
+      await Promise.all(element.arguments.map(child => this.checkFnc(child)))
       return;
     }
 
@@ -208,6 +216,9 @@ export class MonacoEditorComponent implements OnInit, OnDestroy, ControlValueAcc
       this.cachedText = obj;
     } else {
       this.sandbox.getModel().setValue(obj);
+      this.sandbox.getAST().then(ast => {
+        this.ast = ast;
+      });
     }
   }
   registerOnChange(fn: any): void {
@@ -222,7 +233,6 @@ export class MonacoEditorComponent implements OnInit, OnDestroy, ControlValueAcc
   async ngOnDestroy() {
     if (this.sandbox && this.sandbox.getModel()) {
       await this.sandbox.getModel().dispose()
-      debugger;
     }
   }
 }
