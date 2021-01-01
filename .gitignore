@@ -2,3 +2,4 @@ node_modules
 public
 creds.h
 /server/.vscode/sftp.json
+/clients/pc-receiver/smarthomereceiver.sh
