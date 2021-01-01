@@ -13,6 +13,7 @@ import { Transformation } from '../models/transformation';
 import { ResponseCodeError } from '../util/express-util.ts/response-code-error';
 import { Transformer } from '../models/transformer';
 import { TscCompiler } from '../util/tsc-compiler';
+import { Sound } from '../models/sound';
 @Path('sender')
 export class SenderResource {
 
@@ -110,17 +111,28 @@ export class SenderResource {
         path: ''
     })
     async getSenders(req, res: HttpResponse) {
-        const senders = await load(Sender, 'true = true', undefined, {
-            deep: {
-                connections: "TRUE = TRUE",
-                events: "`timestamp` > UNIX_TIMESTAMP(DATE_ADD(NOW(),INTERVAL -8 DAY))",
-                batteryEntries: "TRUE = TRUE",
-                transformation: "TRUE = TRUE",
-                receiver: "TRUE = TRUE",
-            }
-        });
+        const [senders, sounds] = await Promise.all([
+            load(Sender, 'true = true', undefined, {
+                deep: {
+                    connections: "TRUE = TRUE",
+                    events: "`timestamp` > UNIX_TIMESTAMP(DATE_ADD(NOW(),INTERVAL -8 DAY))",
+                    batteryEntries: "TRUE = TRUE",
+                    transformation: "TRUE = TRUE",
+                    receiver: "TRUE = TRUE",
+                }
+            }),
+            load(Sound, 'true=true')
+        ])
+
+
+        const definitionFile = TscCompiler.responseINterface
+            .replace(
+                "type Sound = string",
+                `type Sound = ${sounds.map(s => `'${s.key}'`).join(' | ')}`)
+
+
         await Promise.all(senders.map(async sender => {
-            sender.transformation.forEach(tr => tr.definitionFile = TscCompiler.responseINterface)
+            sender.transformation.forEach(tr => tr.definitionFile = definitionFile)
         }))
         res.send(senders);
     }

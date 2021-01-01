@@ -25,14 +25,20 @@ export interface Thenable<T> {
 
 declare global {
     type TransformationResponse = TransformationRes;
-    const delay: <T>(time: number, res: T) => Thenable<T>
+    function delay(time: number, res: SenderResponse): Thenable<SenderResponse>
 }
 
 interface SenderResponse {
     promise?: Thenable<SenderResponse>;
     notification?: {
         title?: string
-        sound?: string,
+        sound?: Sound,
         body?: string
+    },
+
+    attributes?: {
+        messageId?: string
     }
 }
+
+type Sound = string

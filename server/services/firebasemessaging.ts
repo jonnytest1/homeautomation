@@ -23,7 +23,7 @@ class FireBAseMessaging {
                 }
             });
     }
-    async sendNotification(token, payload: SenderResponse) {
+    async sendNotification(token, payload: { notification?: admin.messaging.NotificationMessagePayload, [key: string]: any }) {
         return this.app.messaging()
             .sendToDevice(token, {
                 data: {
