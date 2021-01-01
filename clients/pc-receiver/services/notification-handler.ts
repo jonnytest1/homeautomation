@@ -19,7 +19,7 @@ export class NotificationHandler {
     }
 
     async show(ws: Websocket) {
-        console.log(new Date(), this.data.notification.title)
+        console.log(new Date().toLocaleString(), this.data.notification.title)
         if (this.data.notification.sound && typeof this.data.notification.sound === 'string') {
             if (!existsSync(this.prefixPath + this.data.notification.sound)) {
                 const response = await fetchHttps(`${this.serverIp}rest/auto/sound/bykey/${this.data.notification.sound}`)
@@ -60,6 +60,7 @@ export class NotificationHandler {
 
         notifier.notify({
             timeout: 3,
+            appID: "smarthome",
             //
             actions: actions,
             ...this.data.notification,

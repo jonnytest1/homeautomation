@@ -36,3 +36,4 @@ registration.register(serverIp, +listenOnPort)
             console.log(`started server on localhost with port ${listenOnPort}`);
         });
     });
+
