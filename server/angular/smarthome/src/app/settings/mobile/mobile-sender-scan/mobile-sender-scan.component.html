@@ -1,0 +1,13 @@
+<p>
+  mobile-sender-scan works!
+</p>
+<input (input)="setZoom($event)"
+       [step]="step"
+       [min]="min"
+       [max]="max"
+       type="range">
+
+<video #video
+       autoplay></video>
+<br>
+<canvas #canvas></canvas>

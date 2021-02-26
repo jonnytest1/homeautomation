@@ -1,8 +1,7 @@
 import { AfterViewInit, Component, ElementRef, Inject, OnInit, ViewChild } from '@angular/core';
 import { MAT_DIALOG_DATA } from '@angular/material/dialog';
-import { BatteryLevel } from '../../../../../../../models/battery';
 import { GoogleCharts } from 'google-charts';
-import { Sender } from '../../interfaces';
+import { SenderFe } from '../../interfaces';
 @Component({
   selector: 'app-battery',
   templateUrl: './battery.component.html',
@@ -16,7 +15,7 @@ export class BatteryComponent implements OnInit, AfterViewInit {
 
   smallest: number = Number.MAX_VALUE;
 
-  constructor(@Inject(MAT_DIALOG_DATA) public sender: Sender) { }
+  constructor(@Inject(MAT_DIALOG_DATA) public sender: SenderFe) { }
 
   ngOnInit() {
 

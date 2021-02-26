@@ -2,8 +2,7 @@ import { AfterViewInit, Component, ElementRef, Inject, OnInit, ViewChild } from 
 import { MAT_DIALOG_DATA } from '@angular/material/dialog';
 
 import { GoogleCharts } from 'google-charts';
-import { EventHistory } from '../../../../../../../models/event';
-import { Sender } from '../../interfaces';
+import { EventHistoryFe, SenderFe } from '../../interfaces';
 @Component({
   selector: 'app-events',
   templateUrl: './events.component.html',
@@ -17,7 +16,7 @@ export class EventsComponent implements OnInit, AfterViewInit {
 
 
 
-  constructor(@Inject(MAT_DIALOG_DATA) public sender: Sender) { }
+  constructor(@Inject(MAT_DIALOG_DATA) public sender: SenderFe) { }
 
   ngOnInit() {
   }
@@ -49,33 +48,43 @@ export class EventsComponent implements OnInit, AfterViewInit {
       role: 'tooltip',
       'p': { html: true }
     });
-    this.sender.events
-      .filter(ev => ev.type == "trigger" && ev.timestamp > (Date.now() - (1000 * 60 * 60 * 24 * 7)))
-      .filter(ev => {
-        try {
-          const dt = JSON.parse(ev.data)
-          return !dt.test;
-        } catch (e) {
-          return true
-        }
-      })
-      .forEach(ev => {
 
-        const date = new Date(ev.timestamp);
-        // const mins = new Date();
-        const day = new Date();
-        day.setFullYear(date.getFullYear(), date.getMonth(), date.getDate());
-        day.setHours(0)
-        day.setMinutes(0)
-        day.setSeconds(0)
-        day.setUTCMilliseconds(0)
-        // mins.setHours(date.getHours())
-        /// mins.setMinutes(date.getMinutes())
-        // mins.setSeconds(date.getSeconds())
-        const mins = [date.getHours(), date.getMinutes(), date.getSeconds()]
-        let messgageEl = this.getMessageElement(ev);
+    const events = this.sender.events.filter(ev => {
+      try {
+        const dt = JSON.parse(ev.data)
+        return !dt.test;
+      } catch (e) {
+        return true
+      }
+    });
 
-        let msg = `
+    const one_week = 1000 * 60 * 60 * 24 * 7;
+    const two_months = one_week * 8;
+
+    let timedEvents = events
+      .filter(ev => ev.type == "trigger" && ev.timestamp > (Date.now() - one_week))
+    if (timedEvents.length < 3) {
+      timedEvents = events
+        .filter(ev => ev.type == "trigger" && ev.timestamp > (Date.now() - two_months))
+    }
+
+    timedEvents.forEach(ev => {
+
+      const date = new Date(ev.timestamp);
+      // const mins = new Date();
+      const day = new Date();
+      day.setFullYear(date.getFullYear(), date.getMonth(), date.getDate());
+      day.setHours(0)
+      day.setMinutes(0)
+      day.setSeconds(0)
+      day.setUTCMilliseconds(0)
+      // mins.setHours(date.getHours())
+      /// mins.setMinutes(date.getMinutes())
+      // mins.setSeconds(date.getSeconds())
+      const mins = [date.getHours(), date.getMinutes(), date.getSeconds()]
+      let messgageEl = this.getMessageElement(ev);
+
+      let msg = `
         <ul class="google-visualization-tooltip-item-list">
           <li class="google-visualization-tooltip-item">
             <span style="font-family:Arial;font-size:15px;color:#000000;opacity:1;margin:0;font-style:none;text-decoration:none;font-weight:none;">
@@ -90,13 +99,13 @@ export class EventsComponent implements OnInit, AfterViewInit {
           ${messgageEl}
         </ul>`;
 
-        //
-        data.addRow([day, mins, msg])
-        //dataTable.push([day, mins])
-      })
+      //
+      data.addRow([day, mins, msg])
+      //dataTable.push([day, mins])
+    })
     return data;//GoogleCharts.api.visualization.arrayToDataTable(dataTable);
   }
-  private getMessageElement(ev: EventHistory) {
+  private getMessageElement(ev: EventHistoryFe) {
     try {
       const dt = JSON.parse(ev.data);
       const msg = dt.message;

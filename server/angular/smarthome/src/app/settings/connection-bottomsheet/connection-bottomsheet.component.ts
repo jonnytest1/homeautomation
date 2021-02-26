@@ -2,7 +2,7 @@ import { Component, Inject, OnInit } from '@angular/core';
 import { MatSnackBarRef, MAT_SNACK_BAR_DATA } from '@angular/material/snack-bar';
 import { Observable, Subject } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { Connection, Sender } from '../interfaces';
+import { Connection, SenderFe } from '../interfaces';
 import { SettingsService } from '../settings.service';
 
 @Component({
@@ -14,7 +14,7 @@ export class ConnectionBottomsheetComponent implements OnInit {
 
   title$ = new Observable<string>();
 
-  constructor(@Inject(MAT_SNACK_BAR_DATA) public data: { con: Connection, sender: Sender },
+  constructor(@Inject(MAT_SNACK_BAR_DATA) public data: { con: Connection, sender: SenderFe },
     private snackbarRef: MatSnackBarRef<any>, private settingsService: SettingsService) {
     this.title$ = this.settingsService.getTitleKeys(this.data.con.id);
   }

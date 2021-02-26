@@ -1,6 +1,8 @@
 .container{
     width: 1200px;
     height: 700px;
+    //width: calc(94vw - 48px);
+   // height: calc(56vw - 48px);
 
     mat-grid-list{
         height:100%

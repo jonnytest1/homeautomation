@@ -1,0 +1,31 @@
+<ng-container *ngIf="sender$|async let sender">
+  <p>
+    Sender {{sender.id}}
+  </p>
+
+
+  <mat-select [(value)]="transformer">
+    <mat-select-trigger *ngIf="transformer"
+                        [className]="debug(sender)">
+      {{transformer.name}}({{transformer.transformationKey}})
+    </mat-select-trigger>
+
+    <mat-option routerLink="add">
+      Add Router
+    </mat-option>
+
+    <mat-option *ngFor="let transformation of sender.transformation"
+                [value]="transformation">
+
+
+      <button mat-icon-button
+              class="right"
+              aria-label="Example icon button with a vertical three dot icon">
+        <mat-icon>delete</mat-icon>
+      </button>
+      {{transformation.name}} ({{transformation.transformationKey}})
+
+    </mat-option>
+  </mat-select>
+
+</ng-container>
