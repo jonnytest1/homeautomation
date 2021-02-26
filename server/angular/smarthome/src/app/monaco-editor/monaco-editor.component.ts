@@ -1,4 +1,3 @@
-/* tslint:disable */
 import { ChangeDetectorRef, Component, EventEmitter, forwardRef, Injector, Input, OnDestroy, OnInit, Output } from '@angular/core';
 import { ControlValueAccessor, NgModel, NG_VALUE_ACCESSOR } from '@angular/forms';
 
@@ -20,7 +19,7 @@ export class MonacoEditorComponent implements OnInit, OnDestroy, ControlValueAcc
 
   onTouch;
 
-  sandbox;
+  sandbox: any;
 
   cachedText;
 
@@ -69,7 +68,7 @@ export class MonacoEditorComponent implements OnInit, OnDestroy, ControlValueAcc
       },
       ignoreDuplicateModules: ['vs/editor/editor.main'],
     });
-    return new Promise(resolver => {
+    return new Promise<void>(resolver => {
       (window.require as any)(['vs/editor/editor.main', 'vs/language/typescript/tsWorker', 'sandbox/index'], (
         main, _tsWorker, sandboxFactory
       ) => {
@@ -216,9 +215,13 @@ export class MonacoEditorComponent implements OnInit, OnDestroy, ControlValueAcc
       this.cachedText = obj;
     } else {
       this.sandbox.getModel().setValue(obj);
-      this.sandbox.getAST().then(ast => {
-        this.ast = ast;
-      });
+      setTimeout(() => {
+        this.sandbox.getAST().then(ast => {
+          this.ast = ast;
+          this.cdr.markForCheck();
+        });
+      }, 200)
+
     }
   }
   registerOnChange(fn: any): void {
@@ -230,9 +233,9 @@ export class MonacoEditorComponent implements OnInit, OnDestroy, ControlValueAcc
   setDisabledState?(isDisabled: boolean): void {
     //
   }
-  async ngOnDestroy() {
+  ngOnDestroy() {
     if (this.sandbox && this.sandbox.getModel()) {
-      await this.sandbox.getModel().dispose()
+      this.sandbox.getModel().dispose()
     }
   }
 }
