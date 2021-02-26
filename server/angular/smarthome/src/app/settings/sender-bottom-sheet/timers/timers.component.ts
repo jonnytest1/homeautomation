@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Inject, OnDestroy, OnInit } from '@angular/core';
 import { MAT_DIALOG_DATA } from '@angular/material/dialog';
-import { Sender, Timer } from '../../interfaces';
+import { SenderFe, Timer } from '../../interfaces';
 import { SettingsService } from '../../settings.service';
 
 @Component({
@@ -23,7 +23,7 @@ export class TimersComponent implements OnInit, OnDestroy {
 
   lastCheck = Date.now();
 
-  constructor(@Inject(MAT_DIALOG_DATA) public sender: Sender,
+  constructor(@Inject(MAT_DIALOG_DATA) public sender: SenderFe,
     private service: SettingsService, private cdr: ChangeDetectorRef) {
     this.interval = setInterval(async () => {
       this.timers = this.timers.filter(timer => timer.time >= (Date.now() - (1000 * 60 * 60 * 4)))
@@ -44,7 +44,7 @@ export class TimersComponent implements OnInit, OnDestroy {
 
 
   }
-  private async getTimers(service: SettingsService, sender: Sender) {
+  private async getTimers(service: SettingsService, sender: SenderFe) {
     const timers = await service.getTimers(sender.id).toPromise();
     return timers;
 
@@ -73,7 +73,18 @@ export class TimersComponent implements OnInit, OnDestroy {
   getPercent(timer: Timer) {
     const duration = this.getDuration(timer);
     this.cdr.markForCheck()
-    return 100 - Math.max(Math.round(this.getRemainingMillis(timer) * 100 / duration), 0)
+    const percent = 100 - Math.max(Math.round(this.getRemainingMillis(timer) * 100 / duration), 0);
+
+    if (!timer.color) {
+      timer.color = "#f3e714"
+    }
+    if (percent > 0.5) {
+      timer.color = "#e4b313"
+    }
+    if (percent >= 0.98) {
+      timer.color = "#78C000"
+    }
+    return percent
   }
 
 

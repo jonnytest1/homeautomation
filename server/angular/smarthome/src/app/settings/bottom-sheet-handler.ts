@@ -12,6 +12,10 @@ export class BottomSheetHandler {
 
 
     snackbarRef: MatSnackBarRef<any>;
+    paramType: string;
+    id: string;
+
+
 
     constructor(
         private settingsComponent: SettingsComponent,
@@ -39,6 +43,7 @@ export class BottomSheetHandler {
     checkSnackbar() {
         const params = this.activeRoute.snapshot.queryParams;
         const paramType: snackbarType = params.type;
+
         let type: ComponentType<any>;
         let data;
         let actionDismiss
@@ -46,8 +51,14 @@ export class BottomSheetHandler {
             if (this.settingsComponent.connectionHandler) {
                 this.settingsComponent.connectionHandler.setAcvtiveSender(null);
             }
-        } else if (paramType == "connection") {
+        }
+        if (paramType == this.paramType && params.id == this.id) {
+            return;
+        }
+
+        if (paramType == "connection") {
             if (!this.settingsComponent.senders) {
+                setTimeout(this.checkSnackbar.bind(this), 500);
                 return
             }
             type = ConnectionBottomsheetComponent
@@ -58,6 +69,7 @@ export class BottomSheetHandler {
         } else if (paramType == "sender") {
             type = SenderBottomSheetComponent
             if (!this.settingsComponent.senders) {
+                setTimeout(this.checkSnackbar.bind(this), 500);
                 return
             }
             const senderIndex = this.settingsComponent.senders.findIndex(sender => sender.id == params.id);
@@ -73,6 +85,10 @@ export class BottomSheetHandler {
             type = ReceiverBottomsheetComponent
             data = this.settingsComponent.receivers.find(rec => rec.id == params.id);
         }
+
+        this.paramType = paramType;
+        this.id = params.id;
+
         if (!data) {
             return;
         }

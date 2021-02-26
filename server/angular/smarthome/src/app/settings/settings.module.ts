@@ -1,4 +1,4 @@
-import { NgModule } from '@angular/core';
+import { Injectable, NgModule } from '@angular/core';
 
 import { SettingsComponent } from './settings.component';
 import { MatCardModule } from '@angular/material/card';
@@ -29,6 +29,23 @@ import { RouterModule } from '@angular/router';
 import { routes } from './settings.routes';
 import { TransformationEditorComponent } from './transformation-editor/transformation-editor.component';
 import { MonacoEditorComponent } from '../monaco-editor/monaco-editor.component';
+import { SettingsMobileComponent } from './mobile/settings.mobile.component';
+import { MatTabsModule } from '@angular/material/tabs';
+import { HammerGestureConfig, HammerModule, HAMMER_GESTURE_CONFIG } from '@angular/platform-browser';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+
+import * as hammer from 'hammerjs';
+import { MobileSenderComponent } from './mobile/mobile-sender/mobile-sender.component';
+import { DebounceClickDirective } from '../utils/directive/debounce-click';
+
+@Injectable()
+export class MyHammerConfig extends HammerGestureConfig {
+    overrides = <any>{
+        swipe: { direction: hammer.DIRECTION_ALL },
+        pinch: { enable: false },
+        rotate: { enable: false }
+    };
+};
 @NgModule({
     declarations: [
         SettingsComponent,
@@ -37,15 +54,15 @@ import { MonacoEditorComponent } from '../monaco-editor/monaco-editor.component'
         ReceiverBottomsheetComponent,
         AutosavingDirective,
         AutosavingDirectiveProvider,
-        CodeEditorComponent,
+        CodeEditorComponent, MobileSenderComponent,
         MonacoEditorComponent,
         TransformerDropDownComponent,
         TimersComponent,
-        TransformationEditorComponent
+        TransformationEditorComponent, SettingsMobileComponent, DebounceClickDirective
     ],
     imports: [
         CommonModule, FormsModule,
-        MatListModule,
+        MatListModule, MatTabsModule, HammerModule,
         MatIconModule, MatGridListModule, RouterModule.forChild(routes),
         MatCardModule, MatSelectModule, NgCircleProgressModule.forRoot(),
         MatBottomSheetModule, HttpClientModule, MatDialogModule,
@@ -54,7 +71,10 @@ import { MonacoEditorComponent } from '../monaco-editor/monaco-editor.component'
     providers: [SettingsService, {
         provide: ROOT_AUTOSAVE_PATH,
         useValue: environment.prefixPath + 'rest/auto/'
-    }],
+    }, {
+            provide: HAMMER_GESTURE_CONFIG,
+            useClass: MyHammerConfig
+        },],
     bootstrap: []
 })
 export class SettingsModule { }

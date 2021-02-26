@@ -115,7 +115,7 @@ export class SenderResource {
             load(Sender, 'true = true', undefined, {
                 deep: {
                     connections: "TRUE = TRUE",
-                    events: "`timestamp` > UNIX_TIMESTAMP(DATE_ADD(NOW(),INTERVAL -8 DAY))",
+                    events: "`timestamp` > UNIX_TIMESTAMP(DATE_ADD(NOW(),INTERVAL -60 DAY))",
                     batteryEntries: "TRUE = TRUE",
                     transformation: "TRUE = TRUE",
                     receiver: "TRUE = TRUE",

@@ -1,4 +1,3 @@
-import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
 
 import { AppRoutingModule } from './app-routing.module';
@@ -8,15 +7,21 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { MatListModule } from '@angular/material/list';
 import { MatIconModule } from '@angular/material/icon';
 import { SettingsModule } from './settings/settings.module';
-import { MonacoEditorComponent } from './monaco-editor/monaco-editor.component';
+import { HammerGestureConfig, HAMMER_GESTURE_CONFIG, BrowserModule, HammerModule } from '@angular/platform-browser';
+import { FormsModule } from '@angular/forms';
+import { CameraComponent } from './camera/camera.component';
+
+
+
 
 @NgModule({
   declarations: [
-    AppComponent
+    AppComponent,
+    CameraComponent
   ],
   imports: [
-    BrowserModule,
-    AppRoutingModule, SettingsModule,
+    BrowserModule, HammerModule,
+    AppRoutingModule, SettingsModule, FormsModule,
     MatSidenavModule, MatListModule, MatIconModule,
     BrowserAnimationsModule,
   ],
@@ -24,3 +29,7 @@ import { MonacoEditorComponent } from './monaco-editor/monaco-editor.component';
   bootstrap: [AppComponent]
 })
 export class AppModule { }
+
+
+
+

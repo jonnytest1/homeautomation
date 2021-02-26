@@ -5,7 +5,7 @@
       <th>
         Senders
       </th>
-      <th>
+      <th *ngIf="!isMobile">
         Connections
       </th>
       <th>
@@ -42,7 +42,7 @@
           </mat-list-item>
         </mat-list>
       </td>
-      <td>
+      <td *ngIf="!isMobile">
         <canvas #canvas></canvas>
       </td>
       <td>

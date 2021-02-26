@@ -7,8 +7,18 @@ import { Component } from '@angular/core';
 export class AppComponent {
   title = 'smarthome';
 
+  mobile = AppComponent.isMobile()
   constructor() {
   }
   contentOpened: boolean;
   sidenavOpened: boolean;
+
+  leaveSideNav() {
+    this.sidenavOpened = false
+  }
+
+
+  public static isMobile() {
+    return window.innerWidth < 600;
+  }
 }

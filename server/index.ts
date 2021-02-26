@@ -3,6 +3,7 @@ import { updateDatabase } from 'hibernatets';
 import { initialize } from './express-wrapper';
 const https = require('https');
 const fetch = require('node-fetch');
+const NodeMediaServer = require('node-media-server');
 
 console.log('server.ts iniz');
 
@@ -72,7 +73,21 @@ updateDatabase(__dirname + '/models')
             }
         });
     });
-
+const mediaServerConfig = {
+    rtmp: {
+        port: 11935,
+        chunk_size: 60000,
+        gop_cache: true,
+        ping: 30,
+        ping_timeout: 60
+    },
+    http: {
+        port: 8000,
+        allow_origin: '*'
+    }
+};
+const nodeMediaServer = new NodeMediaServer(mediaServerConfig)
+nodeMediaServer.run();
 /*
 
 app.get('/dbtest', async (req, res) => {

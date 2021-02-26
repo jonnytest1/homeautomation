@@ -4,17 +4,25 @@
                mode="push"
                [opened]="contentOpened||sidenavOpened"
                (mouseenter)="sidenavOpened=true"
-               (mouseleave)="sidenavOpened=false">
+               (mouseleave)="leaveSideNav()">
     <mat-nav-list>
       <h4> Smart Home</h4>
-
       <a mat-list-item
          (mouseover)="$event.target.click()"
+         (click)="leaveSideNav()"
          routerLinkActive="activeRoute"
-         routerLink="setup">
+         [routerLink]="mobile?'setup/mobile':'setup'">
         Setup
       </a>
       <a mat-list-item
+         (click)="leaveSideNav()"
+         (mouseover)="$event.target.click()"
+         routerLinkActive="activeRoute"
+         routerLink="camera">
+        Camera
+      </a>
+      <a mat-list-item
+         (click)="leaveSideNav()"
          (mouseover)="$event.target.click()"
          routerLinkActive="activeRoute"
          routerLink="options">

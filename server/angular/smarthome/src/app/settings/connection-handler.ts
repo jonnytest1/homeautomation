@@ -3,19 +3,19 @@ import { ChangeDetectorRef } from '@angular/core';
 import { environment } from '../../environments/environment';
 import { CanvasUtil } from '../utils/context';
 import { ConnectionBottomsheetComponent } from './connection-bottomsheet/connection-bottomsheet.component';
-import { Connection, Receiver, Sender } from './interfaces';
+import { Connection, Receiver, SenderFe } from './interfaces';
 import { SenderBottomSheetComponent } from './sender-bottom-sheet/sender-bottom-sheet.component';
 import { SettingsService } from './settings.service';
 
 export class ConnectionHandler {
 
 
-    addingSender: Sender;
+    addingSender: SenderFe;
 
-    activeSender: Sender;
+    activeSender: SenderFe;
     util: CanvasUtil;
 
-    constructor(private service: SettingsService, private snackOpen: (data: { con: Connection, sender: Sender }) => void) {
+    constructor(private service: SettingsService, private snackOpen: (data: { con: Connection, sender: SenderFe }) => void) {
 
     }
 
@@ -23,7 +23,7 @@ export class ConnectionHandler {
         this.util = new CanvasUtil(nativeCanvas);
     }
 
-    setAcvtiveSender(sender: Sender) {
+    setAcvtiveSender(sender: SenderFe) {
         if (sender !== this.activeSender) {
             this.activeSender = sender;
             this.drawConnections();
@@ -96,7 +96,7 @@ export class ConnectionHandler {
         });
     }
 
-    startAdd(sender: Sender) {
+    startAdd(sender: SenderFe) {
         this.addingSender = sender;
         if (this.activeSender !== sender) {
             this.activeSender = sender;

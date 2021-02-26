@@ -29,25 +29,25 @@
           </app-transformer-drop-down>
           <button class="right test-button"
                   color="primary"
-                  (click)="send()"
+                  (debouncedClick)="send()"
                   mat-flat-button>
             {{ isManual() ? 'Trigger' : 'Test'}}
           </button>
           <button mat-icon-button
                   class="right"
-                  (click)="displayTimers()"
+                  (debouncedClick)="displayTimers()"
                   aria-label="battery display">
             <mat-icon>schedule</mat-icon>
           </button>
           <button mat-icon-button
                   class="right"
-                  (click)="displayEvents()"
+                  (debouncedClick)="displayEvents()"
                   aria-label="battery display">
             <mat-icon>date_range</mat-icon>
           </button>
           <button mat-icon-button
                   class="right"
-                  (click)="displayBattery()"
+                  (debouncedClick)="displayBattery()"
                   aria-label="battery display">
             <mat-icon>battery_unknown</mat-icon>
           </button>

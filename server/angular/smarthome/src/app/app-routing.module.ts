@@ -1,5 +1,6 @@
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
+import { CameraComponent } from './camera/camera.component';
 import { MonacoEditorComponent } from './monaco-editor/monaco-editor.component';
 
 const routes: Routes = [{
@@ -8,6 +9,9 @@ const routes: Routes = [{
 }, {
   path: 'options',
   loadChildren: () => import('./options/options.module').then(m => m.OptionsModule)
+}, {
+  path: 'camera',
+  component: CameraComponent
 }, {
   path: 'code',
   component: MonacoEditorComponent

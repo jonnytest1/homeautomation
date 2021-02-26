@@ -2,7 +2,7 @@ import { ChangeDetectorRef, Component, Host, Inject, OnInit } from '@angular/cor
 import { MatDialog } from '@angular/material/dialog';
 import { MAT_SNACK_BAR_DATA, MatSnackBarRef } from '@angular/material/snack-bar';
 import { Observable } from 'rxjs';
-import { Sender, TransformFe } from '../interfaces';
+import { SenderFe, TransformFe } from '../interfaces';
 import { SettingsComponent } from '../settings.component';
 import { SettingsService } from '../settings.service';
 import { BatteryComponent } from './battery/battery.component';
@@ -19,11 +19,13 @@ export class SenderBottomSheetComponent implements OnInit {
 
 	public transformer: TransformFe = {}
 	title$: Observable<string>;
-	constructor(@Inject(MAT_SNACK_BAR_DATA) public data: Sender,
+	constructor(@Inject(MAT_SNACK_BAR_DATA) public data: SenderFe,
 		private service: SettingsService,
 		private snackbarRef: MatSnackBarRef<any>, private dialog: MatDialog,
 		private cdr: ChangeDetectorRef) {
-		this.transformer = this.data.transformation[0] || {}
+
+
+		this.transformer = this.sort(this.data.transformation)[0] || {}
 
 		this.title$ = this.service.getSenderTitleKeys(this.data.id);
 	}
@@ -65,7 +67,7 @@ export class SenderBottomSheetComponent implements OnInit {
 			deviceKey: this.data.deviceKey
 		};
 		if (!this.isManual()) {
-			dataObj.testsend = true
+			//dataObj.testsend = true
 		}
 		if (this.data.transformationAttribute && this.transformer) {
 			dataObj[this.data.transformationAttribute] = this.transformer.transformationKey
@@ -76,5 +78,24 @@ export class SenderBottomSheetComponent implements OnInit {
 			&& this.transformer.tsTransformation.includes("promise")) {
 			this.displayTimers();
 		}
+	}
+
+	sort(array: Array<TransformFe>): Array<TransformFe> {
+		array.sort((tr1, tr2) => {
+			return this.getHistoryCount(tr2) - this.getHistoryCount(tr1);
+		})
+		return array;
+	}
+
+	getHistoryCount(transformer: TransformFe) {
+		if (transformer.historyCount === undefined) {
+			transformer.historyCount = this.data.events.filter(event => {
+				if (!event.parsedData) {
+					event.parsedData = JSON.parse(event.data);
+				}
+				return event.parsedData.message == transformer.transformationKey
+			}).length
+		}
+		return transformer.historyCount;
 	}
 }

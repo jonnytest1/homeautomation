@@ -7,11 +7,13 @@ import { CanvasUtil } from '../utils/context';
 import { ConnectionBottomsheetComponent } from './connection-bottomsheet/connection-bottomsheet.component';
 import { ConnectionHandler } from './connection-handler';
 import { ReceiverBottomsheetComponent } from './receiver-bottomsheet/receiver-bottomsheet.component';
-import { Receiver, Sender } from './interfaces';
+import { Receiver, SenderFe } from './interfaces';
 import { SenderBottomSheetComponent } from './sender-bottom-sheet/sender-bottom-sheet.component';
 import { SettingsService } from './settings.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { BottomSheetHandler } from './bottom-sheet-handler';
+import { AppComponent } from '../app.component';
+import { DataHolder } from './data-holder';
 
 @Component({
   selector: 'app-settings',
@@ -20,24 +22,26 @@ import { BottomSheetHandler } from './bottom-sheet-handler';
 })
 export class SettingsComponent implements OnInit, AfterViewInit, OnDestroy {
 
-  senders: Array<Sender>;
+  senders: Array<SenderFe>;
 
   @ViewChild('canvas')
   canvas: ElementRef<HTMLCanvasElement>;
   connectionHandler: ConnectionHandler;
   receivers: any[];
-  data$: Observable<[Sender[], any[]]>;
+  data$: Observable<[SenderFe[], any[]]>;
 
 
   interval
 
   bottomSheetHandler: BottomSheetHandler
 
+  isMobile = AppComponent.isMobile()
+
   constructor(
     private snack: MatSnackBar,
     private router: Router,
     private activeRoute: ActivatedRoute,
-    private service: SettingsService,
+    private service: SettingsService, dataHolder: DataHolder,
     private cdr: ChangeDetectorRef) {
 
     this.bottomSheetHandler = new BottomSheetHandler(this, this.router, this.activeRoute, snack)
@@ -46,9 +50,7 @@ export class SettingsComponent implements OnInit, AfterViewInit, OnDestroy {
       // this.openSnackBar(data, ConnectionBottomsheetComponent)
     });
 
-
-    this.interval = setInterval(async () => {
-      const senders = await service.getSenders().toPromise();
+    dataHolder.getSenders().subscribe(senders => {
       senders.forEach(sender => {
         let foundSender = false;
         this.senders.forEach(sender2 => {
@@ -62,8 +64,7 @@ export class SettingsComponent implements OnInit, AfterViewInit, OnDestroy {
           this.senders.push(sender);
         }
       })
-
-    }, 4000)
+    })
 
     this.fetchData().then(() => {
       if (this.canvas) {
@@ -93,13 +94,12 @@ export class SettingsComponent implements OnInit, AfterViewInit, OnDestroy {
     return Promise.all([this.service.getSenders().toPromise().then(senders => {
       this.senders = senders;
     }),
-
     this.service.getReceivers().toPromise().then(receivers => {
       this.receivers = receivers;
     })]);
   }
 
-  setActive(sender: Sender, event: MouseEvent) {
+  setActive(sender: SenderFe, event: MouseEvent) {
     this.bottomSheetHandler.navigate("sender", sender.id)
     event.stopPropagation();
   }
@@ -128,7 +128,7 @@ export class SettingsComponent implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
-  senderAddClick(sender: Sender) {
+  senderAddClick(sender: SenderFe) {
     this.connectionHandler.startAdd(sender);
   }
 

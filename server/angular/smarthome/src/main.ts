@@ -7,6 +7,13 @@ import * as CodeMirror from 'codemirror';
 if (environment.production) {
   enableProdMode();
 }
+import 'hammerjs'
+platformBrowserDynamic().bootstrapModule(AppModule).then(ref => {
+  // Ensure Angular destroys itself on hot reloads.
+  if (window['ngRef']) {
+    window['ngRef'].destroy();
+  }
+  window['ngRef'] = ref;
 
-platformBrowserDynamic().bootstrapModule(AppModule)
-  .catch(err => console.error(err));
+  // Otherise, log the boot error
+}).catch(err => console.error(err));

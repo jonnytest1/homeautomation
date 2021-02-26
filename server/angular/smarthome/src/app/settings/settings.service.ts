@@ -3,7 +3,7 @@ import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { map, share, shareReplay } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
-import { Connection, Receiver, Sender, Timer, TransformFe } from './interfaces';
+import { Connection, Receiver, SenderFe, Timer, TransformFe } from './interfaces';
 import { v4 as uuid } from "uuid"
 import { AbstractHttpService } from '../utils/http-service';
 import { Router } from '@angular/router';
@@ -24,7 +24,7 @@ export class SettingsService extends AbstractHttpService {
     }
 
     addSender() {
-        return this.post<Sender>(`${environment.prefixPath}rest/sender`, {
+        return this.post<SenderFe>(`${environment.prefixPath}rest/sender`, {
             type: "manual",
             deviceKey: uuid()
         })
@@ -32,7 +32,7 @@ export class SettingsService extends AbstractHttpService {
 
 
     deleteSender(id: number) {
-        return this.delete<Sender>(`${environment.prefixPath}rest/auto/sender?itemRef=${id}`)
+        return this.delete<SenderFe>(`${environment.prefixPath}rest/auto/sender?itemRef=${id}`)
     }
 
 
@@ -53,7 +53,7 @@ export class SettingsService extends AbstractHttpService {
 
 
     getSenders() {
-        return this.get<Array<Sender>>(environment.prefixPath + 'rest/sender').pipe(
+        return this.get<Array<SenderFe>>(environment.prefixPath + 'rest/sender').pipe(
             map(senders =>
                 senders.sort((s1, s2) => s1.id > s2.id ? 1 : -1)
             )
