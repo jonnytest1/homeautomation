@@ -26,17 +26,17 @@ public class BarcodeSender implements Runnable {
     private Context applicationContext;
 
     public BarcodeSender(Result rawResult, Context applicationContext) {
-        this.content=prepareSendMessage(rawResult);
         this.rawResult = rawResult.getText();
+        this.content=prepareSendMessage();
         this.applicationContext = applicationContext;
     }
 
-    ObjectNode prepareSendMessage(Result rawResult){
+    ObjectNode prepareSendMessage(){
         ObjectNode jsonNode = new ObjectMapper() //
                 .createObjectNode();
         jsonNode.put("deviceKey",DEVICE_KEY);
         jsonNode.put("timestamp", Instant.now().toString());
-        jsonNode.put("message", rawResult.getText());
+        jsonNode.put("message", this.rawResult);
         return jsonNode;
     }
 
