@@ -1,11 +1,12 @@
-import { column, mapping, Mappings, primary, primaryOptions, table } from 'hibernatets';
+import { column, mapping, Mappings, primary, table } from 'hibernatets';
+
 import { autosaveable } from '../express-db-wrapper';
 import { ResponseCodeError } from '../util/express-util.ts/response-code-error';
 import { logKibana } from '../util/log';
 import { settable } from '../util/settable';
 import { BatteryLevel } from './battery';
 import { Connection } from './connection';
-import { SenderResponse, TransformationResponse } from './connection-response';
+import { TransformationResponse } from './connection-response';
 import { EventHistory } from './event';
 import { Transformation } from './transformation';
 import { Transformer } from './transformer';
@@ -89,9 +90,9 @@ export class Sender extends Transformer {
         return this.transformation.find(transform => transform.transformationKey == data[this.transformationAttribute]);
     }
 
-    private async checkPromise(pData: TransformationResponse, usedTransformation: Transformation) {
+    async checkPromise(pData: TransformationResponse, usedTransformation: Transformation) {
         if (pData && pData.promise) {
-            pData.promise.then(sendData => this.checkPromise(sendData, usedTransformation));
+            pData.promise.then(this, "checkPromise", usedTransformation);
         }
         if (pData && pData.notification) {
             if (pData.notification.title == undefined) {

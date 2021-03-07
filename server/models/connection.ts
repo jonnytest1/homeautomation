@@ -1,12 +1,10 @@
-import { column, mapping, Mappings, primary, primaryOptions, table } from 'hibernatets';
-import { runInNewContext } from 'vm';
+import { column, mapping, Mappings, primary, table } from 'hibernatets';
+
 import { autosaveable } from '../express-db-wrapper';
-import { settable, settableValidator } from '../util/settable';
-import { TransformationResponse } from './connection-response';
+import { SenderResponse, TransformationResponse } from './connection-response';
 import { Receiver } from './receiver';
-import { convertToOS, writeFileDir } from '../util/file';
-import { Transformer } from './transformer';
 import { Transformation } from './transformation';
+import { Transformer } from './transformer';
 
 
 @autosaveable
@@ -41,12 +39,16 @@ export class Connection extends Transformer {
             return;
         }
         if (newData.promise) {
-            newData.promise.then((pData) => this.receiver.send(pData));
+            newData.promise.then(this, "sendToReceiver");
             return newData;
         }
         return {
             error: await this.receiver.send(newData)
         };
+    }
+
+    sendToReceiver(pData: SenderResponse) {
+        this.receiver.send(pData)
     }
 
     getContext(data) {

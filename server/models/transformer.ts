@@ -1,8 +1,12 @@
-
+import { save } from 'hibernatets';
+import { getId } from 'hibernatets/utils';
 import { runInNewContext } from 'vm';
+
 import { Thenable, TransformationResponse } from './connection-response';
+import { Timer } from './timer';
 import { Transformation } from './transformation';
-import { v4 as uuidv4 } from 'uuid';
+
+
 export abstract class Transformer {
 
 
@@ -22,27 +26,26 @@ export abstract class Transformer {
 
     }
 
-    getContext(data) {
+    getContext(sendData) {
         const el = this;
         return {
-            data: data,
-            delay: (<T>(sekunden: number, obj?: T): Thenable<T | void> | T => {
+            data: sendData,
+            delay: (<T>(sekunden: number, objectToSend?: T): Thenable<T | void> | T => {
                 const millis = sekunden * 1000;
                 return {
                     time: millis,
-                    then: (cb) => {
-                        const timerId = uuidv4()
-                        Transformer.timeouts[timerId] = {
-                            start: Date.now(),
-                            time: Date.now() + millis,
-                            obj,
-                            data: data,
-                            ref: el
-                        };
-                        setTimeout(() => {
-                            delete Transformer.timeouts[timerId]
-                            cb(obj);
-                        }, millis)
+                    then: (thisArg, fncName, ...args) => {
+                        const id = getId(thisArg)
+                        const className = thisArg.constructor.name;
+                        const timer = new Timer({
+                            startTimestamp: Date.now(),
+                            endtimestamp: Date.now() + millis,
+                            args: [fncName, objectToSend, ...args],
+                            classId: id,
+                            className: className,
+                            data: sendData
+                        })
+                        save(timer);
                     }
                 }
             }) as typeof delay

@@ -96,10 +96,11 @@ export async function initialize(rootpath: string, options?: {
         const filePath = resource.target.constructor.path ? '/' + resource.target.constructor.path : '';
         const resourcePath = resource.path.startsWith('/') || resource.path === '' ? resource.path : '/' + resource.path;
         const fullPath = `/rest${filePath}${resourcePath}`;
+
         console.log(`adding ${fullPath} with ${resource.type.toLocaleUpperCase()}`);
         if (resource.type === 'ws') {
             app[resource.type](fullPath, (ws, req) => {
-                const clientKey: string = req.query.client;
+                const clientKey: string = req.query.client as string;
                 resource.target.onConnected(clientKey, ws);
             });
         } else {

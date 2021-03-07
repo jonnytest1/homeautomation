@@ -75,8 +75,7 @@ export class SenderResource {
         path: ":senderid/timers"
     })
     async getTimers(req: HttpRequest, res) {
-        const timers = Transformer.getActiveTimers(+req.params.senderid)
-        res.send(timers);
+        res.send(await load(Timer, `alerted='false' AND timerClassId=${+req.params.senderid} AND timerClassName='Sender'`));
     }
 
     @POST({ path: '' })

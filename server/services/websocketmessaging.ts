@@ -1,7 +1,9 @@
 import { client as WebSocketClient } from 'websocket';
+
 import { WS } from '../express-wrapper';
 import { Websocket } from '../express-ws-type';
 import { SenderResponse } from '../models/connection-response';
+
 @WS({
     path: 'ws'
 })

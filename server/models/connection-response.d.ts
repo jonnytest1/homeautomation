@@ -18,7 +18,7 @@ export interface TransformationResponse extends TransformationRes {
 
 export interface Thenable<T> {
 
-    then<U>(cb: (res: T) => U)
+    then<U>(thisArg: U, methodName: keyof U, ...args)
 
     time: number
 }

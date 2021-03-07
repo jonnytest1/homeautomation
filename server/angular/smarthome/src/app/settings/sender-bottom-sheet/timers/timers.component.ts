@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Inject, OnDestroy, OnInit } from '@angular/core';
 import { MAT_DIALOG_DATA } from '@angular/material/dialog';
-import { SenderFe, Timer } from '../../interfaces';
+
+import { SenderFe, TimerFe } from '../../interfaces';
 import { SettingsService } from '../../settings.service';
 
 @Component({
@@ -11,7 +12,7 @@ import { SettingsService } from '../../settings.service';
 })
 export class TimersComponent implements OnInit, OnDestroy {
 
-  timers: Array<Timer>
+  timers: Array<TimerFe>
 
   rowDef: string = "2:2"
 
@@ -26,11 +27,11 @@ export class TimersComponent implements OnInit, OnDestroy {
   constructor(@Inject(MAT_DIALOG_DATA) public sender: SenderFe,
     private service: SettingsService, private cdr: ChangeDetectorRef) {
     this.interval = setInterval(async () => {
-      this.timers = this.timers.filter(timer => timer.time >= (Date.now() - (1000 * 60 * 60 * 4)))
+      this.timers = this.timers.filter(timer => timer.endtimestamp >= (Date.now() - (1000 * 60 * 60 * 4)))
       if (Date.now() - (1000 * 5) > (this.lastCheck)) {
         const timers = await this.getTimers(service, sender);
         const newTimers = timers.filter(timer => {
-          return !this.timers.some(tm => tm.uuid === timer.uuid);
+          return !this.timers.some(tm => tm.id === timer.id);
         })
         this.timers.push(...newTimers);
       }
@@ -45,7 +46,7 @@ export class TimersComponent implements OnInit, OnDestroy {
 
   }
   private async getTimers(service: SettingsService, sender: SenderFe) {
-    const timers = await service.getTimers(sender.id).toPromise();
+    const timers: Array<TimerFe> = await service.getTimers(sender.id).toPromise();
     return timers;
 
   }
@@ -70,7 +71,7 @@ export class TimersComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     clearInterval(this.interval)
   }
-  getPercent(timer: Timer) {
+  getPercent(timer: TimerFe) {
     const duration = this.getDuration(timer);
     this.cdr.markForCheck()
     const percent = 100 - Math.max(Math.round(this.getRemainingMillis(timer) * 100 / duration), 0);
@@ -88,21 +89,24 @@ export class TimersComponent implements OnInit, OnDestroy {
   }
 
 
-  getSubtitle(timer: Timer) {
+  getSubtitle(timer: TimerFe) {
     const remaining = this.getRemainingMillis(timer);
+    if (!timer.parsedData) {
+      timer.parsedData = JSON.parse(timer.data);
+    }
     return [
       `${msToTime(Math.max(remaining, 0))}`,
       `${msToTime(this.getDuration(timer))}`,
-      `ends at ${new Date(timer.time).toTimeString().split(' ')[0]}`,
-      `${this.sender.transformation.find(tr => tr.transformationKey == timer.data.message).name || this.sender.name || ''}`];
+      `ends at ${new Date(timer.endtimestamp).toTimeString().split(' ')[0]}`,
+      `${this.sender.transformation.find(tr => tr.transformationKey == timer.parsedData.message).name || this.sender.name || ''}`];
   }
 
-  getDuration(timer: Timer) {
-    return Math.round((timer.time - timer.start) * 100) / 100;
+  getDuration(timer: TimerFe) {
+    return Math.round((timer.endtimestamp - timer.startTimestamp) * 100) / 100;
   }
 
-  getRemainingMillis(timer: Timer) {
-    return Math.round((timer.time - Date.now()) * 100) / 100;
+  getRemainingMillis(timer: TimerFe) {
+    return Math.round((timer.endtimestamp - Date.now()) * 100) / 100;
   }
   ngOnInit() {
   }

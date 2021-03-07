@@ -1,6 +1,8 @@
 import { config } from 'dotenv';
 import { updateDatabase } from 'hibernatets';
 import { initialize } from './express-wrapper';
+import { EventScheduler } from './services/event-scheduler';
+import { logKibana } from './util/log';
 const https = require('https');
 const fetch = require('node-fetch');
 const NodeMediaServer = require('node-media-server');
@@ -62,6 +64,7 @@ updateDatabase(__dirname + '/models')
             allowCors: true,
             public: __dirname + '/public'
         }).then(() => {
+            new EventScheduler();
             if (process.env.REDIRECT) {
                 console.log("set redirection")
                 fetch("https://192.168.178.54/nodets/redirect?port=8080", {
@@ -97,3 +100,8 @@ app.get('/dbtest', async (req, res) => {
 process.on('SIGHUP', () => {
     console.log('sighup');
 });
+
+process.on('uncaughtException', function (err) {
+    console.log(err);
+    logKibana("ERROR", "uncaught global exception", err);
+})

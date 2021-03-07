@@ -1,11 +1,12 @@
+import { promises } from 'fs';
+import { join } from 'path';
+
+import { convertToOS, writeFileDir } from './file';
+import { logKibana } from './log';
+
 
 
 const tsc = require('node-typescript-compiler')
-import { promises } from "fs"
-import { convertToOS, writeFileDir } from './file';
-import { join } from "path"
-import { logKibana } from './log';
-
 export class TscCompiler {
 
     static responseINterface

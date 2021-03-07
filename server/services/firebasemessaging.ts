@@ -1,6 +1,5 @@
-
 import * as admin from 'firebase-admin';
-import { SenderResponse } from '../models/connection-response';
+
 
 class FireBAseMessaging {
     private app: admin.app.App;

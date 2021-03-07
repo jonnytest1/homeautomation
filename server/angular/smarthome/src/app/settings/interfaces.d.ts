@@ -1,12 +1,19 @@
-import { Sender as NodeSender } from "../../../../../models/sender"
-import { Connection as NodeConnection } from "../../../../../models/connection"
-import { Receiver as NodeReceiver } from "../../../../../models/receiver"
-import { Transformation } from '../../../../../models/transformation';
+import { Connection as NodeConnection } from '../../../../../models/connection';
 import { EventHistory } from '../../../../../models/event';
+import { Receiver as NodeReceiver } from '../../../../../models/receiver';
+import { Sender as NodeSender } from '../../../../../models/sender';
+import { Timer } from '../../../../../models/timer';
+import { Transformation } from '../../../../../models/transformation';
 
 type NonFunctionPropertyNames<T> = { [K in keyof T]: T[K] extends Function ? never : K }[keyof T];
 type NonFunctionProperties<T> = Partial<Pick<T, NonFunctionPropertyNames<T>>>;
 type CustomOmit<T, K extends keyof any> = Pick<T, Exclude<keyof T, K>>;
+
+export interface TimerFe extends Timer {
+    color?: string
+
+    parsedData?
+}
 
 export interface DoubleClickCounter {
     lastClick?: number
@@ -37,14 +44,6 @@ export interface Connection extends CustomOmit<NonFunctionProperties<NodeConnect
     receiver: Receiver
 }
 
-export interface Timer {
-    start: number,
-    time: number,
-    data: any,
-    uuid: string,
-
-    color?: string
-}
 
 export interface Receiver extends NonFunctionProperties<NodeReceiver>, DoubleClickCounter {
 
