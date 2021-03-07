@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, ElementRef, OnInit, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import flv from "flv.js";
 import { v4 as uuid } from "uuid";
 @Component({
@@ -6,7 +6,7 @@ import { v4 as uuid } from "uuid";
   templateUrl: './camera.component.html',
   styleUrls: ['./camera.component.scss']
 })
-export class CameraComponent implements AfterViewInit, OnInit {
+export class CameraComponent implements AfterViewInit, OnInit, OnDestroy {
 
   videoId;
   streamName = "test";
@@ -14,19 +14,22 @@ export class CameraComponent implements AfterViewInit, OnInit {
   @ViewChild("videoElement")
   videoElement: ElementRef<HTMLVideoElement>
 
+
+  player: flv.Player
   constructor() { }
+
 
   ngOnInit() {
     this.videoId = "video_" + uuid().replace(/-/g, '');
   }
   ngAfterViewInit(): void {
-    const flvPlayer = flv.createPlayer({
+    this.player = flv.createPlayer({
       type: 'flv',
       url: `https://192.168.178.54/live/${this.streamName}.flv`
     });
-    flvPlayer.attachMediaElement(this.videoElement.nativeElement);
-    flvPlayer.load();
-    flvPlayer.play();
+    this.player.attachMediaElement(this.videoElement.nativeElement);
+    this.player.load();
+    //flvPlayer.play();
     /*const flvjs = null;
     if (flvjs.isSupported()) {
       var videoElement = document.getElementById('videoElement');
@@ -42,5 +45,11 @@ export class CameraComponent implements AfterViewInit, OnInit {
         flvPlayer.play();
       }
     }*/
+  }
+
+  ngOnDestroy(): void {
+    this.player.detachMediaElement()
+    this.player.unload()
+    this.player.destroy()
   }
 }
