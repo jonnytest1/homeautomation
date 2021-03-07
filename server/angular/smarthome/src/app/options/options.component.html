@@ -43,5 +43,13 @@
                 (click)="addFile();$event.stopPropagation()">
             <mat-icon>add_circle</mat-icon>
         </button>
+
+        <audio controls
+               *ngIf="addingSound.url"
+               [src]="addingSound.url">
+            <source [src]="addingSound.url"
+                    type="audio/mp3">
+            Your browser does not support the audio element.
+        </audio>
     </form>
 </div>
