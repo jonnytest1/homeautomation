@@ -1,6 +1,5 @@
 
 
-
 interface TransformationRes extends SenderResponse {
     status?: number;
     error?: number;
@@ -32,7 +31,7 @@ interface SenderResponse {
     promise?: Thenable<SenderResponse>;
     notification?: {
         title?: string
-        sound?: Sound,
+        sound?: SoundType,
         body?: string
     },
 
@@ -41,4 +40,6 @@ interface SenderResponse {
     }
 }
 
-type Sound = string
+export type SoundType = soundListRuntime | '*' | Array<soundListRuntime>
+
+type soundListRuntime = string

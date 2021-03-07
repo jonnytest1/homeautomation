@@ -1,19 +1,19 @@
 import { load, queries, save } from 'hibernatets';
-import { GET, HttpRequest, HttpResponse, Path, POST, PUT } from '../express-wrapper';
-import { BatteryLevel } from '../models/battery';
-import { Connection } from '../models/connection';
-import { EventHistory } from '../models/event';
-import { Receiver } from '../models/receiver';
-import { Sender } from '../models/sender';
-import { logKibana } from '../util/log';
-import { assign } from '../util/settable';
-import { DataBaseBase } from "hibernatets/mariadb-base"
+import { DataBaseBase } from 'hibernatets/mariadb-base';
+
 import { loadOne } from '../express-db-wrapper';
+import { GET, HttpRequest, HttpResponse, Path, POST } from '../express-wrapper';
+import { BatteryLevel } from '../models/battery';
+import { EventHistory } from '../models/event';
+import { Sender } from '../models/sender';
+import { Sound } from '../models/sound';
+import { Timer } from '../models/timer';
 import { Transformation } from '../models/transformation';
 import { ResponseCodeError } from '../util/express-util.ts/response-code-error';
-import { Transformer } from '../models/transformer';
+import { logKibana } from '../util/log';
+import { assign } from '../util/settable';
 import { TscCompiler } from '../util/tsc-compiler';
-import { Sound } from '../models/sound';
+
 @Path('sender')
 export class SenderResource {
 
@@ -126,8 +126,8 @@ export class SenderResource {
 
         const definitionFile = TscCompiler.responseINterface
             .replace(
-                "type Sound = string",
-                `type Sound = ${sounds.map(s => `'${s.key}'`).join(' | ')}`)
+                "type soundListRuntime = string",
+                `type soundListRuntime = ${sounds.map(s => `'${s.key}'`).join(' | ')}`)
 
 
         await Promise.all(senders.map(async sender => {
