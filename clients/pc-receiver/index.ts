@@ -21,15 +21,15 @@ registration.register(serverIp, +listenOnPort)
         app.use(express.text());
 
         app.ws('/', async (ws, req) => {
-            let data = req.query.data;
             try {
-                data = JSON.parse(data);
+                const data = JSON.parse(req.query.data as string);
+                if (data.notification) {
+                    new NotificationHandler(data, serverIp).show(ws);
+                }
             } catch (e) {
                 console.error(e);
             }
-            if (data.notification) {
-                new NotificationHandler(data, serverIp).show(ws);
-            }
+
         });
 
         app.listen(+listenOnPort, '', () => {

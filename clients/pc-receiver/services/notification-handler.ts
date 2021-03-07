@@ -1,14 +1,14 @@
 import { Websocket } from '../../../server/express-ws-type';
 import { promises, existsSync } from "fs"
 import { fetchHttps } from '../util/request';
+import { Audio, AudioPlayer } from "./playsound"
 const notifier = require('node-notifier');
-var player = require('play-sound')({
+var player: AudioPlayer = require('play-sound')({
     player: 'C:\\Program Files\\VideoLAN\\VLC\\vlc.exe',
-
 });
 export class NotificationHandler {
 
-    audio;
+    audio: Audio;
     data: any;
 
     readonly prefixPath = 'D:\\Jonathan\\Projects\\node\\homeautomation\\clients\\pc-receiver\\services\\sounds\\';
@@ -34,21 +34,7 @@ export class NotificationHandler {
             }
 
 
-            const args = ['--intf', 'dummy', '--no-loop', '--play-and-exit'];
-            if (this.data.notification.volume) {
-                args.push(`--mmdevice-volume=0.1`);
-                args.push(`--directx-volume=0.1`);
-                args.push(`--waveout-volume=0.1`);
-                args.push(`--volume=10`);
-            }
-
-            this.audio = player.play(this.prefixPath + this.data.notification.sound, {
-                'C:\\Program Files\\VideoLAN\\VLC\\vlc.exe': args
-            }, (err) => {
-                if (err) {
-                    console.error(err);
-                }
-            });
+            this.playSound(this.data.notification.sound);
             this.data.notification.sound = false;
         }
 
@@ -65,7 +51,7 @@ export class NotificationHandler {
             actions: actions,
             ...this.data.notification,
             message: this.data.notification.body
-        }, (error, response: 'dismissed' | 'timeout' | (typeof actions[0]), metadata) => {
+        }, ((error, response: 'dismissed' | 'timeout' | (typeof actions[0]), metadata) => {
             if (error) {
                 console.error(error);
             } else {
@@ -79,7 +65,34 @@ export class NotificationHandler {
             if (this.audio) {
                 this.audio.kill();
             }
-        });
+        }).bind(this));
+    }
+
+    playSound(sound) {
+        const args = ['--intf', 'dummy', '--no-loop', '--play-and-exit'];
+        if (this.data.notification.volume) {
+            args.push(`--mmdevice-volume=0.1`);
+            args.push(`--directx-volume=0.1`);
+            args.push(`--waveout-volume=0.1`);
+            args.push(`--volume=10`);
+        }
+        console.log("playing sound")
+        this.audio = player.play(this.prefixPath + sound, {
+            'C:\\Program Files\\VideoLAN\\VLC\\vlc.exe': args
+        }, ((err) => {
+            if (!this.audio.killed) {
+                setTimeout(() => {
+                    this.audio.kill();
+                    this.playSound(sound)
+                }, 500)
+            } else {
+                console.log("stoppping")
+            }
+
+            if (err) {
+                console.error(err);
+            }
+        }).bind(this));
     }
 }
 

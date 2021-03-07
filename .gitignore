@@ -4,3 +4,4 @@ creds.h
 /server/.vscode/sftp.json
 /clients/pc-receiver/smarthomereceiver.sh
 package-lock.json
+clients/pc-receiver/services/sounds/
