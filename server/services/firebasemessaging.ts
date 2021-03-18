@@ -22,7 +22,7 @@ class FireBAseMessaging {
                 }
             });
     }
-    async sendNotification(token, payload: { notification?: admin.messaging.NotificationMessagePayload, [key: string]: any }) {
+    async sendNotification(token, payload: FireBaseMessagingPayload) {
         return this.app.messaging()
             .sendToDevice(token, {
                 data: {
@@ -33,5 +33,14 @@ class FireBAseMessaging {
     }
 
 }
+
+export interface FireBaseMessagingPayload {
+    notification?: admin.messaging.NotificationMessagePayload
+
+    type?: string
+    id?: string
+}
+
+
 
 export const firebasemessageing = new FireBAseMessaging();

@@ -1,7 +1,7 @@
 import { NotificationData, SenderResponse, SoundType } from './connection-response';
 import { Sound } from './sound';
 import { autosaveable } from '../express-db-wrapper';
-import { firebasemessageing } from '../services/firebasemessaging';
+import { firebasemessageing, FireBaseMessagingPayload } from '../services/firebasemessaging';
 import ws from '../services/websocketmessaging';
 import { logKibana } from '../util/log';
 import { settable } from '../util/settable';
@@ -99,8 +99,10 @@ export class Receiver {
     }
 
     private async sendForFirebase(evaluatedData: SenderResponse<string>): Promise<number> {
+        const firebaseData = evaluatedData as FireBaseMessagingPayload
+
         console.log(`sending push notification for ${this.name}`);
-        const response = await firebasemessageing.sendNotification(this.firebaseToken, evaluatedData);
+        const response = await firebasemessageing.sendNotification(this.firebaseToken, firebaseData);
         if (response.failureCount > 0) {
             logKibana('ERROR', {
                 message: 'error sending firebase to receiver',

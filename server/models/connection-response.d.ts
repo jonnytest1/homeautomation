@@ -43,13 +43,11 @@ interface NotificationData<SoundDef = SoundType> {
     title?: string;
     sound?: SoundDef;
     body?: string;
-
-    [key: string]: unknown
 }
 
-interface SenderResponse<SoundDef = SoundType> {
+interface SenderResponse<SoundDef = SoundType, NotificationType = NotificationData<SoundDef>> {
     promise?: Delayed<SenderResponse>;
-    notification?: NotificationData<SoundDef>,
+    notification?: NotificationType,
 
     attributes?: {
         messageId?: string

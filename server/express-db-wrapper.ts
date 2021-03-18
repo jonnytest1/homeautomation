@@ -14,7 +14,7 @@ export interface ConstructorClass<T> {
 
 export function getter<T>(opts: {
     name: string,
-    condition?: string | ((obj, req) => never)
+    condition?: string | ((obj, req) => (string | number | boolean))
 }) {
     if (!opts.condition) {
         opts.condition = "TRUE = TRUE"
