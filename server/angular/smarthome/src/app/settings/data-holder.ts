@@ -1,7 +1,7 @@
-import { Injectable } from '@angular/core';
-import { Observable, Subject } from 'rxjs';
 import { SenderFe } from './interfaces';
 import { SettingsService } from './settings.service';
+import { Injectable } from '@angular/core';
+import { Observable, Subject } from 'rxjs';
 
 
 @Injectable({ providedIn: 'root' })

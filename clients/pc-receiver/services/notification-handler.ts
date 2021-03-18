@@ -1,14 +1,19 @@
+import { existsSync, promises } from 'fs';
+
 import { Websocket } from '../../../server/express-ws-type';
-import { promises, existsSync } from "fs"
 import { fetchHttps } from '../util/request';
-import { Audio, AudioPlayer } from "./playsound"
+import { Audio, AudioPlayer } from './playsound';
+
 const notifier = require('node-notifier');
 var player: AudioPlayer = require('play-sound')({
     player: 'C:\\Program Files\\VideoLAN\\VLC\\vlc.exe',
 });
+
+interface AudioRef {
+    audio: Audio
+}
 export class NotificationHandler {
 
-    audio: Audio;
     data: any;
 
     readonly prefixPath = 'D:\\Jonathan\\Projects\\node\\homeautomation\\clients\\pc-receiver\\services\\sounds\\';
@@ -19,6 +24,9 @@ export class NotificationHandler {
     }
 
     async show(ws: Websocket) {
+        const audioRef: AudioRef = {
+            audio: null
+        }
         console.log(new Date().toLocaleString(), this.data.notification.title)
         if (this.data.notification.sound && typeof this.data.notification.sound === 'string') {
             if (!existsSync(this.prefixPath + this.data.notification.sound)) {
@@ -34,7 +42,7 @@ export class NotificationHandler {
             }
 
 
-            this.playSound(this.data.notification.sound);
+            this.playSound(this.data.notification.sound, audioRef);
             this.data.notification.sound = false;
         }
 
@@ -52,6 +60,7 @@ export class NotificationHandler {
             ...this.data.notification,
             message: this.data.notification.body
         }, ((error, response: 'dismissed' | 'timeout' | (typeof actions[0]), metadata) => {
+            console.log("closing notification", audioRef);
             if (error) {
                 console.error(error);
             } else {
@@ -62,13 +71,23 @@ export class NotificationHandler {
                     console.error(e);
                 }
             }
-            if (this.audio) {
-                this.audio.kill();
+
+            if (audioRef.audio) {
+                if (!audioRef.audio.kill()) {
+                    audioRef.audio.killed = true;
+                }
+            } else if (this.data.notification.sound) {
+                console.log("audio undefined");
+                setTimeout(() => {
+                    if (audioRef.audio && !audioRef.audio.killed) {
+                        audioRef.audio.kill();
+                    }
+                }, 1000)
             }
         }).bind(this));
     }
 
-    playSound(sound) {
+    playSound(sound, audioRef: AudioRef) {
         const args = ['--intf', 'dummy', '--no-loop', '--play-and-exit'];
         if (this.data.notification.volume) {
             args.push(`--mmdevice-volume=0.1`);
@@ -77,13 +96,15 @@ export class NotificationHandler {
             args.push(`--volume=10`);
         }
         console.log("playing sound")
-        this.audio = player.play(this.prefixPath + sound, {
+        audioRef.audio = player.play(this.prefixPath + sound, {
             'C:\\Program Files\\VideoLAN\\VLC\\vlc.exe': args
         }, ((err) => {
-            if (!this.audio.killed) {
+            if (!audioRef.audio.killed) {
                 setTimeout(() => {
-                    this.audio.kill();
-                    this.playSound(sound)
+                    if (!audioRef.audio.killed) {
+                        audioRef.audio.kill();
+                        this.playSound(sound, audioRef)
+                    }
                 }, 500)
             } else {
                 console.log("stoppping")

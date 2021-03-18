@@ -1,0 +1,24 @@
+
+sleep 2h
+BLACKDETECT_NAME="/home/pi/$(date +'%Y-%m-%d').blackdetect.txt"
+#ffmpeg -f v4l2 -framerate 30 -video_size 3840x2160 -t 17:00:00 -input_format mjpeg -i /dev/video0 -preset faster -pix_fmt yuv420p -filter:v "crop=1800:1300:1100:0" "/home/pi/$(date +'%Y-%m-%d').mkv"
+
+#ffprobe -f lavfi -i "movie=/home/pi/$(date +'%Y-%m-%d').mkv,blackdetect[out0]" -show_entries tags=lavfi.black_start,lavfi.black_end -of default=nw=1 -v quiet > "$BLACKDETECT_NAME"
+
+
+#lineCt=0
+#curStart
+
+#while read p; do
+#  lineCt=$((lineCt+1))
+#  if [ "$lineCt" -eq "4" ]
+#  then
+#    lineCt=0
+#       ffmpeg -i /path/to/input.mp4 -filter_complex "[0:v]trim=start=5.42208:end=73.4067,setpts=PTS-STARTPTS[v1]; -map [v1] output.mp4
+#  fi
+#  if [[ $p == TAG:lavfi.black_end* ]]; then
+#    CUR_END="$p"
+#  elif [[ $p == TAG:lavfi.black_start* ]]; then
+#    CUR_START="$p"
+#  fi
+#done < "$BLACKDETECT_NAME"

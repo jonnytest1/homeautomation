@@ -1,6 +1,5 @@
-import { Route } from '@angular/router';
 import { OptionsComponent } from './options.component';
-import { OptionsModule } from './options.module';
+import { Route } from '@angular/router';
 
 export const routes: Array<Route> = [
     {

@@ -1,14 +1,21 @@
 import { Connection as NodeConnection } from '../../../../../models/connection';
 import { EventHistory } from '../../../../../models/event';
-import { Receiver as NodeReceiver } from '../../../../../models/receiver';
 import { Sender as NodeSender } from '../../../../../models/sender';
 import { Timer } from '../../../../../models/timer';
 import { Transformation } from '../../../../../models/transformation';
 
+
+
+type Primitives = string | number | boolean | Date;
+
+type NestedNonFunctionProperty<K> = K extends Primitives ? K : (K extends Array<unknown> ? Array<FrontendProperties<K[0]>> : FrontendProperties<K>);
+
 // eslint-disable-next-line @typescript-eslint/ban-types
-type NonFunctionPropertyNames<T> = { [K in keyof T]: T[K] extends Function ? never : K }[keyof T];
-type NonFunctionProperties<T> = Partial<Pick<T, NonFunctionPropertyNames<T>>>;
+type NonFunctionPropertyNames<T> = { [K in keyof T]: (T[K] extends Function ? (never) : K) }[keyof T];
+type FrontendProperties<T> = Partial<{ [K in NonFunctionPropertyNames<T>]: NestedNonFunctionProperty<T[K]> }>;
+
 type CustomOmit<T, K extends string> = Pick<T, Exclude<keyof T, K>>;
+
 
 export interface TimerFe extends Timer {
     color?: string
@@ -22,7 +29,7 @@ export interface DoubleClickCounter {
 export interface SenderFe extends CustomOmit<
     CustomOmit<
         CustomOmit<
-            NonFunctionProperties<NodeSender>, "connections"
+            FrontendProperties<NodeSender>, "connections"
         >, "transformation"
     >, "events">, DoubleClickCounter {
     connections: Array<ConnectionFe>
@@ -32,25 +39,21 @@ export interface SenderFe extends CustomOmit<
     events: Array<EventHistoryFe>
 }
 
-export interface EventHistoryFe extends NonFunctionProperties<EventHistory> {
-    parsedData?: unknown
+export interface EventHistoryFe extends FrontendProperties<EventHistory> {
+    parsedData?: {
+        message?: string
+    }
 }
 
-export interface TransformFe extends CustomOmit<NonFunctionProperties<Transformation>, ""> {
+export interface TransformFe extends FrontendProperties<Transformation> {
     historyCount?: number
 
 }
-export interface ConnectionFe extends CustomOmit<CustomOmit<NonFunctionProperties<NodeConnection>, "receiver">, "transformation"> {
+export interface ConnectionFe extends CustomOmit<FrontendProperties<NodeConnection>, "transformation"> {
 
-    receiver: ReceiverFe,
 
     transformation: TransformFe
 }
 
 
-export interface ReceiverFe extends NonFunctionProperties<NodeReceiver>, DoubleClickCounter {
-
-    /* id: string,
-     name: string,
-     description: string*/
-}
+export type ReceiverFe = ConnectionFe["receiver"];

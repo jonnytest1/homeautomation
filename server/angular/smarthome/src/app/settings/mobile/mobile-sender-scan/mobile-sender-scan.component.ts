@@ -1,6 +1,5 @@
-import { AfterViewInit, ChangeDetectorRef, Component, ElementRef, OnInit, ViewChild } from '@angular/core';
-import barcodeReader from 'javascript-barcode-reader'
 import { BarcodeDetector } from "./barcode";
+import { AfterViewInit, ChangeDetectorRef, Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 
 @Component({
   selector: 'app-mobile-sender-scan',

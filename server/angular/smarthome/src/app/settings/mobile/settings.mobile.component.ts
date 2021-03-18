@@ -1,8 +1,7 @@
-import { ChangeDetectorRef, Component } from '@angular/core';
-import { Data } from '@angular/router';
-import { first } from 'rxjs/operators';
 import { DataHolder } from '../data-holder';
 import { SettingsService } from '../settings.service';
+import { ChangeDetectorRef, Component } from '@angular/core';
+import { first } from 'rxjs/operators';
 
 
 @Component({

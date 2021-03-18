@@ -1,7 +1,7 @@
 import { ChangeDetectorRef, Component, EventEmitter, forwardRef, Injector, Input, OnDestroy, OnInit, Output } from '@angular/core';
 import { ControlValueAccessor, NgModel, NG_VALUE_ACCESSOR } from '@angular/forms';
 
-declare var monaco
+declare let monaco
 
 @Component({
   selector: 'app-monaco-editor',
@@ -19,7 +19,7 @@ export class MonacoEditorComponent implements OnInit, OnDestroy, ControlValueAcc
 
   onTouch;
 
-  sandbox: any;
+  sandbox;
 
   cachedText;
 
@@ -40,8 +40,8 @@ export class MonacoEditorComponent implements OnInit, OnDestroy, ControlValueAcc
   decorators = [];
 
   ast;
-  static editorArgs: { main: any; _tsWorker: any; sandboxFactory: any; };
-  previousText: any;
+  static editorArgs: { main: unknown; _tsWorker: unknown; sandboxFactory: unknown; };
+  previousText: string;
 
   constructor(private injector: Injector, private cdr: ChangeDetectorRef) {
     this.getSandBox().then(this.initializeEditor.bind(this))
@@ -61,7 +61,8 @@ export class MonacoEditorComponent implements OnInit, OnDestroy, ControlValueAcc
   }
 
   async setupRequire() {
-    (window.require as any).config({
+    const requireFnc = (window.require as any)
+    requireFnc.config({
       paths: {
         vs: 'https://typescript.azureedge.net/cdn/4.0.5/monaco/min/vs',
         sandbox: 'https://www.typescriptlang.org/js/sandbox',
@@ -69,7 +70,7 @@ export class MonacoEditorComponent implements OnInit, OnDestroy, ControlValueAcc
       ignoreDuplicateModules: ['vs/editor/editor.main'],
     });
     return new Promise<void>(resolver => {
-      (window.require as any)(['vs/editor/editor.main', 'vs/language/typescript/tsWorker', 'sandbox/index'], (
+      requireFnc(['vs/editor/editor.main', 'vs/language/typescript/tsWorker', 'sandbox/index'], (
         main, _tsWorker, sandboxFactory
       ) => {
         MonacoEditorComponent.editorArgs = { main, _tsWorker, sandboxFactory }
@@ -80,7 +81,7 @@ export class MonacoEditorComponent implements OnInit, OnDestroy, ControlValueAcc
   }
 
   private async initializeEditor() {
-    const { main, _tsWorker, sandboxFactory } = MonacoEditorComponent.editorArgs;
+    const { main, sandboxFactory } = MonacoEditorComponent.editorArgs;
     document.getElementById('loader').parentNode.removeChild(document.getElementById('loader'));
     const models = monaco.editor.getModels();
 
@@ -98,7 +99,7 @@ export class MonacoEditorComponent implements OnInit, OnDestroy, ControlValueAcc
     }
   }
 
-  private createEditor(sandboxFactory: any, main: any) {
+  private createEditor(sandboxFactory, main) {
     this.createTheme();
     this.setupGlobalTypes();
 
@@ -119,7 +120,7 @@ export class MonacoEditorComponent implements OnInit, OnDestroy, ControlValueAcc
     });
     this.sandbox.editor.onDidChangeModelDecorations(async () => {
       const model = this.sandbox.getModel();
-      let errors = model.getAllDecorations()
+      const errors = model.getAllDecorations()
         .filter(dec => dec.options.className == "squiggly-error");
       const text = this.sandbox.getModel().getValue();
       this.saveCode(errors, text);
@@ -135,7 +136,7 @@ export class MonacoEditorComponent implements OnInit, OnDestroy, ControlValueAcc
     this.sandbox.editor.focus();
   }
 
-  private async saveCode(errors: any, text: any) {
+  private async saveCode(errors, text: string) {
     if (!errors.length) {
       const js = await this.sandbox.getRunnableJS();
       if (text !== `({\n\n}) as TransformationResponse`) {
@@ -210,7 +211,7 @@ export class MonacoEditorComponent implements OnInit, OnDestroy, ControlValueAcc
       }
     });
   }
-  writeValue(obj: any): void {
+  writeValue(obj: string): void {
     if (!this.sandbox) {
       this.cachedText = obj;
     } else {
@@ -224,10 +225,10 @@ export class MonacoEditorComponent implements OnInit, OnDestroy, ControlValueAcc
 
     }
   }
-  registerOnChange(fn: any): void {
+  registerOnChange(fn): void {
     this.onChange = fn;
   }
-  registerOnTouched(fn: any): void {
+  registerOnTouched(fn): void {
     this.onTouch = fn;
   }
   setDisabledState?(isDisabled: boolean): void {

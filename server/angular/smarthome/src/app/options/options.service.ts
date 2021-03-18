@@ -1,11 +1,10 @@
+import { Sound } from './interface ';
+import { environment } from '../../environments/environment';
+import { AbstractHttpService } from '../utils/http-service';
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
-import { environment } from '../../environments/environment';
-import { AbstractHttpService } from '../utils/http-service';
-import { Sound } from './interface ';
 
 @Injectable()
 export class OptionsService extends AbstractHttpService {

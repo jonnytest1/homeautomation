@@ -1,8 +1,7 @@
-import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
-import { DomSanitizer } from '@angular/platform-browser';
-import { fileURLToPath } from 'url';
 import { Sound } from './interface ';
 import { OptionsService } from './options.service';
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import { DomSanitizer } from '@angular/platform-browser';
 @Component({
   selector: 'app-options',
   templateUrl: './options.component.html',
@@ -36,7 +35,7 @@ export class OptionsComponent implements OnInit {
     })
   }
   onRemove(file) {
-
+    //
   }
 
   addFile() {
@@ -90,7 +89,7 @@ export class OptionsComponent implements OnInit {
 
   private async readBytes(soundRef: Partial<Sound>, fl: Blob): Promise<void> {
     return new Promise(res => {
-      var r = new FileReader();
+      const r = new FileReader();
       r.onload = () => {
         const result = new Uint8Array(r.result as ArrayBuffer);
         soundRef.bytes = result.join(',');

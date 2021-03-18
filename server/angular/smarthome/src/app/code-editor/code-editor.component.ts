@@ -1,11 +1,10 @@
-import { NgForOf } from '@angular/common';
-import { ChangeDetectorRef, Component, ElementRef, forwardRef, Host, Inject, Injector, Input, OnInit, Optional, Self, ViewChild } from '@angular/core';
-import { ControlValueAccessor, FormControl, NgControl, NgForm, NgModel, NG_VALUE_ACCESSOR } from '@angular/forms';
-import * as CodeMirror from 'codemirror';
 import { CodeEditor } from './code-editor';
+import { ChangeDetectorRef, Component, ElementRef, forwardRef, Injector, Input, OnInit, ViewChild } from '@angular/core';
+import { ControlValueAccessor, NgModel, NG_VALUE_ACCESSOR } from '@angular/forms';
+import * as CodeMirror from 'codemirror';
 
-const css = require('codemirror/lib/codemirror.css');
 const customcss = require('./custom.css');
+const css = require('codemirror/lib/codemirror.css');
 const hintCss = require('codemirror/addon/hint/show-hint.css');
 
 const csss = [customcss, hintCss];
@@ -29,7 +28,7 @@ export class CodeEditorComponent implements OnInit, ControlValueAccessor {
 
 
   @Input()
-  codetitle: String;
+  codetitle: string;
 
   onChange: any;
 
@@ -44,17 +43,17 @@ export class CodeEditorComponent implements OnInit, ControlValueAccessor {
 
   recentlySaved = false;
   constructor(private injector: Injector, private cdr: ChangeDetectorRef) { }
-  writeValue(obj: any): void {
+  writeValue(obj: string): void {
     if (!this.codeMirror) {
       this.cachedValue = obj;
     } else {
       this.codeMirror.setValue(this.toDisplayCode(obj));
     }
   }
-  registerOnChange(fn: any): void {
+  registerOnChange(fn): void {
     this.onChange = fn;
   }
-  registerOnTouched(fn: any): void {
+  registerOnTouched(fn): void {
     this.onTouched = fn;
   }
   setDisabledState?(isDisabled: boolean): void {
@@ -208,7 +207,7 @@ export class CodeEditorComponent implements OnInit, ControlValueAccessor {
   }
 
   private setError(errorKey: string, errors: any): boolean {
-    let foundLine = false;
+    const foundLine = false;
     try {
       const pos = JSON.parse(errorKey);
       const token = this.codeMirror.getTokenAt({ line: pos.row - 1, ch: pos.character })

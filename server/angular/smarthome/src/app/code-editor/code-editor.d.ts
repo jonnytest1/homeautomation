@@ -34,7 +34,7 @@ interface Token {
 
     state: {
         cc: Array<Function>
-        context: any,
+        context,
         /**
          * offset from left
          */
@@ -53,7 +53,7 @@ interface SelecitonPos extends MArkerPos {
 }
 
 interface MArkOptions {
-    attributes: any
+    attributes
     css: string
 }
 interface MArkerPos {
@@ -63,6 +63,6 @@ interface MArkerPos {
 }
 
 interface LineElement {
-    text: String,
+    text: string,
     lineNo(): number
 }

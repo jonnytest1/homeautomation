@@ -1,8 +1,8 @@
+import { EventHistoryFe, SenderFe } from '../../interfaces';
 import { AfterViewInit, Component, ElementRef, Inject, OnInit, ViewChild } from '@angular/core';
 import { MAT_DIALOG_DATA } from '@angular/material/dialog';
 
 import { GoogleCharts } from 'google-charts';
-import { EventHistoryFe, SenderFe } from '../../interfaces';
 @Component({
   selector: 'app-events',
   templateUrl: './events.component.html',
@@ -12,13 +12,14 @@ export class EventsComponent implements OnInit, AfterViewInit {
 
   @ViewChild('chartRef')
   chartRef: ElementRef<HTMLDivElement>;
-  chart: any;
+  chart;
 
 
 
   constructor(@Inject(MAT_DIALOG_DATA) public sender: SenderFe) { }
 
   ngOnInit() {
+    //
   }
   ngAfterViewInit(): void {
     GoogleCharts.load(() => {
@@ -39,8 +40,7 @@ export class EventsComponent implements OnInit, AfterViewInit {
   }
 
   prepareData() {
-    const dataTable: Array<Array<any>> = [['day', 'mins']];
-    var data = new GoogleCharts.api.visualization.DataTable();
+    const data = new GoogleCharts.api.visualization.DataTable();
     data.addColumn('date', 'Emails Received');
     data.addColumn('timeofday', 'Time of Day');
     data.addColumn({
@@ -82,9 +82,9 @@ export class EventsComponent implements OnInit, AfterViewInit {
       /// mins.setMinutes(date.getMinutes())
       // mins.setSeconds(date.getSeconds())
       const mins = [date.getHours(), date.getMinutes(), date.getSeconds()]
-      let messgageEl = this.getMessageElement(ev);
+      const messgageEl = this.getMessageElement(ev);
 
-      let msg = `
+      const msg = `
         <ul class="google-visualization-tooltip-item-list">
           <li class="google-visualization-tooltip-item">
             <span style="font-family:Arial;font-size:15px;color:#000000;opacity:1;margin:0;font-style:none;text-decoration:none;font-weight:none;">
@@ -114,7 +114,7 @@ export class EventsComponent implements OnInit, AfterViewInit {
       }
 
 
-      let messgageEl = `
+      const messgageEl = `
         <li class="google-visualization-tooltip-item">
           <table style="margin-left: -4px;">
             <tr>

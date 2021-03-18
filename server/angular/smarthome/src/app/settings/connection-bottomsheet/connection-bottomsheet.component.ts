@@ -1,9 +1,9 @@
+import { ConnectionFe, SenderFe } from '../interfaces';
+import { SettingsService } from '../settings.service';
 import { Component, Inject, OnInit } from '@angular/core';
 import { MAT_SNACK_BAR_DATA, MatSnackBarRef } from '@angular/material/snack-bar';
 import { Observable } from 'rxjs';
 
-import { ConnectionFe, SenderFe } from '../interfaces';
-import { SettingsService } from '../settings.service';
 
 @Component({
   selector: 'app-connection-bottomsheet',
@@ -15,7 +15,7 @@ export class ConnectionBottomsheetComponent implements OnInit {
   title$ = new Observable<string>();
 
   constructor(@Inject(MAT_SNACK_BAR_DATA) public data: { con: ConnectionFe, sender: SenderFe },
-    private snackbarRef: MatSnackBarRef<any>, private settingsService: SettingsService) {
+    private snackbarRef: MatSnackBarRef<unknown>, private settingsService: SettingsService) {
     this.title$ = this.settingsService.getTitleKeys(this.data.con.id);
   }
 
@@ -29,6 +29,7 @@ export class ConnectionBottomsheetComponent implements OnInit {
 
 
   ngOnInit() {
+    //
   }
 
 }

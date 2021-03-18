@@ -95,17 +95,8 @@ void sendoffcode() {
 
 
 void loop() {
-   if (ELECHOUSE_cc1101.CheckReceiveFlag())
-    {
-        size = ELECHOUSE_cc1101.ReceiveData(RX_buffer);
-        for (i = 0; i < i; i++)
-        {
-            received_number = RX_buffer[i];
-            Serial.println(received_number);
-        }
-        ELECHOUSE_cc1101.SetReceive();
-    }
- /* Serial.println("send off");
+ 
+  Serial.println("send off");
    delay(100);
   sendoffcode();
   Serial.println("sent");
@@ -114,7 +105,7 @@ delay(1000);
     delay(100);
      sendoncode();
       Serial.println("sent");
-  delay(1000);*/
+  delay(1000);
   
   /*i++;
   delay(200);

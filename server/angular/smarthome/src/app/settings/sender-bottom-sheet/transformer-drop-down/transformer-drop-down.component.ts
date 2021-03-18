@@ -1,10 +1,7 @@
-import { ChangeDetectorRef, Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
-import { ControlValueAccessor } from '@angular/forms';
-import { ActivatedRoute, Router } from '@angular/router';
-import { analytics } from 'firebase';
-import { Observable } from 'rxjs';
 import { SenderFe, TransformFe } from '../../interfaces';
 import { SettingsService } from '../../settings.service';
+import { ChangeDetectorRef, Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
 
 @Component({
     selector: 'app-transformer-drop-down',
@@ -31,7 +28,6 @@ export class TransformerDropDownComponent implements OnInit {
     }
 
     ngOnInit() {
-        const t: any = null;
         this.transformerChange.subscribe((event: TransformFe) => {
             this.router.navigate([], {
                 queryParams: {
@@ -52,7 +48,7 @@ export class TransformerDropDownComponent implements OnInit {
             this.cdr.detectChanges();
         });
     }
-    concat(ar1, ar2): Array<any> {
+    concat(ar1: Array<string>, ar2: Array<TransformFe>): Array<string | TransformFe> {
         return [...(ar1 || []), ...ar2];
     }
 

@@ -1,6 +1,6 @@
 export interface Audio {
     killed: boolean
-    kill(): void
+    kill(): boolean
 }
 
 

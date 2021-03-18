@@ -1,13 +1,12 @@
-import { ChangeDetectorRef, Component, Host, Inject, OnInit } from '@angular/core';
-import { MatDialog } from '@angular/material/dialog';
-import { MAT_SNACK_BAR_DATA, MatSnackBarRef } from '@angular/material/snack-bar';
-import { Observable } from 'rxjs';
-import { SenderFe, TransformFe } from '../interfaces';
-import { SettingsComponent } from '../settings.component';
-import { SettingsService } from '../settings.service';
 import { BatteryComponent } from './battery/battery.component';
 import { EventsComponent } from './events/events.component';
 import { TimersComponent } from './timers/timers.component';
+import { SenderFe, TransformFe } from '../interfaces';
+import { SettingsService } from '../settings.service';
+import { ChangeDetectorRef, Component, Inject, OnInit } from '@angular/core';
+import { MatDialog } from '@angular/material/dialog';
+import { MAT_SNACK_BAR_DATA, MatSnackBarRef } from '@angular/material/snack-bar';
+import { Observable } from 'rxjs';
 
 @Component({
 	selector: 'app-sender-bottom-sheet',
@@ -21,7 +20,7 @@ export class SenderBottomSheetComponent implements OnInit {
 	title$: Observable<string>;
 	constructor(@Inject(MAT_SNACK_BAR_DATA) public data: SenderFe,
 		private service: SettingsService,
-		private snackbarRef: MatSnackBarRef<any>, private dialog: MatDialog,
+		private snackbarRef: MatSnackBarRef<unknown>, private dialog: MatDialog,
 		private cdr: ChangeDetectorRef) {
 
 
@@ -35,6 +34,7 @@ export class SenderBottomSheetComponent implements OnInit {
 	}
 
 	ngOnInit() {
+		//
 	}
 
 
@@ -63,7 +63,7 @@ export class SenderBottomSheetComponent implements OnInit {
 		this.snackbarRef.dismissWithAction()
 	}
 	async send() {
-		const dataObj: { [key: string]: any } = {
+		const dataObj: { [key: string]: unknown } = {
 			deviceKey: this.data.deviceKey
 		};
 		if (!this.isManual()) {

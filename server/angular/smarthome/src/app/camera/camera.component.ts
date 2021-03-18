@@ -16,7 +16,9 @@ export class CameraComponent implements AfterViewInit, OnInit, OnDestroy {
 
 
   player: flv.Player
-  constructor() { }
+  constructor() {
+    //
+  }
 
 
   ngOnInit() {

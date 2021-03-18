@@ -13,19 +13,16 @@
 // D2               GD0
 */
 
-#include "transmitter.h"
-int received_number = 0;
+#include <RCSwitch.h>
+
+RCSwitch mySwitch = RCSwitch();
 
 void setup()
 {
     Serial.begin(9600);
-
-    Serial.println("init");
-    ELECHOUSE_cc1101.Init();
-    ELECHOUSE_cc1101.SetReceive();
-      Serial.println("Setting up the registers.");
+  mySwitch.enableReceive(0);  // Receiver on interrupt 0 => that is pin #2
   //cc1101_SetupRegisters();
-    ELECHOUSE_cc1101.SpiWriteReg(CC1101_IOCFG0, 0x06);   // GDO0 Output Pin Configuration
+ /*   ELECHOUSE_cc1101.SpiWriteReg(CC1101_IOCFG0, 0x06);   // GDO0 Output Pin Configuration
   ELECHOUSE_cc1101.SpiWriteReg(CC1101_FIFOTHR, 0x47);  // RX FIFO and TX FIFO Thresholds
   ELECHOUSE_cc1101.SpiWriteReg(CC1101_PKTLEN, 0x0D);   // Packet Length
   ELECHOUSE_cc1101.SpiWriteReg(CC1101_PKTCTRL0, 0x00); // Packet Automation Control
@@ -49,25 +46,25 @@ void setup()
   ELECHOUSE_cc1101.SpiWriteReg(CC1101_FSCAL0, 0x1F);   // Frequency Synthesizer Calibration
   ELECHOUSE_cc1101.SpiWriteReg(CC1101_TEST2, 0x81);    // Various Test Settings
   ELECHOUSE_cc1101.SpiWriteReg(CC1101_TEST1, 0x35);    // Various Test Settings
-  ELECHOUSE_cc1101.SpiWriteReg(CC1101_TEST0, 0x09);    // Various Test Settings
+  ELECHOUSE_cc1101.SpiWriteReg(CC1101_TEST0, 0x09);    // Various Test Settings*/
    Serial.println("set up the registers.");
 }
 
-byte RX_buffer[11] = {0};
+byte buffer[100] = {0};
 byte size, i, flag;
 
 void loop()
 {
-    Serial.println("check receive");
-    if (ELECHOUSE_cc1101.CheckReceiveFlag())
-    {
-       Serial.println("got receive");
-        size = ELECHOUSE_cc1101.ReceiveData(RX_buffer);
-        for (i = 0; i < i; i++)
-        {
-            received_number = RX_buffer[i];
-            Serial.println(received_number);
-        }
-        ELECHOUSE_cc1101.SetReceive();
-    }
+    if (mySwitch.available()) {
+    
+    Serial.print("Received ");
+    Serial.print( mySwitch.getReceivedValue() );
+    Serial.print(" / ");
+    Serial.print( mySwitch.getReceivedBitlength() );
+    Serial.print("bit ");
+    Serial.print("Protocol: ");
+    Serial.println( mySwitch.getReceivedProtocol() );
+
+    mySwitch.resetAvailable();
+  }
 }

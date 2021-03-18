@@ -1,6 +1,6 @@
+import { TransformFe } from '../interfaces';
 import { AfterViewInit, Component, Input, OnInit, ViewChild } from '@angular/core';
 import { NgModel } from '@angular/forms';
-import { TransformFe } from '../interfaces';
 
 @Component({
   selector: 'app-transformation-editor',
@@ -18,13 +18,16 @@ export class TransformationEditorComponent implements OnInit, AfterViewInit {
   @ViewChild("jsTransform", { read: NgModel })
   jsTransform: NgModel;
 
-  constructor() { }
+  constructor() {
+    //
+  }
   ngAfterViewInit(): void {
     this.jsTransform.control.markAsTouched();
     this.jsTransform.control.markAsDirty()
   }
 
   ngOnInit() {
+    //
   }
 
 }

@@ -1,9 +1,9 @@
+import { DataHolder } from '../../data-holder';
+import { SenderFe, TransformFe } from '../../interfaces';
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { DataHolder } from '../../data-holder';
-import { SenderFe, TransformFe } from '../../interfaces';
 
 @Component({
   selector: 'app-mobile-sender',
@@ -25,7 +25,7 @@ export class MobileSenderComponent implements OnInit {
   }
 
   ngOnInit() {
-
+    //
   }
 
 

@@ -51,10 +51,12 @@ On Oct 22, 2016 10:07 PM, "Simon Monk" <srmonk@gmail.com> wrote:
 #define F1_915  0xB1        
 #define F0_915  0x3B       
 // Carrier frequency = 433 MHz 433.9375
+//#define F2_433  0x10       
+//#define F1_433  0xAB        
+//#define F0_433  0x6F        
 #define F2_433  0x10       
-#define F1_433  0xAB        
-#define F0_433  0x6F        
-
+#define F1_433  0xA7        
+#define F0_433  0x62        
 
 
 

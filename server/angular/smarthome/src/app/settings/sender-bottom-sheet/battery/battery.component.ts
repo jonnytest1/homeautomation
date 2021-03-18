@@ -1,7 +1,7 @@
+import { SenderFe } from '../../interfaces';
 import { AfterViewInit, Component, ElementRef, Inject, OnInit, ViewChild } from '@angular/core';
 import { MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { GoogleCharts } from 'google-charts';
-import { SenderFe } from '../../interfaces';
 @Component({
   selector: 'app-battery',
   templateUrl: './battery.component.html',
@@ -11,14 +11,14 @@ export class BatteryComponent implements OnInit, AfterViewInit {
 
   @ViewChild('chartRef')
   chartRef: ElementRef<HTMLDivElement>;
-  chart: any;
+  chart;
 
   smallest: number = Number.MAX_VALUE;
 
   constructor(@Inject(MAT_DIALOG_DATA) public sender: SenderFe) { }
 
   ngOnInit() {
-
+    //
   }
 
 
@@ -43,7 +43,7 @@ export class BatteryComponent implements OnInit, AfterViewInit {
 
 
   prepareData() {
-    const dataTable: Array<Array<any>> = [['time', 'level', 'average', 'too low']];
+    const dataTable: Array<Array<string>> = [['time', 'level', 'average', 'too low']];
     this.smallest = Number.MAX_VALUE;
     const hasErrorDisplay = false;
     this.sender.batteryEntries

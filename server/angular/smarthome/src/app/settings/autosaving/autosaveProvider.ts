@@ -14,5 +14,7 @@ export class AutosavingDirectiveProvider {
     @Input()
     public resource: string;
 
-    constructor() { }
+    constructor() {
+        //
+    }
 }

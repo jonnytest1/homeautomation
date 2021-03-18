@@ -24,7 +24,7 @@
             ],
             "restart": true,
         },
-        {
+       /*  {
             "type": "node",
             "request": "launch",
             "name": "prod launch local receiver",
@@ -43,6 +43,12 @@
                 "${workspaceFolder}\\index.ts"
             ],
             "restart": true,
-        }
+        }, */
+        {
+            "type": "node",
+            "request": "attach",
+            "name": "Attach to prod receiver",
+           "processId": "${command:PickProcess}"
+        },
     ]
 }

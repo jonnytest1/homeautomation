@@ -1,8 +1,8 @@
+import { SenderFe, TimerFe } from '../../interfaces';
+import { SettingsService } from '../../settings.service';
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Inject, OnDestroy, OnInit } from '@angular/core';
 import { MAT_DIALOG_DATA } from '@angular/material/dialog';
 
-import { SenderFe, TimerFe } from '../../interfaces';
-import { SettingsService } from '../../settings.service';
 
 @Component({
   selector: 'app-timers',
@@ -14,7 +14,7 @@ export class TimersComponent implements OnInit, OnDestroy {
 
   timers: Array<TimerFe>
 
-  rowDef: string = "2:2"
+  rowDef = "2:2"
 
   cols;
 
@@ -109,15 +109,15 @@ export class TimersComponent implements OnInit, OnDestroy {
     return Math.round((timer.endtimestamp - Date.now()) * 100) / 100;
   }
   ngOnInit() {
+    //
   }
 
 }
 
 function msToTime(duration: number) {
-  var milliseconds = ((duration % 1000) / 100);
-  let seconds = Math.floor((duration / 1000) % 60);
-  let minutes = Math.floor((duration / (1000 * 60)) % 60);
-  let hours = Math.floor((duration / (1000 * 60 * 60)) % 24);
+  const seconds = Math.floor((duration / 1000) % 60);
+  const minutes = Math.floor((duration / (1000 * 60)) % 60);
+  const hours = Math.floor((duration / (1000 * 60 * 60)) % 24);
 
   const strhours = (hours < 10) ? "0" + hours : hours;
   const strminutes = (minutes < 10) ? "0" + minutes : minutes;

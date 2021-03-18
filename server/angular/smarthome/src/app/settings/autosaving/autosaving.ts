@@ -1,7 +1,7 @@
-import { HttpClient } from '@angular/common/http';
-import { Directive, ElementRef, Host, HostBinding, Inject, InjectionToken, Input, OnInit, Optional, Self, TemplateRef } from '@angular/core';
-import { ControlValueAccessor, NgModel, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { AutosavingDirectiveProvider } from './autosaveProvider';
+import { HttpClient } from '@angular/common/http';
+import { Directive, ElementRef, Inject, InjectionToken, Input, OnInit, Optional, Self } from '@angular/core';
+import { ControlValueAccessor, NgModel, NG_VALUE_ACCESSOR } from '@angular/forms';
 export const ROOT_AUTOSAVE_PATH = new InjectionToken<string>('AUTO_SAVE_PATH');
 @Directive({
   selector: '[autosaving]',
@@ -15,7 +15,7 @@ export class AutosavingDirective implements OnInit {
   dataRef: string | number;
 
   @Input()
-  ngModel: any;
+  ngModel;
 
   @Input()
   name: string;
@@ -115,7 +115,7 @@ export class AutosavingDirective implements OnInit {
 
 
     ngModelRef.valueChanges.subscribe(newValue => {
-
+      //
 
 
     });
