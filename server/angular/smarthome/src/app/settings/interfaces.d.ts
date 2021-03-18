@@ -1,5 +1,3 @@
-import { Connection as NodeConnection } from '../../../../../models/connection';
-import { EventHistory } from '../../../../../models/event';
 import { Sender as NodeSender } from '../../../../../models/sender';
 import { Timer } from '../../../../../models/timer';
 import { Transformation } from '../../../../../models/transformation';
@@ -17,7 +15,20 @@ type FrontendProperties<T> = Partial<{ [K in NonFunctionPropertyNames<T>]: Neste
 type CustomOmit<T, K extends string> = Pick<T, Exclude<keyof T, K>>;
 
 
-export interface TimerFe extends Timer {
+type NestedWith<K, Key, Value> = K extends Primitives ? K : (K extends Array<unknown> ? Array<With<K[0], Key, Value>> : With<K, Key, Value>);
+type EverythingExceptKey<T, Key, Value> = {
+    [K in Exclude<keyof T, Key>]: NestedWith<T[K], Key, Value>;
+};
+
+type ValueIfKeyExists<T, Key, Value> = {
+    [K in EqualsKeyPropertyNamesList<T, Key>]: Value;
+};
+
+type With<T, Key, Value> = Partial<ValueIfKeyExists<T, Key, Value> & EverythingExceptKey<T, Key, Value>>
+type EqualsKeyPropertyNamesList<T, Key> = { [K in keyof T]: (K extends Key ? K : never) }[keyof T];
+
+
+export interface TimerFe extends FrontendProperties<Timer> {
     color?: string
 
     parsedData?
@@ -26,20 +37,16 @@ export interface TimerFe extends Timer {
 export interface DoubleClickCounter {
     lastClick?: number
 }
-export interface SenderFe extends CustomOmit<
-    CustomOmit<
-        CustomOmit<
-            FrontendProperties<NodeSender>, "connections"
-        >, "transformation"
-    >, "events">, DoubleClickCounter {
-    connections: Array<ConnectionFe>
 
+type SenderWithConnectionTransformation = CustomOmit<With<FrontendProperties<NodeSender>, "transformation", TransformFe>, "transformation">
+
+export interface SenderFe extends SenderWithConnectionTransformation, DoubleClickCounter {
     transformation: Array<TransformFe>
-
-    events: Array<EventHistoryFe>
 }
 
-export interface EventHistoryFe extends FrontendProperties<EventHistory> {
+
+
+export type EventHistoryFe = SenderFe["events"][0] & {
     parsedData?: {
         message?: string
     }
@@ -49,11 +56,7 @@ export interface TransformFe extends FrontendProperties<Transformation> {
     historyCount?: number
 
 }
-export interface ConnectionFe extends CustomOmit<FrontendProperties<NodeConnection>, "transformation"> {
-
-
-    transformation: TransformFe
-}
+export type ConnectionFe = SenderFe["connections"][0] //  With<FrontendProperties<NodeConnection>, "transformation", TransformFe>
 
 
 export type ReceiverFe = ConnectionFe["receiver"];
