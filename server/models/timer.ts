@@ -1,9 +1,26 @@
-import { column, primary, table } from 'hibernatets';
+import { Delayed, SenderResponse } from './connection-response';
+import { column, primary, save, table } from 'hibernatets';
+import { getId } from 'hibernatets/utils';
+
 
 @table()
 export class Timer {
 
-    constructor(options?: { startTimestamp: number, endtimestamp: number, args: Array<Object>, className: string, classId: number, data?}) {
+    static start<U>(thisArg: U, fncName: keyof U, timerData: Delayed<SenderResponse>, ...args) {
+        const id = getId(thisArg)
+        const className = thisArg.constructor.name;
+        const timer = new Timer({
+            startTimestamp: Date.now(),
+            endtimestamp: Date.now() + timerData.time,
+            args: [fncName, timerData.nestedObject, ...args],
+            classId: id,
+            className: className,
+            data: timerData.sentData
+        })
+        save(timer);
+
+    }
+    constructor(options?: { startTimestamp: number, endtimestamp: number, args: Array<unknown>, className: string, classId: number, data?}) {
         if (options) {
             this.startTimestamp = options.startTimestamp
             this.endtimestamp = options.endtimestamp
@@ -53,5 +70,6 @@ export class Timer {
         size: 'large'
     })
     arguments: string
+
 
 }

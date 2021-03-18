@@ -1,9 +1,10 @@
-import { load, queries, remove, save } from 'hibernatets';
-import { getDBConfig } from 'hibernatets/utils';
-import { HttpRequest, resources } from "./express-wrapper"
+
+import { HttpRequest, resources } from './express-wrapper';
 import { ResponseCodeError } from './util/express-util.ts/response-code-error';
 import { logKibana } from './util/log';
 import { assign } from './util/settable';
+import { getDBConfig } from 'hibernatets/utils';
+import { load, queries, remove, save } from 'hibernatets';
 
 
 export interface ConstructorClass<T> {
@@ -13,7 +14,7 @@ export interface ConstructorClass<T> {
 
 export function getter<T>(opts: {
     name: string,
-    condition?: string | Function
+    condition?: string | ((obj, req) => never)
 }) {
     if (!opts.condition) {
         opts.condition = "TRUE = TRUE"
@@ -27,18 +28,18 @@ export function getter<T>(opts: {
             type: "get",
             target: target,
             callback: async (req: HttpRequest, res) => {
-                const params = []
-                let condition = opts.condition;
+                let condition: (obj: T) => unknown = opts.condition as never;
                 if (opts.condition == "id") {
                     condition = (o) => o[getDBConfig(target).modelPrimary] = req.params[opts.name]
                 }
                 if (opts.condition && typeof opts.condition !== "string") {
-                    const condtionFnc = opts.condition as Function;
+                    const condtionFnc = opts.condition;
                     condition = (obj) => condtionFnc(obj, req)
                 }
-                const response = await load<any>(target, condition as any);
+                const response = await load(target, condition);
                 if (!response || response.length == 0) {
                     res.status(404).send()
+                    return;
                 }
                 res.send(response);
 
@@ -102,9 +103,9 @@ export function autosaveable(target) {
 
 export async function loadOne<T>(
     findClass: ConstructorClass<T>,
-    primaryKEyOrFilter: any,
-    params: any,
-    opts: any = {}): Promise<T> {
+    primaryKEyOrFilter,
+    params: Array<string | number> | string,
+    opts = {}): Promise<T> {
     const obj = await load(findClass, primaryKEyOrFilter, params, { ...opts, first: true })
     if (!obj) {
         logKibana("DEBUG", `${primaryKEyOrFilter}`)

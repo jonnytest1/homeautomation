@@ -1,5 +1,3 @@
-import { load, queries, save } from 'hibernatets';
-import { DataBaseBase } from 'hibernatets/mariadb-base';
 
 import { loadOne } from '../express-db-wrapper';
 import { GET, HttpRequest, HttpResponse, Path, POST } from '../express-wrapper';
@@ -13,6 +11,8 @@ import { ResponseCodeError } from '../util/express-util.ts/response-code-error';
 import { logKibana } from '../util/log';
 import { assign } from '../util/settable';
 import { TscCompiler } from '../util/tsc-compiler';
+import { DataBaseBase } from 'hibernatets/mariadb-base';
+import { load, queries, save } from 'hibernatets';
 
 @Path('sender')
 export class SenderResource {
@@ -64,7 +64,7 @@ export class SenderResource {
         path: "eventkeys"
     })
     async getEventKeys(req: HttpRequest, res) {
-        const eventKEys = await new DataBaseBase().selectQuery<any>(
+        const eventKEys = await new DataBaseBase().selectQuery<{ evkey: string }>(
             `SELECT DISTINCT SUBSTRING_INDEX(SUBSTRING_INDEX(\`data\`,'message":"',-1),'"',1) as evkey
             FROM eventhistory 
             WHERE SENDER = ?`, [req.query.id])
@@ -85,7 +85,7 @@ export class SenderResource {
                 .send('missing deviceKey');
             return;
         }
-        let existingSender = await load(Sender, s => s.deviceKey = req.body.deviceKey, [], { first: true });
+        const existingSender = await load(Sender, s => s.deviceKey = req.body.deviceKey, [], { first: true });
         if (existingSender) {
             if (req.body.a_read1) {
                 const batteryLevel = new BatteryLevel(req.body.a_read1, req.body.a_read2, req.body.a_read3);

@@ -1,11 +1,15 @@
-import { column, mapping, Mappings, primary, table } from 'hibernatets';
 
-import { autosaveable } from '../express-db-wrapper';
-import { SenderResponse, TransformationResponse } from './connection-response';
+import { ConnectionResponse, TransformationRes } from './connection-response';
 import { Receiver } from './receiver';
+import { Timer } from './timer';
 import { Transformation } from './transformation';
 import { Transformer } from './transformer';
+import { autosaveable } from '../express-db-wrapper';
+import { column, mapping, Mappings, primary, table } from 'hibernatets';
 
+
+const defaultTransformation = new Transformation()
+defaultTransformation.transformation = "false"
 
 @autosaveable
 @table()
@@ -30,25 +34,29 @@ export class Connection extends Transformer {
         }
     }
 
-    async execute(data: any): Promise<TransformationResponse> {
-        const dataCp = { ...data };
+    async execute(data, initialRequest: boolean, usedTransformation?: Transformation): Promise<TransformationRes> {
+        const dataCp = { ...data, usedTransformation: usedTransformation };
         delete dataCp.promise;
-
-        const newData = await this.transform(dataCp, this.transformation);
+        let transformation = defaultTransformation;
+        if (!initialRequest || (this.transformation && this.transformation.transformation)) {
+            transformation = this.transformation;
+        }
+        const newData: ConnectionResponse | false = await this.transform(dataCp, transformation);
         if (newData === false) {
-            return;
+            return {};
         }
         if (newData.promise) {
-            newData.promise.then(this, "sendToReceiver");
+            Timer.start(this, "sendToReceiver", newData.promise);
             return newData;
         }
         return {
-            error: await this.receiver.send(newData)
+            error: await this.sendToReceiver(newData, initialRequest)
         };
     }
 
-    sendToReceiver(pData: SenderResponse) {
-        this.receiver.send(pData)
+    async sendToReceiver(pData: ConnectionResponse, initialRequest = false) {
+        if (initialRequest == pData.withRequest)
+            return this.receiver.send(pData)
     }
 
     getContext(data) {

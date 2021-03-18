@@ -1,12 +1,13 @@
-import { HttpClient, HttpClientModule } from '@angular/common/http';
-import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
-import { map, share, shareReplay } from 'rxjs/operators';
+import { ConnectionFe, ReceiverFe, SenderFe, TimerFe, TransformFe } from './interfaces';
 import { environment } from '../../environments/environment';
-import { Connection, Receiver, SenderFe, Timer, TransformFe } from './interfaces';
-import { v4 as uuid } from "uuid"
 import { AbstractHttpService } from '../utils/http-service';
+import { HttpClient } from '@angular/common/http';
+import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
+import { Observable } from 'rxjs';
+import { map, tap } from 'rxjs/operators';
+import { v4 as uuid } from 'uuid';
+
 
 @Injectable({ providedIn: 'root' })
 export class SettingsService extends AbstractHttpService {
@@ -16,7 +17,7 @@ export class SettingsService extends AbstractHttpService {
     }
     addConnection(deviceKey: string, receiverId: number) {
 
-        return this.post<Connection>(`${environment.prefixPath}rest/connection`, {
+        return this.post<ConnectionFe>(`${environment.prefixPath}rest/connection`, {
             senderId: deviceKey,
             receiverId: receiverId
         })
@@ -39,7 +40,7 @@ export class SettingsService extends AbstractHttpService {
 
 
     getTimers(id: number) {
-        return this.get<Array<Timer>>(`${environment.prefixPath}rest/sender/${id}/timers`)
+        return this.get<Array<TimerFe>>(`${environment.prefixPath}rest/sender/${id}/timers`)
     }
 
 
@@ -56,12 +57,25 @@ export class SettingsService extends AbstractHttpService {
         return this.get<Array<SenderFe>>(environment.prefixPath + 'rest/sender').pipe(
             map(senders =>
                 senders.sort((s1, s2) => s1.id > s2.id ? 1 : -1)
-            )
+            ),
+            tap(senders => {
+                const def = senders
+                    .filter(s => s.transformation.length)
+                    .map(s => s.transformation[0].definitionFile)[0]
+
+                senders.forEach(s => {
+                    s.connections.
+                        filter(con => con.transformation)
+                        .forEach(c => {
+                            c.transformation.definitionFile = def;
+                        })
+                })
+            })
         );
     }
 
     getReceivers() {
-        return this.get<Array<Receiver>>(environment.prefixPath + 'rest/receiver');
+        return this.get<Array<ReceiverFe>>(environment.prefixPath + 'rest/receiver');
     }
     getTitleKeys(id): Observable<string> {
         return this.get<Array<string>>(`${environment.prefixPath}rest/connection/key?itemRef=${id}`).pipe(

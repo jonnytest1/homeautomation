@@ -1,11 +1,7 @@
-
-import { ChangeDetectorRef } from '@angular/core';
-import { environment } from '../../environments/environment';
-import { CanvasUtil } from '../utils/context';
-import { ConnectionBottomsheetComponent } from './connection-bottomsheet/connection-bottomsheet.component';
-import { Connection, Receiver, SenderFe } from './interfaces';
-import { SenderBottomSheetComponent } from './sender-bottom-sheet/sender-bottom-sheet.component';
+import { ConnectionFe, ReceiverFe, SenderFe } from './interfaces';
 import { SettingsService } from './settings.service';
+import { CanvasUtil } from '../utils/context';
+
 
 export class ConnectionHandler {
 
@@ -15,7 +11,7 @@ export class ConnectionHandler {
     activeSender: SenderFe;
     util: CanvasUtil;
 
-    constructor(private service: SettingsService, private snackOpen: (data: { con: Connection, sender: SenderFe }) => void) {
+    constructor(private service: SettingsService, private snackOpen: (data: { con: ConnectionFe, sender: SenderFe }) => void) {
 
     }
 
@@ -36,7 +32,6 @@ export class ConnectionHandler {
         const height = getComputedStyle(nativeCanvas.parentElement).height;
         nativeCanvas.height = +height.replace('px', '');
 
-        const width = nativeCanvas.width;
         this.util.reset();
 
         if (!this.activeSender || !this.activeSender.connections) {
@@ -104,7 +99,7 @@ export class ConnectionHandler {
         }
     }
 
-    async addConnection(item: Receiver): Promise<Connection> {
+    async addConnection(item: ReceiverFe): Promise<ConnectionFe> {
         if (this.addingSender) {
             if (!this.addingSender.connections) {
                 this.addingSender.connections = [];
@@ -119,9 +114,9 @@ export class ConnectionHandler {
                 this.addingSender = undefined;
                 return null;
             }
-            const newConnection: Connection = {
+            const newConnection: ConnectionFe = {
                 receiver: item,
-                transformation: {} as any,
+                transformation: {},
                 id: highestId + 10
             };
             this.addingSender.connections.push(newConnection);

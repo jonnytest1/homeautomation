@@ -6,38 +6,55 @@ interface TransformationRes extends SenderResponse {
 
 
     response?: {
-        [key: string]: any
+        [key: string]: unknown
     }
-}
-
-export interface TransformationResponse extends TransformationRes {
 
 }
 
 
-export interface Thenable<T> {
+export interface ConnectionResponse extends TransformationRes {
 
-    then<U>(thisArg: U, methodName: keyof U, ...args)
+    withRequest?: boolean
+}
 
+
+export interface Delayed<T> {
+
+    nestedObject: T,
+    sentData: unknown
     time: number
 }
 
 declare global {
     type TransformationResponse = TransformationRes;
-    function delay(time: number, res: SenderResponse): Thenable<SenderResponse>
+    function delay(time: number, res: SenderResponse): Delayed<SenderResponse>
+    let data: DataObj
 }
 
-interface SenderResponse {
-    promise?: Thenable<SenderResponse>;
-    notification?: {
-        title?: string
-        sound?: SoundType,
-        body?: string
-    },
+
+interface DataObj {
+    usedTransformation: {
+        name: string
+    }
+}
+
+
+interface NotificationData<SoundDef = SoundType> {
+    title?: string;
+    sound?: SoundDef;
+    body?: string;
+
+    [key: string]: unknown
+}
+
+interface SenderResponse<SoundDef = SoundType> {
+    promise?: Delayed<SenderResponse>;
+    notification?: NotificationData<SoundDef>,
 
     attributes?: {
         messageId?: string
     }
+
 }
 
 export type SoundType = soundListRuntime | '*' | Array<soundListRuntime>

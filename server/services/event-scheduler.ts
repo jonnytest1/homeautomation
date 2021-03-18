@@ -1,23 +1,23 @@
-import { load, queries } from 'hibernatets';
-import { ConstructorClass } from 'hibernatets/interface/mapping';
-import { LoadOptions } from 'hibernatets/load';
 
 import { Connection } from '../models/connection';
 import { Sender } from '../models/sender';
 import { Timer } from '../models/timer';
 import { logKibana } from '../util/log';
+import { LoadOptions } from 'hibernatets/load';
+import { ConstructorClass } from 'hibernatets/interface/mapping';
+import { load, queries } from 'hibernatets';
 
 export class EventScheduler {
 
     schedulerInterval: NodeJS.Timeout
 
-    callbackClasses: { [key: string]: { classRef: ConstructorClass<any>, loadOptions?: LoadOptions<any> } } = {}
+    callbackClasses: { [key: string]: { classRef: ConstructorClass<unknown>, loadOptions?: LoadOptions<unknown> } } = {}
 
     constructor() {
         console.log("starting event scheduler")
         this.checkTimers();
 
-        const callbackClasses: Array<{ classRef: ConstructorClass<any>, loadOptions?: LoadOptions<any> }> = [
+        const callbackClasses: Array<{ classRef: ConstructorClass<unknown>, loadOptions?: LoadOptions<unknown> }> = [
             {
                 classRef: Sender,
                 loadOptions: {
@@ -46,10 +46,14 @@ export class EventScheduler {
         try {
             const timers = await load(Timer, "alerted='false' AND endtimestamp < UNIX_TIMESTAMP(NOW(3))*1000")
             await Promise.all([timers.map(async timer => {
-                const timerArguments: Array<any> = JSON.parse(timer.arguments);
+                const timerArguments: Array<never> = JSON.parse(timer.arguments);
                 const functionName: string = timerArguments.shift();
                 const thisArgsObject = await load(this.callbackClasses[timer.timerClassName].classRef, +timer.timerClassId, undefined, { deep: true })
-                await thisArgsObject[functionName](...timerArguments)
+                try {
+                    await thisArgsObject[functionName](...timerArguments)
+                } catch (e) {
+                    logKibana("ERROR", `error in timer execution function:'${functionName}' of ${timer.timerClassName}`, e);
+                }
                 timer.alerted = "true";
                 await queries(timer);
             })])

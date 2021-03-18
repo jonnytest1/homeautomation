@@ -1,15 +1,16 @@
-import { column, mapping, Mappings, primary, table } from 'hibernatets';
 
-import { autosaveable } from '../express-db-wrapper';
-import { ResponseCodeError } from '../util/express-util.ts/response-code-error';
-import { logKibana } from '../util/log';
-import { settable } from '../util/settable';
 import { BatteryLevel } from './battery';
 import { Connection } from './connection';
-import { TransformationResponse } from './connection-response';
 import { EventHistory } from './event';
+import { Timer } from './timer';
 import { Transformation } from './transformation';
 import { Transformer } from './transformer';
+import { TransformationRes } from './connection-response';
+import { settable } from '../util/settable';
+import { logKibana } from '../util/log';
+import { ResponseCodeError } from '../util/express-util.ts/response-code-error';
+import { autosaveable } from '../express-db-wrapper';
+import { column, mapping, Mappings, primary, table } from 'hibernatets';
 
 @table()
 @autosaveable
@@ -44,7 +45,7 @@ export class Sender extends Transformer {
 
     @column()
     @settable
-    name: String;
+    name: string;
 
     @column()
     @settable
@@ -54,9 +55,9 @@ export class Sender extends Transformer {
         super()
     }
 
-    async trigger(body) {
-        let data = body;
-        let newData: TransformationResponse | false = body;
+    async trigger(body: unknown) {
+        const data = body;
+        let newData: TransformationRes | false = body;
         let usedTransformation = null;
         if (this.transformationAttribute) {
             usedTransformation = this.getTransformer(data);
@@ -83,23 +84,24 @@ export class Sender extends Transformer {
         if (newData && newData.promise) {
             newData.response.time = newData.promise.time / (1000);
         }
-        return this.checkPromise(newData, usedTransformation)
+        return this.checkPromise(newData, usedTransformation, true)
     }
 
-    private getTransformer(data: any) {
+    private getTransformer(data: unknown) {
         return this.transformation.find(transform => transform.transformationKey == data[this.transformationAttribute]);
     }
 
-    async checkPromise(pData: TransformationResponse, usedTransformation: Transformation) {
+    async checkPromise(pData: TransformationRes, usedTransformation: Transformation, initialRequest = false) {
         if (pData && pData.promise) {
-            pData.promise.then(this, "checkPromise", usedTransformation);
+            Timer.start(this, "checkPromise", pData.promise, usedTransformation);
         }
         if (pData && pData.notification) {
             if (pData.notification.title == undefined) {
                 pData.notification.title = usedTransformation.name || this.name || ''
             }
+
         }
-        return Promise.all(this.connections.map(connection => connection.execute(pData)
+        return Promise.all(this.connections.map(connection => connection.execute(pData, initialRequest, usedTransformation)
             .then(errs => {
                 if (pData.response) {
                     errs = { ...errs, ...pData.response };
@@ -107,9 +109,10 @@ export class Sender extends Transformer {
                 return errs;
             })
         ));
+
     }
 
-    getContext(data: any) {
+    getContext(data: unknown) {
         return {
             ...super.getContext(data),
             sender: JSON.parse(JSON.stringify(this)),

@@ -1,17 +1,17 @@
-import { ComponentType } from '@angular/cdk/portal';
-import { MatSnackBar, MatSnackBarRef } from '@angular/material/snack-bar';
-import { ActivatedRoute, Router } from '@angular/router';
 import { ConnectionBottomsheetComponent } from './connection-bottomsheet/connection-bottomsheet.component';
 import { ReceiverBottomsheetComponent } from './receiver-bottomsheet/receiver-bottomsheet.component';
 import { SenderBottomSheetComponent } from './sender-bottom-sheet/sender-bottom-sheet.component';
 import { SettingsComponent } from './settings.component';
+import { ActivatedRoute, Router } from '@angular/router';
+import { MatSnackBar, MatSnackBarRef } from '@angular/material/snack-bar';
+import { ComponentType } from '@angular/cdk/portal';
 
 
 type snackbarType = "connection" | "sender" | "receiver"
 export class BottomSheetHandler {
 
 
-    snackbarRef: MatSnackBarRef<any>;
+    snackbarRef: MatSnackBarRef<unknown>;
     paramType: string;
     id: string;
 
@@ -25,7 +25,7 @@ export class BottomSheetHandler {
         this.register();
     }
     register() {
-        this.activeRoute.queryParams.subscribe(params => {
+        this.activeRoute.queryParams.subscribe(() => {
             this.checkSnackbar()
         })
     }
@@ -44,7 +44,7 @@ export class BottomSheetHandler {
         const params = this.activeRoute.snapshot.queryParams;
         const paramType: snackbarType = params.type;
 
-        let type: ComponentType<any>;
+        let type: ComponentType<unknown>;
         let data;
         let actionDismiss
         if (!paramType) {
@@ -96,8 +96,8 @@ export class BottomSheetHandler {
     }
 
     getConnectionData(conId: number) {
-        for (let sender of this.settingsComponent.senders) {
-            for (let con of sender.connections) {
+        for (const sender of this.settingsComponent.senders) {
+            for (const con of sender.connections) {
                 if (con.id == conId) {
                     this.settingsComponent.connectionHandler.setAcvtiveSender(sender);
                     return { con, sender };
@@ -107,7 +107,7 @@ export class BottomSheetHandler {
         return null;
     }
 
-    openSnackBar(config, type: ComponentType<any>, actionDismiss?: Function) {
+    openSnackBar<T>(config, type: ComponentType<T>, actionDismiss?: () => void) {
         if (this.snackbarRef) {
             this.snackbarRef.dismiss();
         }

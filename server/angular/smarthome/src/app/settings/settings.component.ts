@@ -1,19 +1,14 @@
-import { ComponentType } from '@angular/cdk/portal';
-import { AfterViewInit, ChangeDetectorRef, Component, ContentChild, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
-import { MatBottomSheet, MatBottomSheetRef } from '@angular/material/bottom-sheet';
-import { MatSnackBar, MatSnackBarRef } from '@angular/material/snack-bar';
-import { Observable, forkJoin } from 'rxjs';
-import { CanvasUtil } from '../utils/context';
-import { ConnectionBottomsheetComponent } from './connection-bottomsheet/connection-bottomsheet.component';
-import { ConnectionHandler } from './connection-handler';
-import { ReceiverBottomsheetComponent } from './receiver-bottomsheet/receiver-bottomsheet.component';
-import { Receiver, SenderFe } from './interfaces';
-import { SenderBottomSheetComponent } from './sender-bottom-sheet/sender-bottom-sheet.component';
-import { SettingsService } from './settings.service';
-import { ActivatedRoute, Router } from '@angular/router';
+
 import { BottomSheetHandler } from './bottom-sheet-handler';
-import { AppComponent } from '../app.component';
+import { ConnectionHandler } from './connection-handler';
 import { DataHolder } from './data-holder';
+import { ReceiverFe, SenderFe } from './interfaces';
+import { SettingsService } from './settings.service';
+import { AppComponent } from '../app.component';
+import { Observable } from 'rxjs';
+import { ActivatedRoute, Router } from '@angular/router';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { AfterViewInit, ChangeDetectorRef, Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
 
 @Component({
   selector: 'app-settings',
@@ -27,8 +22,8 @@ export class SettingsComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild('canvas')
   canvas: ElementRef<HTMLCanvasElement>;
   connectionHandler: ConnectionHandler;
-  receivers: any[];
-  data$: Observable<[SenderFe[], any[]]>;
+  receivers: ReceiverFe[];
+  data$: Observable<[SenderFe[], ReceiverFe[]]>;
 
 
   interval
@@ -110,7 +105,7 @@ export class SettingsComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   ngOnInit() {
-
+    //
   }
 
   ngAfterViewInit() {
@@ -119,7 +114,7 @@ export class SettingsComponent implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
-  async receiverClick(item: Receiver) {
+  async receiverClick(item: ReceiverFe) {
     const newConnection = await this.connectionHandler.addConnection(item);
     if (newConnection) {
       this.bottomSheetHandler.navigate("connection", newConnection.id)

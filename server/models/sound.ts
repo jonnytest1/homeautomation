@@ -1,7 +1,8 @@
-import { column, primary, table } from 'hibernatets';
+
 import { autosaveable, getter } from '../express-db-wrapper';
 import { HttpRequest } from '../express-wrapper';
 import { settable } from '../util/settable';
+import { column, primary, table } from 'hibernatets';
 
 @table()
 @getter({
@@ -13,7 +14,6 @@ import { settable } from '../util/settable';
 })
 @autosaveable
 export class Sound {
-
 
     @column({ type: "text", size: "large" })
     @settable

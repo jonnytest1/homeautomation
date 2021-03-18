@@ -5,9 +5,10 @@ import { Sender as NodeSender } from '../../../../../models/sender';
 import { Timer } from '../../../../../models/timer';
 import { Transformation } from '../../../../../models/transformation';
 
+// eslint-disable-next-line @typescript-eslint/ban-types
 type NonFunctionPropertyNames<T> = { [K in keyof T]: T[K] extends Function ? never : K }[keyof T];
 type NonFunctionProperties<T> = Partial<Pick<T, NonFunctionPropertyNames<T>>>;
-type CustomOmit<T, K extends keyof any> = Pick<T, Exclude<keyof T, K>>;
+type CustomOmit<T, K extends string> = Pick<T, Exclude<keyof T, K>>;
 
 export interface TimerFe extends Timer {
     color?: string
@@ -24,7 +25,7 @@ export interface SenderFe extends CustomOmit<
             NonFunctionProperties<NodeSender>, "connections"
         >, "transformation"
     >, "events">, DoubleClickCounter {
-    connections: Array<Connection>
+    connections: Array<ConnectionFe>
 
     transformation: Array<TransformFe>
 
@@ -32,20 +33,22 @@ export interface SenderFe extends CustomOmit<
 }
 
 export interface EventHistoryFe extends NonFunctionProperties<EventHistory> {
-    parsedData?: any
+    parsedData?: unknown
 }
 
 export interface TransformFe extends CustomOmit<NonFunctionProperties<Transformation>, ""> {
     historyCount?: number
 
 }
-export interface Connection extends CustomOmit<NonFunctionProperties<NodeConnection>, "receiver"> {
+export interface ConnectionFe extends CustomOmit<CustomOmit<NonFunctionProperties<NodeConnection>, "receiver">, "transformation"> {
 
-    receiver: Receiver
+    receiver: ReceiverFe,
+
+    transformation: TransformFe
 }
 
 
-export interface Receiver extends NonFunctionProperties<NodeReceiver>, DoubleClickCounter {
+export interface ReceiverFe extends NonFunctionProperties<NodeReceiver>, DoubleClickCounter {
 
     /* id: string,
      name: string,
