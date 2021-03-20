@@ -1,10 +1,8 @@
-import { load, queries } from 'hibernatets';
-import { GET, HttpRequest, HttpResponse, Path, POST, PUT } from '../express-wrapper';
+import { GET, HttpRequest, HttpResponse, Path, POST } from '../express-wrapper';
 import { Connection } from '../models/connection';
 import { Receiver } from '../models/receiver';
 import { Sender } from '../models/sender';
-import { Transformation } from '../models/transformation';
-import { assign } from '../util/settable';
+import { load, queries } from 'hibernatets';
 
 @Path('connection')
 export class ConnectionResource {
