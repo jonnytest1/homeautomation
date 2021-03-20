@@ -60,7 +60,7 @@ export class NotificationHandler {
             ...this.data.notification,
             message: this.data.notification.body
         }, ((error, response: 'dismissed' | 'timeout' | (typeof actions[0]), metadata) => {
-            console.log("closing notification", audioRef);
+            console.log("closing notification");
             if (error) {
                 console.error(error);
             } else {
