@@ -1,4 +1,3 @@
-// original name: c_cpp_properties.json
 {
     "configurations": [
         {
@@ -6,15 +5,9 @@
             "includePath": [
                 "C:\\Program Files (x86)\\Arduino\\tools\\**",
                 "C:\\Program Files (x86)\\Arduino\\hardware\\tools\\**",
-                // "C:\\Program Files (x86)\\Arduino\\hardware\\arduino\\avr\\**",
                 "C:\\Users\\Jonathan\\AppData\\Local\\Arduino15\\packages\\esp32\\tools\\**",
                 "C:\\Users\\Jonathan\\Documents\\Arduino\\libraries\\**",
-                //  "C:\\Program Files (x86)\\Arduino\\libraries\\**",
                 "C:\\Users\\Jonathan\\AppData\\Local\\Arduino15\\packages\\esp32\\hardware\\esp32\\1.0.4\\**"
-                /* "C:\\Users\\Jonathan\\AppData\\Local\\Arduino15\\packages\\esp32\\hardware\\esp32\\1.0.4\\tools\\sdk\\include\\**",
-                "C:\\Users\\Jonathan\\AppData\\Local\\Arduino15\\packages\\esp32\\hardware\\esp32\\1.0.4\\tools\\sdk\\include\\esp32\\**",
-                "C:\\Users\\Jonathan\\AppData\\Local\\Arduino15\\packages\\esp32\\hardware\\esp32\\1.0.4\\libraries\\WiFi\\src\\**",
-                "C:\\Users\\Jonathan\\AppData\\Local\\Arduino15\\packages\\esp32\\hardware\\esp32\\1.0.4\\libraries\\HTTPClient\\src\\**"*/
             ],
             "forcedInclude": [
                 "C:\\Users\\Jonathan\\AppData\\Local\\Arduino15\\packages\\esp32\\hardware\\esp32\\1.0.4\\cores\\esp32\\Arduino.h"
