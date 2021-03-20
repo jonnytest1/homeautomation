@@ -1,6 +1,6 @@
-const fetch = require('node-fetch');
 import { btoa } from './btoaatob';
-export async function logKibana(level: 'INFO' | 'ERROR' | 'DEBUG', message: string | Object, error?) {
+const fetch = require('node-fetch');
+export async function logKibana(level: 'INFO' | 'ERROR' | 'DEBUG', message, error?) {
     let jsonData: { [key: string]: string } = {
         Severity: level,
         application: `SmartHome${process.env.DEBUG ? '_debug' : ''}`,
@@ -11,7 +11,7 @@ export async function logKibana(level: 'INFO' | 'ERROR' | 'DEBUG', message: stri
         if (message['message']) {
             jsonData.message = message['message'];
             delete message['message'];
-            for (let i in message) {
+            for (const i in message) {
                 if (typeof message[i] != "number" && typeof message[i] !== "string") {
                     jsonData[i] = JSON.stringify(message[i])
                 } else {

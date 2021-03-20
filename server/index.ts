@@ -1,11 +1,11 @@
-import { config } from 'dotenv';
-import { updateDatabase } from 'hibernatets';
 import { initialize } from './express-wrapper';
 import { EventScheduler } from './services/event-scheduler';
 import { logKibana } from './util/log';
-const https = require('https');
+import { updateDatabase } from 'hibernatets';
+import { config } from 'dotenv';
 const fetch = require('node-fetch');
 const NodeMediaServer = require('node-media-server');
+const https = require('https');
 
 console.log('server.ts iniz');
 
@@ -18,9 +18,9 @@ if (env.error) {
 console.log(env.parsed);
 
 updateDatabase(__dirname + '/models')
-    .then(() => {
+    .then(async () => {
         let redirected = null;
-        initialize(__dirname + '/resources', {
+        await initialize(__dirname + '/resources', {
             prereesources: app => {
                 app.use((req, res, next) => {
                     res.header('Access-Control-Allow-Origin', '*');
@@ -63,18 +63,17 @@ updateDatabase(__dirname + '/models')
             },
             allowCors: true,
             public: __dirname + '/public'
-        }).then(() => {
-            new EventScheduler();
-            if (process.env.REDIRECT) {
-                console.log("set redirection")
-                fetch("https://192.168.178.54/nodets/redirect?port=8080", {
-                    method: "POST",
-                    agent: new https.Agent({
-                        rejectUnauthorized: false
-                    })
-                })
-            }
         });
+        new EventScheduler().start();
+        if (process.env.REDIRECT) {
+            console.log("set redirection")
+            fetch("https://192.168.178.54/nodets/redirect?port=8080", {
+                method: "POST",
+                agent: new https.Agent({
+                    rejectUnauthorized: false
+                })
+            })
+        }
     });
 const mediaServerConfig = {
     rtmp: {
