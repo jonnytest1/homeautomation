@@ -1,3 +1,4 @@
+//https://github.com/grspy/rcswitch-cc1101/blob/master/cc1101.cpp
 /**
    Copyright (c) 2011 panStamp <contact@panstamp.com>
 
@@ -182,22 +183,19 @@ void CC1101::readBurstReg(byte * buffer, byte regAddr, byte len)
 */
 void CC1101::reset(void)
 {
-
-  
   cc1101_Deselect();                    // Deselect CC1101
-  
   delayMicroseconds(5);
   cc1101_Select();                      // Select CC1101
   delayMicroseconds(10);
   cc1101_Deselect();                    // Deselect CC1101
   delayMicroseconds(41);
   cc1101_Select();                      // Select CC1101
-
+   Serial.println("waitmiso");
   wait_Miso();                          // Wait until MISO goes low
-  
   spi.send(CC1101_SRES);                // Send reset command strobe
+   Serial.println("waitmiso2");
   wait_Miso();                          // Wait until MISO goes low
-
+   Serial.println("deselect");
   cc1101_Deselect();                    // Deselect CC1101
 
   //setDefaultRegs();                     // Reconfigure CC1101
@@ -284,7 +282,7 @@ void CC1101::init(void)
   //spi.setClockDivider(SPI_CLOCK_DIV16);
   //spi.setBitOrder(MSBFIRST);
   pinMode(GDO0, INPUT);                 // Config GDO0 as input
-  
+ Serial.println("reset");
   reset();                              // Reset CC1101
 
   // Configure PATABLE

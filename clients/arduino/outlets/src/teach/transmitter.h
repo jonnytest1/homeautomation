@@ -50,10 +50,10 @@ On Oct 22, 2016 10:07 PM, "Simon Monk" <srmonk@gmail.com> wrote:
 #define F2_915  0x22        
 #define F1_915  0xB1        
 #define F0_915  0x3B       
-// Carrier frequency = 433 MHz 426.125
+// Carrier frequency = 433 MHz
 #define F2_433  0x10       
-#define F1_433  0xAB        
-#define F0_433  0x6F        
+#define F1_433  0xA7        
+#define F0_433  0x62        
 
 
 
@@ -166,15 +166,16 @@ class ELECHOUSE_CC1101
     void SpiMode(byte config);
     byte SpiTransfer(byte value);
     void GDO_Set (void);
-    void Reset (void);
+   
+    void SpiWriteBurstReg(byte addr, byte *buffer, byte num);
     void SpiStrobe(byte strobe);
     byte SpiReadReg(byte addr);
     void SpiReadBurstReg(byte addr, byte *buffer, byte num);
     byte SpiReadStatus(byte addr);
     void RegConfigSettings(byte f);
   public:
+     void Reset (void);
     void SpiWriteReg(byte addr, byte value);
-    void SpiWriteBurstReg(byte addr, byte *buffer, byte num);
     void Init(void);
     void Init(byte f);
     void SendData(byte *txBuffer, byte size);

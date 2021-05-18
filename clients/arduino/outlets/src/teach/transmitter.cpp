@@ -41,7 +41,7 @@ On Oct 22, 2016 10:07 PM, "Simon Monk" <srmonk@gmail.com> wrote:
 #define   BYTES_IN_RXFIFO     0x7F              //byte number in RXfifo
 
 /****************************************************************/
-byte PaTabel[8] = {0x00 ,0x00 ,0x00 ,0x00 ,0x60 ,0x60 ,0x60 ,0x60};
+byte PaTabel[8] = {0x60 ,0x60 ,0x60 ,0x60 ,0x60 ,0x60 ,0x60 ,0x60};
 
 /****************************************************************
 *FUNCTION NAME:SpiInit
@@ -332,7 +332,7 @@ void ELECHOUSE_CC1101::RegConfigSettings(byte f)
     SpiWriteReg(CC1101_IOCFG0,   0x06);   //asserts when sync word has been sent/received, and de-asserts at the end of the packet 
     SpiWriteReg(CC1101_PKTCTRL1, 0x04);   //two status bytes will be appended to the payload of the packet,including RSSI LQI and CRC OK
                       //No address check
-    SpiWriteReg(CC1101_PKTCTRL0, 0x05);   //whitening off;CRC Enable£»variable length packets, packet length configured by the first byte after sync word
+    SpiWriteReg(CC1101_PKTCTRL0, 0x05);   //whitening off;CRC Enable��variable length packets, packet length configured by the first byte after sync word
     SpiWriteReg(CC1101_ADDR,     0x00);   //address used for packet filtration.
     SpiWriteReg(CC1101_PKTLEN,   0x3D);   //61 bytes max length
 }
@@ -348,8 +348,11 @@ void ELECHOUSE_CC1101::SendData(byte *txBuffer,byte size)
   SpiWriteReg(CC1101_TXFIFO,size);
   SpiWriteBurstReg(CC1101_TXFIFO,txBuffer,size);      //write data to send
   SpiStrobe(CC1101_STX);                  //start send  
+  Serial.println("start send");
     while (!digitalRead(GDO0));               // Wait for GDO0 to be set -> sync transmitted  
+  Serial.println("sync transmitted");
     while (digitalRead(GDO0));                // Wait for GDO0 to be cleared -> end of packet
+  Serial.println("end paxcket");
   SpiStrobe(CC1101_SFTX);                 //flush TXfifo
 }
 
