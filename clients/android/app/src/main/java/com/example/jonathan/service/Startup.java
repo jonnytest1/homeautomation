@@ -1,4 +1,4 @@
-package com.example.jonathan.barcode.service;
+package com.example.jonathan.service;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;

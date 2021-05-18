@@ -1,4 +1,4 @@
-package com.example.jonathan.barcode.http;
+package com.example.jonathan.http;
 
 import java.io.BufferedWriter;
 import java.io.IOException;

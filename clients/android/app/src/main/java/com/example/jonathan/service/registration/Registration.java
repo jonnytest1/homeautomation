@@ -1,4 +1,4 @@
-package com.example.jonathan.barcode.service.registration;
+package com.example.jonathan.service.registration;
 
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -9,11 +9,12 @@ import java.util.concurrent.TimeUnit;
 
 public class Registration {
 
-    public static final String DEVICE_KEY ="mobile-device";
-
+    public static final String BARCODE_SENDER_DEVICE_KEY ="mobile-device";
+    public static final String SHARE_URL_SENDER_DEVICE_KEY ="mobile-device-share-url";
     private final Context context;
 
     public Registration(Context context){
+
         this.context=context;
     }
 
@@ -23,15 +24,14 @@ public class Registration {
             prefs.edit().putBoolean("firstLaunch",true).commit();
 
             ExecutorService pool = Executors.newFixedThreadPool(2);
-            pool.submit(new SenderRegistration());
+            pool.submit(new BarcodeSenderRegistration());
+            pool.submit(new ShareSenderRegistration());
             pool.submit(new ReceiverRegistration());
             try {
                 pool.awaitTermination(2, TimeUnit.SECONDS);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-
-
         }
     }
 }

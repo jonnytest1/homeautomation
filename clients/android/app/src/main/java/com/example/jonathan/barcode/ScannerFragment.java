@@ -5,7 +5,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.example.jonathan.barcode.service.BarcodeSender;
+import com.example.jonathan.service.BarcodeSender;
 import com.google.zxing.Result;
 
 import java.time.Instant;

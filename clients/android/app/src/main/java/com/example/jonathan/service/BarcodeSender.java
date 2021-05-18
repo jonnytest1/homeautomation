@@ -1,4 +1,4 @@
-package com.example.jonathan.barcode.service;
+package com.example.jonathan.service;
 
 import android.content.Context;
 import android.os.Handler;
@@ -6,8 +6,8 @@ import android.os.Looper;
 import android.util.Log;
 import android.widget.Toast;
 
-import com.example.jonathan.barcode.http.CustomHttp;
-import com.example.jonathan.barcode.http.CustomResponse;
+import com.example.jonathan.http.CustomHttp;
+import com.example.jonathan.http.CustomResponse;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -16,7 +16,7 @@ import com.google.zxing.Result;
 import java.io.IOException;
 import java.time.Instant;
 
-import static com.example.jonathan.barcode.service.registration.Registration.DEVICE_KEY;
+import static com.example.jonathan.service.registration.Registration.BARCODE_SENDER_DEVICE_KEY;
 
 public class BarcodeSender implements Runnable {
 
@@ -34,7 +34,7 @@ public class BarcodeSender implements Runnable {
     ObjectNode prepareSendMessage(){
         ObjectNode jsonNode = new ObjectMapper() //
                 .createObjectNode();
-        jsonNode.put("deviceKey",DEVICE_KEY);
+        jsonNode.put("deviceKey", BARCODE_SENDER_DEVICE_KEY);
         jsonNode.put("timestamp", Instant.now().toString());
         jsonNode.put("message", this.rawResult);
         return jsonNode;

@@ -10,10 +10,10 @@ import android.media.RingtoneManager;
 import android.net.Uri;
 import android.util.Log;
 
-import com.example.jonathan.barcode.http.CustomHttp;
-import com.example.jonathan.barcode.http.CustomResponse;
-import com.example.jonathan.barcode.service.registration.ReceiverRegistration;
-import com.example.jonathan.barcode.service.registration.Registration;
+import com.example.jonathan.http.CustomHttp;
+import com.example.jonathan.http.CustomResponse;
+import com.example.jonathan.service.registration.ReceiverRegistration;
+import com.example.jonathan.service.registration.Registration;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
@@ -32,7 +32,7 @@ import java.net.MalformedURLException;
 
 import androidx.core.app.NotificationCompat;
 
-import static com.example.jonathan.barcode.service.registration.ReceiverRegistration.RECEIVER_ID;
+import static com.example.jonathan.service.registration.ReceiverRegistration.RECEIVER_ID;
 
 public class MessagingService extends FirebaseMessagingService  {
     private static final String TAG = "MyFirebaseMsgService";
@@ -73,7 +73,7 @@ public class MessagingService extends FirebaseMessagingService  {
 
                 ArrayNode node =(ArrayNode) new ObjectMapper().readTree(content);
                 for (JsonNode item : node) {
-                    if (item.get("deviceKey").asText().equals(Registration.DEVICE_KEY)) {
+                    if (item.get("deviceKey").asText().equals(Registration.BARCODE_SENDER_DEVICE_KEY)) {
                         RECEIVER_ID = item.get("id").asInt();
                     }
                 }

@@ -1,4 +1,4 @@
-package com.example.jonathan.barcode.http;
+package com.example.jonathan.http;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;

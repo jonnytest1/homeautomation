@@ -4,6 +4,8 @@ import android.Manifest;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 
+import com.example.jonathan.service.registration.Registration;
+
 import java.time.Instant;
 
 import androidx.core.app.ActivityCompat;
@@ -19,6 +21,7 @@ public class MainActivity extends FragmentActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        new Registration(getApplicationContext()).checkRegistration();
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         if(ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA)!= PackageManager.PERMISSION_GRANTED){
