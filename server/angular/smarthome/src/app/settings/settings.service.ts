@@ -16,11 +16,10 @@ export class SettingsService extends AbstractHttpService {
         super(http, router);
     }
     addConnection(deviceKey: string, receiverId: number) {
-
         return this.post<ConnectionFe>(`${environment.prefixPath}rest/connection`, {
             senderId: deviceKey,
             receiverId: receiverId
-        })
+        });
 
     }
 

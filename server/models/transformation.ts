@@ -1,7 +1,7 @@
-import { column, primary, table } from 'hibernatets';
 
 import { autosaveable } from '../express-db-wrapper';
 import { settable } from '../util/settable';
+import { column, primary, table } from 'hibernatets';
 
 @table()
 @autosaveable
@@ -34,6 +34,6 @@ export class Transformation {
     @settable
     name
 
-    definitionFile
+    definitionFile?
 
 }

@@ -55,7 +55,7 @@ export class Connection extends Transformer {
     }
 
     async sendToReceiver(pData: ConnectionResponse, initialRequest = false) {
-        if (initialRequest == pData.withRequest)
+        if (!!initialRequest == !!pData.withRequest)
             return this.receiver.send(pData)
     }
 

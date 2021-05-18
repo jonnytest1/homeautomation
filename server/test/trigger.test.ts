@@ -1,5 +1,4 @@
 /* eslint-disable import/order */
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { mockRepsonse, mockRequest } from './util/http';
 import { mockedLogging } from './util/mock-logging';
 import { hibernatetsMock } from './util/mockhibernatets';

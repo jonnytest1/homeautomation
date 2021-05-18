@@ -1,5 +1,6 @@
 run this: ffmpeg -framerate 30 -input_format mjpeg -re -i /dev/video0 -c:v libx264 -preset veryfast -f flv -tune
 zerolatency rtmp://192.168.178.54:11935/live/{{streamName}}
+http://192.168.178.54:8000/admin/
 <video #videoElement
        width="auto"
        height="auto">

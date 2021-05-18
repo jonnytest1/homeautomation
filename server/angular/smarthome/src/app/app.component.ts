@@ -9,6 +9,7 @@ export class AppComponent {
 
   mobile = AppComponent.isMobile()
   constructor() {
+    //
   }
   contentOpened: boolean;
   sidenavOpened: boolean;

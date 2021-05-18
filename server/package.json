@@ -10,7 +10,7 @@
         "express": "",
         "express-ws": "^4.0.0",
         "firebase-admin": "^9.1.0",
-        "hibernatets": "^1.0.49",
+        "hibernatets": "^1.0.52",
         "mariadb": "",
         "mkdirp": "^1.0.4",
         "node-fetch": "^2.6.0",

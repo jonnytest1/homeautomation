@@ -51,20 +51,27 @@ export class EventScheduler {
 
     async checkTimers() {
         try {
-            const timer = await load(Timer, "alerted='false' AND endtimestamp < UNIX_TIMESTAMP(NOW(3))*1000", undefined, { first: true })
-            const timerArguments: Array<never> = JSON.parse(timer.arguments);
-            const functionName: string = timerArguments.shift();
-            const thisArgsObject = await load(this.callbackClasses[timer.timerClassName].classRef, +timer.timerClassId, undefined, { deep: true })
-            try {
-                await thisArgsObject[functionName](...timerArguments)
-            } catch (e) {
-                logKibana("ERROR", `error in timer execution function:'${functionName}' of ${timer.timerClassName}`, e);
-            }
-            timer.alerted = "true";
-            await queries(timer);
+            await this.callTimer();
         } catch (e) {
             logKibana("ERROR", "error in scheduler", e);
         }
-        this.schedulerInterval = setTimeout(() => this.checkTimers(), 200);
+        this.schedulerInterval = setTimeout(() => this.checkTimers(), 800);
+    }
+
+    private async callTimer() {
+        const timer = await load(Timer, "alerted='false' AND endtimestamp < UNIX_TIMESTAMP(NOW(3))*1000", undefined, { first: true });
+        if (!timer) {
+            return;
+        }
+        const timerArguments: Array<never> = JSON.parse(timer.arguments);
+        const functionName: string = timerArguments.shift();
+        const thisArgsObject = await load(this.callbackClasses[timer.timerClassName].classRef, +timer.timerClassId, undefined, { deep: true });
+        try {
+            await thisArgsObject[functionName](...timerArguments);
+        } catch (e) {
+            logKibana("ERROR", `error in timer execution function:'${functionName}' of ${timer.timerClassName}`, e);
+        }
+        timer.alerted = "true";
+        await queries(timer);
     }
 }
