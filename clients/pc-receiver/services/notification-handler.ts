@@ -3,6 +3,7 @@ import { existsSync, promises } from 'fs';
 import { Websocket } from '../../../server/express-ws-type';
 import { fetchHttps } from '../util/request';
 import { Audio, AudioPlayer } from './playsound';
+import { FrontendSound } from './server-interfaces';
 
 const notifier = require('node-notifier');
 var player: AudioPlayer = require('play-sound')({
@@ -29,8 +30,14 @@ export class NotificationHandler {
         }
         console.log(new Date().toLocaleString(), this.data.notification.title)
         if (this.data.notification.sound && typeof this.data.notification.sound === 'string') {
+            if (this.data.notification.sound.match(/[^a-zA-Z0-9]/g)) {
+                console.error("invalid sound string");
+                return;
+            }
+
             if (!existsSync(this.prefixPath + this.data.notification.sound)) {
-                const response = await fetchHttps(`${this.serverIp}rest/auto/sound/bykey/${this.data.notification.sound}`)
+                const soundRequestUrl = new URL(`${this.serverIp}rest/auto/sound/bykey/${encodeURIComponent(this.data.notification.sound)}`);
+                const response = await fetchHttps<Array<FrontendSound>>(soundRequestUrl.href)
                 if (response.status != 200) {
                     ws.send("failure getting sound");
                     return;
@@ -51,16 +58,16 @@ export class NotificationHandler {
         if (!this.data.notification.body && this.data.notification.title) {
             this.data.notification.body = this.data.notification.title;
         }
-
+        const timeout = 20
         notifier.notify({
-            timeout: 3,
+            timeout: timeout,
             appID: "smarthome",
             //
             actions: actions,
             ...this.data.notification,
             message: this.data.notification.body
         }, ((error, response: 'dismissed' | 'timeout' | (typeof actions[0]), metadata) => {
-            console.log("closing notification");
+            console.log(`closing notification with ${response} timeout was ` + timeout);
             if (error) {
                 console.error(error);
             } else {
@@ -71,6 +78,7 @@ export class NotificationHandler {
                     console.error(e);
                 }
             }
+
 
             if (audioRef.audio) {
                 if (!audioRef.audio.kill()) {
@@ -87,7 +95,7 @@ export class NotificationHandler {
         }).bind(this));
     }
 
-    playSound(sound, audioRef: AudioRef) {
+    playSound(sound: string, audioRef: AudioRef) {
         const args = ['--intf', 'dummy', '--no-loop', '--play-and-exit'];
         if (this.data.notification.volume) {
             args.push(`--mmdevice-volume=0.1`);
@@ -96,6 +104,10 @@ export class NotificationHandler {
             args.push(`--volume=10`);
         }
         console.log("playing sound")
+        if (sound.match(/[^a-zA-Z0-9]/g)) {
+            console.error("invalid sound string");
+            return;
+        }
         audioRef.audio = player.play(this.prefixPath + sound, {
             'C:\\Program Files\\VideoLAN\\VLC\\vlc.exe': args
         }, ((err) => {

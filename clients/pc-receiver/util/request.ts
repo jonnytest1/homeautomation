@@ -2,7 +2,12 @@ import { Agent } from 'https';
 
 const fetch = require('node-fetch');
 
-export function fetchHttps(url: string, opts = {}, ...args): Promise<Response> {
+interface TypedJsonResponse<T> extends Response {
+    json(): Promise<T>
+
+}
+
+export function fetchHttps<T = any>(url: string, opts = {}, ...args): Promise<TypedJsonResponse<T>> {
     const httpsAgent = new Agent({
         rejectUnauthorized: false,
     });

@@ -1,5 +1,5 @@
 import { fetchHttps } from '../util/request';
-
+import { FrontendReceiver } from './server-interfaces';
 class Registration {
 
     readonly deviceKey = 'pc-receiver';
@@ -7,7 +7,7 @@ class Registration {
     async register(ip, port): Promise<void> {
         try {
 
-            const response = await fetchHttps(`${ip}rest/receiver`);
+            const response = await fetchHttps<Array<FrontendReceiver>>(`${ip}rest/receiver`);
             const receivers = await response.json();
             if (!receivers.some(receiver => receiver.deviceKey === this.deviceKey)) {
                 const saveResponse = await fetchHttps(`${ip}rest/receiver`, {
