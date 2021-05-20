@@ -62,14 +62,6 @@ export class Receiver {
 
 
 
-        if (!this.firebaseToken) {
-            console.log(`sending websocket notification for ${this.name}`);
-            ws.send(this.deviceKey, evaluatedData);
-            return 0;
-        }
-        if (process.env.DEBUG) {
-            return 0;
-        }
 
     }
     sendForIp(evaluatedData: SenderResponse<string>): number {

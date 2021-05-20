@@ -1,4 +1,5 @@
 import { Delayed, SenderResponse } from './connection-response';
+import { FrontendWebsocket } from '../resources/frontend-update';
 import { column, primary, save, table } from 'hibernatets';
 import { getId } from 'hibernatets/utils';
 
@@ -17,8 +18,10 @@ export class Timer {
             className: className,
             data: timerData.sentData
         })
-        save(timer);
-
+        save(timer)
+            .then(() => {
+                FrontendWebsocket.updateTimers()
+            })
     }
     constructor(options?: { startTimestamp: number, endtimestamp: number, args: Array<unknown>, className: string, classId: number, data?}) {
         if (options) {

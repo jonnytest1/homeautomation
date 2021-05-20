@@ -1,4 +1,3 @@
-import { DataHolder } from '../data-holder';
 import { SettingsService } from '../settings.service';
 import { ChangeDetectorRef, Component } from '@angular/core';
 import { first } from 'rxjs/operators';
@@ -12,18 +11,18 @@ import { first } from 'rxjs/operators';
 export class SettingsMobileComponent {
 
     readonly tabs = [{
-        title: "Senders",
+        title: 'Senders',
         items: []
     }, {
-        title: "Receivers",
+        title: 'Receivers',
         items: []
-    }]
+    }];
 
-    currentIndex = 0
+    currentIndex = 0;
     interval: NodeJS.Timeout;
 
 
-    constructor(private service: SettingsService, private cdr: ChangeDetectorRef, private data: DataHolder) {
+    constructor(private service: SettingsService, private cdr: ChangeDetectorRef) {
         this.fetchData().then(() => {
             this.cdr.detectChanges();
         });
@@ -34,21 +33,29 @@ export class SettingsMobileComponent {
     }
 
     private fetchData() {
-        return Promise.all([this.data.getSenders().pipe(first()).toPromise().then(senders => {
-            this.tabs[0].items = senders;
-        }), this.service.getReceivers().toPromise().then(receivers => {
-            this.tabs[1].items = receivers;
-        })]);
+        return Promise.all([
+            this.service.senders$
+                .pipe(first())
+                .toPromise()
+                .then(senders => {
+                    this.tabs[0].items = senders;
+                }),
+            this.service.getReceivers()
+                .toPromise()
+                .then(receivers => {
+                    this.tabs[1].items = receivers;
+                })
+        ]);
     }
 
     left() {
         this.currentIndex--;
-        this.currentIndex < 0 && (this.currentIndex = this.tabs.length - 1)
+        this.currentIndex < 0 && (this.currentIndex = this.tabs.length - 1);
     }
 
     right() {
         this.currentIndex++;
-        this.currentIndex > this.tabs.length - 1 && (this.currentIndex = 0)
+        this.currentIndex > this.tabs.length - 1 && (this.currentIndex = 0);
     }
 
     setActive(item, $event) {

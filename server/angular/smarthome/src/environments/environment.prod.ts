@@ -1,4 +1,5 @@
 export const environment = {
-  production: true,
-  prefixPath: '',
+    production: true,
+    prefixPath: '',
+    insecureWebsocket: false
 };

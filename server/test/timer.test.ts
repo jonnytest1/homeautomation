@@ -37,6 +37,7 @@ describe("test stuff wroks when calling with timer", () => {
         }
 
         const usedTransformation = getUsedTransformationJson()
+        hibernatetsMock.queries.mockRestore()
         hibernatetsMock.load.mockImplementation((async (classArg, cond, param, opts) => {
             if (classArg == Timer) {
                 const timer = new Timer();

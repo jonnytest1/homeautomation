@@ -7,7 +7,7 @@ import { MatSnackBar, MatSnackBarRef } from '@angular/material/snack-bar';
 import { ComponentType } from '@angular/cdk/portal';
 
 
-type snackbarType = "connection" | "sender" | "receiver"
+type snackbarType = 'connection' | 'sender' | 'receiver';
 export class BottomSheetHandler {
 
 
@@ -21,13 +21,13 @@ export class BottomSheetHandler {
         private settingsComponent: SettingsComponent,
         private router: Router,
         private activeRoute: ActivatedRoute,
-        private snack: MatSnackBar,) {
+        private snack: MatSnackBar) {
         this.register();
     }
     register() {
         this.activeRoute.queryParams.subscribe(() => {
-            this.checkSnackbar()
-        })
+            this.checkSnackbar();
+        });
     }
 
     navigate(type: snackbarType, id: number) {
@@ -36,8 +36,8 @@ export class BottomSheetHandler {
                 type,
                 id
             },
-            queryParamsHandling: "merge"
-        })
+            queryParamsHandling: 'merge'
+        });
     }
 
     checkSnackbar() {
@@ -46,44 +46,44 @@ export class BottomSheetHandler {
 
         let type: ComponentType<unknown>;
         let data;
-        let actionDismiss
+        let actionDismiss;
         if (!paramType) {
             if (this.settingsComponent.connectionHandler) {
                 this.settingsComponent.connectionHandler.setAcvtiveSender(null);
             }
         }
-        if (paramType == this.paramType && params.id == this.id) {
+        if (paramType === this.paramType && params.id === this.id) {
             return;
         }
 
-        if (paramType == "connection") {
+        if (paramType === 'connection') {
             if (!this.settingsComponent.senders) {
                 setTimeout(this.checkSnackbar.bind(this), 500);
-                return
+                return;
             }
-            type = ConnectionBottomsheetComponent
-            data = this.getConnectionData(params.id)
+            type = ConnectionBottomsheetComponent;
+            data = this.getConnectionData(params.id);
             actionDismiss = () => {
-                this.settingsComponent.connectionHandler.drawConnections()
-            }
-        } else if (paramType == "sender") {
-            type = SenderBottomSheetComponent
+                this.settingsComponent.connectionHandler.drawConnections();
+            };
+        } else if (paramType === 'sender') {
+            type = SenderBottomSheetComponent;
             if (!this.settingsComponent.senders) {
                 setTimeout(this.checkSnackbar.bind(this), 500);
-                return
+                return;
             }
-            const senderIndex = this.settingsComponent.senders.findIndex(sender => sender.id == params.id);
-            data = this.settingsComponent.senders[senderIndex]
+            const senderIndex = this.settingsComponent.senders.findIndex(sender => sender.id === params.id);
+            data = this.settingsComponent.senders[senderIndex];
             actionDismiss = () => {
-                this.settingsComponent.removeSenderByIndex(senderIndex)
-            }
+                this.settingsComponent.removeSenderByIndex(senderIndex);
+            };
             this.settingsComponent.connectionHandler.setAcvtiveSender(data);
-        } else if (paramType == "receiver") {
+        } else if (paramType === 'receiver') {
             if (!this.settingsComponent.receivers) {
-                return
+                return;
             }
-            type = ReceiverBottomsheetComponent
-            data = this.settingsComponent.receivers.find(rec => rec.id == params.id);
+            type = ReceiverBottomsheetComponent;
+            data = this.settingsComponent.receivers.find(rec => rec.id === params.id);
         }
 
         this.paramType = paramType;
@@ -98,7 +98,7 @@ export class BottomSheetHandler {
     getConnectionData(conId: number) {
         for (const sender of this.settingsComponent.senders) {
             for (const con of sender.connections) {
-                if (con.id == conId) {
+                if (con.id === conId) {
                     this.settingsComponent.connectionHandler.setAcvtiveSender(sender);
                     return { con, sender };
                 }
@@ -121,7 +121,7 @@ export class BottomSheetHandler {
             if (actionDismiss) {
                 actionDismiss();
             }
-        })
+        });
     }
 
     dismiss() {

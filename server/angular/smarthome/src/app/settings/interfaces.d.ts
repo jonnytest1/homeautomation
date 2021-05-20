@@ -1,7 +1,14 @@
 import { Sender as NodeSender } from '../../../../../models/sender';
 import { Timer } from '../../../../../models/timer';
 import { Transformation } from '../../../../../models/transformation';
+import { SocketResponses as sR } from "../../../../../resources/frontend-update"
 
+export type SocketResponses = sR;
+
+export interface ResponseData<K extends keyof SocketResponses = keyof SocketResponses> {
+    type: K,
+    data: SocketResponses[K]
+}
 
 
 type Primitives = string | number | boolean | Date | undefined;
@@ -45,8 +52,11 @@ export interface DoubleClickCounter {
 //@ts-ignore
 type SenderWithConnectionTransformation = CustomOmit<With<FrontendProperties<NodeSender>, "transformation", TransformFe>, "transformation">
 
+
 export interface SenderFe extends SenderWithConnectionTransformation, DoubleClickCounter {
     transformation: Array<TransformFe>
+
+
 }
 
 

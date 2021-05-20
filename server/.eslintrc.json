@@ -21,6 +21,7 @@
                 ]
             }
         ],
+        "no-prototype-builtins": "off",
         "unused-imports/no-unused-imports": "warn",
         "@typescript-eslint/no-var-requires": "off",
         "@typescript-eslint/explicit-module-boundary-types": "off",
@@ -29,7 +30,11 @@
         "@typescript-eslint/ban-types": "warn",
         "@typescript-eslint/ban-ts-comment": "off",
         "no-var": "warn",
-        "prefer-const": "warn"
+        "prefer-const": "warn",
+        "indent": [
+            "warn",
+            4
+        ]
     },
     "extends": [
         "eslint:recommended",

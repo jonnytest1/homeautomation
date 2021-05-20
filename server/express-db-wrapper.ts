@@ -1,10 +1,10 @@
 
-import { HttpRequest, resources } from './express-wrapper';
 import { ResponseCodeError } from './util/express-util.ts/response-code-error';
 import { logKibana } from './util/log';
 import { assign } from './util/settable';
 import { getDBConfig } from 'hibernatets/utils';
 import { load, queries, remove, save } from 'hibernatets';
+import { HttpRequest, resources } from 'express-hibernate-wrapper';
 
 
 export interface ConstructorClass<T> {

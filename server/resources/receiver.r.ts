@@ -1,9 +1,9 @@
-import { load, queries, save } from 'hibernatets';
-import { Body } from 'node-fetch';
-import { GET, HttpRequest, HttpResponse, Path, POST, PUT } from '../express-wrapper';
+import { FrontendWebsocket } from './frontend-update';
 import { Receiver } from '../models/receiver';
 import { logKibana } from '../util/log';
 import { assign } from '../util/settable';
+import { load, save } from 'hibernatets';
+import { Path, POST, GET, HttpResponse } from 'express-hibernate-wrapper';
 
 @Path('receiver')
 export class ReceiverResource {
@@ -12,7 +12,7 @@ export class ReceiverResource {
         path: ''
     })
     async register(req, res) {
-        let existingSender = await load(Receiver, s => s.deviceKey = req.body.deviceKey, [], { first: true });
+        const existingSender = await load(Receiver, s => s.deviceKey = req.body.deviceKey, [], { first: true });
         if (existingSender) {
             logKibana('INFO', `receiver already exists with id ${req.body.deviceKey}`);
             res.status(409)
@@ -29,6 +29,7 @@ export class ReceiverResource {
         await assign(receiver, req.body);
         await save(receiver);
         res.send(receiver);
+        FrontendWebsocket.updateSenders()
     }
 
     @GET({

@@ -1,8 +1,9 @@
 
 import { autosaveable, getter } from '../express-db-wrapper';
-import { HttpRequest } from '../express-wrapper';
+
 import { settable } from '../util/settable';
 import { column, primary, table } from 'hibernatets';
+import { HttpRequest } from 'express-hibernate-wrapper';
 
 @table()
 @getter({

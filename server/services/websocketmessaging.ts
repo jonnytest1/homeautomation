@@ -1,8 +1,7 @@
+import { SenderResponse } from '../models/connection-response';
+import { Websocket, WS } from 'express-hibernate-wrapper';
 import { client as WebSocketClient } from 'websocket';
 
-import { WS } from '../express-wrapper';
-import { Websocket } from '../express-ws-type';
-import { SenderResponse } from '../models/connection-response';
 
 @WS({
     path: 'ws'
@@ -15,7 +14,7 @@ class WebsocketMessaging {
 
     client: WebSocketClient;
     constructor() {
-
+        //
     }
 
     sendWebsocket(ip, data: SenderResponse): Promise<string> {
@@ -27,7 +26,7 @@ class WebsocketMessaging {
                     console.log('Connection Error: ' + error.toString());
                     err(error);
                 });
-                connection.on('close', (...args) => {
+                connection.on('close', () => {
                     console.log('Connection Closed');
                     resolver(null)
 

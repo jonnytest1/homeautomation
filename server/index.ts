@@ -1,7 +1,7 @@
-import { initialize } from './express-wrapper';
 import { EventScheduler } from './services/event-scheduler';
 import { logKibana } from './util/log';
 import { updateDatabase } from 'hibernatets';
+import { HttpRequest, initialize } from 'express-hibernate-wrapper';
 import { config } from 'dotenv';
 const fetch = require('node-fetch');
 const NodeMediaServer = require('node-media-server');
@@ -22,9 +22,12 @@ updateDatabase(__dirname + '/models')
         let redirected = null;
         await initialize(__dirname + '/resources', {
             prereesources: app => {
-                app.use((req, res, next) => {
-                    res.header('Access-Control-Allow-Origin', '*');
-                    res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
+                app.use((req: HttpRequest, res, next) => {
+                    const forwardedFor = req.headers.http_x_forwarded_for;
+                    if ((!forwardedFor || typeof forwardedFor !== 'string' || !forwardedFor.startsWith('192.168.178')) && process.env.DEBUG !== "true") {
+                        res.status(403).send();
+                        return;
+                    }
                     next();
                 });
                 app.post('/redirect', (req, res) => {

@@ -1,5 +1,5 @@
-import { DataHolder } from '../../data-holder';
 import { SenderFe, TransformFe } from '../../interfaces';
+import { SettingsService } from '../../settings.service';
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Observable } from 'rxjs';
@@ -16,12 +16,12 @@ export class MobileSenderComponent implements OnInit {
   sender$: Observable<SenderFe>;
 
 
-  transformer: TransformFe = {}
-  constructor(private activeRoute: ActivatedRoute, dataHolder: DataHolder) {
+  transformer: TransformFe = {};
+  constructor(private activeRoute: ActivatedRoute, dataHolder: SettingsService) {
 
-    this.sender$ = dataHolder.getSenders().pipe(
+    this.sender$ = dataHolder.senders$.pipe(
       map(senders => senders.find(sender => sender.id == +this.activeRoute.snapshot.params.id))
-    )
+    );
   }
 
   ngOnInit() {
@@ -30,6 +30,6 @@ export class MobileSenderComponent implements OnInit {
 
 
   debug(sender) {
-    //console.log(sender)
+    // console.log(sender)
   }
 }

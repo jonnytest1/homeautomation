@@ -55,7 +55,7 @@ export class EventScheduler {
         } catch (e) {
             logKibana("ERROR", "error in scheduler", e);
         }
-        this.schedulerInterval = setTimeout(() => this.checkTimers(), 800);
+        this.schedulerInterval = setTimeout(() => this.checkTimers(), 1000);
     }
 
     private async callTimer() {

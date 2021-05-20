@@ -1,18 +1,18 @@
 
+import { FrontendWebsocket } from './frontend-update';
 import { loadOne } from '../express-db-wrapper';
-import { GET, HttpRequest, HttpResponse, Path, POST } from '../express-wrapper';
 import { BatteryLevel } from '../models/battery';
 import { EventHistory } from '../models/event';
 import { Sender } from '../models/sender';
-import { Sound } from '../models/sound';
 import { Timer } from '../models/timer';
 import { Transformation } from '../models/transformation';
 import { ResponseCodeError } from '../util/express-util.ts/response-code-error';
 import { logKibana } from '../util/log';
 import { assign } from '../util/settable';
-import { TscCompiler } from '../util/tsc-compiler';
+import { senderLoader } from '../services/sender-loader';
 import { DataBaseBase } from 'hibernatets/mariadb-base';
 import { load, queries, save } from 'hibernatets';
+import { Path, POST, HttpRequest, HttpResponse, GET } from 'express-hibernate-wrapper';
 
 @Path('sender')
 export class SenderResource {
@@ -56,6 +56,7 @@ export class SenderResource {
                         sender.batteryEntries.push(batteryLevel);
                     }
                 }
+                queries(sender).then(() => FrontendWebsocket.updateSenders())
             }
         }
     }
@@ -102,6 +103,7 @@ export class SenderResource {
         sender.transformation.push(new Transformation())
         await assign(sender, req.body);
         await save(sender);
+        FrontendWebsocket.updateSenders();
         res.send(sender);
     }
 
@@ -110,29 +112,7 @@ export class SenderResource {
         path: ''
     })
     async getSenders(req, res: HttpResponse) {
-        const [senders, sounds] = await Promise.all([
-            load(Sender, 'true = true', undefined, {
-                deep: {
-                    connections: "TRUE = TRUE",
-                    events: "`timestamp` > UNIX_TIMESTAMP(DATE_ADD(NOW(),INTERVAL -60 DAY))",
-                    batteryEntries: "TRUE = TRUE",
-                    transformation: "TRUE = TRUE",
-                    receiver: "TRUE = TRUE",
-                }
-            }),
-            load(Sound, 'true=true')
-        ])
-
-
-        const definitionFile = TscCompiler.responseINterface
-            .replace(
-                "type soundListRuntime = string",
-                `type soundListRuntime = ${sounds.map(s => `'${s.key}'`).join(' | ')}`)
-
-
-        await Promise.all(senders.map(async sender => {
-            sender.transformation.forEach(tr => tr.definitionFile = definitionFile)
-        }))
+        const senders = await senderLoader.loadSenders()
         res.send(senders);
     }
     @POST({
@@ -145,6 +125,7 @@ export class SenderResource {
         sender.transformation.push(transform);
         await queries(sender);
         res.send(transform);
+        FrontendWebsocket.updateSenders()
     }
 
     @GET({

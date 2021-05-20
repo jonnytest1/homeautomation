@@ -21,3 +21,9 @@ hibernatetsMock.mapping.mockImplementation((...args) => {
     // console.log(...args)
     return (...args) => undefined
 })
+
+hibernatetsMock.queries.mockImplementation((...args) => {
+    return new Promise((resolver, catcher) => {
+        //unneccessary for now
+    })
+})

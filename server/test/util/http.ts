@@ -1,4 +1,5 @@
-import { HttpRequest, HttpResponse } from '../../express-wrapper';
+import { HttpRequest, HttpResponse } from 'express-hibernate-wrapper';
+
 
 
 jest.mock('../../util/settable');
