@@ -1,21 +1,21 @@
 <div class="container">
-  <mat-grid-list [cols]="cols"
-                 rowHeight="fit">
-    <mat-grid-tile *ngFor="let timer of timers">
+    <mat-grid-list [cols]="cols"
+                   rowHeight="fit">
+        <mat-grid-tile *ngFor="let timer of timers">
 
-      <circle-progress [percent]="getPercent(timer)"
-                       responsive="true"
-                       [subtitle]="getSubtitle(timer)"
-                       [outerStrokeWidth]="16"
-                       [innerStrokeWidth]="8"
-                       outerStrokeColor="#78C000"
-                       innerStrokeColor="#C7E596"
-                       [animation]="true"
-                       [animationDuration]="200">
-      </circle-progress>
-    </mat-grid-tile>
-    <mat-grid-tile *ngIf="timers && !timers.length">
-      Keine aktiven Timer
-    </mat-grid-tile>
-  </mat-grid-list>
+            <circle-progress [percent]="getPercent(timer)"
+                             responsive="true"
+                             [subtitle]="getSubtitle(timer)"
+                             [outerStrokeWidth]="16"
+                             [innerStrokeWidth]="8"
+                             outerStrokeColor="#78C000"
+                             innerStrokeColor="#C7E596"
+                             [animation]="true"
+                             [animationDuration]="100">
+            </circle-progress>
+        </mat-grid-tile>
+        <mat-grid-tile *ngIf="timers && !timers.length">
+            Keine aktiven Timer
+        </mat-grid-tile>
+    </mat-grid-list>
 </div>

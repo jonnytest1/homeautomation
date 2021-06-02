@@ -35,7 +35,7 @@ export class SettingsComponent implements OnInit, AfterViewInit, OnDestroy {
         private snack: MatSnackBar,
         private router: Router,
         private activeRoute: ActivatedRoute,
-        private service: SettingsService,
+        public service: SettingsService,
         private cdr: ChangeDetectorRef) {
 
         this.bottomSheetHandler = new BottomSheetHandler(this, this.router, this.activeRoute, snack);
@@ -43,7 +43,6 @@ export class SettingsComponent implements OnInit, AfterViewInit, OnDestroy {
             this.bottomSheetHandler.navigate('connection', data.con.id);
             // this.openSnackBar(data, ConnectionBottomsheetComponent)
         });
-
         service.senders$.subscribe(senders => {
             senders.forEach(sender => {
                 let foundSender = false;
@@ -64,8 +63,8 @@ export class SettingsComponent implements OnInit, AfterViewInit, OnDestroy {
             if (this.canvas) {
                 this.connectionHandler.setCanvas(this.canvas.nativeElement);
             }
-            setTimeout(() => {
-                this.bottomSheetHandler.checkSnackbar();
+            setTimeout(async () => {
+                await this.bottomSheetHandler.checkSnackbar(this.senders);
                 this.cdr.detectChanges();
             });
 

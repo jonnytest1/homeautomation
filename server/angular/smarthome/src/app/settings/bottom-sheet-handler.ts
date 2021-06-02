@@ -2,9 +2,11 @@ import { ConnectionBottomsheetComponent } from './connection-bottomsheet/connect
 import { ReceiverBottomsheetComponent } from './receiver-bottomsheet/receiver-bottomsheet.component';
 import { SenderBottomSheetComponent } from './sender-bottom-sheet/sender-bottom-sheet.component';
 import { SettingsComponent } from './settings.component';
+import { SenderFe } from './interfaces';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MatSnackBar, MatSnackBarRef } from '@angular/material/snack-bar';
 import { ComponentType } from '@angular/cdk/portal';
+import { combineLatest } from 'rxjs';
 
 
 type snackbarType = 'connection' | 'sender' | 'receiver';
@@ -15,19 +17,25 @@ export class BottomSheetHandler {
     paramType: string;
     id: string;
 
-
+    registeredSenderIds: Array<number> = [];
 
     constructor(
         private settingsComponent: SettingsComponent,
         private router: Router,
         private activeRoute: ActivatedRoute,
         private snack: MatSnackBar) {
+
         this.register();
     }
     register() {
-        this.activeRoute.queryParams.subscribe(() => {
-            this.checkSnackbar();
-        });
+        combineLatest([this.settingsComponent.service.senders$, this.activeRoute.queryParams])
+            .subscribe(([senders]) => {
+                if (!this.registeredSenderIds.some(id => id === +this.id)) {
+                    this.id = undefined;
+                }
+                this.checkSnackbar(senders);
+                this.registeredSenderIds = senders.map(sender => sender.id);
+            });
     }
 
     navigate(type: snackbarType, id: number) {
@@ -40,9 +48,9 @@ export class BottomSheetHandler {
         });
     }
 
-    checkSnackbar() {
-        const params = this.activeRoute.snapshot.queryParams;
-        const paramType: snackbarType = params.type;
+    checkSnackbar(senders: Array<SenderFe>) {
+        const params: Record<string, string> = this.activeRoute.snapshot.queryParams;
+        const paramType: snackbarType = params.type as snackbarType;
 
         let type: ComponentType<unknown>;
         let data;
@@ -57,27 +65,28 @@ export class BottomSheetHandler {
         }
 
         if (paramType === 'connection') {
-            if (!this.settingsComponent.senders) {
+            if (!senders) {
                 setTimeout(this.checkSnackbar.bind(this), 500);
                 return;
             }
             type = ConnectionBottomsheetComponent;
-            data = this.getConnectionData(params.id);
+            data = this.getConnectionData(+params.id);
             actionDismiss = () => {
                 this.settingsComponent.connectionHandler.drawConnections();
             };
         } else if (paramType === 'sender') {
             type = SenderBottomSheetComponent;
-            if (!this.settingsComponent.senders) {
+            if (!senders) {
                 setTimeout(this.checkSnackbar.bind(this), 500);
                 return;
             }
-            const senderIndex = this.settingsComponent.senders.findIndex(sender => sender.id === params.id);
-            data = this.settingsComponent.senders[senderIndex];
+
+            const senderIndex = senders.findIndex(sender => sender.id === +params.id);
+            data = senders[senderIndex];
             actionDismiss = () => {
                 this.settingsComponent.removeSenderByIndex(senderIndex);
             };
-            this.settingsComponent.connectionHandler.setAcvtiveSender(data);
+            this.settingsComponent.connectionHandler?.setAcvtiveSender(data);
         } else if (paramType === 'receiver') {
             if (!this.settingsComponent.receivers) {
                 return;

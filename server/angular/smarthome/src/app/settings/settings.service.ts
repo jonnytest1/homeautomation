@@ -45,7 +45,7 @@ export class SettingsService extends AbstractHttpService {
         };
     }
     updateSenders(data: Sender[]) {
-        const currentSenders = { ...this.senders$.value };
+        const currentSenders = [...this.senders$.value];
         data.forEach(sender => {
             const currentSender = currentSenders.find(cSender => cSender.id === sender.id);
             if (currentSender) {
