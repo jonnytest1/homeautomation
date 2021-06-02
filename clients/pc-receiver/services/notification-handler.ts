@@ -1,6 +1,6 @@
+import { Websocket } from 'express-hibernate-wrapper';
 import { existsSync, promises } from 'fs';
 
-import { Websocket } from '../../../server/express-ws-type';
 import { fetchHttps } from '../util/request';
 import { Audio, AudioPlayer } from './playsound';
 import { FrontendSound } from './server-interfaces';
@@ -65,7 +65,8 @@ export class NotificationHandler {
             //
             actions: actions,
             ...this.data.notification,
-            message: this.data.notification.body
+            message: this.data.notification.body,
+            wait: true,
         }, ((error, response: 'dismissed' | 'timeout' | (typeof actions[0]), metadata) => {
             console.log(`closing notification with ${response} timeout was ` + timeout);
             if (error) {

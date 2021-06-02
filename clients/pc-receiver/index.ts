@@ -1,8 +1,9 @@
-import { ExpressWs } from '../../server/express-ws-type';
+
 import { NotificationHandler } from './services/notification-handler';
 import registration from './services/registration';
 import { config } from "dotenv"
 import { UrlService } from './services/url-service';
+import { ExpressWs } from 'express-hibernate-wrapper';
 config();
 const express = require('express');
 const serverIp = process.env.serverip || '192.168.178.54'
