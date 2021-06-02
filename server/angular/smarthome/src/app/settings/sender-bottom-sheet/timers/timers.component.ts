@@ -13,7 +13,7 @@ import { combineLatest, Subscription, timer } from 'rxjs';
 })
 export class TimersComponent implements OnInit, OnDestroy {
 
-    timers: Array<TimerFe>;
+    timers: Array<TimerFe> = [];
 
     rowDef = '2:2';
 
@@ -23,22 +23,37 @@ export class TimersComponent implements OnInit, OnDestroy {
 
     subscription = new Subscription();
 
-    constructor(@Inject(MAT_DIALOG_DATA) public sender: SenderFe,
-        private service: SettingsService, private cdr: ChangeDetectorRef) {
+    first = true;
 
-        this.subscription.add(combineLatest([this.service.timers$, timer(0, 2000)])
+    constructor(@Inject(MAT_DIALOG_DATA) public sender: SenderFe,
+        private service: SettingsService,
+        private cdr: ChangeDetectorRef) {
+    }
+    ngOnInit() {
+        this.subscription.add(combineLatest([this.service.timers$, timer(0, 1000)])
             .subscribe(([timers]) => {
-                if (!this.timers) {
-                    this.timers = timers;
-                } else {
-                    const newTimers = timers.filter(potentiallyNewTimer => {
-                        return !this.timers.some(tm => tm.id === potentiallyNewTimer.id);
-                    });
-                    this.timers.push(...newTimers);
-                    this.timers = this.timers.filter(currentTimer => currentTimer.endtimestamp >= (Date.now() - (1000 * 60 * 60 * 4)));
+                this.updateTimers(timers);
+
+                if (this.first) {
+                    // honestly i have no clue why it doesnt work duirectly without this
+                    // otherwise it will only show the timers after the second timer the timer triggers
+                    // changedetection was run
+                    this.first = false;
+                    setTimeout(() => {
+                        this.cdr.markForCheck();
+                    }, 10);
                 }
-                this.recalc();
             }));
+
+    }
+    private updateTimers(timers: TimerFe[]) {
+
+        const newTimers = timers.filter(potentiallyNewTimer => {
+            return !this.timers.some(tm => tm.id === potentiallyNewTimer.id);
+        });
+        this.timers = this.timers.filter(currentTimer => currentTimer.endtimestamp >= (Date.now() - (1000 * 60 * 60 * 4)));
+        this.timers.push(...newTimers);
+        this.recalc();
     }
 
     private recalc() {
@@ -55,6 +70,8 @@ export class TimersComponent implements OnInit, OnDestroy {
             this.scaling = 80;
             this.rowDef = `2:1.2`;
         }
+
+        console.log('timers ' + JSON.stringify(this.timers), this.cols, this.rowDef);
         this.cdr.detectChanges();
     }
 
@@ -63,7 +80,6 @@ export class TimersComponent implements OnInit, OnDestroy {
     }
     getPercent(timerData: TimerFe) {
         const duration = this.getDuration(timerData);
-        this.cdr.markForCheck();
         const percent = 100 - Math.max(Math.round(this.getRemainingMillis(timerData) * 100 / duration), 0);
 
         if (!timerData.color) {
@@ -97,9 +113,6 @@ export class TimersComponent implements OnInit, OnDestroy {
 
     getRemainingMillis(timerData: TimerFe) {
         return Math.round((timerData.endtimestamp - Date.now()) * 100) / 100;
-    }
-    ngOnInit() {
-        //
     }
 
 }

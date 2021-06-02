@@ -39,8 +39,8 @@ export class OptionsComponent implements OnInit {
     }
 
     addFile() {
-        if (!this.addingSound.key || this.sounds.some(sound => sound.key == this.addingSound.key)) {
-            this.error = 'needs unique key'
+        if (!this.addingSound.key || this.sounds.some(sound => sound.key === this.addingSound.key)) {
+            this.error = 'needs unique key';
             return;
         }
         const addingSound = this.addingSound as Sound;
@@ -74,7 +74,7 @@ export class OptionsComponent implements OnInit {
         evt.preventDefault();
     }
     onDrop(event) {
-        if (event.addedFiles.length == 1) {
+        if (event.addedFiles.length === 1) {
             const fl: File = event.addedFiles[0];
             this.addingSound.file = fl;
             this.soundName = fl.name;

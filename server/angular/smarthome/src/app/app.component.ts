@@ -1,25 +1,27 @@
 import { Component } from '@angular/core';
+import { fromEvent } from 'rxjs';
+import { map } from 'rxjs/operators';
 @Component({
-  selector: 'app-root',
-  templateUrl: './app.component.html',
-  styleUrls: ['./app.component.less']
+    selector: 'app-root',
+    templateUrl: './app.component.html',
+    styleUrls: ['./app.component.less']
 })
 export class AppComponent {
-  title = 'smarthome';
+    constructor() {
+        //
+    }
+    title = 'smarthome';
 
-  mobile = AppComponent.isMobile()
-  constructor() {
-    //
-  }
-  contentOpened: boolean;
-  sidenavOpened: boolean;
-
-  leaveSideNav() {
-    this.sidenavOpened = false
-  }
+    mobile$ = AppComponent.isMobile();
+    contentOpened: boolean;
+    sidenavOpened: boolean;
 
 
-  public static isMobile() {
-    return window.innerWidth < 600;
-  }
+    public static isMobile() {
+        return fromEvent(window, 'resize').pipe(map(() => window.innerWidth < 600));
+    }
+
+    leaveSideNav() {
+        this.sidenavOpened = false;
+    }
 }
