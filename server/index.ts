@@ -15,8 +15,6 @@ const env = config({
 if (env.error) {
     throw env.error;
 }
-console.log(env.parsed);
-
 updateDatabase(__dirname + '/src')
     .then(async () => {
         let redirected = null;
