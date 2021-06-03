@@ -31,10 +31,7 @@
         "@typescript-eslint/ban-ts-comment": "off",
         "no-var": "warn",
         "prefer-const": "warn",
-        "indent": [
-            "warn",
-            4
-        ]
+        "indent": "off"
     },
     "extends": [
         "eslint:recommended",
