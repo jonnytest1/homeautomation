@@ -41,7 +41,9 @@ export class FrontendWebsocket {
 
     static sendToWebsocket<T extends keyof SocketResponses>(ws: Websocket, data: { type: T, data: SocketResponses[T] }) {
         if (ws.readyState !== ws.OPEN) {
-            setTimeout(this.sendToWebsocket, 200, data)
+            setTimeout(() => {
+                this.sendToWebsocket(ws, data)
+            }, 200)
             return
         }
         ws.send(JSON.stringify(data))
