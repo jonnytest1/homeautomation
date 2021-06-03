@@ -30,7 +30,7 @@ export class TimersComponent implements OnInit, OnDestroy {
         private cdr: ChangeDetectorRef) {
     }
     ngOnInit() {
-        this.subscription.add(combineLatest([this.service.timers$, timer(0, 1000)])
+        this.subscription.add(combineLatest([this.service.timers$, timer(0, 600)])
             .subscribe(([timers]) => {
                 this.updateTimers(timers);
 

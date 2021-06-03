@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { fromEvent } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { map, startWith } from 'rxjs/operators';
 @Component({
     selector: 'app-root',
     templateUrl: './app.component.html',
@@ -18,7 +18,10 @@ export class AppComponent {
 
 
     public static isMobile() {
-        return fromEvent(window, 'resize').pipe(map(() => window.innerWidth < 600));
+        return fromEvent(window, 'resize').pipe(
+            map(() => window.innerWidth < 600),
+            startWith(window.innerWidth < 600)
+        );
     }
 
     leaveSideNav() {

@@ -29,7 +29,7 @@ export class SettingsComponent implements OnInit, AfterViewInit, OnDestroy {
 
     bottomSheetHandler: BottomSheetHandler;
 
-    isMobile = AppComponent.isMobile();
+    isMobile$ = AppComponent.isMobile();
 
     constructor(
         private snack: MatSnackBar,

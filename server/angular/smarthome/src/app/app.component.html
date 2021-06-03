@@ -11,7 +11,7 @@
                (mouseover)="$event.target.click()"
                (click)="leaveSideNav()"
                routerLinkActive="activeRoute"
-               [routerLink]="(mobile$|async)?'setup/mobile':'setup'">
+               [routerLink]="(mobile$|async) ? 'setup/mobile':'setup'">
                 Setup
             </a>
             <a mat-list-item

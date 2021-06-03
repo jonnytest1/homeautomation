@@ -1,7 +1,7 @@
 import { Sender as NodeSender } from '../../../../../models/sender';
 import { Timer } from '../../../../../models/timer';
 import { Transformation } from '../../../../../models/transformation';
-import { SocketResponses as sR } from "../../../../../resources/frontend-update"
+import { SocketResponses as sR } from "../../../../../resources/websocket-response"
 
 export type SocketResponses = sR;
 
