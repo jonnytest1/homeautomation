@@ -6,10 +6,10 @@ import { dbwrapper } from "./util/mock-db-wrapper"
 //jest.mock('../models/receiver')
 // Sender Resource needs to be imported after mocks have been registered
 import { SenderResource } from '../src/resources/sender.r';
-import { ResponseCodeError } from '../src/util/express-util.ts/response-code-error';
 import { getSenderObject } from './util/object/sender-object';
 import { TimerFactory } from '../src/services/timer-factory';
 import { ReceiverData } from '../src/models/receiver-data';
+import { ResponseCodeError } from 'express-hibernate-wrapper';
 
 describe("triggertest", () => {
 
@@ -18,13 +18,13 @@ describe("triggertest", () => {
 
 
     test("with should get 404 with sender not found", async () => {
-        dbwrapper.loadOne.mockImplementation(() => {
-            throw new ResponseCodeError(404, ``)
-        });
+
+        const error = new ResponseCodeError(404, 'test')
+        dbwrapper.loadOne.mockRejectedValue(error);
         const sender = new SenderResource()
         const response = mockRepsonse();
 
-        await expect(sender.trigger(mockRequest({ deviceKey: "test" }), response)).rejects.toThrow(ResponseCodeError)
+        await expect(sender.trigger(mockRequest({ deviceKey: "test" }), response)).rejects.toEqual(error)
 
     })
 
