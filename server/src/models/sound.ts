@@ -1,5 +1,5 @@
 
-import { autosaveable, getter } from '../express-db-wrapper';
+import { autosaveable, getter } from '../util/express-db-wrapper';
 
 import { settable } from '../util/settable';
 import { column, primary, table } from 'hibernatets';

@@ -1,6 +1,6 @@
 
 import { FrontendWebsocket } from './frontend-update';
-import { loadOne } from '../express-db-wrapper';
+import { loadOne } from '../util/express-db-wrapper';
 import { BatteryLevel } from '../models/battery';
 import { EventHistory } from '../models/event';
 import { Sender } from '../models/sender';

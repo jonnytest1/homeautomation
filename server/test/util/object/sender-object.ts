@@ -1,7 +1,7 @@
-import { Connection } from '../../../models/connection';
-import { Receiver } from '../../../models/receiver';
-import { Sender } from '../../../models/sender';
-import { Transformation } from '../../../models/transformation';
+import { Connection } from '../../../src/models/connection';
+import { Receiver } from '../../../src/models/receiver';
+import { Sender } from '../../../src/models/sender';
+import { Transformation } from '../../../src/models/transformation';
 
 export function getSenderObject(transformationJs: string, connectiontransform?: string, options: {
     errors?: number

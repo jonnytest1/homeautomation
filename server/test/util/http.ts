@@ -1,10 +1,8 @@
-import { HttpRequest, HttpResponse } from 'express-hibernate-wrapper';
+import type { HttpRequest, HttpResponse } from 'express-hibernate-wrapper';
 
+jest.mock('../../src/util/settable');
 
-
-jest.mock('../../util/settable');
-
-const settableImport = require('../../util/settable');
+const settableImport = require('../../src/util/settable');
 settableImport.settable.mockImplementation(() => undefined)
 export function mockRequest(body): HttpRequest {
     return {

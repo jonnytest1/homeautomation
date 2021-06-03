@@ -3,7 +3,7 @@ import { Receiver } from './receiver';
 import { Transformation } from './transformation';
 import { Transformer } from './transformer';
 import type { ReceiverData } from './receiver-data';
-import { autosaveable } from '../express-db-wrapper';
+import { autosaveable } from '../util/express-db-wrapper';
 import { column, mapping, Mappings, primary, table } from 'hibernatets';
 
 

@@ -1,6 +1,6 @@
 import type { ReceiverData } from './receiver-data';
 import type { EvaluatedData } from './evaluated-data';
-import { autosaveable } from '../express-db-wrapper';
+import { autosaveable } from '../util/express-db-wrapper';
 import { firebasemessageing, FireBaseMessagingPayload } from '../services/firebasemessaging';
 import ws from '../services/websocketmessaging';
 import { logKibana } from '../util/log';

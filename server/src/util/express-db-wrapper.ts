@@ -1,7 +1,7 @@
 
-import { ResponseCodeError } from './util/express-util.ts/response-code-error';
-import { logKibana } from './util/log';
-import { assign } from './util/settable';
+import { ResponseCodeError } from './express-util.ts/response-code-error';
+import { logKibana } from './log';
+import { assign } from './settable';
 import { getDBConfig } from 'hibernatets/utils';
 import { load, queries, remove, save } from 'hibernatets';
 import { HttpRequest, resources } from 'express-hibernate-wrapper';

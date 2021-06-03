@@ -1,5 +1,5 @@
-var mkdirp = require('mkdirp');
-var fs = require('fs');
+const mkdirp = require('mkdirp');
+const fs = require('fs');
 const path = require('path');
 export async function writeFileDir(filePath, contents) {
     return new Promise(async res => {

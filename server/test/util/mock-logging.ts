@@ -1,6 +1,6 @@
-import * as logging from '../../util/log';
+import * as logging from '../../src/util/log';
 
-jest.mock('../../util/log')
+jest.mock('../../src/util/log')
 
 export const mockedLogging = logging as jest.Mocked<typeof logging>;
 

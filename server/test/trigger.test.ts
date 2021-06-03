@@ -6,11 +6,11 @@ import { dbwrapper } from "./util/mock-db-wrapper"
 
 //jest.mock('../models/receiver')
 // Sender Resource needs to be imported after mocks have been registered
-import { SenderResource } from '../resources/sender.r';
-import { ResponseCodeError } from '../util/express-util.ts/response-code-error';
+import { SenderResource } from '../src/resources/sender.r';
+import { ResponseCodeError } from '../src/util/express-util.ts/response-code-error';
 import { getSenderObject } from './util/object/sender-object';
-import { TimerFactory } from '../services/timer-factory';
-import { ReceiverData } from '../models/receiver-data';
+import { TimerFactory } from '../src/services/timer-factory';
+import { ReceiverData } from '../src/models/receiver-data';
 
 describe("triggertest", () => {
 

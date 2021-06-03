@@ -1,5 +1,5 @@
-import { EventScheduler } from './services/event-scheduler';
-import { logKibana } from './util/log';
+import { EventScheduler } from './src/services/event-scheduler';
+import { logKibana } from './src/util/log';
 import { updateDatabase } from 'hibernatets';
 import { HttpRequest, initialize } from 'express-hibernate-wrapper';
 import { config } from 'dotenv';
@@ -17,10 +17,10 @@ if (env.error) {
 }
 console.log(env.parsed);
 
-updateDatabase(__dirname + '/models')
+updateDatabase(__dirname + '/src')
     .then(async () => {
         let redirected = null;
-        await initialize(__dirname + '/resources', {
+        await initialize(__dirname + '/src/resources', {
             prereesources: app => {
                 app.use((req: HttpRequest, res, next) => {
                     const forwardedFor = req.headers.http_x_forwarded_for;

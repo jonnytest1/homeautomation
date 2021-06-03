@@ -1,7 +1,7 @@
 import { ConnectionFe, ReceiverFe, ResponseData, SenderFe, TimerFe, TransformFe } from './interfaces';
 import { environment } from '../../environments/environment';
 import { AbstractHttpService } from '../utils/http-service';
-import { Sender } from '../../../../../models/sender';
+import { Sender } from '../../../../../src/models/sender';
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';

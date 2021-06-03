@@ -4,12 +4,12 @@ import { hibernatetsMock } from './util/mockhibernatets';
 import "./util/mock-db-wrapper"
 import { getSenderObject } from './util/object/sender-object';
 
-import { EventScheduler } from '../services/event-scheduler';
-import { Timer } from '../models/timer';
-import type { Transformation } from '../models/transformation';
-import { TimerFactory } from '../services/timer-factory';
-import { ReceiverData } from '../models/receiver-data';
-import type { ConnectionResponse } from '../models/connection-response';
+import { EventScheduler } from '../src/services/event-scheduler';
+import { Timer } from '../src/models/timer';
+import type { Transformation } from '../src/models/transformation';
+import { TimerFactory } from '../src/services/timer-factory';
+import { ReceiverData } from '../src/models/receiver-data';
+import type { ConnectionResponse } from '../src/models/connection-response';
 
 describe("test stuff wroks when calling with timer", () => {
     hibernatetsMock.load.mockReturnValue(null);
