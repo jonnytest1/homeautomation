@@ -1,6 +1,6 @@
 
-import { Delayed as Delayed, TransformationRes } from './connection-response';
-import { Transformation } from './transformation';
+import type { Delayed as Delayed, TransformationRes } from './connection-response';
+import type { Transformation } from './transformation';
 import { runInNewContext } from 'vm';
 
 

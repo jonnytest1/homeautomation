@@ -1,4 +1,4 @@
-import { SenderResponse } from '../models/connection-response';
+import type { SenderResponse } from '../models/connection-response';
 import { Websocket, WS } from 'express-hibernate-wrapper';
 import { client as WebSocketClient } from 'websocket';
 

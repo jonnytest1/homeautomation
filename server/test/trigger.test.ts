@@ -9,7 +9,8 @@ import { dbwrapper } from "./util/mock-db-wrapper"
 import { SenderResource } from '../resources/sender.r';
 import { ResponseCodeError } from '../util/express-util.ts/response-code-error';
 import { getSenderObject } from './util/object/sender-object';
-import { Timer } from '../models/timer';
+import { TimerFactory } from '../services/timer-factory';
+import { ReceiverData } from '../models/receiver-data';
 
 describe("triggertest", () => {
 
@@ -49,7 +50,7 @@ describe("triggertest", () => {
 
         await sender.trigger(mockRequest({ deviceKey: "test", tKey: "transformValue" }), response)
 
-        expect(senderObject.connections[0].receiver.send).toHaveBeenCalledWith({ "response": { "tag": "transformatonName" }, "withRequest": true })
+        expect(senderObject.connections[0].receiver.send).toHaveBeenCalledWith(new ReceiverData({ "response": { "tag": "transformatonName" }, "withRequest": true }))
         expect(response.values.status).toBe(200)
     })
 
@@ -68,7 +69,7 @@ describe("triggertest", () => {
                 }
             })
         })`)
-        const mockFnc = Timer.start = jest.fn()
+        const mockFnc = TimerFactory.create = jest.fn()
         hibernatetsMock.load.mockImplementation(async () => {
             return senderObject as any;
         });

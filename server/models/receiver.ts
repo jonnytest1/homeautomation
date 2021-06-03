@@ -1,11 +1,11 @@
-import { NotificationData, SenderResponse, SoundType } from './connection-response';
-import { Sound } from './sound';
+import type { ReceiverData } from './receiver-data';
+import type { EvaluatedData } from './evaluated-data';
 import { autosaveable } from '../express-db-wrapper';
 import { firebasemessageing, FireBaseMessagingPayload } from '../services/firebasemessaging';
 import ws from '../services/websocketmessaging';
 import { logKibana } from '../util/log';
 import { settable } from '../util/settable';
-import { column, load, primary, table } from 'hibernatets';
+import { column, primary, table } from 'hibernatets';
 
 const fetch = require('node-fetch');
 @table()
@@ -43,11 +43,11 @@ export class Receiver {
         //
     }
 
-    async send(data: SenderResponse | false): Promise<number> {
+    async send(data: ReceiverData | false): Promise<number> {
         if (!data) {
             return;
         }
-        const evaluatedData = await this.evaluateData(data);
+        const evaluatedData = await data.evaluate();
 
         switch (this.type) {
             case "ws":
@@ -64,18 +64,20 @@ export class Receiver {
 
 
     }
-    sendForIp(evaluatedData: SenderResponse<string>): number {
+    sendForIp(evaluatedData: EvaluatedData): number {
         fetch(`http://${this.ip}`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
             },
-            body: JSON.stringify(evaluatedData)
+            body: JSON.stringify(evaluatedData.data)
         })
         return 0;
     }
 
-    private sendForWebsocket(evaluatedData: SenderResponse<string>): number {
+    private sendForWebsocket(evaluatedDataObj: EvaluatedData): number {
+        const evaluatedData = evaluatedDataObj.data
+        console.log(`notification to ${this.ip} for ${evaluatedData.notification.title}`)
         ws.sendWebsocket(this.ip, evaluatedData)
             .then(response => {
                 if (response === "dismissed") {
@@ -86,11 +88,14 @@ export class Receiver {
                         });
                     }
                 }
-            });
+            }).catch(e => {
+                logKibana("ERROR", "failed connecting to websocket", e)
+            })
         return 0;
     }
 
-    private async sendForFirebase(evaluatedData: SenderResponse<string>): Promise<number> {
+    private async sendForFirebase(evaluatedDataObj: EvaluatedData): Promise<number> {
+        const evaluatedData = evaluatedDataObj.data
         const firebaseData = evaluatedData as FireBaseMessagingPayload
 
         console.log(`sending push notification for ${this.name}`);
@@ -114,38 +119,5 @@ export class Receiver {
             }
         }
         return response.failureCount;
-    }
-
-    async evaluateData(data: SenderResponse): Promise<SenderResponse<string>> {
-        const evaluatedData = {
-            ...data,
-        }
-        if (evaluatedData.notification) {
-            evaluatedData.notification = await this.getNotificationData(evaluatedData.notification)
-        }
-
-        return evaluatedData as SenderResponse<string>;
-    }
-
-    async getNotificationData(notificationData?: NotificationData): Promise<NotificationData<string>> {
-        const notificationObj = {
-            ...notificationData
-        }
-        if (notificationObj.sound) {
-            notificationObj.sound = await this.evaluateSounds(notificationData.sound)
-        }
-        return notificationObj as NotificationData<string>
-    }
-
-    async evaluateSounds(sound: SoundType): Promise<string> {
-        if (sound instanceof Array) {
-            return sound[Math.floor(Math.random() * sound.length)]
-        }
-        if (sound === "*") {
-            const sounds = await load(Sound, "TRUE=TRUE")
-            const soundKeys = sounds.map(sound => sound.key)
-            return soundKeys[Math.floor(Math.random() * soundKeys.length)]
-        }
-        return sound;
     }
 }

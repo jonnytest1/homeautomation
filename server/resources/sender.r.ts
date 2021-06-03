@@ -10,6 +10,7 @@ import { ResponseCodeError } from '../util/express-util.ts/response-code-error';
 import { logKibana } from '../util/log';
 import { assign } from '../util/settable';
 import { senderLoader } from '../services/sender-loader';
+import { SenderTriggerService } from '../services/sender-trigger-service';
 import { DataBaseBase } from 'hibernatets/mariadb-base';
 import { load, queries, save } from 'hibernatets';
 import { Path, POST, HttpRequest, HttpResponse, GET } from 'express-hibernate-wrapper';
@@ -26,7 +27,7 @@ export class SenderResource {
             deep: ['connections', 'receiver', "transformer", "transformation"]
         });
         try {
-            const responses = await sender.trigger(req.body);
+            const responses = await new SenderTriggerService(sender).trigger(req.body);
             if (responses.reduce<number>((a, b) => b.error ? b.error + a : a, 0) > 0) {
                 res.status(500)
                     .send();

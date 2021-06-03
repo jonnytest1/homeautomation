@@ -1,6 +1,6 @@
 
 
-interface TransformationRes extends SenderResponse {
+export interface TransformationRes extends SenderResponse {
     status?: number;
     error?: number;
 

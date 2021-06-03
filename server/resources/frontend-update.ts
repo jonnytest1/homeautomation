@@ -1,14 +1,8 @@
+import type { SocketResponses } from './websocket-response';
 import { Timer } from '../models/timer';
-import { Sender } from '../models/sender';
 import { senderLoader } from '../services/sender-loader';
 import { HttpRequest, Websocket, WS } from 'express-hibernate-wrapper';
 import { load } from 'hibernatets';
-
-export interface SocketResponses {
-    timerUpdate: Array<Timer>
-
-    senderUpdate: Array<Sender>
-}
 
 
 @WS({ path: "/updates" })
@@ -46,6 +40,10 @@ export class FrontendWebsocket {
     }
 
     static sendToWebsocket<T extends keyof SocketResponses>(ws: Websocket, data: { type: T, data: SocketResponses[T] }) {
+        if (ws.readyState !== ws.OPEN) {
+            setTimeout(this.sendToWebsocket, 200, data)
+            return
+        }
         ws.send(JSON.stringify(data))
     }
 

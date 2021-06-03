@@ -6,7 +6,10 @@ import { getSenderObject } from './util/object/sender-object';
 
 import { EventScheduler } from '../services/event-scheduler';
 import { Timer } from '../models/timer';
-import { Transformation } from '../models/transformation';
+import type { Transformation } from '../models/transformation';
+import { TimerFactory } from '../services/timer-factory';
+import { ReceiverData } from '../models/receiver-data';
+import type { ConnectionResponse } from '../models/connection-response';
 
 describe("test stuff wroks when calling with timer", () => {
     hibernatetsMock.load.mockReturnValue(null);
@@ -54,11 +57,11 @@ describe("test stuff wroks when calling with timer", () => {
             }
 
         }) as any)
-        const mockFnc = Timer.start = jest.fn()
+        const mockFnc = TimerFactory.create = jest.fn()
 
         const eventScheduler = new EventScheduler();
         await eventScheduler.checkTimers()
-        expect(sender.connections[0].receiver.send).toHaveBeenCalledWith({
+        expect(sender.connections[0].receiver.send).toHaveBeenCalledWith(new ReceiverData({
             ...{
                 "notification": {
                     "body": "NotificationBody",
@@ -67,7 +70,7 @@ describe("test stuff wroks when calling with timer", () => {
                 }
             },
             usedTransformation
-        })
+        } as ConnectionResponse))
         const timerCall = mockFnc.mock.calls[0];
         expect(timerCall[1]).toBe("checkPromise")
         expect(timerCall[2].nestedObject.notification.body).toBe("SecondTimerBody")

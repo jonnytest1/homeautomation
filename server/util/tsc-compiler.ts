@@ -1,8 +1,8 @@
+import { convertToOS, writeFileDir } from './file';
+import { logKibana } from './log';
 import { promises } from 'fs';
 import { join } from 'path';
 
-import { convertToOS, writeFileDir } from './file';
-import { logKibana } from './log';
 
 
 
