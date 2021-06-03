@@ -4,6 +4,8 @@
         "module": "commonjs",
         "baseUrl": "./",
         "moduleResolution": "node",
+        "isolatedModules": true,
+        "importsNotUsedAsValues": "error",
         "target": "es6",
         "typeRoots": [
             "node_modules/@types",
