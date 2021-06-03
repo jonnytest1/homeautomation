@@ -1,6 +1,5 @@
 
 import { FrontendWebsocket } from './frontend-update';
-import { loadOne } from '../util/express-db-wrapper';
 import { BatteryLevel } from '../models/battery';
 import { EventHistory } from '../models/event';
 import { Sender } from '../models/sender';
@@ -8,9 +7,9 @@ import { Timer } from '../models/timer';
 import { Transformation } from '../models/transformation';
 import { ResponseCodeError } from '../util/express-util.ts/response-code-error';
 import { logKibana } from '../util/log';
-import { assign } from '../util/settable';
 import { senderLoader } from '../services/sender-loader';
 import { SenderTriggerService } from '../services/sender-trigger-service';
+import { assign, loadOne } from 'express-hibernate-wrapper';
 import { DataBaseBase } from 'hibernatets/mariadb-base';
 import { load, queries, save } from 'hibernatets';
 import { Path, POST, HttpRequest, HttpResponse, GET } from 'express-hibernate-wrapper';

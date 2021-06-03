@@ -1,10 +1,9 @@
 import type { ReceiverData } from './receiver-data';
 import type { EvaluatedData } from './evaluated-data';
-import { autosaveable } from '../util/express-db-wrapper';
 import { firebasemessageing, FireBaseMessagingPayload } from '../services/firebasemessaging';
 import ws from '../services/websocketmessaging';
 import { logKibana } from '../util/log';
-import { settable } from '../util/settable';
+import { autosaveable, settable } from 'express-hibernate-wrapper';
 import { column, primary, table } from 'hibernatets';
 
 const fetch = require('node-fetch');

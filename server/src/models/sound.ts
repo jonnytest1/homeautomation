@@ -1,7 +1,7 @@
 
-import { autosaveable, getter } from '../util/express-db-wrapper';
 
-import { settable } from '../util/settable';
+import { autosaveable, getter, settable } from 'express-hibernate-wrapper';
+
 import { column, primary, table } from 'hibernatets';
 import type { HttpRequest } from 'express-hibernate-wrapper';
 

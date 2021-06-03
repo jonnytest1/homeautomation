@@ -1,6 +1,6 @@
 
-import { autosaveable } from '../util/express-db-wrapper';
-import { settable } from '../util/settable';
+
+import { autosaveable, settable } from 'express-hibernate-wrapper';
 import { column, primary, table } from 'hibernatets';
 
 @table()

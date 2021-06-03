@@ -5,9 +5,9 @@ import { EventHistory } from './event';
 import { Transformation } from './transformation';
 import { Transformer } from './transformer';
 import type { TransformationRes } from './connection-response';
-import { settable } from '../util/settable';
-import { autosaveable } from '../util/express-db-wrapper';
+
 import { logKibana } from '../util/log';
+import { autosaveable, settable } from 'express-hibernate-wrapper';
 import { column, mapping, Mappings, primary, table } from 'hibernatets';
 import { ResponseCodeError } from 'express-hibernate-wrapper';
 

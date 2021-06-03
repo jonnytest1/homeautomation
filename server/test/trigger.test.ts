@@ -1,7 +1,6 @@
 /* eslint-disable import/order */
 import { mockRepsonse, mockRequest } from './util/http';
 import { mockedLogging } from './util/mock-logging';
-import { hibernatetsMock } from './util/mockhibernatets';
 import { dbwrapper } from "./util/mock-db-wrapper"
 
 //jest.mock('../models/receiver')
@@ -19,7 +18,9 @@ describe("triggertest", () => {
 
 
     test("with should get 404 with sender not found", async () => {
-        hibernatetsMock.load.mockReturnValue(null);
+        dbwrapper.loadOne.mockImplementation(() => {
+            throw new ResponseCodeError(404, ``)
+        });
         const sender = new SenderResource()
         const response = mockRepsonse();
 
@@ -44,9 +45,7 @@ describe("triggertest", () => {
          })`
         )
 
-        hibernatetsMock.load.mockImplementation(async () => {
-            return senderObject as any;
-        });
+        dbwrapper.loadOne.mockReturnValue(Promise.resolve(senderObject));
 
         await sender.trigger(mockRequest({ deviceKey: "test", tKey: "transformValue" }), response)
 
@@ -70,9 +69,7 @@ describe("triggertest", () => {
             })
         })`)
         const mockFnc = TimerFactory.create = jest.fn()
-        hibernatetsMock.load.mockImplementation(async () => {
-            return senderObject as any;
-        });
+        dbwrapper.loadOne.mockReturnValue(Promise.resolve(senderObject));
 
         await sender.trigger(mockRequest({ deviceKey: "test", tKey: "transformValue" }), response)
 

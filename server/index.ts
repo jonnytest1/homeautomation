@@ -1,7 +1,7 @@
 import { EventScheduler } from './src/services/event-scheduler';
 import { logKibana } from './src/util/log';
 import { updateDatabase } from 'hibernatets';
-import { HttpRequest, initialize } from 'express-hibernate-wrapper';
+import { HttpRequest, initialize, ResponseCodeError } from 'express-hibernate-wrapper';
 import { config } from 'dotenv';
 const fetch = require('node-fetch');
 const NodeMediaServer = require('node-media-server');
@@ -19,6 +19,13 @@ updateDatabase(__dirname + '/src')
     .then(async () => {
         let redirected = null;
         await initialize(__dirname + '/src/resources', {
+            errorCallback: (e) => {
+                if (e instanceof ResponseCodeError) {
+                    logKibana("DEBUG", "response code error", e)
+                } else {
+                    logKibana("ERROR", "error in request handling", e)
+                }
+            },
             prereesources: app => {
                 app.use((req: HttpRequest, res, next) => {
                     const forwardedFor = req.headers.http_x_forwarded_for;

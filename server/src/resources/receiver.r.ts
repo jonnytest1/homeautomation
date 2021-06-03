@@ -1,7 +1,7 @@
 import { FrontendWebsocket } from './frontend-update';
 import { Receiver } from '../models/receiver';
 import { logKibana } from '../util/log';
-import { assign } from '../util/settable';
+import { assign } from 'express-hibernate-wrapper';
 import { load, save } from 'hibernatets';
 import { Path, POST, GET, HttpResponse } from 'express-hibernate-wrapper';
 
