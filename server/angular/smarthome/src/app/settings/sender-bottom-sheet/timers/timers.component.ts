@@ -36,7 +36,7 @@ export class TimersComponent implements OnInit, OnDestroy {
 
                 if (this.first) {
                     // honestly i have no clue why it doesnt work duirectly without this
-                    // otherwise it will only show the timers after the second timer the timer triggers
+                    // otherwise it will only show the timers after the second time the timer triggers
                     // changedetection was run
                     this.first = false;
                     setTimeout(() => {
@@ -70,8 +70,6 @@ export class TimersComponent implements OnInit, OnDestroy {
             this.scaling = 80;
             this.rowDef = `2:1.2`;
         }
-
-        console.log('timers ' + JSON.stringify(this.timers), this.cols, this.rowDef);
         this.cdr.detectChanges();
     }
 
