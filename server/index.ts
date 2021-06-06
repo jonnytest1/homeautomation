@@ -1,5 +1,6 @@
 import { EventScheduler } from './src/services/event-scheduler';
 import { logKibana } from './src/util/log';
+import { startNodeRed } from './src/node-red/server';
 import { updateDatabase } from 'hibernatets';
 import { HttpRequest, initialize, ResponseCodeError } from 'express-hibernate-wrapper';
 import { config } from 'dotenv';
@@ -98,7 +99,12 @@ const mediaServerConfig = {
 };
 const nodeMediaServer = new NodeMediaServer(mediaServerConfig)
 nodeMediaServer.run();
+
+startNodeRed()
+
 /*
+
+
 
 app.get('/dbtest', async (req, res) => {
     res.send('helloo worl.d');
