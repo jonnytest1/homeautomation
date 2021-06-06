@@ -4,50 +4,68 @@ import { Observable } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 
 
+function base64ify(value: string) {
+    try {
+        btoa(value);
+        return value;
+    } catch (e) {
+        return value.replace(/./g, c => {
+            if (c.charCodeAt(0) > 256) {
+                return '_';
+            }
+            return c;
+        });
+    }
+}
+
 export async function logKibana(level: 'INFO' | 'ERROR' | 'DEBUG', message, error?) {
     let logStack;
     try {
         throw new Error('origin');
     } catch (e) {
-        logStack = e.stack;
+        logStack = base64ify(e.stack);
     }
 
+    const devMode = location.host === 'localhost:4200';
     let jsonData: { [key: string]: string } = {
         Severity: level,
-        application: `SmartHomeFe${location.host === 'localhost:4200' ? '_debug' : ''}`,
+        application: `SmartHomeFe${devMode ? '_debug' : ''}`,
         log_stack: logStack
     };
     if (!message && error) {
-        jsonData.message = error.message;
+        jsonData.message = base64ify(error.message);
     } else if (message instanceof Object) {
         if (message['message']) {
-            jsonData.message = message['message'];
+            jsonData.message = base64ify(message['message']);
             delete message['message'];
             for (const i in message) {
                 if (typeof message[i] !== 'number' && typeof message[i] !== 'string') {
-                    jsonData[i] = JSON.stringify(message[i]);
+                    jsonData[i] = base64ify(JSON.stringify(message[i]));
                 } else {
-                    jsonData[i] = message[i];
+                    jsonData[i] = base64ify(message[i]);
                 }
             }
         } else {
-            jsonData.message = JSON.stringify(message);
+            jsonData.message = base64ify(JSON.stringify(message));
         }
     } else {
-        jsonData.message = message;
+        jsonData.message = base64ify(message);
     }
     if (error) {
         const displayMessage = jsonData.message;
         jsonData = { ...jsonData, ...error };
-        jsonData.error_message = error.message;
-        jsonData.error_stacktrace = error.stack;
+        jsonData.error_message = base64ify(error.message);
+        jsonData.error_stacktrace = base64ify(error.stack);
 
         if (displayMessage && error.message) {
-            jsonData.message = displayMessage;
+            jsonData.message = base64ify(displayMessage);
         }
 
     }
     console.log(jsonData);
+    if (devMode) {
+        return;
+    }
     fetch(`https://pi4.e6azumuvyiabvs9s.myfritz.net/tm/libs/log/index.php`, {
         method: 'POST',
         headers: {
@@ -77,6 +95,7 @@ export class CustomGlobalErrorHandler implements ErrorHandler {
 
     handleError(error: Error): void {
         logKibana('ERROR', 'global error', error);
+        console.error(error);
     }
 
 }

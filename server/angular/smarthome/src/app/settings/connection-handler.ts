@@ -27,6 +27,9 @@ export class ConnectionHandler {
     }
 
     drawConnections() {
+        if (!this.util) {
+            return;
+        }
         const nativeCanvas = this.util.canvas;
 
         const height = getComputedStyle(nativeCanvas.parentElement).height;
@@ -42,7 +45,7 @@ export class ConnectionHandler {
         let startY;
         let endY;
 
-        const offsetMod = -26;
+        const offsetMod = -34;
         receivers.forEach(receiver => {
             const connection = this.activeSender.connections
                 .find(con => `${con.receiver.id}` === receiver.attributes.getNamedItem('item').value);
@@ -70,8 +73,9 @@ export class ConnectionHandler {
 
         senders.forEach(sender => {
             if (sender.attributes.getNamedItem('item').value === `${this.activeSender.id}`) {
-                const top = sender.offsetTop + offsetMod;
-                const heightForSender = Math.floor((top + (top + sender.offsetHeight)) / 2);
+                const iconElement = sender.parentElement.querySelector<HTMLElement>('.mat-icon.startConnection');
+                const top = iconElement.offsetTop;
+                const heightForSender = Math.floor((top - 1 + (top + iconElement.offsetHeight)) / 2);
                 if (!startY || heightForSender < startY) {
                     startY = heightForSender;
                 }
@@ -123,7 +127,7 @@ export class ConnectionHandler {
             const connection = await this.service.addConnection(this.activeSender.deviceKey, item.id).toPromise();
 
             newConnection.id = connection.id;
-            newConnection.transformation.id = connection.transformation.id
+            newConnection.transformation.id = connection.transformation.id;
 
             this.addingSender = undefined;
             this.drawConnections();

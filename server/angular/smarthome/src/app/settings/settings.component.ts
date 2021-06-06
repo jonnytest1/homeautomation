@@ -57,6 +57,10 @@ export class SettingsComponent implements OnInit, AfterViewInit, OnDestroy {
                     this.senders.push(sender);
                 }
             });
+            setTimeout(() => {
+                // gotta wait till its drawn to dom
+                this.connectionHandler.drawConnections();
+            }, 10);
         });
 
         this.fetchData().then(() => {

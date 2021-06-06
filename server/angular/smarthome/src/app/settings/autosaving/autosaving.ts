@@ -8,14 +8,14 @@ export const ROOT_AUTOSAVE_PATH = new InjectionToken<string>('AUTO_SAVE_PATH');
 })
 export class AutosavingDirective implements OnInit {
     constructor(
-        @Inject(ROOT_AUTOSAVE_PATH) private rootPath: string,
+        @Inject(ROOT_AUTOSAVE_PATH) rootPath: string,
 
         @Optional() private itemProvider: AutosavingDirectiveProvider,
-        private elementRef: ElementRef,
+        elementRef: ElementRef,
         private ngModelRef: NgModel,
 
         @Optional() @Self() @Inject(NG_VALUE_ACCESSOR) private asd: ControlValueAccessor[],
-        private http: HttpClient) {
+        http: HttpClient) {
 
         ngModelRef.control.setAsyncValidators(async (control) => {
             if (this.value === control.value || this.duringConstructor || control.pristine) {
@@ -88,11 +88,9 @@ export class AutosavingDirective implements OnInit {
         });
 
 
-        ngModelRef.valueChanges.subscribe(newValue => {
-            //
-
-
-        });
+        /* ngModelRef.valueChanges.subscribe(newValue => {
+             //
+         });*/
 
         this.duringConstructor = false;
     }
