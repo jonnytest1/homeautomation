@@ -28,6 +28,10 @@ updateDatabase(__dirname + '/src')
                 }
             },
             prereesources: app => {
+                app.use((req, res, next) => {
+                    res.header('Access-Control-Allow-Methods', '*');
+                    next();
+                });
                 app.use((req: HttpRequest, res, next) => {
                     const forwardedFor = req.headers.http_x_forwarded_for;
                     if ((!forwardedFor || typeof forwardedFor !== 'string' || !forwardedFor.startsWith('192.168.178')) && process.env.DEBUG !== "true") {
