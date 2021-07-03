@@ -10,6 +10,27 @@ import { map, tap } from 'rxjs/operators';
 import { v4 as uuid } from 'uuid';
 
 
+let ws: WebSocket;
+let service: SettingsService;
+
+function openWebsocket() {
+    ws = new WebSocket(getRelativeWebsocketUrl());
+    ws.onclose = () => {
+        openWebsocket();
+    };
+    ws.onmessage = (e) => {
+        service.onMessage(e);
+    };
+}
+openWebsocket();
+
+function getRelativeWebsocketUrl() {
+    const baseUri = new URL(environment.prefixPath || document.baseURI);
+    baseUri.protocol = `ws${!environment.insecureWebsocket ? 's' : ''}://`;
+    baseUri.pathname += 'rest/updates';
+    return baseUri.href;
+}
+
 @Injectable({ providedIn: 'root' })
 export class SettingsService extends AbstractHttpService {
 
@@ -23,26 +44,20 @@ export class SettingsService extends AbstractHttpService {
 
     constructor(http: HttpClient, router: Router) {
         super(http, router);
-        this.connectWebsocket();
+        service = this;
 
         this.getSenders().toPromise().then(senders => {
             this.senders$.next(senders);
         });
     }
 
-    private connectWebsocket() {
-        this.websocket = new WebSocket(this.getRelativeWebsocketUrl());
-        this.websocket.onclose = () => {
-            this.connectWebsocket();
-        };
-        this.websocket.onmessage = (message: MessageEvent<string>) => {
-            const messageEvent: ResponseData = JSON.parse(message.data);
-            if (messageEvent.type === 'timerUpdate') {
-                this.timers.next(messageEvent.data);
-            } else if (messageEvent.type === 'senderUpdate') {
-                this.updateSenders(messageEvent.data as Sender[]);
-            }
-        };
+    public onMessage(message: MessageEvent<string>) {
+        const messageEvent: ResponseData = JSON.parse(message.data);
+        if (messageEvent.type === 'timerUpdate') {
+            this.timers.next(messageEvent.data);
+        } else if (messageEvent.type === 'senderUpdate') {
+            this.updateSenders(messageEvent.data as Sender[]);
+        }
     }
     updateSenders(data: Sender[]) {
         const currentSenders = [...this.senders$.value];
@@ -63,12 +78,6 @@ export class SettingsService extends AbstractHttpService {
         this.senders$.next(currentSenders);
     }
 
-    private getRelativeWebsocketUrl() {
-        const baseUri = new URL(environment.prefixPath || document.baseURI);
-        baseUri.protocol = `ws${!environment.insecureWebsocket ? 's' : ''}://`;
-        baseUri.pathname += 'rest/updates';
-        return baseUri.href;
-    }
 
     addConnection(deviceKey: string, receiverId: number) {
         return this.post<ConnectionFe>(`${environment.prefixPath}rest/connection`, {

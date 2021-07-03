@@ -4,7 +4,6 @@ import { ConnectionHandler } from './connection-handler';
 import { ReceiverFe, SenderFe } from './interfaces';
 import { SettingsService } from './settings.service';
 import { AppComponent } from '../app.component';
-import { Observable } from 'rxjs';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { AfterViewInit, ChangeDetectorRef, Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
@@ -22,17 +21,13 @@ export class SettingsComponent implements OnInit, AfterViewInit, OnDestroy {
     canvas: ElementRef<HTMLCanvasElement>;
     connectionHandler: ConnectionHandler;
     receivers: ReceiverFe[];
-    data$: Observable<[SenderFe[], ReceiverFe[]]>;
-
-
-    interval;
 
     bottomSheetHandler: BottomSheetHandler;
 
     isMobile$ = AppComponent.isMobile();
 
     constructor(
-        private snack: MatSnackBar,
+        snack: MatSnackBar,
         private router: Router,
         private activeRoute: ActivatedRoute,
         public service: SettingsService,
@@ -44,19 +39,7 @@ export class SettingsComponent implements OnInit, AfterViewInit, OnDestroy {
             // this.openSnackBar(data, ConnectionBottomsheetComponent)
         });
         service.senders$.subscribe(senders => {
-            senders.forEach(sender => {
-                let foundSender = false;
-                this.senders.forEach(sender2 => {
-                    if (sender.id === sender2.id) {
-                        foundSender = true;
-                        sender2.batteryEntries = sender.batteryEntries;
-                        sender2.events = sender.events;
-                    }
-                });
-                if (!foundSender) {
-                    this.senders.push(sender);
-                }
-            });
+            this.senders = senders
             setTimeout(() => {
                 // gotta wait till its drawn to dom
                 this.connectionHandler.drawConnections();
@@ -88,12 +71,11 @@ export class SettingsComponent implements OnInit, AfterViewInit, OnDestroy {
         this.bottomSheetHandler.navigate('sender', sender.id);
     }
     private fetchData() {
-        return Promise.all([this.service.getSenders().toPromise().then(senders => {
-            this.senders = senders;
-        }),
-        this.service.getReceivers().toPromise().then(receivers => {
-            this.receivers = receivers;
-        })]);
+        return Promise.all([
+            this.service.senders$.toPromise(),
+            this.service.getReceivers().toPromise().then(receivers => {
+                this.receivers = receivers;
+            })]);
     }
 
     setActive(sender: SenderFe, event: MouseEvent) {
@@ -102,7 +84,6 @@ export class SettingsComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     ngOnDestroy(): void {
-        clearInterval(this.interval);
         this.bottomSheetHandler.dismiss();
     }
 
