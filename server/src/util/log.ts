@@ -7,7 +7,7 @@ export async function logKibana(level: 'INFO' | 'ERROR' | 'DEBUG', message, erro
     };
     if (!message && error) {
         jsonData.message = error.message;
-    } else if (message instanceof Object) {
+    } else if (typeof message === "object") {
         if (message['message']) {
             jsonData.message = message['message'];
             delete message['message'];

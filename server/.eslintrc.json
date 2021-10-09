@@ -6,6 +6,21 @@
         "import",
         "unused-imports"
     ],
+    "overrides": [
+        {
+            "files": [
+                "**/*.d.ts"
+            ],
+            "rules": {
+                "@typescript-eslint/consistent-type-imports": [
+                    "warn",
+                    {
+                        "prefer": "type-imports"
+                    }
+                ],
+            }
+        }
+    ],
     "rules": {
         "import/order": [
             "warn",

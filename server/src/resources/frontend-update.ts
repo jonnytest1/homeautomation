@@ -9,10 +9,8 @@ import { load } from 'hibernatets';
 export class FrontendWebsocket {
 
     static websockets: Array<Websocket> = []
-
-
     static async updateTimers() {
-        const timers = await load(Timer, `alerted='false' AND timerClassName='Sender'`)
+        const timers = await load(Timer, Timer.timerQuery)
         this.websockets.forEach(async (socket) => {
             this.sendToWebsocket(socket, {
                 type: "timerUpdate",
@@ -32,7 +30,7 @@ export class FrontendWebsocket {
     }
 
     static async updateTimersForSocket(socket) {
-        const timers = await load(Timer, `alerted='false' AND timerClassName='Sender'`)
+        const timers = await load(Timer, Timer.timerQuery)
         this.sendToWebsocket(socket, {
             type: "timerUpdate",
             data: timers

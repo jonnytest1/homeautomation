@@ -29,7 +29,6 @@ export class ConnectionResource {
     @GET({
         path: 'key'
     })
-
     async getKeys(req: HttpRequest, res: HttpResponse) {
         const connection = await load(Connection, +req.query.itemRef, [], { deep: ["transformer"] });
         res.send(connection.getContextKeys());

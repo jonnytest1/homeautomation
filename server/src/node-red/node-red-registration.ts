@@ -40,7 +40,7 @@ interface SendData {
 }
 
 
-export class SuperNode {
+export abstract class SuperNode {
 
     declare send: (data: SendData | Array<SendData>) => void
     declare on: (eventType: "close" | "input", callback: (e) => void) => void

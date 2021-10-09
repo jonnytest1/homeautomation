@@ -32,6 +32,13 @@ updateDatabase(__dirname + '/src')
                     res.header('Access-Control-Allow-Methods', '*');
                     next();
                 });
+                app.use((req, res, next) => {
+                    if (req.path == "/healthcheck") {
+                        res.status(200).send("OK")
+                        return;
+                    }
+                    next();
+                })
                 app.use((req: HttpRequest, res, next) => {
                     const forwardedFor = req.headers.http_x_forwarded_for;
                     if ((!forwardedFor || typeof forwardedFor !== 'string' || !forwardedFor.startsWith('192.168.178')) && process.env.DEBUG !== "true") {

@@ -3,6 +3,7 @@ import { column, primary, table } from 'hibernatets';
 
 @table()
 export class Timer {
+    static timerQuery = "(alerted='false' OR endtimestamp > (UNIX_TIMESTAMP(DATE_ADD(NOW(),INTERVAL -1 DAY)))*1000) AND timerClassName='Sender'"
 
     constructor(options?: { startTimestamp: number, endtimestamp: number, args: Array<unknown>, className: string, classId: number, data?}) {
         if (options) {

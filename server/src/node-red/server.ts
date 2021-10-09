@@ -139,9 +139,11 @@ export async function startNodeRed() {
             settings.uiPort = 1880;
         }
 
+        settings.uiHost = "0.0.0.0";
 
-        settings.uiHost = settings.uiHost || "0.0.0.0";
-
+        if (process.env.RED_USER_DIR) {
+            flowFile = path.join(process.env.RED_USER_DIR, "flow.json")
+        }
         if (flowFile) {
             settings.flowFile = flowFile;
         }

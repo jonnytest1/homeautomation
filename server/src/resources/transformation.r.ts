@@ -4,8 +4,6 @@ import { DataBaseBase } from 'hibernatets/mariadb-base';
 
 @Path("transformation")
 export class TransformationResource {
-
-
     @GET({
         path: "keys/:senderid"
     })

@@ -3,6 +3,7 @@ import { ConnectionService } from './connection-service';
 import type { TransformationRes } from '../models/connection-response';
 import type { Sender } from '../models/sender';
 import type { Transformation } from '../models/transformation';
+import { SmartHomeTrigger } from '../node-red/register-custom-type';
 
 export class SenderTriggerService {
 
@@ -11,6 +12,7 @@ export class SenderTriggerService {
     }
 
     async trigger(body: unknown) {
+        SmartHomeTrigger.instances.forEach(i => i.trigger(body))
 
         const { usedTransformation, responseData } = await this.sender.transformData(body)
 

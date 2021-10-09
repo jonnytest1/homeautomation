@@ -30,13 +30,13 @@ const frontendType: () => TypeRegistration = () => ({
         RED.editor.validateNode(this)
         debugger;
         console.log(...args);
-    }, label: () => {
-        return 'Test12'
     }
 })
 
 
-class Test extends SuperNode {
+export class SmartHomeTrigger extends SuperNode {
+    static instances: Array<SmartHomeTrigger> = []
+
 
     static frontendDefinition = frontendType
 
@@ -52,6 +52,8 @@ class Test extends SuperNode {
 
     constructor(context: Context & { props: { key: string } }) {
         super(context);
+
+        SmartHomeTrigger.instances.push(this)
         console.log(this.context().keys())
 
         this.on("input", data => {
@@ -66,6 +68,18 @@ class Test extends SuperNode {
             }]);
         })
 
+        this.on("close", resolver => {
+            SmartHomeTrigger.instances = SmartHomeTrigger.instances.filter(instance => instance !== this)
+            resolver()
+        })
+
+    }
+
+    trigger(reqBody) {
+        this.send({
+            payload: reqBody,
+            topic: "triggered"
+        })
     }
 }
 
@@ -74,7 +88,7 @@ class Test extends SuperNode {
 export async function registration() {
     registerType({
         moduleName: "smarthome",
-        classRef: Test
+        classRef: SmartHomeTrigger
     })
 
 }
