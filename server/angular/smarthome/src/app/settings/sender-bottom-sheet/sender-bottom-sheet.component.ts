@@ -24,7 +24,7 @@ export class SenderBottomSheetComponent implements OnInit {
         private cdr: ChangeDetectorRef) {
 
 
-        this.transformer = this.sort(this.data.transformation)[0] || {};
+        this.transformer = this.data.transformation[0] || {};
 
         this.title$ = this.service.getSenderTitleKeys(this.data.id);
     }
@@ -78,24 +78,5 @@ export class SenderBottomSheetComponent implements OnInit {
             && this.transformer.tsTransformation.includes('promise')) {
             this.displayTimers();
         }
-    }
-
-    sort(array: Array<TransformFe>): Array<TransformFe> {
-        array.sort((tr1, tr2) => {
-            return this.getHistoryCount(tr2) - this.getHistoryCount(tr1);
-        });
-        return array;
-    }
-
-    getHistoryCount(transformer: TransformFe) {
-        if (transformer.historyCount === undefined) {
-            transformer.historyCount = this.data.events.filter((event: EventHistoryFe) => {
-                if (!event.parsedData) {
-                    event.parsedData = JSON.parse(event.data);
-                }
-                return event.parsedData.message === transformer.transformationKey;
-            }).length;
-        }
-        return transformer.historyCount;
     }
 }

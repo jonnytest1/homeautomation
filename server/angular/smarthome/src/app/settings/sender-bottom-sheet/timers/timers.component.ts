@@ -51,7 +51,7 @@ export class TimersComponent implements OnInit, OnDestroy {
         const newTimers = timers.filter(potentiallyNewTimer => {
             return !this.timers.some(tm => tm.id === potentiallyNewTimer.id);
         });
-        this.timers = this.timers.filter(currentTimer => currentTimer.endtimestamp >= (Date.now() - (1000 * 60 * 60 * 4)));
+        this.timers = this.timers.filter(currentTimer => currentTimer.endtimestamp >= (Date.now() - (1000 * 60 * 60 * 24)));
         this.timers.push(...newTimers);
         this.recalc();
     }

@@ -1,12 +1,13 @@
 
 import { BottomSheetHandler } from './bottom-sheet-handler';
 import { ConnectionHandler } from './connection-handler';
-import { ReceiverFe, SenderFe } from './interfaces';
+import type { ReceiverFe, SenderFe } from './interfaces';
 import { SettingsService } from './settings.service';
 import { AppComponent } from '../app.component';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { AfterViewInit, ChangeDetectorRef, Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { AfterViewInit, ChangeDetectorRef, ElementRef, OnDestroy, OnInit } from '@angular/core';
+import { Component, ViewChild } from '@angular/core';
 
 @Component({
     selector: 'app-settings',
@@ -39,7 +40,7 @@ export class SettingsComponent implements OnInit, AfterViewInit, OnDestroy {
             // this.openSnackBar(data, ConnectionBottomsheetComponent)
         });
         service.senders$.subscribe(senders => {
-            this.senders = senders
+            this.senders = senders;
             setTimeout(() => {
                 // gotta wait till its drawn to dom
                 this.connectionHandler.drawConnections();

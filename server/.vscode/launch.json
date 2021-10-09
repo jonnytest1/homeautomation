@@ -15,6 +15,15 @@
         },
         {
             "type": "node",
+            "request": "attach",
+            "name": "smarthome rndm",
+            "address": "192.168.178.54",
+            "port": 20001,
+            "localRoot": "${workspaceFolder}",
+            "remoteRoot": "/var/node"
+        },
+        {
+            "type": "node",
             "request": "launch",
             "name": "launch node ts server",
             //"program": "${workspaceFolder}\\index.ts",

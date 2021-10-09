@@ -11,20 +11,21 @@ import { ActivatedRoute, Router } from '@angular/router';
 export class TransformerDropDownComponent implements OnInit {
 
     @Input()
-    public data: SenderFe
+    public data: SenderFe;
 
     @Input()
-    transformer: TransformFe = {}
+    transformer: TransformFe = {};
 
     @Output()
-    transformerChange: EventEmitter<TransformFe> = new EventEmitter<TransformFe>()
+    transformerChange: EventEmitter<TransformFe> = new EventEmitter<TransformFe>();
 
-    missingKeys: Array<string>
+    missingKeys: Array<string>;
 
 
     changeFnc;
 
-    constructor(private service: SettingsService, private cdr: ChangeDetectorRef, private router: Router, private activeRoute: ActivatedRoute) {
+    constructor(private service: SettingsService,
+        private cdr: ChangeDetectorRef, private router: Router, private activeRoute: ActivatedRoute) {
     }
 
     ngOnInit() {
@@ -33,39 +34,42 @@ export class TransformerDropDownComponent implements OnInit {
                 queryParams: {
                     transformer: event.id
                 },
-                queryParamsHandling: "merge"
-            })
-        })
+                queryParamsHandling: 'merge'
+            });
+        });
 
         const params = this.activeRoute.snapshot.queryParams;
         if (params.transformer) {
-            this.transformer = this.data.transformation.find(transofmrer => transofmrer.id == params.transformer)
+            this.transformer = this.data.transformation.find(transofmrer => transofmrer.id === +params.transformer) || this.transformer;
         }
-        this.transformerChange.emit(this.transformer)
+        this.transformerChange.emit(this.transformer);
 
-        this.service.getMissingSenderKeys(this.data.id).toPromise().then(keys => {
-            this.missingKeys = keys;
-            this.cdr.detectChanges();
+        this.service.senders$.subscribe(() => {
+            this.service.getMissingSenderKeys(this.data.id).toPromise().then(keys => {
+                this.missingKeys = keys;
+                this.cdr.detectChanges();
+            });
         });
+
     }
     concat(ar1: Array<string>, ar2: Array<TransformFe>): Array<string | TransformFe> {
         return [...(ar1 || []), ...ar2];
     }
 
     async checkNew(el: TransformFe) {
-        this.transformerChange.emit(el)
+        this.transformerChange.emit(el);
         if (el.id === undefined) {
             const response = await this.service.createTransformer(el, this.data.id).toPromise();
             el.id = response.id;
             this.data.transformation.push(el);
-            this.missingKeys.splice(this.missingKeys.indexOf(el.transformationKey), 1)
+            this.missingKeys.splice(this.missingKeys.indexOf(el.transformationKey), 1);
         }
-        this.cdr.markForCheck()
+        this.cdr.markForCheck();
     }
 
     transformationLoeschen(evt: MouseEvent) {
 
-        evt.stopPropagation()
-        evt.preventDefault()
+        evt.stopPropagation();
+        evt.preventDefault();
     }
 }

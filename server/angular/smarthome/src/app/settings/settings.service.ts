@@ -1,7 +1,6 @@
-import { ConnectionFe, ReceiverFe, ResponseData, SenderFe, TimerFe, TransformFe } from './interfaces';
+import { ConnectionFe, EventHistoryFe, ReceiverFe, ResponseData, SenderFe, TimerFe, TransformFe } from './interfaces';
 import { environment } from '../../environments/environment';
 import { AbstractHttpService } from '../utils/http-service';
-import { Sender } from '../../../../../src/models/sender';
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
@@ -47,7 +46,7 @@ export class SettingsService extends AbstractHttpService {
         service = this;
 
         this.getSenders().toPromise().then(senders => {
-            this.senders$.next(senders);
+            this.updateSenders(senders);
         });
     }
 
@@ -56,13 +55,13 @@ export class SettingsService extends AbstractHttpService {
         if (messageEvent.type === 'timerUpdate') {
             this.timers.next(messageEvent.data);
         } else if (messageEvent.type === 'senderUpdate') {
-            this.updateSenders(messageEvent.data as Sender[]);
+            this.updateSenders(messageEvent.data as SenderFe[]);
         }
     }
-    updateSenders(data: Sender[]) {
+    updateSenders(data: SenderFe[]) {
         const currentSenders = [...this.senders$.value];
         data.forEach(sender => {
-            const currentSender = currentSenders.find(cSender => cSender.id === sender.id);
+            let currentSender = currentSenders.find(cSender => cSender.id === sender.id);
             if (currentSender) {
                 currentSender.batteryEntries = sender.batteryEntries;
                 currentSender.events = sender.events;
@@ -70,12 +69,31 @@ export class SettingsService extends AbstractHttpService {
                 delete sender.batteryEntries;
                 Object.apply(currentSender, sender);
             } else {
+                currentSender = sender;
                 currentSenders.push(sender);
             }
+            this.sort(currentSender.transformation, currentSender.events);
         });
 
 
         this.senders$.next(currentSenders);
+    }
+
+    sort(array: Array<TransformFe>, events: SenderFe['events']): Array<TransformFe> {
+        array.sort((tr1, tr2) => {
+            return this.getHistoryCount(tr2, events) - this.getHistoryCount(tr1, events);
+        });
+        return array;
+    }
+
+    getHistoryCount(transformer: TransformFe, events: SenderFe['events']) {
+        transformer.historyCount = events.filter((event: EventHistoryFe) => {
+            if (!event.parsedData) {
+                event.parsedData = JSON.parse(event.data);
+            }
+            return event.parsedData.message === transformer.transformationKey;
+        }).length;
+        return transformer.historyCount;
     }
 
 

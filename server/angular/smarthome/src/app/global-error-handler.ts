@@ -4,7 +4,7 @@ import { Observable } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 
 
-function base64ify(value: string) {
+function base64safe(value: string) {
     try {
         btoa(value);
         return value;
@@ -23,42 +23,50 @@ export async function logKibana(level: 'INFO' | 'ERROR' | 'DEBUG', message, erro
     try {
         throw new Error('origin');
     } catch (e) {
-        logStack = base64ify(e.stack);
+        logStack = base64safe(e.stack);
     }
 
     const devMode = location.host === 'localhost:4200';
-    let jsonData: { [key: string]: string } = {
+    const jsonData: { [key: string]: string } = {
         Severity: level,
         application: `SmartHomeFe${devMode ? '_debug' : ''}`,
         log_stack: logStack
     };
     if (!message && error) {
-        jsonData.message = base64ify(error.message);
+        jsonData.message = base64safe(error.message);
     } else if (message instanceof Object) {
         if (message['message']) {
-            jsonData.message = base64ify(message['message']);
+            jsonData.message = base64safe(message['message']);
             delete message['message'];
             for (const i in message) {
                 if (typeof message[i] !== 'number' && typeof message[i] !== 'string') {
-                    jsonData[i] = base64ify(JSON.stringify(message[i]));
+                    jsonData[i] = base64safe(JSON.stringify(message[i]));
                 } else {
-                    jsonData[i] = base64ify(message[i]);
+                    jsonData[i] = base64safe(message[i]);
                 }
             }
         } else {
-            jsonData.message = base64ify(JSON.stringify(message));
+            jsonData.message = base64safe(JSON.stringify(message));
         }
     } else {
-        jsonData.message = base64ify(message);
+        jsonData.message = base64safe(message);
     }
     if (error) {
         const displayMessage = jsonData.message;
-        jsonData = { ...jsonData, ...error };
-        jsonData.error_message = base64ify(error.message);
-        jsonData.error_stacktrace = base64ify(error.stack);
+        // tslint:disable-next-line: forin
+        for (const key in error) {
+            try {
+                JSON.stringify(error[key]);
+                jsonData['error_' + key] = base64safe(error[key]);
+            } catch (e) {
+                jsonData['error_' + key] = `${error[key]}`;
+            }
+        }
+        jsonData.error_message = base64safe(error.message);
+        jsonData.error_stacktrace = base64safe(error.stack);
 
         if (displayMessage && error.message) {
-            jsonData.message = base64ify(displayMessage);
+            jsonData.message = base64safe(displayMessage);
         }
 
     }
