@@ -75,7 +75,7 @@ export class SenderResource {
         path: ":senderid/timers"
     })
     async getTimers(req: HttpRequest, res) {
-        res.send(await load(Timer, `alerted='false' AND timerClassId=${+req.params.senderid} AND timerClassName='Sender'`));
+        res.send(await load(Timer, `alerted='false' AND timerClassId=? AND timerClassName='Sender'`, [+req.params.senderid]));
     }
 
     @POST({ path: '' })

@@ -14,13 +14,22 @@ export class ReceiverResource {
     async register(req, res) {
         const existingSender = await load(Receiver, s => s.deviceKey = req.body.deviceKey, [], { first: true });
         if (existingSender) {
+            if (existingSender.type == "ws" || existingSender.type == "ip" || existingSender.type == "http") {
+                let newIp = req.headers.http_x_forwarded_for
+                if (req.body.port) {
+                    newIp += `:${req.body.port}`;
+                }
+                if (newIp != existingSender.ip) {
+                    existingSender.ip = newIp
+                }
+            }
             logKibana('INFO', `receiver already exists with id ${req.body.deviceKey}`);
             res.status(409)
                 .send(existingSender);
             return;
         }
         const receiver = new Receiver();
-        if (req.body.type === 'ip' || req.body.type === 'wss') {
+        if (req.body.type === 'ip' || req.body.type === 'wss' || req.body.type === 'http') {
             receiver.ip = req.headers.http_x_forwarded_for;
             if (req.body.port) {
                 receiver.ip += `:${req.body.port}`;

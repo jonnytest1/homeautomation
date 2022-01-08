@@ -34,9 +34,13 @@ export class Receiver {
     @column()
     ip: string;
 
+
+    /**
+     * ip is deprecated
+     */
     @settable
     @column()
-    type: 'ip' | 'firebase' | 'ws';
+    type: 'ip' | 'firebase' | 'ws' | "http";
 
     constructor() {
         //
@@ -54,6 +58,7 @@ export class Receiver {
             case "firebase":
                 return await this.sendForFirebase(evaluatedData);
             case "ip":
+            case "http":
                 return await this.sendForIp(evaluatedData);
             default:
                 return 0;
