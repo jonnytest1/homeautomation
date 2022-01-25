@@ -1,7 +1,7 @@
 
 
-import { Sound } from '../../../server/models/sound';
-import { Receiver } from '../../../server/models/receiver';
+import { Sound } from '../../../server/src/models/sound';
+import { Receiver } from '../../../server/src/models/receiver';
 
 type Primitives = string | number | boolean | Date | undefined;
 

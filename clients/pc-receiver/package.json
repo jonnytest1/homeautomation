@@ -1,35 +1,35 @@
 {
-    "name": "pcreceiver",
-    "version": "1.0.0",
-    "description": "node",
-    "main": "index.ts",
-    "dependencies": {
-        "atob": "^2.1.2",
-        "dotenv": "",
-        "express": "^4.17.1",
-        "express-ws": "^4.0.0",
-        "node-fetch": "^2.6.0",
-        "node-notifier": "^8.0.0",
-        "express-hibernate-wrapper": "^1.0.11",
-        "nodemon": "^2.0.4",
-        "play-sound": "^1.1.3",
-        "typescript": "",
-        "websocket": "^1.0.32"
+  "name": "pcreceiver",
+  "version": "1.0.0",
+  "description": "node",
+  "main": "index.ts",
+  "dependencies": {
+    "atob": "^2.1.2",
+    "clap-detector": "^0.5.3",
+    "dotenv": "",
+    "express": "^4.17.1",
+    "express-hibernate-wrapper": "^1.0.11",
+    "express-ws": "^4.0.0",
+    "node-fetch": "^2.6.0",
+    "node-notifier": "^8.0.0",
+    "nodemon": "^2.0.4",
+    "typescript": "",
+    "websocket": "^1.0.32"
+  },
+  "devDependencies": {
+    "@types/firebase": "^3.2.1",
+    "@types/express": "",
+    "ts-node": "",
+    "tslint": ""
+  },
+  "nodemonConfig": {
+    "execMap": {
+      "ts": "npm install && node -r ts-node/register"
     },
-    "devDependencies": {
-        "@types/firebase": "^3.2.1",
-        "@types/express": "",
-        "ts-node": "",
-        "tslint": ""
-    },
-    "nodemonConfig": {
-        "execMap": {
-            "ts": "npm install && node -r ts-node/register"
-        },
-        "verbose": true,
-        "ignore": [
-            "package-lock.json"
-        ],
-        "delay": "0"
-    }
+    "verbose": true,
+    "ignore": [
+      "package-lock.json"
+    ],
+    "delay": "0"
+  }
 }

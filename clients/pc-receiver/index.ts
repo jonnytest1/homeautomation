@@ -4,12 +4,20 @@ import registration from './services/registration';
 import { config } from "dotenv"
 import { UrlService } from './services/url-service';
 import { ExpressWs } from 'express-hibernate-wrapper';
+import ClapDetector from "clap-detector"
+import { RepeatingAudio } from './services/repeating-audio-player';
 config();
 const express = require('express');
 const serverIp = process.env.serverip || '192.168.178.54'
 const listenOnPort = process.env.listenport || '12345'
-
-
+/*
+const clap = new ClapDetector({
+    CLAP_AMPLITUDE_THRESHOLD: 0.4, CLAP_ENERGY_THRESHOLD: 0.2,
+})
+clap.addClapsListener(claps => {
+    console.log("heard 1 clap", claps)
+}, { number: 1, delay: 0, force: true })
+*/
 
 registration.register(serverIp, +listenOnPort)
     .then(() => {

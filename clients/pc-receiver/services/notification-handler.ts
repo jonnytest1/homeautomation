@@ -2,22 +2,24 @@ import { Websocket } from 'express-hibernate-wrapper';
 import { existsSync, promises } from 'fs';
 
 import { fetchHttps } from '../util/request';
-import { Audio, AudioPlayer } from './playsound';
+import { RepeatingAudio } from './repeating-audio-player';
 import { FrontendSound } from './server-interfaces';
 
 const notifier = require('node-notifier');
-var player: AudioPlayer = require('play-sound')({
-    player: 'C:\\Program Files\\VideoLAN\\VLC\\vlc.exe',
-});
 
-interface AudioRef {
-    audio: Audio
+
+interface NotificationData {
+    notification: {
+        sound: string,
+        volume?: string | number
+        title: string
+        body?: string
+    }
 }
+
 export class NotificationHandler {
 
-    data: any;
-
-    readonly prefixPath = 'D:\\Jonathan\\Projects\\node\\homeautomation\\clients\\pc-receiver\\services\\sounds\\';
+    data: NotificationData;
 
     constructor(data, private serverIp) {
         this.data = data;
@@ -25,9 +27,6 @@ export class NotificationHandler {
     }
 
     async show(ws: Websocket) {
-        const audioRef: AudioRef = {
-            audio: null
-        }
         console.log(new Date().toLocaleString(), this.data.notification.title)
         if (this.data.notification.sound && typeof this.data.notification.sound === 'string') {
             if (this.data.notification.sound.match(/[^a-zA-Z0-9]/g)) {
@@ -35,7 +34,7 @@ export class NotificationHandler {
                 return;
             }
 
-            if (!existsSync(this.prefixPath + this.data.notification.sound)) {
+            if (!existsSync(RepeatingAudio.prefixPath + this.data.notification.sound)) {
                 const soundRequestUrl = new URL(`${this.serverIp}rest/auto/sound/bykey/${encodeURIComponent(this.data.notification.sound)}`);
                 const response = await fetchHttps<Array<FrontendSound>>(soundRequestUrl.href)
                 if (response.status != 200) {
@@ -45,14 +44,12 @@ export class NotificationHandler {
                 const responseBlob = (await response.json())[0];
                 const charCodeArray: Array<number> = responseBlob.bytes.split(",")
                     .map(c => +c)
-                await promises.writeFile(this.prefixPath + this.data.notification.sound, Uint8Array.from(charCodeArray))
+                await promises.writeFile(RepeatingAudio.prefixPath + this.data.notification.sound, Uint8Array.from(charCodeArray))
             }
 
-
-            this.playSound(this.data.notification.sound, audioRef);
-            this.data.notification.sound = false;
         }
 
+        const audio = new RepeatingAudio(this.data.notification.sound, this.data.notification.volume)
         const actions = ['do1', 'do2'];
 
         if (!this.data.notification.body && this.data.notification.title) {
@@ -79,53 +76,7 @@ export class NotificationHandler {
                     console.error(e);
                 }
             }
-
-
-            if (audioRef.audio) {
-                if (!audioRef.audio.kill()) {
-                    audioRef.audio.killed = true;
-                }
-            } else if (this.data.notification.sound) {
-                console.log("audio undefined");
-                setTimeout(() => {
-                    if (audioRef.audio && !audioRef.audio.killed) {
-                        audioRef.audio.kill();
-                    }
-                }, 1000)
-            }
-        }).bind(this));
-    }
-
-    playSound(sound: string, audioRef: AudioRef) {
-        const args = ['--intf', 'dummy', '--no-loop', '--play-and-exit'];
-        if (this.data.notification.volume) {
-            args.push(`--mmdevice-volume=0.1`);
-            args.push(`--directx-volume=0.1`);
-            args.push(`--waveout-volume=0.1`);
-            args.push(`--volume=10`);
-        }
-        console.log("playing sound")
-        if (sound.match(/[^a-zA-Z0-9]/g)) {
-            console.error("invalid sound string");
-            return;
-        }
-        audioRef.audio = player.play(this.prefixPath + sound, {
-            'C:\\Program Files\\VideoLAN\\VLC\\vlc.exe': args
-        }, ((err) => {
-            if (!audioRef.audio.killed) {
-                setTimeout(() => {
-                    if (!audioRef.audio.killed) {
-                        audioRef.audio.kill();
-                        this.playSound(sound, audioRef)
-                    }
-                }, 500)
-            } else {
-                console.log("stoppping")
-            }
-
-            if (err) {
-                console.error(err);
-            }
+            audio.stop()
         }).bind(this));
     }
 }
