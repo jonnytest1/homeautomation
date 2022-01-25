@@ -25,9 +25,19 @@ export async function logKibana(level: 'INFO' | 'ERROR' | 'DEBUG', message, erro
         jsonData.message = message;
     }
     if (error) {
-        jsonData = { ...jsonData, ...error };
-        jsonData.error_message = error.message;
-        jsonData.error_stacktrace = error.stack;
+        if (typeof error == "string") {
+            jsonData = {
+                ...jsonData,
+                error_message: error
+            };
+        } else {
+            jsonData = {
+                ...jsonData,
+                ...error
+            };
+            jsonData.error_message = error.message;
+            jsonData.error_stacktrace = error.stack;
+        }
     }
     console.log(jsonData);
     fetch(`https://pi4.e6azumuvyiabvs9s.myfritz.net/tm/libs/log/index.php`, {

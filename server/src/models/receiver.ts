@@ -93,7 +93,10 @@ export class Receiver {
                     }
                 }
             }).catch(e => {
-                logKibana("ERROR", "failed connecting to websocket", e)
+                logKibana("ERROR", {
+                    message: "failed connecting to websocket",
+                    evluatedObj: evaluatedDataObj
+                }, e)
             })
         return 0;
     }
