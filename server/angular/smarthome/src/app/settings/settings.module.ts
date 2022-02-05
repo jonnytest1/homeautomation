@@ -67,13 +67,13 @@ export class MyHammerConfig extends HammerGestureConfig {
         MatBottomSheetModule, HttpClientModule, MatDialogModule,
         MatSnackBarModule, MatInputModule, MatButtonModule
     ],
-    providers: [SettingsService, {
+    providers: [{
         provide: ROOT_AUTOSAVE_PATH,
         useValue: environment.prefixPath + 'rest/auto/'
     }, {
-            provide: HAMMER_GESTURE_CONFIG,
-            useClass: MyHammerConfig
-        },],
+        provide: HAMMER_GESTURE_CONFIG,
+        useClass: MyHammerConfig
+    },],
     bootstrap: []
 })
 export class SettingsModule { }

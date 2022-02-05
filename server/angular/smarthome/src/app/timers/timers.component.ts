@@ -1,16 +1,13 @@
-import { SenderFe, TimerFe } from '../../interfaces';
-import { SettingsService } from '../../settings.service';
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Inject, OnDestroy, OnInit } from '@angular/core';
-import { MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
 import { combineLatest, Subscription, timer } from 'rxjs';
-import { TimerParser } from '../../../utils/time-parser';
-
+import { SenderFe, TimerFe } from '../settings/interfaces';
+import { SettingsService } from '../settings/settings.service';
+import { TimerParser } from '../utils/time-parser';
 
 @Component({
     selector: 'app-timers',
     templateUrl: './timers.component.html',
-    styleUrls: ['./timers.component.scss'],
-    changeDetection: ChangeDetectionStrategy.OnPush
+    styleUrls: ['./timers.component.scss']
 })
 export class TimersComponent implements OnInit, OnDestroy {
 
@@ -26,15 +23,16 @@ export class TimersComponent implements OnInit, OnDestroy {
 
     first = true;
 
-    constructor(@Inject(MAT_DIALOG_DATA) public sender: SenderFe,
-        private service: SettingsService,
-        private cdr: ChangeDetectorRef) {
-    }
-    ngOnInit() {
-        this.subscription.add(combineLatest([this.service.timers$, timer(0, 600)])
-            .subscribe(([timers]) => {
-                this.updateTimers(timers);
+    senders: Array<SenderFe>;
 
+    constructor(private service: SettingsService,
+        private cdr: ChangeDetectorRef) { }
+
+    ngOnInit() {
+        this.subscription.add(combineLatest([this.service.timers$, this.service.senders$, timer(0, 600)])
+            .subscribe(([timers, senders]) => {
+                this.updateTimers(timers);
+                this.senders = senders;
                 if (this.first) {
                     // honestly i have no clue why it doesnt work duirectly without this
                     // otherwise it will only show the timers after the second time the timer triggers
@@ -45,7 +43,6 @@ export class TimersComponent implements OnInit, OnDestroy {
                     }, 10);
                 }
             }));
-
     }
     private updateTimers(timers: TimerFe[]) {
 
@@ -73,10 +70,10 @@ export class TimersComponent implements OnInit, OnDestroy {
         }
         this.cdr.detectChanges();
     }
-
     ngOnDestroy(): void {
         this.subscription.unsubscribe();
     }
+
     getPercent(timerData: TimerFe) {
         const duration = this.getDuration(timerData);
         const percent = 100 - Math.max(Math.round(this.getRemainingMillis(timerData) * 100 / duration), 0);
@@ -97,13 +94,26 @@ export class TimersComponent implements OnInit, OnDestroy {
     getSubtitle(timerData: TimerFe) {
         const remaining = this.getRemainingMillis(timerData);
         if (!timerData.parsedData) {
-            timerData.parsedData = JSON.parse(timerData.data);
+            timerData.parsedData = JSON.parse(timerData.data ?? '');
         }
-        return [
+        if (!timerData.parsedArguments) {
+            timerData.parsedArguments = JSON.parse(timerData.arguments ?? '');
+        }
+        const transofrmaionResult = timerData.parsedArguments?.[1];
+        const transformer = timerData.parsedArguments[2];
+
+        const subTitleArray = [
             `${TimerParser.msToTime(Math.max(remaining, 0))}`,
             `${TimerParser.msToTime(this.getDuration(timerData))}`,
-            `ends at ${new Date(timerData.endtimestamp).toTimeString().split(' ')[0]}`,
-            `${this.sender.transformation.find(tr => tr.transformationKey === timerData.parsedData.message)?.name || this.sender.name || ''}`];
+            `ends at ${new Date(timerData.endtimestamp ?? 0).toTimeString().split(' ')[0]}`,
+        ];
+        if (transformer.transformation.includes('promise:')) {
+            subTitleArray.push(`${transofrmaionResult?.notification?.body || transofrmaionResult?.notification?.title || ''}`);
+        }
+        subTitleArray.push(
+            `${transformer?.name ?? ''}`
+        );
+        return subTitleArray;
     }
 
     getDuration(timerData: TimerFe) {
@@ -113,5 +123,4 @@ export class TimersComponent implements OnInit, OnDestroy {
     getRemainingMillis(timerData: TimerFe) {
         return Math.round((timerData.endtimestamp - Date.now()) * 100) / 100;
     }
-
 }

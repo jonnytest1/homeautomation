@@ -92,7 +92,7 @@ export class BottomSheetHandler {
                 return;
             }
             type = ReceiverBottomsheetComponent;
-            data = this.settingsComponent.receivers.find(rec => rec.id === params.id);
+            data = this.settingsComponent.receivers.find(rec => rec.id === +params.id);
         }
 
         this.paramType = paramType;

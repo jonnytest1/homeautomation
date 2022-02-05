@@ -10,6 +10,7 @@
         "declaration": false,
         "module": "es2020",
         "moduleResolution": "node",
+        "strictNullChecks": false,
         "emitDecoratorMetadata": true,
         "experimentalDecorators": true,
         "target": "es5",

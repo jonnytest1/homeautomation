@@ -12,20 +12,26 @@ import { MatIconModule } from '@angular/material/icon';
 import { BrowserModule, HammerModule } from '@angular/platform-browser';
 import { FormsModule } from '@angular/forms';
 import { HTTP_INTERCEPTORS } from '@angular/common/http';
+import { TimersComponent } from './timers/timers.component';
+import { MatGridListModule } from '@angular/material/grid-list';
+import { NgCircleProgressModule } from 'ng-circle-progress';
+import { SettingsService } from './settings/settings.service';
 
 
 @NgModule({
     declarations: [
         AppComponent,
-        CameraComponent
+        CameraComponent,
+        TimersComponent
     ],
     imports: [
         BrowserModule, HammerModule,
         AppRoutingModule, SettingsModule, FormsModule,
-        MatSidenavModule, MatListModule, MatIconModule,
-        BrowserAnimationsModule,
+        MatSidenavModule, MatListModule, MatIconModule, MatGridListModule,
+        BrowserAnimationsModule, NgCircleProgressModule.forRoot()
     ],
     providers: [
+        SettingsService,
         {
             // processes all errors
             provide: ErrorHandler,

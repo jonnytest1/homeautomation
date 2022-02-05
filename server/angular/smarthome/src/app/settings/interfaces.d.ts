@@ -1,3 +1,4 @@
+import type { TransformationRes } from '../../../../../src/models/connection-response';
 import { Sender as NodeSender } from '../../../../../src/models/sender';
 import { Timer } from '../../../../../src/models/timer';
 import { Transformation } from '../../../../../src/models/transformation';
@@ -41,6 +42,7 @@ type EqualsKeyPropertyNamesList<T, Key> = { [K in keyof T]: (K extends Key ? K :
 
 
 export interface TimerFe extends FrontendProperties<Timer> {
+    parsedArguments?: [string, TransformationRes, TransformFe];
     color?: string
 
     parsedData?
@@ -69,6 +71,8 @@ export type EventHistoryFe = SenderFe["events"][0] & {
 
 export interface TransformFe extends FrontendProperties<Transformation> {
     historyCount?: number
+
+    sender?: number
 
 }
 export type ConnectionFe = SenderFe["connections"][0] //  With<FrontendProperties<NodeConnection>, "transformation", TransformFe>

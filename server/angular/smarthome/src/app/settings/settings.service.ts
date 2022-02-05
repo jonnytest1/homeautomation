@@ -1,4 +1,4 @@
-import { ConnectionFe, EventHistoryFe, ReceiverFe, ResponseData, SenderFe, TimerFe, TransformFe } from './interfaces';
+import { ConnectionFe, EventHistoryFe, ReceiverFe, ResponseData, SenderFe, SocketResponses, TimerFe, TransformFe } from './interfaces';
 import { environment } from '../../environments/environment';
 import { AbstractHttpService } from '../utils/http-service';
 import { HttpClient } from '@angular/common/http';
@@ -50,9 +50,13 @@ export class SettingsService extends AbstractHttpService {
         });
     }
 
+    private isType<K extends keyof SocketResponses>(obj: ResponseData, key: K): obj is ResponseData<K> {
+        return obj.type === key;
+    }
+
     public onMessage(message: MessageEvent<string>) {
         const messageEvent: ResponseData = JSON.parse(message.data);
-        if (messageEvent.type === 'timerUpdate') {
+        if (this.isType(messageEvent, 'timerUpdate')) {
             this.timers.next(messageEvent.data);
         } else if (messageEvent.type === 'senderUpdate') {
             this.updateSenders(messageEvent.data as SenderFe[]);
@@ -87,7 +91,7 @@ export class SettingsService extends AbstractHttpService {
     }
 
     getHistoryCount(transformer: TransformFe, events: SenderFe['events']) {
-        transformer.historyCount = events.filter((event: EventHistoryFe) => {
+        transformer.historyCount = events?.filter((event: EventHistoryFe) => {
             if (!event.parsedData) {
                 event.parsedData = JSON.parse(event.data);
             }
