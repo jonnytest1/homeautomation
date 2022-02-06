@@ -1,3 +1,4 @@
+
 from customlogging import logKibana
 import datetime
 import pygame
@@ -13,7 +14,7 @@ class CameraHandler:
 
         self.cam = pygame.camera.Camera("/dev/video0", (640, 480))
         self.cam.start()
-        self.imageBuffer = []
+        self.imageBuffer: list[pygame.Surface] = []
 
     def getImage(self):
         image = self.cam.get_image()

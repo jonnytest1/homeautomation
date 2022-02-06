@@ -26,6 +26,10 @@ def doRequest(x):
 def logKibana(level: LogLevel, msg: str, e: Exception = None, args=dict()):
     global logcounter
     logcounter += 1
+
+    if isinstance(level, LogLevel):
+        level = level.value
+
     x = {
         "application": "pythonpicam",
         "Severity": level,

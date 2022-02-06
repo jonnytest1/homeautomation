@@ -1,6 +1,7 @@
 
 # pip3 install pygame
 
+from qranalizer import analizeQRCodes
 import traceback
 import sys
 import socketserver
@@ -78,7 +79,7 @@ def startServer():
 
 
 _thread.start_new_thread(startServer, tuple())
-
+#_thread.start_new_thread(analizeQRCodes, (cameraHandlerInstance,))
 payload = {'deviceKey': 'camerapi',
            'port': str(PORT),
            'type': 'ip',

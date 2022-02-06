@@ -7,11 +7,12 @@ class SenderLoader {
 
 
     async loadSenders() {
+        const twoMonthsAgo = Date.now() - (1000 * 60 * 60 * 24 * 60);
         const [senders, sounds] = await Promise.all([
-            load(Sender, 'true = true', undefined, {
+            load(Sender, 'true = true', [twoMonthsAgo], {
                 deep: {
                     connections: "TRUE = TRUE",
-                    events: "`timestamp` > UNIX_TIMESTAMP(DATE_ADD(NOW(),INTERVAL -60 DAY))",
+                    events: "`timestamp` > " + twoMonthsAgo,
                     batteryEntries: "TRUE = TRUE",
                     transformation: "TRUE = TRUE",
                     receiver: "TRUE = TRUE",

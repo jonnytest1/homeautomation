@@ -7,21 +7,23 @@ import androidx.viewpager2.adapter.FragmentStateAdapter;
 
 public class PagerAdapter extends FragmentStateAdapter {
 
+
+    Fragment[] fragments;
+
     public PagerAdapter(@NonNull FragmentActivity fm) {
         super(fm);
+        fragments=new Fragment[]{
+                new ScannerFragment(),new SecondFragment(),new IdentFragment(fm)
+        };
     }
     @NonNull
     @Override
     public Fragment createFragment(int position) {
-        if(position==0){
-            return new ScannerFragment();
-        }else{
-            return new SecondFragment();
-        }
+        return fragments[position];
     }
 
     @Override
     public int getItemCount() {
-        return 2;
+        return fragments.length;
     }
 }

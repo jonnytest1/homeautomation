@@ -15,7 +15,6 @@ if (process.argv[2] === 'admin') {
 import { registration } from './register-custom-type';
 import * as RED from "node-red"
 import * as redSettings from "node-red/settings.js"
-
 const express = require('express');
 const nopt = require("nopt");
 const http = require('http');
@@ -301,7 +300,7 @@ export async function startNodeRed() {
             } else {
                 util.log(err);
             }
-            process.exit(1);
+            //process.exit(1);
         });
 
         let stopping = false;
