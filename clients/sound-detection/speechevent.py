@@ -1,20 +1,36 @@
 from datetime import datetime
+from typing import List
+from clap.util import millis, seconds_ago
 
 from words import word_map
 
 
-class SpeechEvent:
+class InvalidWordException(Exception):
 
     def __init__(self, word: str):
-        self.used_word = word_map[word]
+        self.word = word
+
+
+class SpeechEvent:
+
+    def __init__(self, word: str, history: List["SpeechEvent"]):
+        self.word_text = word
+
+        if word_map.get(self.word_text) == None:
+            for history_word in history:
+                if(word_map.get(history_word.word_text+" "+self.word_text)):
+                    print("overwriting from history " +
+                          history_word.word_text+" "+self.word_text)
+                    self.word_text = history_word.word_text+" "+self.word_text
 
         self.time = datetime.now()
 
-    def millis(self):
-        return int((self.time - datetime(1970, 1, 1)).total_seconds() * 1000)
-
     def seconds_ago(self):
-        return (datetime.now()-self.time).total_seconds()
+        return seconds_ago(self.time)
 
     def dispatch(self):
+        if word_map.get(self.word_text) == None:
+            raise InvalidWordException(self.word_text)
+        self.used_word = word_map[self.word_text]
+
         self.used_word.dispatch(self)
