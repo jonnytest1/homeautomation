@@ -5,3 +5,6 @@ creds.h
 /clients/pc-receiver/smarthomereceiver.sh
 package-lock.json
 clients/pc-receiver/services/sounds/
+clients/sound-detection/__pycache__/
+clients/sound-detection/model
+sftp.json
