@@ -8,7 +8,7 @@ import socketserver
 import http.server
 import _thread
 from camerahandler import CameraHandler
-from customlogging import logKibana
+from customlogging import LogLevel, logKibana
 import time
 import requests
 import json
@@ -39,7 +39,12 @@ class CustomHandler(http.server.SimpleHTTPRequestHandler):
                 print("parsing "+postdata+"to json")
                 postdata = json.loads(postdata)
 
-            response, mimetype = cameraHandlerInstance.trigger(postdata)
+            logKibana(LogLevel.DEBUG, "request to" + self.path)
+            if self.path == "/healthcheck":
+                response = "ok"
+                mimetype = "text/plain"
+            else:
+                response, mimetype = cameraHandlerInstance.trigger(postdata)
 
             if(response is None):
                 self.send_response(204)
@@ -50,7 +55,7 @@ class CustomHandler(http.server.SimpleHTTPRequestHandler):
                 self.end_headers()
                 self.wfile.write(str.encode(response))
         except Exception as e:
-            logKibana("ERROR", "error in requset", e, args=dict(
+            logKibana(LogLevel.ERROR, "error in requset", e, args=dict(
                 postdata=str(postdata)
             ))
             traceback.print_exc()
@@ -60,26 +65,25 @@ class CustomHandler(http.server.SimpleHTTPRequestHandler):
 
 
 def startServer():
-
     try:
         with socketserver.TCPServer(("", PORT), CustomHandler) as httpd:
             print("serving at port", PORT)
             try:
                 httpd.serve_forever()
             except:
-                print("clearing webserver")
+                logKibana(LogLevel.DEBUG, "clearing webserver")
                 httpd.shutdown()
                 httpd.socket.close()
     except OSError as e:
         if e.strerror == "Address already in use":
-            print("Address already in use")
+            logKibana(LogLevel.DEBUG, "Address already in use")
         else:
             print(type(e).__name__)
             print(e)
 
 
 _thread.start_new_thread(startServer, tuple())
-#_thread.start_new_thread(analizeQRCodes, (cameraHandlerInstance,))
+# _thread.start_new_thread(analizeQRCodes, (cameraHandlerInstance,))
 payload = {'deviceKey': 'camerapi',
            'port': str(PORT),
            'type': 'ip',

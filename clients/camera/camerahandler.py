@@ -1,5 +1,5 @@
 
-from customlogging import logKibana
+from customlogging import LogLevel, logKibana
 import datetime
 import pygame
 import pygame.camera
@@ -23,11 +23,11 @@ class CameraHandler:
         self.imageBuffer.append(image)
 
     def trigger(self, reqdata: dict):
-        if "tag" in reqdata:
+        if (reqdata is not None) and "tag" in reqdata:
             tag: str = reqdata["tag"]
             triggertime = datetime.datetime.now().isoformat()
             print("storing "+str(len(self.imageBuffer))+" files for "+tag)
-            logKibana("INFO", "storing " +
+            logKibana(LogLevel.INFO, "storing " +
                       str(len(self.imageBuffer))+" files for "+tag)
             filePath = "/home/pi/imgcap/{}".format(tag)
             Path(filePath).mkdir(parents=True, exist_ok=True)

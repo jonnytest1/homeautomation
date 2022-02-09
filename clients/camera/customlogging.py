@@ -4,6 +4,8 @@ import json
 import traceback
 import base64
 from threading import Thread
+import time
+import os
 
 
 class LogLevel(Enum):
@@ -15,31 +17,43 @@ class LogLevel(Enum):
 logcounter = 0
 
 
-def doRequest(x):
+def do_backup_request(x: dict):
+    time.sleep(10)
+    do_request(x)
 
-    jsonstr = json.dumps(x)
-    encoded = base64.b64encode(jsonstr.encode("utf-8")).decode("utf-8")
-    requests.post(
-        "https://pi4.e6azumuvyiabvs9s.myfritz.net/tm/libs/log/index.php", data=encoded)
+
+def do_request(x: dict):
+    try:
+        jsonstr = json.dumps(x)
+        encoded = base64.b64encode(jsonstr.encode("utf-8")).decode("utf-8")
+        response = requests.post(os.environ.get("log_url"), data=encoded)
+
+        if(response.status_code == 502):
+            bT = Thread(target=do_backup_request, args=[x])
+            bT.start()
+    except requests.exceptions.ConnectionError:
+        bT = Thread(target=do_backup_request, args=[x])
+        bT.start()
 
 
 def logKibana(level: LogLevel, msg: str, e: Exception = None, args=dict()):
     global logcounter
     logcounter += 1
-
-    if isinstance(level, LogLevel):
-        level = level.value
-
+    print(msg)
     x = {
         "application": "pythonpicam",
-        "Severity": level,
+        "Severity": level.name,
         "message": msg,
+        "logStack": "".join(traceback.extract_stack().format())
     }
     x.update(args)
     x['count'] = logcounter
     if e != None:
-        x["error_message"] = ''.join(e.args)
-        x["error_stacktrace"] = ''.join(traceback.format_exception(
-            etype=type(e), value=e, tb=e.__traceback__))
-    t = Thread(target=doRequest, args=[x])
+        if not (isinstance(e, Exception)):
+            x.update(e)
+        else:
+            x["error_message"] = ''.join(e.args)
+            x["error_stacktrace"] = ''.join(traceback.format_exception(
+                etype=type(e), value=e, tb=e.__traceback__))
+    t = Thread(target=do_request, args=[x])
     t.start()
