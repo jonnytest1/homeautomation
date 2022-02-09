@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { ChangeDetectorRef, Component } from '@angular/core';
 import { fromEvent } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
 @Component({
@@ -7,15 +7,17 @@ import { map, startWith } from 'rxjs/operators';
     styleUrls: ['./app.component.less']
 })
 export class AppComponent {
-    constructor() {
+    constructor(private cdr: ChangeDetectorRef) {
+        window["defaultLog"] = true
         //
     }
     title = 'smarthome';
 
     mobile$ = AppComponent.isMobile();
-    contentOpened: boolean;
     sidenavOpened: boolean;
 
+
+    lastOpen: number | null = null
 
     public static isMobile() {
         return fromEvent(window, 'resize').pipe(
@@ -23,8 +25,31 @@ export class AppComponent {
             startWith(window.innerWidth < 600)
         );
     }
+    openFromContent() {
+        this.openSideNav()
+    }
+    openSideNav() {
+        this.sidenavOpened = true
+        this.lastOpen = Date.now()
+        console.log(this.lastOpen)
+    }
 
+    leaveContentHover() {
+        this.leaveSideNav()
+    }
     leaveSideNav() {
-        this.sidenavOpened = false;
+        console.log("sidenav init leave")
+        this.delayedLeave(() => {
+            console.log("sidenavOpened leave")
+            this.sidenavOpened = false;
+        })
+    }
+    async delayedLeave(cb: Function) {
+        const lastOpen = this.lastOpen
+        await new Promise(res => setTimeout(res, 100));
+        if (lastOpen == this.lastOpen) {
+            cb();
+            this.cdr.markForCheck()
+        }
     }
 }

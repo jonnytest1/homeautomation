@@ -2,8 +2,9 @@
 <mat-sidenav-container class="example-container">
     <mat-sidenav #sidenav
                  mode="push"
-                 [opened]="contentOpened||sidenavOpened"
-                 (mouseenter)="sidenavOpened=true"
+                 class="sidenav"
+                 [opened]="sidenavOpened"
+                 (mouseenter)="openSideNav()"
                  (mouseleave)="leaveSideNav()">
         <mat-nav-list>
             <h4> Smart Home</h4>
@@ -36,8 +37,8 @@
     <mat-sidenav-content>
         <div class="content-wrapper">
             <div class="mouseenter"
-                 (mouseenter)="contentOpened=true"
-                 (mouseleave)="contentOpened=false">
+                 (mouseenter)="openFromContent()"
+                 (mouseleave)="leaveContentHover()">
                 <mat-icon>menu</mat-icon>
             </div>
             <router-outlet></router-outlet>
