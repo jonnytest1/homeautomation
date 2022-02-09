@@ -1,6 +1,6 @@
 from datetime import datetime
 from typing import List
-from clap.util import millis, seconds_ago
+from util import millis, seconds_ago
 
 from words import word_map
 

@@ -5,7 +5,7 @@ from typing import List
 import requests
 import os
 from json import encoder
-from clap.util import millis, seconds_ago
+from util import millis, seconds_ago
 from customlogging import LogLevel, logKibana
 from registration import device_key
 encodeObj = encoder.JSONEncoder()
@@ -15,7 +15,7 @@ if TYPE_CHECKING:
 
 class Word:
 
-    def __init__(self, words: List[str], trigger: str):
+    def __init__(self, words: List[str], trigger: str = None):
         self.words = words
         self.trigger = trigger
         self.last_trigger = datetime.now()

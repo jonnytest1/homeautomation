@@ -41,7 +41,8 @@ with sd.RawInputStream(samplerate=args["samplerate"], blocksize=8000, device=arg
     print('#' * 80)
     time.sleep(1)
     word_list = json.encoder.JSONEncoder().encode(list(word_map.keys()))
-    print(word_list)
+    for word in list(word_map.keys()):
+        print(word)
     rec = vosk.KaldiRecognizer(model, args["samplerate"], word_list)
     while True:
         data = queue.get()

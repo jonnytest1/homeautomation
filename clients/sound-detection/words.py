@@ -1,10 +1,11 @@
 from typing import Dict
+from mobileSenderWords import MobileSenderWords
 from word import Word
-
 
 words = [
     Word(["light on", "licht an", "licht on"], "light"),
-    Word(["licht aus", "light off"], "light")
+    Word(["licht aus", "light off"], "light"),
+    MobileSenderWords()
 ]
 
 word_map: Dict["str", "Word"] = dict()
