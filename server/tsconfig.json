@@ -15,7 +15,8 @@
         "outDir": "compiledjs/shutup",
         "lib": [
             "dom",
-            "es6"
+            "es6",
+            "ESNext"
         ]
     },
     "include": [

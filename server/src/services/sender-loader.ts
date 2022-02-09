@@ -13,7 +13,7 @@ class SenderLoader {
                 deep: {
                     connections: "TRUE = TRUE",
                     events: "`timestamp` > " + twoMonthsAgo,
-                    batteryEntries: "TRUE = TRUE",
+                    batteryEntries: "`timestamp` > " + twoMonthsAgo,
                     transformation: "TRUE = TRUE",
                     receiver: "TRUE = TRUE",
                 }

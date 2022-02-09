@@ -47,15 +47,15 @@ updateDatabase(__dirname + '/src')
                     }
                     next();
                 });
-                app.post('/redirect', (req, res) => {
-                    if (redirected) {
-                        redirected = null;
-                    } else {
-                        redirected = `${req.headers.http_x_forwarded_for}:${req.query.port}`;
-                    }
-                    console.log(`redirect set to ${redirected}`);
-                    res.send();
-                });
+                /* app.post('/redirect', (req, res) => {
+                     if (redirected) {
+                         redirected = null;
+                     } else {
+                         redirected = `${req.headers.http_x_forwarded_for}:${req.query.port}`;
+                     }
+                     console.log(`redirect set to ${redirected}`);
+                     res.send();
+                 });*/
                 app.use((req, res, next) => {
                     if (redirected) {
                         const url = new URL(`${req.protocol}://${req.get('host')}${req.originalUrl}`);
