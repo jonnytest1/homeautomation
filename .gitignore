@@ -8,3 +8,4 @@ clients/pc-receiver/services/sounds/
 clients/sound-detection/__pycache__/
 clients/sound-detection/model
 sftp.json
+clients/arduino/water-supply/water-supply/platformio.ini
