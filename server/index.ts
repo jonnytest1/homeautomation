@@ -18,7 +18,7 @@ if (env.error) {
 }
 updateDatabase(__dirname + '/src')
     .then(async () => {
-        let redirected = null;
+        let redirected: string | null = null;
         await initialize(__dirname + '/src/resources', {
             errorCallback: (e) => {
                 if (e instanceof ResponseCodeError) {
