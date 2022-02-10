@@ -45,7 +45,7 @@ export async function startNodeRed() {
     process.env.NODE_RED_HOME = path.join(__dirname, process.env.NODE_RED_HOME);
 
     // Delay logging of (translated) messages until the RED object has been initialized
-    const delayedLogItems = [];
+    const delayedLogItems: Array<{ type: string, id: string, params?}> = [];
 
     let startupHttps = settings.https;
     if (typeof startupHttps === "function") {

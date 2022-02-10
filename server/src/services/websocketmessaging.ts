@@ -17,7 +17,7 @@ class WebsocketMessaging {
         //
     }
 
-    sendWebsocket(ip, data: SenderResponse): Promise<string> {
+    sendWebsocket(ip, data: SenderResponse): Promise<string | null> {
         return new Promise((resolver, err) => {
             console.log('sending websocket connection');
             this.client = new WebSocketClient();

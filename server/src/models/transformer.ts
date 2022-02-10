@@ -26,14 +26,15 @@ export abstract class Transformer {
     }
 
     async transform(data: unknown, transformation: Transformation): Promise<TransformationRes | false> {
+        let transformedData = data as TransformationRes | false
         if (transformation && transformation.transformation) {
             const context = this.getContext(data);
-            data = runInNewContext(`${transformation.transformation}`, context, {
+            transformedData = runInNewContext(`${transformation.transformation}`, context, {
                 displayErrors: true,
-            });
-            return data;
+            }) as TransformationRes | false;
+            return transformedData;
         }
-        return data;
+        return transformedData;
     }
 
 

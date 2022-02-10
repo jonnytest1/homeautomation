@@ -53,6 +53,10 @@ interface SenderResponse<SoundDef = SoundType, NotificationType = NotificationDa
         messageId?: string
     }
 
+    read?: {
+        text: string
+    }
+
 }
 
 export type SoundType = soundListRuntime | '*' | Array<soundListRuntime>

@@ -1,0 +1,1 @@
+export type NullSafe<T> = T extends undefined ? never : T

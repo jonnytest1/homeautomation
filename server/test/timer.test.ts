@@ -12,7 +12,7 @@ import { ReceiverData } from '../src/models/receiver-data';
 import type { ConnectionResponse } from '../src/models/connection-response';
 
 describe("test stuff wroks when calling with timer", () => {
-    hibernatetsMock.load.mockReturnValue(null);
+    hibernatetsMock.load.mockReturnValue(Promise.resolve(null));
     test("TODO", async () => {
         const sender = getSenderObject('')
 

@@ -62,21 +62,21 @@ export class EventScheduler {
     }
 
     private async callTimer() {
-        const timer = await load(Timer, "alerted='false' AND endtimestamp < UNIX_TIMESTAMP(NOW(3))*1000", undefined, {
+        const timer = await load(Timer, "alerted='false' AND endtimestamp < UNIX_TIMESTAMP(NOW(3))*1000", [], {
             first: true
         });
         if (!timer) {
             return;
         }
-        const timerArguments: Array<never> = JSON.parse(timer.arguments);
-        const functionName: string = timerArguments.shift();
+        const timerArguments = JSON.parse(timer.arguments) as [string, never];
+        const functionName: string = timerArguments.shift() as string;
         let thisArgsObject = await load(this.callbackClasses[timer.timerClassName].classRef, +timer.timerClassId, undefined, { deep: true });
         try {
-            if (this.callbackClasses[timer.timerClassName].service) {
-                thisArgsObject = new this.callbackClasses[timer.timerClassName].service(thisArgsObject);
+            const callbackClass = this.callbackClasses[timer.timerClassName]
+            if (callbackClass.service) {
+                thisArgsObject = new callbackClass.service(thisArgsObject);
             }
-
-            await thisArgsObject[functionName](...timerArguments);
+            await (thisArgsObject as any)[functionName](...timerArguments);
         } catch (e) {
             logKibana("ERROR", `error in timer execution function:'${functionName}' of ${timer.timerClassName}`, e);
         }

@@ -2,6 +2,7 @@ import type { ConnectionResponse, SenderResponse } from './connection-response';
 import { EvaluatedData } from './evaluated-data';
 import { Sound } from './sound';
 import { load } from 'hibernatets';
+import type { NullSafe } from '../util/types';
 
 export class ReceiverData {
 
@@ -20,7 +21,7 @@ export class ReceiverData {
         return new EvaluatedData(dataCopy as SenderResponse<string>, this.data)
     }
 
-    async evaluateSound(sound: SenderResponse["notification"]["sound"]) {
+    async evaluateSound(sound: NullSafe<SenderResponse["notification"]>["sound"]) {
         if (sound instanceof Array) {
             return sound[Math.floor(Math.random() * sound.length)]
         }

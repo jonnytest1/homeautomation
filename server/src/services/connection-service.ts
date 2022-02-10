@@ -28,7 +28,7 @@ export class ConnectionService {
             return newData;
         }
         return {
-            error: await this.connection.sendToReceiver(new ReceiverData(newData), initialRequest)
+            error: await this.connection.sendToReceiver(new ReceiverData(newData), initialRequest) || 0
         };
     }
 }

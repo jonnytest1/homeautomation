@@ -46,9 +46,9 @@ export class Receiver {
         //
     }
 
-    async send(data: ReceiverData | false): Promise<number> {
+    async send(data: ReceiverData | false): Promise<number | null> {
         if (!data) {
-            return;
+            return null;
         }
         const evaluatedData = await data.evaluate();
 
@@ -81,7 +81,7 @@ export class Receiver {
 
     private sendForWebsocket(evaluatedDataObj: EvaluatedData): number {
         const evaluatedData = evaluatedDataObj.data
-        console.log(`notification to ${this.ip} for ${evaluatedData.notification.title}`)
+        console.log(`notification to ${this.ip} for ${evaluatedData.notification?.title}`)
         ws.sendWebsocket(this.ip, evaluatedData)
             .then(response => {
                 if (response === "dismissed") {

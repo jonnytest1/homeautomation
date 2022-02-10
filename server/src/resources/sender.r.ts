@@ -33,7 +33,7 @@ export class SenderResource {
                 let status = 200;
                 const statusResponse = responses.find(res => res.status);
 
-                if (statusResponse) {
+                if (statusResponse?.status) {
                     status = statusResponse.status;
                 }
                 res.status(status).send(responses);
@@ -132,8 +132,11 @@ export class SenderResource {
     })
 
     async getKeys(req: HttpRequest, res: HttpResponse) {
-        const connection = await load(Sender, +req.query.itemRef, [], { first: true });
-        res.send(connection.getContextKeys());
+        if (!req.query.itemRef) {
+            return
+        }
+        const sender = await load(Sender, +req.query.itemRef, [], { first: true });
+        res.send(sender.getContextKeys());
     }
 
 }

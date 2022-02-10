@@ -26,7 +26,7 @@ export function getSenderObject(transformationJs: string, connectiontransform?: 
 
 
     const connectionTransfornation = new Transformation()
-    connectionTransfornation.transformation = connectiontransform ? connectiontransform : undefined
+    connectionTransfornation.transformation = connectiontransform ? connectiontransform : ''
     const connection = new Connection(receiver)
     connection.transformation = connectionTransfornation
     sender.connections = [connection];

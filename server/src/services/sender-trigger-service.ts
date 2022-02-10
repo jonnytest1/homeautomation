@@ -4,6 +4,7 @@ import type { TransformationRes } from '../models/connection-response';
 import type { Sender } from '../models/sender';
 import type { Transformation } from '../models/transformation';
 import { SmartHomeTrigger } from '../node-red/register-custom-type';
+import { ReceiverData } from '../models/receiver-data';
 
 export class SenderTriggerService {
 
@@ -20,7 +21,8 @@ export class SenderTriggerService {
             return [];
         }
 
-        if (responseData && responseData.promise) {
+        if (responseData?.promise) {
+            responseData.response ??= {}
             responseData.response.time = responseData.promise.time / (1000);
         }
         return this.checkPromise(responseData, usedTransformation, true)
@@ -28,7 +30,16 @@ export class SenderTriggerService {
 
 
     async checkPromise(pData: TransformationRes, usedTransformation: Transformation, initialRequest = false) {
-        if (pData && pData.promise) {
+        if (pData?.promise) {
+            const promiseData = pData.promise
+            Promise.all(this.sender.connections.map(async connection => {
+                connection.receiver.send(new ReceiverData({
+                    read: {
+                        text: `triggered ${usedTransformation.name} in ${Math.round(promiseData.time / (1000 * 60))}`
+                    }
+                }))
+            }))
+
             TimerFactory.create(this.sender, "checkPromise", pData.promise, usedTransformation);
         }
         if (pData && pData.notification) {

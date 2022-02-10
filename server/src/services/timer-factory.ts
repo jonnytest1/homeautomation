@@ -5,7 +5,7 @@ import { getId } from 'hibernatets/utils';
 import { save } from 'hibernatets';
 
 export class TimerFactory {
-    static create<U, S>(thisArg: U, fncName: keyof U | keyof S, timerData: Delayed<SenderResponse>, ...args) {
+    static create<U extends object, S>(thisArg: U, fncName: keyof U | keyof S, timerData: Delayed<SenderResponse>, ...args) {
         const id = getId(thisArg)
         const className = thisArg.constructor.name;
         const timer = new Timer({
