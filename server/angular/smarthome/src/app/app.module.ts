@@ -16,13 +16,17 @@ import { TimersComponent } from './timers/timers.component';
 import { MatGridListModule } from '@angular/material/grid-list';
 import { NgCircleProgressModule } from 'ng-circle-progress';
 import { SettingsService } from './settings/settings.service';
+import { TodoComponent } from './todo/todo.component';
+import { InventoryComponent } from './inventory/inventory.component';
 
 
 @NgModule({
     declarations: [
         AppComponent,
         CameraComponent,
-        TimersComponent
+        TimersComponent,
+        TodoComponent,
+        InventoryComponent
     ],
     imports: [
         BrowserModule, HammerModule,

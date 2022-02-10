@@ -32,6 +32,17 @@
                routerLink="options">
                 Options
             </a>
+            <a mat-list-item
+               (mouseover)="$event.target.click()"
+               routerLinkActive="activeRoute"
+               routerLink="inventory">
+                Inventory
+            </a> <a mat-list-item
+               (mouseover)="$event.target.click()"
+               routerLinkActive="activeRoute"
+               routerLink="todo">
+                Todo
+            </a>
         </mat-nav-list>
     </mat-sidenav>
     <mat-sidenav-content>

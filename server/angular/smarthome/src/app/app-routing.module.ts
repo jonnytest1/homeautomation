@@ -1,8 +1,10 @@
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
 import { CameraComponent } from './camera/camera.component';
+import { InventoryComponent } from './inventory/inventory.component';
 import { MonacoEditorComponent } from './monaco-editor/monaco-editor.component';
 import { TimersComponent } from './timers/timers.component';
+import { TodoComponent } from './todo/todo.component';
 
 const routes: Routes = [{
     path: 'setup',
@@ -19,6 +21,12 @@ const routes: Routes = [{
 }, {
     path: 'timers',
     component: TimersComponent
+}, {
+    path: 'inventory',
+    component: InventoryComponent
+}, {
+    path: 'todo',
+    component: TodoComponent
 }
 
 ];
