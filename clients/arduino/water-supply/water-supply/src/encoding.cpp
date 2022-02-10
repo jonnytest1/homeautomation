@@ -17,7 +17,15 @@ String json(const std::map<String, String> content)
         {
             separator = true;
         }
-        out = out + "\"" + it->first + "\":\"" + it->second + "\" \n ";
+        String value = it->second;
+        value.replace("\r\n", "\\n");
+        int newLinePos = value.indexOf("\n");
+        while (newLinePos != -1)
+        {
+            value.replace("\n", "\\n");
+            newLinePos = value.indexOf("\n");
+        }
+        out = out + "\"" + it->first + "\":\"" + value + "\" \n ";
         it++;
     }
     return out + "}";

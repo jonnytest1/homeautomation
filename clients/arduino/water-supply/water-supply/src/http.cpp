@@ -13,8 +13,14 @@ String logEndpoint()
     return logHost;
 }
 
+String localIp;
+
 void waitForWifi()
 {
+    if (WiFi.status() == WL_CONNECTED)
+    {
+        return;
+    }
     WiFi.mode(WIFI_STA);
     WiFi.disconnect();
     WiFi.begin(ssid, password);
@@ -30,7 +36,8 @@ void waitForWifi()
             return;
         }
     }
-    Serial.println(WiFi.localIP().toString());
+    localIp = WiFi.localIP().toString();
+    Serial.println(localIp);
 }
 
 void request(const String url, const std::map<String, String> data, void (*callback)(int httpCode, String response), boolean b64)
@@ -88,6 +95,11 @@ void HttpServer::step()
 
         parseRequest(client);
     }
+}
+
+String HttpServer::getIp()
+{
+    return localIp;
 }
 
 void HttpServer::parseRequest(WiFiClient client)

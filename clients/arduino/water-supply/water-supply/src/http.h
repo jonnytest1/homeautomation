@@ -12,6 +12,7 @@ public:
     void step();
     HttpServer(int port, String (*callback)(String header, WiFiClient client));
     void begin();
+    String getIp();
 
 private:
     WiFiServer wifiServer;
