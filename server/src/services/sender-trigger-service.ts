@@ -12,7 +12,7 @@ export class SenderTriggerService {
 
     }
 
-    async trigger(body: unknown) {
+    async trigger(body: Record<string, unknown>) {
         SmartHomeTrigger.instances.forEach(i => i.trigger(body))
 
         const { usedTransformation, responseData } = await this.sender.transformData(body)
@@ -29,13 +29,13 @@ export class SenderTriggerService {
     }
 
 
-    async checkPromise(pData: TransformationRes, usedTransformation: Transformation, initialRequest = false) {
+    async checkPromise(pData: TransformationRes, usedTransformation: Transformation | null, initialRequest = false) {
         if (pData?.promise) {
             const promiseData = pData.promise
             Promise.all(this.sender.connections.map(async connection => {
                 connection.receiver.send(new ReceiverData({
                     read: {
-                        text: `triggered ${usedTransformation.name} in ${Math.round(promiseData.time / (1000 * 60))}`
+                        text: `triggered ${usedTransformation?.name} in ${Math.round(promiseData.time / (1000 * 60))}`
                     }
                 }))
             }))
@@ -44,7 +44,7 @@ export class SenderTriggerService {
         }
         if (pData && pData.notification) {
             if (pData.notification.title == undefined) {
-                pData.notification.title = usedTransformation.name || this.sender.name || ''
+                pData.notification.title = usedTransformation?.name || this.sender.name || ''
             }
 
         }

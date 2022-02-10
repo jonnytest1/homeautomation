@@ -12,7 +12,7 @@ export class ConnectionService {
     constructor(private connection: Connection) { }
 
 
-    async execute(data, initialRequest: boolean, usedTransformation?: Transformation): Promise<TransformationRes> {
+    async execute(data, initialRequest: boolean, usedTransformation?: Transformation | null): Promise<TransformationRes> {
         const dataCp = { ...data, usedTransformation: usedTransformation };
         delete dataCp.promise;
         let transformation = defaultTransformation;

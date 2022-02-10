@@ -53,10 +53,10 @@ export class Sender extends Transformer {
     constructor() {
         super()
     }
-    getTransformer(data: unknown) {
+    getTransformer(data: Record<string, unknown>) {
         return this.transformation.find(transform => transform.transformationKey == data[this.transformationAttribute]);
     }
-    getContext(data: unknown) {
+    getContext(data: Record<string, unknown>) {
         return {
             ...super.getContext(data),
             sender: JSON.parse(JSON.stringify(this)),
@@ -66,9 +66,9 @@ export class Sender extends Transformer {
     }
 
 
-    async transformData(data: unknown): Promise<{ usedTransformation: Transformation; responseData: TransformationRes | false; }> {
-        let newData: TransformationRes | false = data;
-        let usedTransformation = null;
+    async transformData(data: Record<string, unknown>): Promise<{ usedTransformation: Transformation | null; responseData: TransformationRes | false; }> {
+        let newData = data as TransformationRes | false;
+        let usedTransformation: Transformation | null | undefined = null;
         if (this.transformationAttribute) {
             usedTransformation = this.getTransformer(data);
             if (usedTransformation) {

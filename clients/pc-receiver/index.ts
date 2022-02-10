@@ -5,6 +5,10 @@ import { config } from "dotenv"
 import { UrlService } from './services/url-service';
 import { ExpressWs } from 'express-hibernate-wrapper';
 import { RepeatingAudio } from './services/repeating-audio-player';
+
+import "./services/read-text"
+import { TextReader } from './services/read-text';
+import { TransformationRes } from '../../server/src/models/connection-response';
 config();
 const express = require('express');
 const serverIp = process.env.serverip || '192.168.178.54'
@@ -27,12 +31,12 @@ registration.register(serverIp, +listenOnPort)
 
         app.ws('/', async (ws, req) => {
             try {
-                const data = JSON.parse(req.query.data as string);
+                const data = JSON.parse(req.query.data as string) as TransformationRes;
                 if (data.notification) {
                     new NotificationHandler(data, serverIp).show(ws);
                 }
-                if (data.action && data.action == "openUrl") {
-                    // new UrlService(data.data).open();
+                if (data.read) {
+                    new TextReader(data.read).read();
                 }
             } catch (e) {
                 console.error(e);

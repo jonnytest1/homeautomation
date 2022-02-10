@@ -97,8 +97,8 @@ ${trStr}`
     }
 }
 
-promises.readFile(join(__dirname, "../models/connection-response.d.ts"), "utf8").
+promises.readFile(join(__dirname, "../models/connection-response.ts"), "utf8").
     then((content) => {
         TscCompiler.responseINterface = content
-        writeFileDir("/tmp/tsc/transform/connection-response.d.ts", TscCompiler.responseINterface)
+        writeFileDir("/tmp/tsc/transform/connection-response.ts", TscCompiler.responseINterface)
     });

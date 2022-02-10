@@ -45,7 +45,7 @@ interface NotificationData<SoundDef = SoundType> {
     body?: string;
 }
 
-interface SenderResponse<SoundDef = SoundType, NotificationType = NotificationData<SoundDef>> {
+export interface SenderResponse<SoundDef = SoundType, NotificationType = NotificationData<SoundDef>> {
     promise?: Delayed<SenderResponse>;
     notification?: NotificationType,
 
