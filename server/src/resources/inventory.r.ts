@@ -69,5 +69,7 @@ export class INventoryResource {
                 }
             }
         }
+
+        res.send("done")
     }
 }

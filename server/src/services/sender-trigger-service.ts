@@ -35,7 +35,7 @@ export class SenderTriggerService {
             Promise.all(this.sender.connections.map(async connection => {
                 connection.receiver.send(new ReceiverData({
                     read: {
-                        text: `triggered ${usedTransformation?.name} in ${Math.round(promiseData.time / (1000 * 60))}`
+                        text: `started ${usedTransformation?.name} in ${Math.round(promiseData.time / (1000 * 60))} minuten`
                     }
                 }))
             }))
