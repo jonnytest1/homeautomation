@@ -5,6 +5,7 @@ import { InventoryComponent } from './inventory/inventory.component';
 import { MonacoEditorComponent } from './monaco-editor/monaco-editor.component';
 import { TimersComponent } from './timers/timers.component';
 import { TodoComponent } from './todo/todo.component';
+import { WiringComponent } from './wiring/wiring.component';
 
 const routes: Routes = [{
     path: 'setup',
@@ -27,6 +28,9 @@ const routes: Routes = [{
 }, {
     path: 'todo',
     component: TodoComponent
+}, {
+    path: 'wiring',
+    component: WiringComponent
 }
 
 ];

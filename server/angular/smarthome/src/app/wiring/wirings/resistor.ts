@@ -1,0 +1,28 @@
+import { Connection } from './connection';
+import { CurrentCurrent, CurrentOption, GetResistanceOptions, Wiring } from './wiring.a';
+
+export class Resistor extends Wiring {
+
+
+    inC = new Connection(this, "res_in")
+
+    outC = new Connection(this, "res_out")
+
+    voltageDrop: number
+    constructor(public resistance: number) {
+        super()
+    }
+    getTotalResistance(from, options: GetResistanceOptions): number {
+        return this.resistance + this.outC.getTotalResistance(this, options)
+    }
+
+
+    pushCurrent(options: CurrentOption, from: Wiring): CurrentCurrent {
+        this.voltageDrop = (options.current * this.resistance)
+        return this.outC.pushCurrent({
+            ...options,
+            voltage: options.voltage - this.voltageDrop
+        }, this);
+    }
+
+}

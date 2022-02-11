@@ -5,6 +5,9 @@
         "types": [],
         "emitDecoratorMetadata": true
     },
+    "angularCompilerOptions": {
+        "strictTempaltes": true
+    },
     "exclude": [
         "test.ts",
         "**/*.spec.ts"

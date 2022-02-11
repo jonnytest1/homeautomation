@@ -1,0 +1,9 @@
+<p>
+    wiring works!
+
+    <span *ngFor="let bat of batteries">
+        battery capacity {{getRemainingBattery(bat)}} <br>
+        drain at {{bat.currentCurrent_ampere||'0'}}A <br>
+        duraiton : {{bat.getProjectedDurationMinutes()}}hours
+    </span>
+</p>

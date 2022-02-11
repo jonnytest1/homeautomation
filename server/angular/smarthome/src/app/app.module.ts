@@ -18,16 +18,18 @@ import { NgCircleProgressModule } from 'ng-circle-progress';
 import { SettingsService } from './settings/settings.service';
 import { TodoComponent } from './todo/todo.component';
 import { InventoryComponent } from './inventory/inventory.component';
+import { WiringComponent } from './wiring/wiring.component';
 
 
 @NgModule({
-    declarations: [
+    declarations: [	
         AppComponent,
         CameraComponent,
         TimersComponent,
         TodoComponent,
-        InventoryComponent
-    ],
+        InventoryComponent,
+      WiringComponent
+   ],
     imports: [
         BrowserModule, HammerModule,
         AppRoutingModule, SettingsModule, FormsModule,
