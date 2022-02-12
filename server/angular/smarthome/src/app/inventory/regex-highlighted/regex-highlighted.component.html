@@ -1,0 +1,8 @@
+<ng-container *ngIf="!isHighlighted();else highlighted">
+    {{text}}
+</ng-container>
+
+<ng-template #highlighted>
+    <span *ngFor="let part of getParts()"
+          [ngClass]="{highlighted:part.highlighted}">{{part.str}}</span>
+</ng-template>

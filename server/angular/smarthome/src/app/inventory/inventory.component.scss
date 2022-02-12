@@ -1,0 +1,18 @@
+
+.wrapper{
+    height: 100%;
+    margin-left: 20px;
+
+    .orderImage{
+        max-width: 50px;
+    }
+    .filter{
+        margin-left: 40px;
+        position: absolute;
+        right: 50%;
+        top:-14px;
+    }
+    .number{
+        text-align: center;
+    }   
+}
