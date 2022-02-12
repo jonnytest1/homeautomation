@@ -6,5 +6,5 @@ export class Location {
     id
 
     @column()
-    description
+    description: string
 }

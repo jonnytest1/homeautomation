@@ -2,7 +2,8 @@ import type { SocketResponses } from './websocket-response';
 import { Timer } from '../models/timer';
 import { senderLoader } from '../services/sender-loader';
 import { HttpRequest, Websocket, WS } from 'express-hibernate-wrapper';
-import { load } from 'hibernatets';
+import { load, SqlCondition } from 'hibernatets';
+import { Item } from '../models/inventory/item';
 
 
 @WS({ path: "/updates" })
@@ -21,12 +22,21 @@ export class FrontendWebsocket {
 
     static async updateSenders() {
         const senders = await senderLoader.loadSenders()
-        this.websockets.forEach(async (socket) => {
-            this.sendToWebsocket(socket, {
-                type: "senderUpdate",
-                data: senders
-            })
+        this.sendWebsocket({
+            type: "senderUpdate",
+            data: senders
+        }, ...this.websockets)
+    }
+
+    static async updateInventory(...socket: Array<Websocket>) {
+        const items = await load(Item, SqlCondition.ALL, [], {
+            deep: true
         })
+
+        this.sendWebsocket({
+            data: items,
+            type: "inventoryUpdate"
+        }, ...socket)
     }
 
     static async updateTimersForSocket(socket) {
@@ -34,6 +44,12 @@ export class FrontendWebsocket {
         this.sendToWebsocket(socket, {
             type: "timerUpdate",
             data: timers
+        })
+    }
+
+    static sendWebsocket<T extends keyof SocketResponses>(data: { type: T, data: SocketResponses[T] }, ...websockets: Array<Websocket>) {
+        websockets.forEach(socket => {
+            this.sendToWebsocket(socket, data);
         })
     }
 
@@ -62,5 +78,6 @@ export class FrontendWebsocket {
             // TODO
         })
         this.updateTimersForSocket(websocket)
+        this.updateInventory(websocket)
     }
 }

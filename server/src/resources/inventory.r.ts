@@ -2,6 +2,8 @@ import { assign, HttpRequest, HttpResponse, Path, POST } from 'express-hibernate
 import { load, queries, save, SqlCondition } from 'hibernatets';
 import { FrontendOrder, Item } from '../models/inventory/item';
 import { Order } from '../models/inventory/order';
+import websocketmessaging from '../services/websocketmessaging';
+import { FrontendWebsocket } from './frontend-update';
 
 
 
@@ -59,7 +61,7 @@ export class INventoryResource {
                 let storedItem = productLinkMap[item.productLink]
 
                 if (storedItem) {
-                    await assign(storedItem, item, { onlyWhenFalsy: true })
+                    await assign(storedItem, item, { onlyWhenFalsy: false })
                     await queries(storedItem)
                 } else {
                     const newItem = new Item()
@@ -69,7 +71,7 @@ export class INventoryResource {
                 }
             }
         }
-
         res.send("done")
+        FrontendWebsocket.updateInventory(...FrontendWebsocket.websockets)
     }
 }
