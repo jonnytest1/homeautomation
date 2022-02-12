@@ -147,5 +147,5 @@ void HttpServer::parseRequest(WiFiClient client)
     // Close the connection
     client.stop();
     Serial.println("Client disconnected.");
-    Serial.println("");
+    Serial.println();
 }

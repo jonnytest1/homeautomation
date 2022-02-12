@@ -9,7 +9,7 @@
 #define PORT 80
 
 int pinState = LOW;
-int valvePin = 12;
+int valvePin = 16;
 int requestCount = 0;
 
 String deviceKey = "water-supply";
@@ -43,8 +43,9 @@ HttpServer server(PORT, onRequest);
 
 void setup()
 {
-    Serial.begin(9600);
+    Serial.begin(115200);
     Serial.println("start");
+
     String otaPassword = generateUuid();
     pinMode(valvePin, OUTPUT);
 
