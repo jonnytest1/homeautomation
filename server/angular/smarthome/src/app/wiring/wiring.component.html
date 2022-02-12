@@ -4,6 +4,14 @@
     <span *ngFor="let bat of batteries">
         battery capacity {{getRemainingBattery(bat)}} <br>
         drain at {{bat.currentCurrent_ampere||'0'}}A <br>
-        duraiton : {{bat.getProjectedDurationMinutes()}}hours
+        duraiton : {{ bat.getProjectedDurationMinutes() }} hours <br>
+        resistor: -{{resist.voltageDrop}}V
     </span>
+
+
+
 </p>
+<button (click)="switch.enabled=!switch.enabled">switch </button>
+<div style="width: 20px;height: 20px;"
+     [style.backgroundColor]="led.backgroundColor()">
+</div>

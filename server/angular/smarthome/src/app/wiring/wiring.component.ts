@@ -1,6 +1,10 @@
 import { AfterContentChecked, AfterViewChecked, ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
+import { Button } from 'protractor';
 import { Battery } from './wirings/battery';
 import { LED } from './wirings/led';
+import { Resistor } from './wirings/resistor';
+import { SerialConnected } from './wirings/serial-block';
+import { Switch } from './wirings/switch';
 import { Wire } from './wirings/wire';
 
 @Component({
@@ -14,16 +18,24 @@ export class WiringComponent implements OnInit, AfterContentChecked, OnDestroy {
 
     lastTime: number
     interval: NodeJS.Timeout;
+    switch: Switch;
+    led: LED;
+    resist: Resistor;
 
     constructor(private cdr: ChangeDetectorRef) {
 
         const b1 = new Battery(5, 20)
         ///   const b2 = new Battery()
 
-        const led = new LED()
+        this.led = new LED()
+        this.switch = new Switch(0)
+        this.resist = new Resistor(100)
 
-        Wire.connect(b1.connectionProvide, led.inC)
-        Wire.connect(led.outC, b1.connectionConsume)
+
+        const con = new SerialConnected(this.resist, this.led, this.switch)
+
+        Wire.connect(b1.connectionProvide, con.inC)
+        Wire.connect(con.outC, b1.connectionConsume)
 
         this.batteries = [b1]
 

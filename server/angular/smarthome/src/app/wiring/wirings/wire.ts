@@ -15,24 +15,25 @@ export class Wire extends Wiring {
 
     connectedWires: Array<Connection> = []
     getTotalResistance(f: Wiring, options: GetResistanceOptions): number {
-        let resistancetotal = 0;
+        /* let resistancetotal = 0;
+ 
+         this.connectedWires.forEach(res => {
+             const connectionResistance = res.getTotalResistance(this, options)
+             if(isNaN(connectionResistance)){}
+             if (connectionResistance !== 0) {
+                 resistancetotal += 1 / connectionResistance;
+             }
+         })
+         if (this.connectedWires.length > 1) {
+             debugger;
+         }
+ 
+         if (resistancetotal == 0) {
+             return 0
+         }
+         const totalResistance = 1 / resistancetotal;*/
 
-        this.connectedWires.forEach(res => {
-            const connectionResistance = res.getTotalResistance(this, options)
-            if (connectionResistance !== 0) {
-                resistancetotal += 1 / connectionResistance;
-            }
-        })
-        if (this.connectedWires.length > 1) {
-            debugger;
-        }
-
-        if (resistancetotal == 0) {
-            return 0
-        }
-        const totalResistance = 1 / resistancetotal;
-
-        return totalResistance;//this.connectedWires[0].getTotalResistance(this);
+        return this.connectedWires[0].getTotalResistance(this, options);
     }
 
     pushCurrent(options: CurrentOption, from: Wiring): CurrentCurrent {

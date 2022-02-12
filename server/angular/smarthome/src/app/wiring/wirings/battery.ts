@@ -15,8 +15,11 @@ export class Battery extends Wiring {
 
     currentCurrent_ampere: number
 
+    maxAmpereHours: number
+
     constructor(private voltage: number, public ampereHours: number) {
         super();
+        this.maxAmpereHours = this.ampereHours
     }
 
 
@@ -33,7 +36,7 @@ export class Battery extends Wiring {
         if (!from) {
             return this.connectionProvide.pushCurrent(options, this)
         } else {
-            if (options.voltage > 0) {
+            if (options.voltage > 0.001) {
                 throw new Error("voltage should be 0 right here")
             }
             return {
@@ -47,25 +50,37 @@ export class Battery extends Wiring {
 
     checkContent(deltaSeconds: number) {
         const resistance = this.getTotalResistance(null, {})
-        this.currentCurrent_ampere = this.voltage / resistance
+        if (isNaN(resistance)) {
+            this.currentCurrent_ampere = 0
+            this.pushCurrent({
+                current: 0,
+                voltage: 0,
+                deltaSeconds: deltaSeconds,
+                resistance: 0
+            }, null)
+        } else {
+            this.currentCurrent_ampere = this.voltage / resistance
 
-        const result = this.pushCurrent({
-            current: this.currentCurrent_ampere,
-            voltage: this.voltage,
-            deltaSeconds: deltaSeconds,
-            resistance: 0
-        }, null)
-        const ampereSeconds = this.currentCurrent_ampere * deltaSeconds
-        if (ampereSeconds < 0) {
-            debugger
+            const result = this.pushCurrent({
+                current: this.currentCurrent_ampere,
+                voltage: this.voltage,
+                deltaSeconds: deltaSeconds,
+                resistance: 0
+            }, null)
+            const ampereSeconds = this.currentCurrent_ampere * deltaSeconds
+            if (ampereSeconds < 0) {
+                debugger
+            }
+            this.ampereHours -= ampereSeconds / (60 * 60)
         }
-        this.ampereHours -= ampereSeconds / (60 * 60)
-        console.log(this.ampereHours)
+
+
+        //console.log(this.ampereHours)
         //this.connectionConsume.connectedTo.getTotalResistance(null)
         //this.connectionConsume.connectedTo?.pullCurrent({ maxVoltage: this.voltage, maxAmpere: Math.min(this.amperePerFrame, this.watt) })
     }
 
-    getProjectedDurationMinutes() {
+    public getProjectedDurationMinutes(): number {
         const remainingAmpereSeconds = this.ampereHours * 60 * 60
         const remainingSeconds = remainingAmpereSeconds / this.currentCurrent_ampere
         return remainingSeconds / (60 * 60)
