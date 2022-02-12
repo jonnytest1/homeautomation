@@ -9,43 +9,43 @@
         <mat-nav-list>
             <h4> Smart Home</h4>
             <a mat-list-item
-               (mouseover)="$event.target.click()"
+               (mouseover)="click($event)"
                routerLinkActive="activeRoute"
                [routerLink]="(mobile$|async) ? 'setup/mobile':'setup'">
                 Setup
             </a>
             <a mat-list-item
-               (mouseover)="$event.target.click()"
+               (mouseover)="click($event)"
                routerLinkActive="activeRoute"
                routerLink="timers">
                 Timers
             </a>
             <a mat-list-item
-               (mouseover)="$event.target.click()"
+               (mouseover)="click($event)"
                routerLinkActive="activeRoute"
                routerLink="camera">
                 Camera
             </a>
             <a mat-list-item
-               (mouseover)="$event.target.click()"
+               (mouseover)="click($event)"
                routerLinkActive="activeRoute"
                routerLink="options">
                 Options
             </a>
             <a mat-list-item
-               (mouseover)="$event.target.click()"
+               (mouseover)="click($event)"
                routerLinkActive="activeRoute"
                routerLink="inventory">
                 Inventory
             </a>
             <a mat-list-item
-               (mouseover)="$event.target.click()"
+               (mouseover)="click($event)"
                routerLinkActive="activeRoute"
                routerLink="todo">
                 Todo
             </a>
             <a mat-list-item
-               (mouseover)="$event.target.click()"
+               (mouseover)="click($event)"
                routerLinkActive="activeRoute"
                routerLink="wiring">
                 WireTst

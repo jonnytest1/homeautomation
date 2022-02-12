@@ -2,7 +2,7 @@
 import { BottomSheetHandler } from './bottom-sheet-handler';
 import { ConnectionHandler } from './connection-handler';
 import type { ReceiverFe, SenderFe } from './interfaces';
-import { SettingsService } from './settings.service';
+import { SettingsService } from '../data.service';
 import { AppComponent } from '../app.component';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MatSnackBar } from '@angular/material/snack-bar';

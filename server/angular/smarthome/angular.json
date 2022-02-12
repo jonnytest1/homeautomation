@@ -22,6 +22,8 @@
             "baseHref": "/",
             "index": "src/index.html",
             "main": "src/main.ts",
+            "sourceMap": true,
+            "optimization": false,
             "polyfills": "src/polyfills.ts",
             "tsConfig": "src/tsconfig.app.json",
             "assets": [
@@ -30,9 +32,7 @@
               "src/manifest.webmanifest",
               "src/firebase-messaging-sw.js"
             ],
-            "styles": [
-              "src/styles.less"
-            ]
+            "styles": ["src/styles.less"]
           },
           "configurations": {
             "production": {
@@ -44,11 +44,11 @@
               ],
               "baseHref": "/nodets/",
               "deleteOutputPath": true,
-              "optimization": true,
+              "optimization": false,
               "outputHashing": "all",
               "sourceMap": true,
               "extractCss": true,
-              "namedChunks": false,
+              "namedChunks": true,
               "aot": true,
               "extractLicenses": true,
               "vendorChunk": false,
@@ -88,9 +88,7 @@
             "polyfills": "src/polyfills.ts",
             "tsConfig": "src/tsconfig.spec.json",
             "karmaConfig": "src/karma.conf.js",
-            "styles": [
-              "src/styles.less"
-            ],
+            "styles": ["src/styles.less"],
             "scripts": [],
             "assets": [
               "src/favicon.ico",
@@ -102,13 +100,8 @@
         "lint": {
           "builder": "@angular-devkit/build-angular:tslint",
           "options": {
-            "tsConfig": [
-              "src/tsconfig.app.json",
-              "src/tsconfig.spec.json"
-            ],
-            "exclude": [
-              "**/node_modules/**"
-            ]
+            "tsConfig": ["src/tsconfig.app.json", "src/tsconfig.spec.json"],
+            "exclude": ["**/node_modules/**"]
           }
         }
       }
@@ -134,9 +127,7 @@
           "builder": "@angular-devkit/build-angular:tslint",
           "options": {
             "tsConfig": "e2e/tsconfig.e2e.json",
-            "exclude": [
-              "**/node_modules/**"
-            ]
+            "exclude": ["**/node_modules/**"]
           }
         }
       }

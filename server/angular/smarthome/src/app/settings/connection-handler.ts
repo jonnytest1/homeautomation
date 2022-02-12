@@ -1,5 +1,5 @@
 import { ConnectionFe, ReceiverFe, SenderFe } from './interfaces';
-import { SettingsService } from './settings.service';
+import { SettingsService } from '../data.service';
 import { CanvasUtil } from '../utils/context';
 
 

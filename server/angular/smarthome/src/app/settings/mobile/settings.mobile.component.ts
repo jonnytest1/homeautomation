@@ -1,4 +1,4 @@
-import { SettingsService } from '../settings.service';
+import { SettingsService } from '../../data.service';
 import { ChangeDetectorRef, Component } from '@angular/core';
 import { first } from 'rxjs/operators';
 

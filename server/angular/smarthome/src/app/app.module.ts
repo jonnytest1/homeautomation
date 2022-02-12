@@ -9,31 +9,35 @@ import { MatSidenavModule } from '@angular/material/sidenav';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { MatListModule } from '@angular/material/list';
 import { MatIconModule } from '@angular/material/icon';
+import { MatTableModule } from '@angular/material/table';
 import { BrowserModule, HammerModule } from '@angular/platform-browser';
 import { FormsModule } from '@angular/forms';
 import { HTTP_INTERCEPTORS } from '@angular/common/http';
 import { TimersComponent } from './timers/timers.component';
 import { MatGridListModule } from '@angular/material/grid-list';
 import { NgCircleProgressModule } from 'ng-circle-progress';
-import { SettingsService } from './settings/settings.service';
+import { SettingsService } from './data.service';
 import { TodoComponent } from './todo/todo.component';
 import { InventoryComponent } from './inventory/inventory.component';
 import { WiringComponent } from './wiring/wiring.component';
+import { MatSortModule } from '@angular/material/sort';
+import { MatInputModule } from '@angular/material/input';
+import { RegexHighlightedComponent } from './inventory/regex-highlighted/regex-highlighted.component';
 
 
 @NgModule({
-    declarations: [	
+    declarations: [
         AppComponent,
         CameraComponent,
         TimersComponent,
         TodoComponent,
         InventoryComponent,
-      WiringComponent
-   ],
+        WiringComponent, RegexHighlightedComponent
+    ],
     imports: [
         BrowserModule, HammerModule,
-        AppRoutingModule, SettingsModule, FormsModule,
-        MatSidenavModule, MatListModule, MatIconModule, MatGridListModule,
+        AppRoutingModule, SettingsModule, FormsModule, MatInputModule,
+        MatSidenavModule, MatListModule, MatIconModule, MatGridListModule, MatTableModule, MatSortModule,
         BrowserAnimationsModule, NgCircleProgressModule.forRoot()
     ],
     providers: [

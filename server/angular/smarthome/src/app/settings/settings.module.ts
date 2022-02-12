@@ -2,7 +2,6 @@ import { SettingsComponent } from './settings.component';
 import { SenderBottomSheetComponent } from './sender-bottom-sheet/sender-bottom-sheet.component';
 import { ReceiverBottomsheetComponent } from './receiver-bottomsheet/receiver-bottomsheet.component';
 import { ConnectionBottomsheetComponent } from './connection-bottomsheet/connection-bottomsheet.component';
-import { SettingsService } from './settings.service';
 import { AutosavingDirective, ROOT_AUTOSAVE_PATH } from './autosaving/autosaving';
 import { AutosavingDirectiveProvider } from './autosaving/autosaveProvider';
 import { TransformerDropDownComponent } from './sender-bottom-sheet/transformer-drop-down/transformer-drop-down.component';
@@ -35,12 +34,10 @@ import { RouterModule } from '@angular/router';
 import { MatTabsModule } from '@angular/material/tabs';
 import { HammerGestureConfig, HammerModule, HAMMER_GESTURE_CONFIG } from '@angular/platform-browser';
 
-import * as hammer from 'hammerjs';
-
 @Injectable()
 export class MyHammerConfig extends HammerGestureConfig {
     overrides = <any>{
-        swipe: { direction: hammer.DIRECTION_ALL },
+        // swipe: { direction: hammer.DIRECTION_ALL },
         pinch: { enable: false },
         rotate: { enable: false }
     };
@@ -60,10 +57,15 @@ export class MyHammerConfig extends HammerGestureConfig {
         TransformationEditorComponent, SettingsMobileComponent, DebounceClickDirective
     ],
     imports: [
-        CommonModule, FormsModule,
+        CommonModule,
+        FormsModule,
         MatListModule, MatTabsModule, HammerModule,
-        MatIconModule, MatGridListModule, RouterModule.forChild(routes),
-        MatCardModule, MatSelectModule, NgCircleProgressModule.forRoot(),
+        MatIconModule,
+        MatGridListModule,
+        RouterModule.forChild(routes),
+        MatCardModule, MatSelectModule,
+
+        NgCircleProgressModule.forRoot(),
         MatBottomSheetModule, HttpClientModule, MatDialogModule,
         MatSnackBarModule, MatInputModule, MatButtonModule
     ],

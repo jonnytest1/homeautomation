@@ -1,7 +1,7 @@
 import { ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
 import { combineLatest, Subscription, timer } from 'rxjs';
 import { SenderFe, TimerFe } from '../settings/interfaces';
-import { SettingsService } from '../settings/settings.service';
+import { SettingsService } from '../data.service';
 import { TimerParser } from '../utils/time-parser';
 
 @Component({

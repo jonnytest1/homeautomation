@@ -6,7 +6,6 @@ import { platformBrowserDynamic } from '@angular/platform-browser-dynamic';
 if (environment.production) {
     enableProdMode();
 }
-import 'hammerjs'
 platformBrowserDynamic().bootstrapModule(AppModule).then(ref => {
     // Ensure Angular destroys itself on hot reloads.
     if (window['ngRef']) {

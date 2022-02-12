@@ -1,5 +1,5 @@
 import { SenderFe, TransformFe } from '../../interfaces';
-import { SettingsService } from '../../settings.service';
+import { SettingsService } from '../../../data.service';
 import { ChangeDetectorRef, Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 

@@ -1,6 +1,7 @@
 import type { TransformationRes } from '../../../../../src/models/connection-response';
 import { Sender as NodeSender } from '../../../../../src/models/sender';
 import { Timer } from '../../../../../src/models/timer';
+import { Item } from '../../../../../src/models/inventory/item';
 import { Transformation } from '../../../../../src/models/transformation';
 import { SocketResponses as sR } from "../../../../../src/resources/websocket-response"
 
@@ -63,6 +64,7 @@ export interface SenderFe extends SenderWithConnectionTransformation, DoubleClic
 
 
 
+
 export type EventHistoryFe = SenderFe["events"][0] & {
     parsedData?: {
         message?: string
@@ -79,3 +81,6 @@ export type ConnectionFe = SenderFe["connections"][0] //  With<FrontendPropertie
 
 
 export type ReceiverFe = ConnectionFe["receiver"];
+
+
+export type ItemFe = FrontendProperties<Item>

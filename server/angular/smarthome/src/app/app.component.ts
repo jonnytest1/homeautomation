@@ -1,13 +1,14 @@
 import { ChangeDetectorRef, Component } from '@angular/core';
 import { fromEvent } from 'rxjs';
-import { map, startWith } from 'rxjs/operators';
+import { last, map, startWith } from 'rxjs/operators';
+import { SettingsService } from './data.service';
 @Component({
     selector: 'app-root',
     templateUrl: './app.component.html',
     styleUrls: ['./app.component.less']
 })
 export class AppComponent {
-    constructor(private cdr: ChangeDetectorRef) {
+    constructor(private cdr: ChangeDetectorRef, private data: SettingsService) {
         window["defaultLog"] = true
         //
     }
@@ -27,6 +28,14 @@ export class AppComponent {
     }
     openFromContent() {
         this.openSideNav()
+    }
+
+    click(event: Event) {
+        if (Date.now() - this.lastOpen < 500) {
+            return
+        }
+        const target = event.target as HTMLElement
+        target.click()
     }
     openSideNav() {
         this.sidenavOpened = true

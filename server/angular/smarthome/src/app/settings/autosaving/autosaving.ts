@@ -16,7 +16,6 @@ export class AutosavingDirective implements OnInit {
 
         @Optional() @Self() @Inject(NG_VALUE_ACCESSOR) private asd: ControlValueAccessor[],
         http: HttpClient) {
-
         ngModelRef.control.setAsyncValidators(async (control) => {
             if (this.value === control.value || this.duringConstructor || control.pristine) {
                 return null;
@@ -104,9 +103,6 @@ export class AutosavingDirective implements OnInit {
     dataRef: string | number;
 
     @Input()
-    ngModel;
-
-    @Input()
     name: string;
 
     @Input()
@@ -121,7 +117,7 @@ export class AutosavingDirective implements OnInit {
 
     private value;
     ngOnInit(): void {
-        this.value = this.ngModel;
+        this.value = this.ngModelRef.value;
     }
 
 

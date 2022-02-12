@@ -1,5 +1,5 @@
 import { SenderFe, TimerFe } from '../../interfaces';
-import { SettingsService } from '../../settings.service';
+import { SettingsService } from '../../../data.service';
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Inject, OnDestroy, OnInit } from '@angular/core';
 import { MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { combineLatest, Subscription, timer } from 'rxjs';

@@ -1,8 +1,8 @@
 import { BatteryComponent } from './battery/battery.component';
 import { EventsComponent } from './events/events.component';
 import { TimersComponent } from './timers/timers.component';
-import { EventHistoryFe, SenderFe, TransformFe } from '../interfaces';
-import { SettingsService } from '../settings.service';
+import type { SenderFe, TransformFe } from '../interfaces';
+import { SettingsService } from '../../data.service';
 import { ChangeDetectorRef, Component, Inject, OnInit } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { MAT_SNACK_BAR_DATA, MatSnackBarRef } from '@angular/material/snack-bar';
