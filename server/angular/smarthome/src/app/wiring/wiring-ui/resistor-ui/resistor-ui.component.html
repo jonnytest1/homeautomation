@@ -1,0 +1,19 @@
+<app-in-out [node]="node">
+    <img [src]="getIcon()"
+         (click)="openSnackbar(options)" />
+</app-in-out>
+
+
+<ng-template #options>
+    <button (click)="snackbarRef.dismiss()">
+        close
+    </button>
+
+    <input #resistance
+           placeholder="resistance"
+           type="number"
+           (change)="setResistance(resistance)" />
+    <button>
+        en/disable
+    </button>
+</ng-template>

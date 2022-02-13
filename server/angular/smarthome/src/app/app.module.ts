@@ -23,6 +23,8 @@ import { WiringComponent } from './wiring/wiring.component';
 import { MatSortModule } from '@angular/material/sort';
 import { MatInputModule } from '@angular/material/input';
 import { RegexHighlightedComponent } from './inventory/regex-highlighted/regex-highlighted.component';
+import { WiringUiModule } from './wiring/wiring-ui/wiring-ui.module';
+import { WiringModule } from './wiring/wiring.module';
 
 
 @NgModule({
@@ -32,12 +34,12 @@ import { RegexHighlightedComponent } from './inventory/regex-highlighted/regex-h
         TimersComponent,
         TodoComponent,
         InventoryComponent,
-        WiringComponent, RegexHighlightedComponent
+        RegexHighlightedComponent
     ],
     imports: [
         BrowserModule, HammerModule,
-        AppRoutingModule, SettingsModule, FormsModule, MatInputModule,
-        MatSidenavModule, MatListModule, MatIconModule, MatGridListModule, MatTableModule, MatSortModule,
+        AppRoutingModule, SettingsModule, FormsModule, MatInputModule, WiringModule, MatTableModule,
+        MatSidenavModule, MatListModule, MatIconModule, MatGridListModule,
         BrowserAnimationsModule, NgCircleProgressModule.forRoot()
     ],
     providers: [

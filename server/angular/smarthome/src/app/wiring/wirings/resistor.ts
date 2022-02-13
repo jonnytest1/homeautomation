@@ -1,7 +1,8 @@
+import { Collection } from './collection';
 import { Connection } from './connection';
 import { CurrentCurrent, CurrentOption, GetResistanceOptions, Wiring } from './wiring.a';
 
-export class Resistor extends Wiring {
+export class Resistor extends Collection implements Wiring {
 
 
     inC = new Connection(this, "res_in")
@@ -10,7 +11,7 @@ export class Resistor extends Wiring {
 
     voltageDrop: number
     constructor(public resistance: number) {
-        super()
+        super(null, null)
     }
     getTotalResistance(from, options: GetResistanceOptions): number {
         return this.resistance + this.outC.getTotalResistance(this, options)
@@ -24,5 +25,8 @@ export class Resistor extends Wiring {
             voltage: options.voltage - this.voltageDrop
         }, this);
     }
-
+    register(options: { nodes: any[]; until: Wiring; from?: Wiring; }) {
+        options.nodes.push(this)
+        return this.outC.register({ ...options, from: this })
+    }
 }

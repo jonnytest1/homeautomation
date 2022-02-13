@@ -1,11 +1,12 @@
 import { Collection } from './collection';
 import { Connection } from './connection';
+import { ControlCollection } from './control-collection.a';
 import { Resistor } from './resistor';
 import { SerialConnected } from './serial-block';
 import { Wire } from './wire';
 import { CurrentCurrent, CurrentOption, GetResistanceOptions, Wiring } from './wiring.a';
 
-export class Parrallel extends Collection implements Wiring {
+export class Parrallel extends ControlCollection implements Wiring {
     resistance: number;
 
     lanes: Array<Collection>
@@ -27,7 +28,7 @@ export class Parrallel extends Collection implements Wiring {
         this.wireRec = Wire.at(this.outC);
 
         for (const component of containers) {
-            this.wireProv.connectedWires.push(component.inC)
+            this.wireProv.connectedWire = component.inC
             component.outC.connectedTo = this.wireRec
         }
         this.containers = containers
@@ -79,4 +80,8 @@ export class Parrallel extends Collection implements Wiring {
         return this.restCurrent;
     }
 
+
+    getStructure() {
+        return this.containers.map(container => container instanceof ControlCollection ? container.getStructure() : container)
+    }
 }

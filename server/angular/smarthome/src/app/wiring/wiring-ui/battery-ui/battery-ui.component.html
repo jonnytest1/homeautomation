@@ -1,0 +1,15 @@
+<app-in-out [node]="batteryCollection"
+            invers="true">
+    <mat-icon [title]="getChargedPercent()"
+              (click)="logStructure(options)">{{getIcon()}}</mat-icon>
+</app-in-out>
+
+
+<ng-template #options>
+    <button (click)="snackbarRef.dismiss()">
+        close
+    </button>
+    <button (click)="node.enabled=!node.enabled">
+        en/disable
+    </button>
+</ng-template>

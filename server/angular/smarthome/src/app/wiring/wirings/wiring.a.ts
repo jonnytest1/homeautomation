@@ -29,4 +29,6 @@ export abstract class Wiring {
 
     abstract getTotalResistance(from: Wiring, options: GetResistanceOptions): number
     abstract pushCurrent(options: CurrentOption, from: Wiring | null): CurrentCurrent
+
+    abstract register(options: { nodes: any[], until: Wiring, from?: any });
 }

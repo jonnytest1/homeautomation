@@ -1,0 +1,14 @@
+<div [ngClass]="{invers:!!invers}">
+
+    <label (dragenter)="markDropZone($event)"
+           (dragleave)="leaveDropZone()"
+           (drop)="onDrop($event)"
+           (dragover)="$event.preventDefault()"
+           class="dropzone"
+           [ngClass]="{hover:hover}">in</label>
+    <ng-content></ng-content>
+    <label draggable="true"
+           class="draggable"
+           (dragstart)="$event.stopPropagation();storeOutgoing()"
+           (dragend)="$event.stopPropagation();clearDragCache()">out</label>
+</div>

@@ -1,17 +1,50 @@
-<p>
-    wiring works!
+<mat-sidenav-container class="drop-in-container">
+    <mat-sidenav opened="true"
+                 position="end"
+                 mode="side">
+        <div class="sidenav">
+            <ng-container *ngFor="let templ of nodeTemplates">
+                <mat-icon (dragend)="dropped($event,templ)"
+                          draggable="true">{{templ.templateIcon}}
+                </mat-icon>
+            </ng-container>
+        </div>
+        <div style="position: absolute;bottom: 0px;">
+            <app-net-display [data]="dataStructure"></app-net-display>
+        </div>
+    </mat-sidenav>
+    <mat-sidenav-content>
 
-    <span *ngFor="let bat of batteries">
-        battery capacity {{getRemainingBattery(bat)}} <br>
-        drain at {{bat.currentCurrent_ampere||'0'}}A <br>
-        duraiton : {{ bat.getProjectedDurationMinutes() }} hours <br>
-        resistor: -{{resist.voltageDrop}}V
-    </span>
+        <p>
+            wiring works!<br>
 
+            <span *ngFor="let bat of batteries">
+                battery capacity {{getRemainingBattery(bat)}} <br>
+                drain at {{bat.currentCurrent_ampere||'0'}}A <br>
+                duraiton : {{ bat.getProjectedDurationMinutes() }} hours <br>
+                resistor: -{{resist.voltageDrop}}V
+            </span>
+        </p>
 
+        <div *ngFor="let node of nodes"
+             (dragend)="node.x=$event.x;node.y=$event.y"
+             class="node-wrapper"
+             draggable="true"
+             [style.left]="node.x+'px'"
+             [style.top]="node.y+'px'">
+            <app-view-template [addingData]="node.componentRef"></app-view-template>
+        </div>
 
-</p>
-<button (click)="switch.enabled=!switch.enabled">switch </button>
-<div style="width: 20px;height: 20px;"
-     [style.backgroundColor]="led.backgroundColor()">
-</div>
+        <!-- 
+        <mat-icon *ngFor="let node of nodes"
+                  class="node-icon"
+                  [style.left]="node.x+'px'"
+                  [style.top]="node.y+'px'">{{node.icon}}</mat-icon> -->
+
+        <button (click)="switch.enabled=!switch.enabled">switch </button>
+        <div style="width: 20px;height: 20px;"
+             [style.backgroundColor]="led.backgroundColor()">
+        </div>
+    </mat-sidenav-content>
+
+</mat-sidenav-container>

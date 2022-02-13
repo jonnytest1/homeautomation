@@ -1,0 +1,10 @@
+<div *ngFor="let item of parsedData">
+    <div class="nested"
+         *ngIf="isArray(item);else text">
+        <app-net-display [data]="cast(item)"></app-net-display>
+    </div>
+
+    <ng-template #text>
+        {{item.constructor.name}}
+    </ng-template>
+</div>

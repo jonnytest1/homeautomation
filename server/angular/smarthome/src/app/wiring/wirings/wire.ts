@@ -13,7 +13,7 @@ export class Wire extends Wiring {
     }
     resistance = 0;
 
-    connectedWires: Array<Connection> = []
+    connectedWire: Connection
     getTotalResistance(f: Wiring, options: GetResistanceOptions): number {
         /* let resistancetotal = 0;
  
@@ -33,12 +33,12 @@ export class Wire extends Wiring {
          }
          const totalResistance = 1 / resistancetotal;*/
 
-        return this.connectedWires[0].getTotalResistance(this, options);
+        return this.connectedWire.getTotalResistance(this, options);
     }
 
     pushCurrent(options: CurrentOption, from: Wiring): CurrentCurrent {
 
-        const connection = this.connectedWires[0]
+        const connection = this.connectedWire
         return connection.pushCurrent(options, this)
         /*const currents = this.connectedWires.map(wire => wire.parent.pullCurrent({ ...options, test: true }));
 
@@ -59,12 +59,18 @@ export class Wire extends Wiring {
             wire = new Wire(inC)
         }
 
-        wire.connectedWires.push(outC)
+        wire.connectedWire = outC
     }
 
     static at(outC: Connection) {
         const wire = new Wire()
-        wire.connectedWires.push(outC)
+        wire.connectedWire = outC
         return wire
+    }
+
+
+    register(options: { nodes: any[]; until: Wiring; from?: Wiring; }) {
+        options.nodes.push(this)
+        return this.connectedWire.register({ ...options, from: this })
     }
 }

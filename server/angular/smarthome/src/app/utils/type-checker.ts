@@ -14,3 +14,6 @@ export function propertyEquals<Prop extends Primitives, Value extends Prop>(
 ): prop is Value {
     return prop === value;
 }
+
+
+export type BindingBoolean = boolean | "true"

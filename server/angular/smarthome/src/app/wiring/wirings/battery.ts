@@ -3,6 +3,9 @@ import { Connection } from './connection';
 import { CurrentCurrent, CurrentOption, GetResistanceOptions, Wiring } from './wiring.a';
 
 export class Battery extends Wiring {
+    register(options: { nodes: any[]; until: Wiring; from?: any; }) {
+        throw new Error('Method not implemented.');
+    }
     resistance = 0.000;
 
 
@@ -16,6 +19,8 @@ export class Battery extends Wiring {
     currentCurrent_ampere: number
 
     maxAmpereHours: number
+
+    enabled = false
 
     constructor(private voltage: number, public ampereHours: number) {
         super();
@@ -49,7 +54,13 @@ export class Battery extends Wiring {
 
 
     checkContent(deltaSeconds: number) {
-        const resistance = this.getTotalResistance(null, {})
+        let resistance;
+        if (this.enabled) {
+            resistance = this.getTotalResistance(null, {})
+        } else {
+            resistance = NaN
+        }
+
         if (isNaN(resistance)) {
             this.currentCurrent_ampere = 0
             this.pushCurrent({

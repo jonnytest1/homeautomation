@@ -1,0 +1,36 @@
+.drop-in-container{
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    position: absolute;
+    z-index: 0;
+
+    mat-sidenav{
+        min-width: 100px;
+        max-width: 200px;
+    }
+
+    .sidenav{
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }   
+
+    mat-sidenav-content{
+        padding-left: 40px;
+
+        background-size: 5px 5px;
+        background-image:
+            linear-gradient(to right, rgba(158, 158, 158, 0.1) 1px, transparent 1px),
+            linear-gradient(to bottom, rgba(158, 158, 158, 0.1) 1px, transparent 1px);
+
+
+
+        .node-wrapper{
+            position: fixed;
+            transform: translate(-50% ,-50%);
+        }
+    }
+}

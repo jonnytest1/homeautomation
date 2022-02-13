@@ -21,17 +21,18 @@ export class LED extends Resistor {
     }
 
     pushCurrent(options: CurrentOption, from: Wiring): CurrentCurrent {
+        const returnCurrent = super.pushCurrent(options, from)
         if (options.current > 0) {
-            if (options.voltage > 2.6) {
+            if (this.voltageDrop > 2.6) {
                 this.blown = true;
-                return super.pushCurrent(options, from)
+                return
             }
             this.brightness = 100
         } else {
             this.brightness = 0
         }
 
-        return super.pushCurrent(options, from)
+        return returnCurrent
     }
 
     backgroundColor() {
