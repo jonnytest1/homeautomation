@@ -1,5 +1,3 @@
-import { Options } from 'selenium-webdriver';
-import { threadId } from 'worker_threads';
 import { FromJson, FromJsonOptions } from '../serialisation';
 import { UINode } from '../wiring-ui/ui-node.a';
 import { Collection } from './collection';
@@ -38,11 +36,11 @@ export class SerialConnected extends ControlCollection implements Wiring {
     uiNode?: UINode<Wiring>;
 
 
-    resistance: number;
+    blockResistance: number;
 
     inVoltage: number
 
-    voltageDrop: number
+    blockDrop: number
 
 
     private resistanceAfterNodes: number
@@ -68,7 +66,7 @@ export class SerialConnected extends ControlCollection implements Wiring {
             return this.resistanceAfterNodes
         }
         const resistanceWithNodes = this.innerInC.getTotalResistance(this, options);
-        this.resistance = resistanceWithNodes - this.resistanceAfterNodes
+        this.blockResistance = resistanceWithNodes - this.resistanceAfterNodes
         return resistanceWithNodes
     }
     pushCurrent(options: CurrentOption, from: Wiring): CurrentCurrent {
@@ -77,7 +75,7 @@ export class SerialConnected extends ControlCollection implements Wiring {
             return this.outC.pushCurrent(options, this)
         }
         //this.inVoltage = options.voltage
-        this.voltageDrop = (options.current * this.resistance)
+        this.blockDrop = (options.current * this.blockResistance)
         return this.innerInC.pushCurrent({
             ...options,
             //  voltage: options.voltage - this.voltageDrop

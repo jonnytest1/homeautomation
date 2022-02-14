@@ -101,10 +101,12 @@ export class WiringComponent implements OnInit, AfterContentChecked, OnDestroy {
             .filter((item): item is Wire => item instanceof Wire)
     }
 
+
     storeToLocal() {
 
         const json = JSON.stringify(this.batteries);
         localStorage.setItem("el_network", json)
+        console.log(json)
     }
     loadFromLocal() {
         const json = localStorage.getItem("el_network");
@@ -126,6 +128,7 @@ export class WiringComponent implements OnInit, AfterContentChecked, OnDestroy {
         this.batteries = parsed.map(obj => Battery.fromJSON(obj, serialisationMap, {
             viewRef: this.viewRef,
             displayNodes: this.nodes,
+            injectorFactory: this.getInjector.bind(this),
             elementMap: elementMap
         }));
 
@@ -177,15 +180,21 @@ export class WiringComponent implements OnInit, AfterContentChecked, OnDestroy {
         node.uiInstance.getPosition = () => new Vector2({ x: event.x, y: event.y }).dividedBy(10).rounded().multipliedBy(10)
         node.uiInstance.getInOutComponent().position = node.uiInstance.getPosition()
     }
+
+
+    getInjector(position: Vector2) {
+        return Injector.create({
+            providers: [{
+                provide: positionInjectionToken, useValue: position
+            }], parent: this.viewRef.injector
+        })
+    }
+
     dropped(el: DragEvent, nodeTemplate: NodeTemplate) {
 
         const position = new Vector2({ x: el.x, y: el.y }).dividedBy(10).rounded().multipliedBy(10)
         const newNode = this.viewRef.createComponent(nodeTemplate, {
-            injector: Injector.create({
-                providers: [{
-                    provide: positionInjectionToken, useValue: position
-                }], parent: this.viewRef.injector
-            })
+            injector: this.getInjector(position)
         })
         if (newNode.instance instanceof BatteryUiComponent) {
             this.batteries.push(newNode.instance.node);

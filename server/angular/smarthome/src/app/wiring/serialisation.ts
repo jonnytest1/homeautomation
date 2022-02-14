@@ -1,7 +1,5 @@
-import { Injector, ViewContainerRef } from '@angular/core';
-import { Options } from 'selenium-webdriver';
+import type { Injector, ViewContainerRef } from '@angular/core';
 import { Vector2 } from './util/vector';
-import { positionInjectionToken } from './wiring-ui/in-out/in-out.component';
 import { NodeEl, NodeTemplate } from './wiring.component';
 import { Collection } from './wirings/collection';
 import { Connection } from './wirings/connection';
@@ -14,6 +12,7 @@ export interface FromJsonOptions {
     wire?: Wire
     displayNodes?: NodeEl[],
     viewRef?: ViewContainerRef,
+    injectorFactory?: (pos: Vector2) => Injector
     elementMap?: Record<string, FromElementJson>
 }
 
@@ -43,11 +42,7 @@ export class JsonSerializer {
         if (uiConstructor && json.ui?.x && json.ui.y) {
             const position = new Vector2(json.ui)
             const element = optinos.viewRef.createComponent(uiConstructor, {
-                injector: Injector.create({
-                    providers: [{
-                        provide: positionInjectionToken, useValue: position
-                    }], parent: optinos.viewRef.injector
-                })
+                injector: optinos.injectorFactory(position)
             })
 
             element.instance.node = node

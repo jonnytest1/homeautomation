@@ -21,13 +21,17 @@ export class Parrallel extends ControlCollection implements Wiring {
     wireRec: Wire;
     inVoltage: number;
     restCurrent: CurrentCurrent;
+    resistanceAfterBlock: number;
+    innerOutConnection: Connection;
     constructor(...containers: Array<Collection & Wiring>) {
         super(null, null);
         this.inC = new Connection(this, "par_in");
         this.outC = new Connection(this, "par_out");
 
+        this.innerOutConnection = new Connection(this, "par_inner_out");
+
         this.wireProv = new Wire(this.inC);
-        this.wireRec = Wire.at(this.outC);
+        this.wireRec = Wire.at(this.innerOutConnection);
 
         for (const component of containers) {
             this.wireProv.connectedWire = component.inC
@@ -39,12 +43,14 @@ export class Parrallel extends ControlCollection implements Wiring {
     }
 
     getTotalResistance(from: Wiring, options: GetResistanceOptions): number {
-        if (from == this.outC) {
+        if (from == this.innerOutConnection) {
+            debugger;
             if (options.forParrallel) {
                 if (options.forParrallel === 1) {
                     return 0;
                 }
-                return this.outC.getTotalResistance(this, { ...options, forParrallel: options.forParrallel - 1 })
+                this.resistanceAfterBlock = this.outC.getTotalResistance(this, { ...options, forParrallel: options.forParrallel - 1 });
+                return this.resistanceAfterBlock;
             }
             return this.outC.getTotalResistance(this, { ...options })
         } else if (typeof options.forParrallel != "undefined") {
@@ -52,6 +58,7 @@ export class Parrallel extends ControlCollection implements Wiring {
         }
         let resistancetotal = 0
         this.containers.forEach(res => {
+            debugger;
             const connectionResistance = res.getTotalResistance(this, { ...options, forParrallel: 1 })
             if (connectionResistance !== 0) {
                 resistancetotal += 1 / connectionResistance;
@@ -64,7 +71,7 @@ export class Parrallel extends ControlCollection implements Wiring {
         return this.resistance + this.outC.getTotalResistance(this, options)
     }
     pushCurrent(options: CurrentOption, from: Wiring): CurrentCurrent {
-        if (from == this.outC) {
+        if (from == this.innerOutConnection) {
             return this.restCurrent
         }
         this.voltageDrop = (options.current * this.resistance)
@@ -77,8 +84,6 @@ export class Parrallel extends ControlCollection implements Wiring {
         const subCurrents = this.containers.map(container => container.inC.pushCurrent({
             ...options, voltage: options.voltage - this.voltageDrop
         }, this))
-        debugger;
-
         return this.restCurrent;
     }
 
