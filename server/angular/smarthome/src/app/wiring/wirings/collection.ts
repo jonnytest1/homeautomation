@@ -17,4 +17,10 @@ export class Collection {
         options.nodes.push(this)
         return this.inC.register({ ...options, from: this })
     }
+
+    toJSON() {
+        return {
+            type: this.constructor.name
+        }
+    }
 }

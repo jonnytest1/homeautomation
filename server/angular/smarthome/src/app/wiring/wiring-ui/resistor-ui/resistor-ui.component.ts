@@ -1,6 +1,9 @@
-import { Component, OnInit, TemplateRef } from '@angular/core';
+import { Component, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import { MatSnackBar, MatSnackBarRef } from '@angular/material/snack-bar';
+import { FromJson } from '../../serialisation';
+import { Connection } from '../../wirings/connection';
 import { Resistor } from '../../wirings/resistor';
+import { InOutComponent } from '../in-out/in-out.component';
 import { UINode } from '../ui-node.a';
 
 @Component({
@@ -12,6 +15,10 @@ export class ResistorUiComponent extends UINode<Resistor> implements OnInit {
 
     public static templateIcon = "insights"
     snackbarRef: MatSnackBarRef<any>;
+
+    @ViewChild(InOutComponent)
+    public inOutComponent?: InOutComponent
+
     getIcon(): string {
         return `assets/icons/resistor-svgrepo-com.svg`
     }
@@ -23,7 +30,11 @@ export class ResistorUiComponent extends UINode<Resistor> implements OnInit {
 
     openSnackbar(template: TemplateRef<any>) {
         this.snackbarRef = this.snackbar.openFromTemplate(template)
-    }
+    } static fromJSON(json: any, map: Record<string, FromJson>, context: { inC: Connection; }): Connection {
+
+        debugger;
+        return null
+    };
 
     setResistance(input: HTMLInputElement) {
         this.node.resistance = +input.value

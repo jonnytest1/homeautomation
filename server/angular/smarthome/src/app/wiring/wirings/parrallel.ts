@@ -1,3 +1,5 @@
+
+import { FromJson, FromJsonOptions } from '../serialisation';
 import { Collection } from './collection';
 import { Connection } from './connection';
 import { ControlCollection } from './control-collection.a';
@@ -84,4 +86,10 @@ export class Parrallel extends ControlCollection implements Wiring {
     getStructure() {
         return this.containers.map(container => container instanceof ControlCollection ? container.getStructure() : container)
     }
+
+    static fromJSON(json: any, map: Record<string, FromJson>, context: FromJsonOptions): Wire {
+
+        debugger;
+        return null
+    };
 }

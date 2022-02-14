@@ -1,3 +1,4 @@
+import { UINode } from '../wiring-ui/ui-node.a'
 import { Connection } from './connection'
 import { Wire } from './wire'
 
@@ -24,6 +25,7 @@ export type GetResistanceOptions = {
 
 export abstract class Wiring {
 
+    uiNode?: UINode;
 
     // abstract resistance: number
 

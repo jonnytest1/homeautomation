@@ -12,7 +12,7 @@ describe('WiringComponent', () => {
     it('serial resistor circuit', () => {
         const battery = new Battery(12, Infinity)
         ///   const b2 = new Battery()
-
+        battery.enabled = true
         const resistor = new Resistor(2)
         const resistor3 = new Resistor(3)
         const resistor5 = new Resistor(5)
@@ -31,18 +31,23 @@ describe('WiringComponent', () => {
     });
     it('parrallel resistor circuit', () => {
         const battery = new Battery(6, Infinity)
+        battery.enabled = true
         ///   const b2 = new Battery()
 
 
         const resistor = new Resistor(2)
         const resistor3 = new Resistor(4)
 
+
+
+
         const parrallelblock = new Parrallel(resistor, resistor3)
         const resistor5 = new Resistor(5)
 
-        Wire.connect(battery.connectionProvide, parrallelblock.inC)
-        Wire.connect(parrallelblock.outC, resistor5.inC)
-        Wire.connect(resistor5.outC, battery.connectionConsume)
+        const sC = new SerialConnected(parrallelblock, resistor5)
+
+        Wire.connect(battery.connectionProvide, sC.inC)
+        Wire.connect(sC.outC, battery.connectionConsume)
 
         //expect(+battery.getTotalResistance(null).toPrecision(3)).toBe(1.33)
         battery.checkContent(1)

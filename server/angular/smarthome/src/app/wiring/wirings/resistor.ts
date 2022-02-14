@@ -1,3 +1,6 @@
+
+import { FromJson, FromJsonOptions, JsonSerializer } from '../serialisation';
+import { UINode } from '../wiring-ui/ui-node.a';
 import { Collection } from './collection';
 import { Connection } from './connection';
 import { CurrentCurrent, CurrentOption, GetResistanceOptions, Wiring } from './wiring.a';
@@ -5,6 +8,7 @@ import { CurrentCurrent, CurrentOption, GetResistanceOptions, Wiring } from './w
 export class Resistor extends Collection implements Wiring {
 
 
+    uiNode?: UINode;
     inC = new Connection(this, "res_in")
 
     outC = new Connection(this, "res_out")
@@ -28,5 +32,19 @@ export class Resistor extends Collection implements Wiring {
     register(options: { nodes: any[]; until: Wiring; from?: Wiring; }) {
         options.nodes.push(this)
         return this.outC.register({ ...options, from: this })
+    }
+
+    toJSON() {
+        return {
+            type: this.constructor.name,
+            resistance: this.resistance,
+            ui: this.uiNode
+        }
+    }
+
+    static fromJSON(json: any, map: Record<string, FromJson>, context: FromJsonOptions): InstanceType<typeof this> {
+        const reistor = new Resistor(json.resistance);
+        JsonSerializer.createUiRepresation(reistor, json, context)
+        return reistor
     }
 }

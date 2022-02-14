@@ -7,6 +7,7 @@ import { MatSortModule } from '@angular/material/sort';
 import { MatTableModule } from '@angular/material/table';
 import { BrowserModule } from '@angular/platform-browser';
 import { NetDisplayComponent } from './net-display/net-display.component';
+import { WireUiComponent } from './wiring-ui/wire-ui/wire-ui.component';
 import { WiringUiModule } from './wiring-ui/wiring-ui.module';
 import { WiringComponent } from './wiring.component';
 

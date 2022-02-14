@@ -1,8 +1,14 @@
 
+import { ViewContainerRef, ViewRef } from '@angular/core';
+import { FromJson, FromJsonOptions, JsonSerializer } from '../serialisation';
+import { Collection } from './collection';
 import { Connection } from './connection';
+import { Wire } from './wire';
 import { CurrentCurrent, CurrentOption, GetResistanceOptions, Wiring } from './wiring.a';
 
 export class Battery extends Wiring {
+
+    ampereSeconds: number;
     register(options: { nodes: any[]; until: Wiring; from?: any; }) {
         throw new Error('Method not implemented.');
     }
@@ -18,13 +24,14 @@ export class Battery extends Wiring {
 
     currentCurrent_ampere: number
 
-    maxAmpereHours: number
+    maxAmpereSeconds: number
 
     enabled = false
 
-    constructor(private voltage: number, public ampereHours: number) {
+    constructor(private voltage: number, ampereHours: number) {
         super();
-        this.maxAmpereHours = this.ampereHours
+        this.ampereSeconds = ampereHours * 60 * 60;
+        this.maxAmpereSeconds = this.ampereSeconds
     }
 
 
@@ -46,7 +53,7 @@ export class Battery extends Wiring {
             }
             return {
                 voltage: 0,
-                remainingAmpereHours: this.ampereHours,
+                remainingAmpereHours: this.ampereSeconds,
                 current: 0
             }
         }
@@ -61,7 +68,7 @@ export class Battery extends Wiring {
             resistance = NaN
         }
 
-        if (isNaN(resistance)) {
+        if (isNaN(resistance) || this.ampereSeconds == 0) {
             this.currentCurrent_ampere = 0
             this.pushCurrent({
                 current: 0,
@@ -82,7 +89,7 @@ export class Battery extends Wiring {
             if (ampereSeconds < 0) {
                 debugger
             }
-            this.ampereHours -= ampereSeconds / (60 * 60)
+            this.ampereSeconds = Math.max(this.ampereSeconds - ampereSeconds, 0)
         }
 
 
@@ -92,8 +99,37 @@ export class Battery extends Wiring {
     }
 
     public getProjectedDurationMinutes(): number {
-        const remainingAmpereSeconds = this.ampereHours * 60 * 60
+        const remainingAmpereSeconds = this.ampereSeconds * 60 * 60
         const remainingSeconds = remainingAmpereSeconds / this.currentCurrent_ampere
         return remainingSeconds / (60 * 60)
     }
+
+
+    toJSON() {
+        return {
+            prov: this.connectionProvide.connectedTo,
+            voltage: this.voltage,
+            ui: this.uiNode
+        }
+    }
+
+    static fromJSON(fromJSON: jsonType, serialisationMap: Parameters<FromJson["fromJSON"]>[1], options: Partial<FromJsonOptions>): Battery {
+        const battery = new Battery(fromJSON.voltage, 20);
+        JsonSerializer.createUiRepresation(battery, fromJSON, options)
+        if (serialisationMap[fromJSON.prov.type]) {
+            const outC = serialisationMap[fromJSON.prov.type].fromJSON(fromJSON.prov, serialisationMap, {
+                inC: battery.connectionProvide,
+                ...options
+            })
+            if (outC) {
+                outC.connect(battery.connectionConsume)
+            }
+        } else {
+            throw new Error("missing serialisation for " + fromJSON.prov.type)
+        }
+        return battery
+
+    }
 }
+
+type jsonType = { [K in keyof ReturnType<(Battery)["toJSON"]>]: any }

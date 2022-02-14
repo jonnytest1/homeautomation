@@ -10,10 +10,13 @@
             </ng-container>
         </div>
         <div style="position: absolute;bottom: 0px;">
+            <button (click)="storeToLocal()">store</button>
+            <button (click)="loadFromLocal()">load</button>
+
             <app-net-display [data]="dataStructure"></app-net-display>
         </div>
     </mat-sidenav>
-    <mat-sidenav-content>
+    <mat-sidenav-content (dragover)="mouseMove($event)">
 
         <p>
             wiring works!<br>
@@ -21,19 +24,34 @@
             <span *ngFor="let bat of batteries">
                 battery capacity {{getRemainingBattery(bat)}} <br>
                 drain at {{bat.currentCurrent_ampere||'0'}}A <br>
-                duraiton : {{ bat.getProjectedDurationMinutes() }} hours <br>
-                resistor: -{{resist.voltageDrop}}V
+                duraiton : {{ bat.getProjectedDurationMinutes() }} seconds <br>
+                resistor: -{{resist.voltageDrop}}V <br>
             </span>
         </p>
 
         <div *ngFor="let node of nodes"
-             (dragend)="node.x=$event.x;node.y=$event.y"
+             (dragend)="updatePosition(node,$event)"
              class="node-wrapper"
              draggable="true"
-             [style.left]="node.x+'px'"
-             [style.top]="node.y+'px'">
+             [style.left]="node.uiInstance.getPosition().x+'px'"
+             [style.top]="node.uiInstance.getPosition().y+'px'">
             <app-view-template [addingData]="node.componentRef"></app-view-template>
         </div>
+
+        <app-wire-ui *ngIf="data.currentWire ; let wire"
+                     [fromVector]="wire.from"
+                     [toVector]="wire.to">
+        </app-wire-ui>
+
+        <ng-container *ngFor="let wire of getWirePositions()">
+            <app-wire-ui *ngIf="wire"
+                         [fromVector]="wire.from"
+                         [toVector]="wire.to">
+            </app-wire-ui>
+        </ng-container>
+
+
+
 
         <!-- 
         <mat-icon *ngFor="let node of nodes"

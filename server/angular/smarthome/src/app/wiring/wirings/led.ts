@@ -1,4 +1,5 @@
 
+import { FromJson, FromJsonOptions, JsonSerializer } from '../serialisation';
 import { Connection } from './connection';
 import { Resistor } from './resistor';
 import { CurrentCurrent, CurrentOption, GetResistanceOptions, Wiring } from './wiring.a';
@@ -40,5 +41,19 @@ export class LED extends Resistor {
             return "red"
         }
         return `hsl(54deg,100%,${Math.min(100, this.brightness)}%)`
+    }
+
+    toJSON() {
+        return {
+            type: this.constructor.name,
+            resistance: this.resistance,
+            ui: this.uiNode
+        }
+    }
+
+    static fromJSON(json: any, map: Record<string, FromJson>, context: FromJsonOptions): InstanceType<typeof this> {
+        const led = new LED();
+        JsonSerializer.createUiRepresation(led, json, context)
+        return led
     }
 }
