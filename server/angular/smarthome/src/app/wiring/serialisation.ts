@@ -1,11 +1,18 @@
-import type { Injector, ViewContainerRef } from '@angular/core';
+import { Injectable, Injector, ViewContainerRef } from '@angular/core';
+import { ResolvablePromise } from '../utils/resolvable-promise';
 import { Vector2 } from './util/vector';
 import { NodeEl, NodeTemplate } from './wiring.component';
+import { Battery } from './wirings/battery';
 import { Collection } from './wirings/collection';
 import { Connection } from './wirings/connection';
+import { Switch } from './wirings/switch';
 import { Wire } from './wirings/wire';
 import { Wiring } from './wirings/wiring.a';
 
+
+export interface ControllerRef {
+    setControlRef: (controlRef, key: string) => void
+}
 
 export interface FromJsonOptions {
     inC?: Connection,
@@ -13,15 +20,14 @@ export interface FromJsonOptions {
     displayNodes?: NodeEl[],
     viewRef?: ViewContainerRef,
     injectorFactory?: (pos: Vector2) => Injector
-    elementMap?: Record<string, FromElementJson>
-}
 
-export interface FromElementJson {
-    name: string
+    controlRefs: Record<string, Switch>
+    controllerRefs: Record<string, ControllerRef>
 
-    uiConstructor?: NodeTemplate,
+    constorlRefsInitialized: Promise<void>
+    elementMap: Record<string, FromJson>
 
-    fromJSON: (json: any, map: Record<string, FromJson>, context: FromJsonOptions) => (Collection)
+
 }
 
 
@@ -30,13 +36,13 @@ export interface FromJson {
 
     uiConstructor?: NodeTemplate,
 
-    fromJSON: (json: any, map: Record<string, FromJson>, context: FromJsonOptions) => Wire
+    fromJSON: (json: any, context: FromJsonOptions) => Wire
 }
 
 export class JsonSerializer {
 
-
-    static createUiRepresation(node: Wiring, json: any, optinos: FromJsonOptions) {
+    static async createUiRepresation(node: Wiring & Collection, json: any, optinos: FromJsonOptions) {
+        await optinos.constorlRefsInitialized;
         const conststructorName = node.constructor.name;
         const uiConstructor = optinos.elementMap[conststructorName].uiConstructor
         if (uiConstructor && json.ui?.x && json.ui.y) {

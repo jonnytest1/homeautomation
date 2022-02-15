@@ -185,4 +185,10 @@ export class SettingsService extends AbstractHttpService {
     send(obj) {
         return this.post<void>(environment.prefixPath + 'rest/sender/trigger', obj);
     }
+
+
+    getWiringTemplates(): Observable<Array<{ name: string, content: string }>> {
+        return this.get(environment.prefixPath + 'rest/wiring')
+    }
+
 }

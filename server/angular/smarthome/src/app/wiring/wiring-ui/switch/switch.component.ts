@@ -31,7 +31,6 @@ export class SwitchComponent extends UINode<Switch> implements OnInit {
     }
     static fromJSON(json: any, map: Record<string, FromJson>, context: { inC: Connection; }): Connection {
 
-        debugger;
         return null
     };
 }

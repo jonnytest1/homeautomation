@@ -1,5 +1,6 @@
 import { Component, Input, OnInit, SimpleChanges } from '@angular/core';
 import { skip } from 'rxjs/operators';
+import { Battery } from '../../wirings/battery';
 import { Collection } from '../../wirings/collection';
 import { ControlCollection, StrucureReturn } from '../../wirings/control-collection.a';
 import { Resistor } from '../../wirings/resistor';
@@ -58,7 +59,7 @@ export class NetDisplayComponent implements OnInit {
                     subArray.push(item)
 
                 }
-            } else if (item instanceof ControlCollection) {
+            } else if (item instanceof ControlCollection || item instanceof Battery) {
                 subArray = []
                 this.parsedData.push(item)
                 this.parsedData.push(subArray)
@@ -66,7 +67,15 @@ export class NetDisplayComponent implements OnInit {
             } else if (item instanceof Collection && this.data.length > 3 && !(item instanceof Wire)) {
                 const inConnection = this.parsedData.pop()
                 skipNext = true
-                this.parsedData.push([inConnection, item, item.outC])
+                const subArray = []
+                if (inConnection) {
+                    subArray.push(inConnection)
+                }
+                subArray.push(item);
+                if (item.outC) {
+                    subArray.push(item.outC)
+                }
+                this.parsedData.push(subArray)
             } else {
                 this.parsedData.push(item)
             }

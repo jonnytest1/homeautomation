@@ -1,5 +1,7 @@
+import { FromJson, FromJsonOptions } from '../serialisation';
 import { Connection } from './connection';
 import { Switch } from './switch';
+import { Wire } from './wire';
 import { CurrentCurrent, CurrentOption, GetResistanceOptions, Wiring } from './wiring.a';
 
 export class ToggleSwitch extends Switch {
@@ -15,16 +17,46 @@ export class ToggleSwitch extends Switch {
         }
     }
     pushCurrent(options: CurrentOption, from: Wiring): CurrentCurrent {
-        if (this.enabled) {
-            return super.pushCurrent(options, from);
-        }
-
-        this.voltageDrop = (options.current * this.resistance)
-        return this.negatedOutC.pushCurrent({
+        let superCurrent = super.pushCurrent({
             ...options,
-            voltage: options.voltage - this.voltageDrop
+            current: this.enabled ? options.current : 0
+        }, from);
+        let negatedCurrent = this.negatedOutC.pushCurrent({
+            ...options,
+            current: this.enabled ? 0 : options.current
         }, this);
 
 
+        if (this.enabled) {
+            return superCurrent
+        } else {
+            return negatedCurrent
+        }
+
+    }
+
+    toJSON(): any {
+        return {
+            type: this.constructor.name,
+            resistance: this.resistance,
+            controlRef: this.controlRef,
+            outC: this.outC.connectedTo,
+            negatedOutC: this.negatedOutC.connectedTo,
+            ui: this.uiNode
+        }
+    }
+    static fromJSON(json: any, context: FromJsonOptions): Wire {
+        const self = new ToggleSwitch();
+        self.controlRef = json.controlRef
+        if (context.wire) {
+            context.wire.connect(self.inC)
+        }
+        context.controlRefs[json.controlRef] = self
+        const connected = context.elementMap[json.outC.type].fromJSON(json.outC, { ...context, inC: self.outC })
+        if (json.negatedOutC) {
+            context.elementMap[json.negatedOutC.type].fromJSON(json.negatedOutC, { ...context, inC: self.negatedOutC })
+        }
+        //JsonSerializer.createUiRepresation(tSwitch, json, context)
+        return connected
     }
 }

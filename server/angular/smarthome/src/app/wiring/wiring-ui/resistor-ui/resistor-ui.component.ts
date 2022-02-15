@@ -32,12 +32,6 @@ export class ResistorUiComponent extends UINode<Resistor> implements OnInit {
         this.snackbarRef = this.snackbar.openFromTemplate(template)
     }
 
-    static fromJSON(json: any, map: Record<string, FromJson>, context: { inC: Connection; }): Connection {
-
-        debugger;
-        return null
-    };
-
     setResistance(input: HTMLInputElement) {
         this.node.resistance = +input.value
     }

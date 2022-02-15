@@ -1,7 +1,9 @@
 import { AfterContentChecked, AfterViewChecked, ChangeDetectorRef, Component, ComponentRef, Injector, OnDestroy, OnInit, TemplateRef, ViewChild, ViewContainerRef } from '@angular/core';
 import { Button } from 'protractor';
 import { map } from 'rxjs/operators';
-import { FromElementJson, FromJson } from './serialisation';
+import { ResolvablePromise } from '../utils/resolvable-promise';
+import { LocalStorageSerialization } from './storage';
+import { FromJson, JsonSerializer } from './serialisation';
 import { Vector2 } from './util/vector';
 import { BatteryUiComponent } from './wiring-ui/battery-ui/battery-ui.component';
 import { InOutComponent, positionInjectionToken } from './wiring-ui/in-out/in-out.component';
@@ -19,8 +21,8 @@ import { StrucureReturn } from './wirings/control-collection.a';
 import { LED } from './wirings/led';
 import { Parrallel } from './wirings/parrallel';
 import { Resistor } from './wirings/resistor';
-import { SerialConnected } from './wirings/serial-block';
 import { Switch } from './wirings/switch';
+import { ToggleSwitch } from './wirings/toggle-switch';
 import { Wire } from './wirings/wire';
 
 
@@ -63,7 +65,13 @@ export class WiringComponent implements OnInit, AfterContentChecked, OnDestroy {
 
 
     nodes: Array<NodeEl> = []
-    constructor(private cdr: ChangeDetectorRef, private viewRef: ViewContainerRef, public data: WiringDataService) {
+
+    serialisationMap: Record<string, FromJson> = {}
+
+    constructor(private cdr: ChangeDetectorRef,
+        private viewRef: ViewContainerRef,
+        public data: WiringDataService,
+        public serialize: LocalStorageSerialization) {
 
         this.batteries = []
 
@@ -72,91 +80,74 @@ export class WiringComponent implements OnInit, AfterContentChecked, OnDestroy {
             this.cdr.markForCheck()
 
 
-            this.dataStructures.length = this.batteries.length + this.data.tempSerialBlocks.length
+            //this.dataStructures.length = this.batteries.length + this.data.tempSerialBlocks.length
             this.batteries.forEach((battery, i) => {
-                const serialBlcok = battery.controlContainer
 
-                if (serialBlcok && serialBlcok instanceof SerialConnected) {
-                    const structreArray = serialBlcok?.getStructure(true)
 
-                    if (!this.dataStructures[i] || structreArray.length !== this.dataStructures[i].length) {
-                        this.dataStructures[i] = structreArray
-                    }
+                const structreArray = battery.getStructure();
+
+                if (!this.dataStructures[i] || structreArray.length !== this.dataStructures[i].length) {
+                    this.dataStructures[i] = structreArray
                 }
-            })
 
-            this.data.tempSerialBlocks.forEach((tempSerial, i) => {
-                this.dataStructures[this.batteries.length + i] = tempSerial.getStructure(true)
             })
-
             this.wirePositions = this.getWirePositions()
         }, 100)
+
+        this.initializeSerializerClasses();
     }
 
-    getWires(strucutres = this.dataStructures): Array<Wire> {
-        if (!strucutres.length) {
-            return []
+    private initializeSerializerClasses() {
+        const serializerClasses: Array<FromJson> = [Parrallel, Wire, ToggleSwitch];
+        for (const val of serializerClasses) {
+            this.serialisationMap[val.name] = val;
         }
 
-        return strucutres.flatMap(item => {
-            return item
-        })
-            .filter((item): item is Wire => item instanceof Wire)
+        this.nodeTemplates.forEach(t => {
+            const tempT = new t();
+            let nodeConstructor = tempT.node.constructor as unknown as FromJson;
+            nodeConstructor.uiConstructor = t;
+            this.serialisationMap[nodeConstructor.name] = nodeConstructor;
+        });
     }
+
 
 
     storeToLocal() {
-
-        const json = JSON.stringify(this.batteries);
-        localStorage.setItem("el_network", json)
-        console.log(json)
+        this.serialize.storeToLocal(this.batteries)
     }
-    loadFromLocal() {
-        const json = localStorage.getItem("el_network");
-        const parsed = JSON.parse(json)
+    async load(remote = false) {
 
-        const serialisationMap = {}
-
-        const serializerClasses: Array<FromJson> = [SerialConnected, Parrallel, Wire]
-        for (const val of serializerClasses) {
-            serialisationMap[val.name] = val;
-        }
-
-        const elementMap = Object.fromEntries(this.nodeTemplates.map(t => {
-            const tempT = new t()
-            let nodeConstructor = tempT.node.constructor as unknown as FromElementJson
-            nodeConstructor.uiConstructor = t
-            return [nodeConstructor.name, nodeConstructor]
-        }))
-        this.batteries = parsed.map(obj => Battery.fromJSON(obj, serialisationMap, {
+        this.batteries = await this.serialize.load({
+            remote: remote,
+            elementMap: this.serialisationMap,
             viewRef: this.viewRef,
             displayNodes: this.nodes,
             injectorFactory: this.getInjector.bind(this),
-            elementMap: elementMap
-        }));
-
+        })
     }
-    getWirePositions() {
-        const wireList = this.getWires(this.dataStructures)
 
-        return wireList.map(wire => {
+    getWires(): Set<Wire> {
+        const wires = new Set<Wire>()
+        this.nodes.forEach(node => {
+            const nodeWires = node.uiInstance.getWires();
+            nodeWires.forEach(wire => {
+                wires.add(wire);
+            })
+        })
+        return wires;
+    }
+
+    getWirePositions() {
+        const wireList = this.getWires()
+
+        return [...wireList].map(wire => {
             const connectionParent = wire.inC?.parent
             let from = connectionParent?.uiNode?.getInOutComponent()?.getOutVector();
-            if (connectionParent instanceof SerialConnected) {
-                if (!connectionParent.inC.connectedTo) {
-                    return undefined
-                }
-                // pass to battery
-                from = connectionParent.inC?.connectedTo?.inC?.parent?.uiNode?.getInOutComponent()?.getOutVector()
 
-            }
             const toParent = wire.outC?.parent;
             let to = toParent?.uiNode?.getInOutComponent()?.getInVector();
-            if (toParent instanceof SerialConnected) {
 
-                to = toParent.outC?.connectedTo?.outC?.parent?.uiNode?.getInOutComponent()?.getInVector()
-
-            }
             if (!to || !from) {
                 return undefined
             }

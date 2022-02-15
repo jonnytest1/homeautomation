@@ -7,7 +7,7 @@
              (click)="openSnackbar(options)" />
     </app-in-out>
     <app-in-out #innerSwitch
-                [node]="node.switch1"
+                [node]="nestedSwitchColelction"
                 [offsetVector]="innerSwitchOffset"
                 invers="true"
                 scale="2.2"
@@ -18,7 +18,7 @@
     </app-in-out>
     <app-in-out #outerSwitch
                 [offsetVector]="outerSwitchOffset"
-                [node]="nestedSwitchColelction"
+                [node]="node.switch1"
                 scale="2.2"
                 invers="true">
         <div class="spacer">

@@ -18,8 +18,13 @@
             </ng-container>
         </div>
         <div style="position: absolute;bottom: 0px;">
-            <button (click)="storeToLocal()">store</button>
-            <button (click)="loadFromLocal()">load</button>
+            <button class="menu-button"
+                    (click)="storeToLocal()">store</button>
+            <button class="menu-button"
+                    (click)="load()">load</button>
+
+            <mat-icon (click)="load(true)"
+                      class="menu-button icon">menu</mat-icon>
 
             <app-connection-view [data]="dataStructures"></app-connection-view>
         </div>

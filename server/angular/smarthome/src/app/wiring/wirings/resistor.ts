@@ -3,19 +3,19 @@ import { FromJson, FromJsonOptions, JsonSerializer } from '../serialisation';
 import { UINode } from '../wiring-ui/ui-node.a';
 import { Collection } from './collection';
 import { Connection } from './connection';
+import { Wire } from './wire';
 import { CurrentCurrent, CurrentOption, GetResistanceOptions, Wiring } from './wiring.a';
 
 export class Resistor extends Collection implements Wiring {
 
 
     uiNode?: UINode;
-    inC = new Connection(this, "res_in")
-
-    outC = new Connection(this, "res_out")
 
     voltageDrop: number
     constructor(public resistance: number) {
         super(null, null)
+        this.inC = new Connection(this, "res_in")
+        this.outC = new Connection(this, "res_out")
     }
     getTotalResistance(from, options: GetResistanceOptions): number {
         return this.resistance + this.outC.getTotalResistance(this, options)
@@ -39,17 +39,23 @@ export class Resistor extends Collection implements Wiring {
         return this.outC.register({ ...options, from: this })
     }
 
-    toJSON() {
+    toJSON(): any {
         return {
             type: this.constructor.name,
             resistance: this.resistance,
+            outC: this.outC.connectedTo,
             ui: this.uiNode
         }
     }
 
-    static fromJSON(json: any, map: Record<string, FromJson>, context: FromJsonOptions): InstanceType<typeof this> {
-        const reistor = new Resistor(json.resistance);
-        JsonSerializer.createUiRepresation(reistor, json, context)
-        return reistor
+    static fromJSON(json: any, context: FromJsonOptions): Wire {
+        const self = new Resistor(json.resistance);
+        if (context.wire) {
+            context.wire.connect(self.inC)
+        }
+        JsonSerializer.createUiRepresation(self, json, context)
+        const connected = context.elementMap[json.outC.type].fromJSON(json.outC, { ...context, inC: self.outC })
+
+        return connected
     }
 }

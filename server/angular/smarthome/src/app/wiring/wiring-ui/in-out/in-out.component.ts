@@ -5,7 +5,6 @@ import { WiringDataService } from '../../wiring.service';
 import { Battery } from '../../wirings/battery';
 import { Collection } from '../../wirings/collection';
 import { ControlCollection } from '../../wirings/control-collection.a';
-import { SerialConnected } from '../../wirings/serial-block';
 import { Wire } from '../../wirings/wire';
 import { Wiring } from '../../wirings/wiring.a';
 import { UINode } from '../ui-node.a';
@@ -87,49 +86,51 @@ export class InOutComponent implements OnInit {
     onDrop(event) {
         let draggedOutConnection = this.wiringService.dragConnection
         const draggedParent = draggedOutConnection.parent;
-        const draggedConnectionSerial = draggedParent?.controlContainer
-        const currnetParent = this.node.inC.parent;
-        const currentSerial = currnetParent.controlContainer
+        // const draggedConnectionSerial = draggedParent?.controlContainer
+        const currnetParent = this.node.inC?.parent;
+        //const currentSerial = currnetParent?.controlContainer
         const previousConnection = draggedOutConnection.connectedTo
         this.clearDragCache()
         if (previousConnection && !(previousConnection.outC.parent instanceof ControlCollection)) {
-            draggedConnectionSerial.removeAfter(previousConnection)
+            // draggedConnectionSerial.removeAfter(previousConnection)
         }
-        if (this.node.inC.parent instanceof Battery) {
 
-            if (currentSerial !== draggedConnectionSerial) {
-                this.wiringService.tempSerialBlocks = this.wiringService.tempSerialBlocks.filter(b => b !== draggedConnectionSerial);
-                if (draggedConnectionSerial) {
-                    currentSerial.addNodes(...draggedConnectionSerial.nodes)
-                } else {
-                    currentSerial.addNodes(draggedParent)
-                }
-            }
-            currentSerial.connectLast()
-        } else if (draggedParent instanceof Battery) {
-            if (draggedConnectionSerial == currentSerial) {
-                draggedParent.connectTo(draggedConnectionSerial)
-            } else {
-                this.wiringService.tempSerialBlocks = this.wiringService.tempSerialBlocks.filter(b => b !== currentSerial);
-                if (currentSerial) {
-                    draggedConnectionSerial.addNodes(...currentSerial.nodes)
-                } else {
-                    draggedConnectionSerial.addNodes(currnetParent)
-                }
-            }
-            draggedParent.connectTo(draggedConnectionSerial)
-        } else {
-            const serialBlock = currentSerial
-                ?? draggedConnectionSerial;
-
-            if (!serialBlock) {
-                this.wiringService.tempSerialBlocks.push(new SerialConnected(draggedOutConnection.parent, this.node.inC.parent))
-                return
-            }
-
-
-            serialBlock.addNodes(this.node.inC.parent as any)
-        }
+        Wire.connect(draggedOutConnection, this.node.inC)
+        /*  if (this.node.inC.parent instanceof Battery) {
+  
+              if (currentSerial !== draggedConnectionSerial) {
+                  this.wiringService.tempSerialBlocks = this.wiringService.tempSerialBlocks.filter(b => b !== draggedConnectionSerial);
+                  if (draggedConnectionSerial) {
+                      currentSerial.addNodes(...draggedConnectionSerial.nodes)
+                  } else {
+                      currentSerial.addNodes(draggedParent)
+                  }
+              }
+              currentSerial.connectLast()
+          } else if (draggedParent instanceof Battery) {
+              if (draggedConnectionSerial == currentSerial) {
+                  draggedParent.connectTo(draggedConnectionSerial)
+              } else {
+                  this.wiringService.tempSerialBlocks = this.wiringService.tempSerialBlocks.filter(b => b !== currentSerial);
+                  if (currentSerial) {
+                      draggedConnectionSerial.addNodes(...currentSerial.nodes)
+                  } else {
+                      draggedConnectionSerial.addNodes(currnetParent)
+                  }
+              }
+              draggedParent.connectTo(draggedConnectionSerial)
+          } else {
+              const serialBlock = currentSerial
+                  ?? draggedConnectionSerial;
+  
+              if (!serialBlock) {
+                  this.wiringService.tempSerialBlocks.push(new SerialConnected(draggedOutConnection.parent, this.node.inC.parent))
+                  return
+              }
+  
+  
+              serialBlock.addNodes(this.node.inC.parent as any)
+          }*/
 
     }
 }

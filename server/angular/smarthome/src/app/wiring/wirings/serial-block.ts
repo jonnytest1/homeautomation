@@ -1,4 +1,4 @@
-import { FromJson, FromJsonOptions } from '../serialisation';
+/*import { FromJson, FromJsonOptions } from '../serialisation';
 import { UINode } from '../wiring-ui/ui-node.a';
 import { Collection } from './collection';
 import { Connection } from './connection';
@@ -46,7 +46,7 @@ export class SerialConnected extends ControlCollection implements Wiring {
                 lastEl.connectedTo = undefined
                 Wire.connect(lastEl, node.inC)
             }
-            node.controlContainer = this
+            // node.controlContainer = this
             this.nodes.push(node)
             this.connectFirst()
         })
@@ -152,4 +152,4 @@ export class SerialConnected extends ControlCollection implements Wiring {
         context.wire?.connect(serialBlock.inC)
         return map[json.connectedTo.type].fromJSON(json.connectedTo, map, { ...context, inC: serialBlock.outC })
     };
-}
+}*/

@@ -1,29 +1,15 @@
 
-import { ViewContainerRef, ViewRef } from '@angular/core';
-import { FromJson, FromJsonOptions, JsonSerializer } from '../serialisation';
+import { FromJsonOptions, JsonSerializer } from '../serialisation';
 import { Collection } from './collection';
 import { Connection } from './connection';
-import { SerialConnected } from './serial-block';
-import { Wire } from './wire';
 import { CurrentCurrent, CurrentOption, GetResistanceOptions, Wiring } from './wiring.a';
 
-export class Battery extends Wiring {
+export class Battery extends Collection {
+
 
     ampereSeconds: number;
-    register(options: { nodes: any[]; until: Wiring; from?: any; }) {
-        throw new Error('Method not implemented.');
-    }
+
     resistance = 0.000;
-
-    /**
-     * provider
-     */
-    outC = new Connection(this, "bat_prov");
-    /**
-     * consumer
-     */
-    inC = new Connection(this, "bat_cons");
-
 
     iterationTime: number
 
@@ -36,18 +22,20 @@ export class Battery extends Wiring {
 
 
     constructor(private voltage: number, ampereHours: number) {
-        super();
+        super(null, null);
+        this.outC = new Connection(this, "bat_prov")
+        this.inC = new Connection(this, "bat_cons")
         this.ampereSeconds = ampereHours * 60 * 60;
         this.maxAmpereSeconds = this.ampereSeconds
 
-        this.controlContainer = new SerialConnected()
+        //this.controlContainer = new SerialConnected()
 
-        Wire.connect(this.controlContainer.outC, this.inC)
+        //Wire.connect(this.controlContainer.outC, this.inC)
     }
 
-    connectTo(serial: SerialConnected) {
-        Wire.connect(this.outC, serial.inC)
-    }
+    /* connectTo(serial: SerialConnected) {
+         Wire.connect(this.outC, serial.inC)
+     }*/
 
 
     getTotalResistance(from: Connection, options: GetResistanceOptions): number {
@@ -120,19 +108,38 @@ export class Battery extends Wiring {
     }
 
 
+    register(options: { nodes: any[]; until: Wiring; from?: any; }) {
+        if (options.from == this.inC) {
+            options.nodes.push(this)
+            return;
+        }
+        options.nodes.push(this)
+        this.outC?.register(options)
+    }
+    getStructure() {
+        const nodes = []
+        this.register({ nodes, until: this.inC, from: this });
+        return nodes;
+    }
     toJSON() {
         return {
             prov: this.outC.connectedTo,
             voltage: this.voltage,
-            ui: this.uiNode
+            ui: this.uiNode,
+            enabled: this.enabled,
+            charge: this.ampereSeconds / (60 * 60),
+            maxAmpere: this.maxAmpereSeconds
         }
     }
 
-    static fromJSON(fromJSON: jsonType, serialisationMap: Parameters<FromJson["fromJSON"]>[1], options: Partial<FromJsonOptions>): Battery {
-        const battery = new Battery(fromJSON.voltage, 20);
+    static fromJSON(fromJSON: jsonType, options: FromJsonOptions): Battery {
+
+        const battery = new Battery(fromJSON.voltage, fromJSON.charge ?? 0.001);
+        battery.enabled = fromJSON.enabled
+        battery.maxAmpereSeconds = fromJSON.maxAmpere ?? fromJSON.charge ?? 0.0001
         JsonSerializer.createUiRepresation(battery, fromJSON, options)
-        if (serialisationMap[fromJSON.prov.type]) {
-            const outC = serialisationMap[fromJSON.prov.type].fromJSON(fromJSON.prov, serialisationMap, {
+        if (options.elementMap[fromJSON.prov.type]) {
+            const outC = options.elementMap[fromJSON.prov.type].fromJSON(fromJSON.prov, {
                 inC: battery.outC,
                 ...options
             })

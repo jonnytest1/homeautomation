@@ -7,7 +7,6 @@ import { Battery } from '../../wirings/battery';
 import { Collection } from '../../wirings/collection';
 import { Connection } from '../../wirings/connection';
 import { Parrallel } from '../../wirings/parrallel';
-import { SerialConnected } from '../../wirings/serial-block';
 import { Wiring } from '../../wirings/wiring.a';
 import { InOutComponent } from '../in-out/in-out.component';
 import { UINode } from '../ui-node.a';
@@ -52,12 +51,16 @@ export class BatteryUiComponent extends UINode<Battery>  {
         this.batteryCollection = new Collection(this.node.inC, this.node.outC)
     }
 
+    refill() {
+        this.node.ampereSeconds = this.node.maxAmpereSeconds;
+    }
+
     logStructure(template: TemplateRef<any>) {
 
         this.snackbarRef = this.snackbar.openFromTemplate(template)
 
-        const structureStart = this.batteryCollection?.outC?.connectedTo?.outC?.parent as (SerialConnected | Parrallel)
-        console.log(structureStart.getStructure(true));
+        /*const structureStart = this.node.get batteryCollection?.outC?.connectedTo?.outC?.parent as (SerialConnected | Parrallel)
+        console.log(structureStart.getStructure(true));*/
     }
 
     static fromJSON(json: any, map: Record<string, FromJson>, context: { inC: Connection; }): Connection {

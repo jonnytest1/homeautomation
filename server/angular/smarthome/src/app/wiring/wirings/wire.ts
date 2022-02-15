@@ -3,10 +3,12 @@ import { FromJson, FromJsonOptions, JsonSerializer } from '../serialisation';
 import { Battery } from './battery';
 import { Collection } from './collection';
 import { Connection } from './connection';
+import { Parrallel } from './parrallel';
 import { Resistor } from './resistor';
 import { CurrentCurrent, CurrentOption, GetResistanceOptions, Wiring } from './wiring.a';
 
 export class Wire extends Collection {
+
 
     constructor(inConnection?: Connection) {
         super(inConnection, null);
@@ -31,6 +33,23 @@ export class Wire extends Collection {
     }
 
 
+    static connectNodes(...nodes: Array<Collection | Array<Collection>>) {
+        let lastEl: Collection
+        nodes.forEach(node => {
+            if (node instanceof Array) {
+                node = new Parrallel(...node);
+            }
+
+            if (lastEl) {
+                // lastEl.connectedTo = undefined
+                Wire.connect(lastEl.outC, node.inC)
+            }
+            // node.controlContainer = this
+            // this.nodes.push(node)
+            // this.connectFirst()
+            lastEl = node;
+        })
+    }
     static connect(inC: Connection, outC: Connection) {
         let wire = inC.connectedTo
         if (!wire) {
@@ -65,13 +84,13 @@ export class Wire extends Collection {
         }
     }
 
-    static fromJSON(json: any, map: Record<string, FromJson>, context: FromJsonOptions): Wire {
+    static fromJSON(json: any, context: FromJsonOptions): Wire {
         const wire = new Wire(context.inC)
         if (json.connectedWire == "BatteryRef") {
             return wire;
         }
 
-        const connected = map[json.connectedWire.type].fromJSON(json.connectedWire, map, { ...context, wire })
+        const connected = context.elementMap[json.connectedWire.type].fromJSON(json.connectedWire, { ...context, wire })
 
         return connected
     };

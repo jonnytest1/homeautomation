@@ -3,8 +3,6 @@ import { FromJson, FromJsonOptions } from '../serialisation';
 import { Collection } from './collection';
 import { Connection } from './connection';
 import { ControlCollection } from './control-collection.a';
-import { Resistor } from './resistor';
-import { SerialConnected } from './serial-block';
 import { Wire } from './wire';
 import { CurrentCurrent, CurrentOption, GetResistanceOptions, Wiring } from './wiring.a';
 
@@ -92,7 +90,7 @@ export class Parrallel extends ControlCollection implements Wiring {
         return this.containers.map(container => container instanceof ControlCollection ? container.getStructure() : container)
     }
 
-    static fromJSON(json: any, map: Record<string, FromJson>, context: FromJsonOptions): Wire {
+    static fromJSON(json: any, context: FromJsonOptions): Wire {
 
         debugger;
         return null

@@ -20,7 +20,7 @@ export class Collection extends Wiring {
         return this.inC.register({ ...options, from: this })
     }
 
-    toJSON() {
+    toJSON(): any {
         return {
             type: this.constructor.name
         }

@@ -2,7 +2,6 @@ import { ControlContainer } from '@angular/forms'
 import { UINode } from '../wiring-ui/ui-node.a'
 import { Connection } from './connection'
 import { ControlCollection } from './control-collection.a'
-import { SerialConnected } from './serial-block'
 import { Wire } from './wire'
 
 
@@ -30,7 +29,7 @@ export abstract class Wiring {
 
     uiNode?: UINode;
 
-    controlContainer?: SerialConnected;
+    // controlContainer?: SerialConnected;
 
     // abstract resistance: number
 
