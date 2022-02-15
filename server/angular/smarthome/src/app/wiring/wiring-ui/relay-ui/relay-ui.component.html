@@ -1,0 +1,34 @@
+<div class="connection-wrapper">
+
+    <app-in-out [node]="node"
+                [offsetVector]="mainOffset"
+                scale="2.2">
+        <img [src]="getIcon()"
+             (click)="openSnackbar(options)" />
+    </app-in-out>
+    <app-in-out #innerSwitch
+                [node]="node.switch1"
+                [offsetVector]="innerSwitchOffset"
+                invers="true"
+                scale="2.2"
+                noInput="true">
+        <div class="spacer">
+
+        </div>
+    </app-in-out>
+    <app-in-out #outerSwitch
+                [offsetVector]="outerSwitchOffset"
+                [node]="nestedSwitchColelction"
+                scale="2.2"
+                invers="true">
+        <div class="spacer">
+
+        </div>
+    </app-in-out>
+</div>
+
+
+
+<ng-template #options>
+    <button (click)="toggleRelay()">toggle</button>
+</ng-template>

@@ -34,7 +34,7 @@ export class Parrallel extends ControlCollection implements Wiring {
         this.wireRec = Wire.at(this.innerOutConnection);
 
         for (const component of containers) {
-            this.wireProv.connectedWire = component.inC
+            this.wireProv.outC = component.inC
             component.outC.connectedTo = this.wireRec
         }
         this.containers = containers

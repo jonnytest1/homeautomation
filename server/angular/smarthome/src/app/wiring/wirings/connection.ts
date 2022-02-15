@@ -1,10 +1,11 @@
+import { Collection } from './collection';
 import { Wire } from './wire';
 import { CurrentCurrent, CurrentOption, GetResistanceOptions, Wiring } from './wiring.a';
 
 export class Connection implements Wiring {
 
 
-    constructor(public parent: Wiring, private id: string) { }
+    constructor(public parent: Wiring & Collection, private id: string) { }
 
 
     resistance: number;

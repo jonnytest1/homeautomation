@@ -1,9 +1,10 @@
 import { Component, Input, OnInit, SimpleChanges } from '@angular/core';
 import { skip } from 'rxjs/operators';
-import { Collection } from '../wirings/collection';
-import { ControlCollection, StrucureReturn } from '../wirings/control-collection.a';
-import { Resistor } from '../wirings/resistor';
-import { Wiring } from '../wirings/wiring.a';
+import { Collection } from '../../wirings/collection';
+import { ControlCollection, StrucureReturn } from '../../wirings/control-collection.a';
+import { Resistor } from '../../wirings/resistor';
+import { Wire } from '../../wirings/wire';
+import { Wiring } from '../../wirings/wiring.a';
 
 @Component({
     selector: 'app-net-display',
@@ -62,7 +63,7 @@ export class NetDisplayComponent implements OnInit {
                 this.parsedData.push(item)
                 this.parsedData.push(subArray)
                 this.indentItem.push(item)
-            } else if (item instanceof Collection && this.data.length > 3) {
+            } else if (item instanceof Collection && this.data.length > 3 && !(item instanceof Wire)) {
                 const inConnection = this.parsedData.pop()
                 skipNext = true
                 this.parsedData.push([inConnection, item, item.outC])

@@ -4,16 +4,24 @@
                  mode="side">
         <div class="sidenav">
             <ng-container *ngFor="let templ of nodeTemplates">
-                <mat-icon (dragend)="dropped($event,templ)"
-                          draggable="true">{{templ.templateIcon}}
-                </mat-icon>
+                <img *ngIf="templ.templateIcon.startsWith('asset:');else maticon"
+                     [src]="templ.templateIcon.split('asset:')[1]"
+                     (dragend)="dropped($event,templ)"
+                     draggable="true">
+
+                <ng-template #maticon>
+                    <mat-icon (dragend)="dropped($event,templ)"
+                              draggable="true">{{templ.templateIcon}}
+                    </mat-icon>
+                </ng-template>
+
             </ng-container>
         </div>
         <div style="position: absolute;bottom: 0px;">
             <button (click)="storeToLocal()">store</button>
             <button (click)="loadFromLocal()">load</button>
 
-            <app-net-display [data]="dataStructure"></app-net-display>
+            <app-connection-view [data]="dataStructures"></app-connection-view>
         </div>
     </mat-sidenav>
     <mat-sidenav-content (dragover)="mouseMove($event)">
@@ -25,7 +33,7 @@
                 battery capacity {{getRemainingBattery(bat)}} <br>
                 drain at {{bat.currentCurrent_ampere||'0'}}A <br>
                 duraiton : {{ bat.getProjectedDurationMinutes() }} seconds <br>
-                resistor: -{{resist.voltageDrop}}V <br>
+
             </span>
         </p>
 
@@ -38,12 +46,13 @@
             <app-view-template [addingData]="node.componentRef"></app-view-template>
         </div>
 
-        <app-wire-ui *ngIf="data.currentWire ; let wire"
+        <app-wire-ui class="tempWire"
+                     *ngIf="data.currentWire ; let wire"
                      [fromVector]="wire.from"
                      [toVector]="wire.to">
         </app-wire-ui>
 
-        <ng-container *ngFor="let wire of getWirePositions()">
+        <ng-container *ngFor="let wire of this.wirePositions">
             <app-wire-ui *ngIf="wire"
                          [fromVector]="wire.from"
                          [toVector]="wire.to">
@@ -51,18 +60,6 @@
         </ng-container>
 
 
-
-
-        <!-- 
-        <mat-icon *ngFor="let node of nodes"
-                  class="node-icon"
-                  [style.left]="node.x+'px'"
-                  [style.top]="node.y+'px'">{{node.icon}}</mat-icon> -->
-
-        <button (click)="switch.enabled=!switch.enabled">switch </button>
-        <div style="width: 20px;height: 20px;"
-             [style.backgroundColor]="led.backgroundColor()">
-        </div>
     </mat-sidenav-content>
 
 </mat-sidenav-container>

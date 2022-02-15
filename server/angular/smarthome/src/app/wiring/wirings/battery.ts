@@ -3,6 +3,7 @@ import { ViewContainerRef, ViewRef } from '@angular/core';
 import { FromJson, FromJsonOptions, JsonSerializer } from '../serialisation';
 import { Collection } from './collection';
 import { Connection } from './connection';
+import { SerialConnected } from './serial-block';
 import { Wire } from './wire';
 import { CurrentCurrent, CurrentOption, GetResistanceOptions, Wiring } from './wiring.a';
 
@@ -14,10 +15,14 @@ export class Battery extends Wiring {
     }
     resistance = 0.000;
 
-
-    connectionProvide = new Connection(this, "bat_prov");
-
-    connectionConsume = new Connection(this, "bat_cons");
+    /**
+     * provider
+     */
+    outC = new Connection(this, "bat_prov");
+    /**
+     * consumer
+     */
+    inC = new Connection(this, "bat_cons");
 
 
     iterationTime: number
@@ -28,16 +33,26 @@ export class Battery extends Wiring {
 
     enabled = false
 
+
+
     constructor(private voltage: number, ampereHours: number) {
         super();
         this.ampereSeconds = ampereHours * 60 * 60;
         this.maxAmpereSeconds = this.ampereSeconds
+
+        this.controlContainer = new SerialConnected()
+
+        Wire.connect(this.controlContainer.outC, this.inC)
+    }
+
+    connectTo(serial: SerialConnected) {
+        Wire.connect(this.outC, serial.inC)
     }
 
 
     getTotalResistance(from: Connection, options: GetResistanceOptions): number {
         if (!from) {
-            return this.connectionProvide.getTotalResistance(this, options)
+            return this.outC.getTotalResistance(this, options)
         } else {
             return 0
         }
@@ -46,7 +61,7 @@ export class Battery extends Wiring {
 
     pushCurrent(options: CurrentOption, from: Wiring): CurrentCurrent {
         if (!from) {
-            return this.connectionProvide.pushCurrent(options, this)
+            return this.outC.pushCurrent(options, this)
         } else {
             if (options.voltage > 0.001) {
                 throw new Error("voltage should be 0 right here")
@@ -107,7 +122,7 @@ export class Battery extends Wiring {
 
     toJSON() {
         return {
-            prov: this.connectionProvide.connectedTo,
+            prov: this.outC.connectedTo,
             voltage: this.voltage,
             ui: this.uiNode
         }
@@ -118,11 +133,11 @@ export class Battery extends Wiring {
         JsonSerializer.createUiRepresation(battery, fromJSON, options)
         if (serialisationMap[fromJSON.prov.type]) {
             const outC = serialisationMap[fromJSON.prov.type].fromJSON(fromJSON.prov, serialisationMap, {
-                inC: battery.connectionProvide,
+                inC: battery.outC,
                 ...options
             })
             if (outC) {
-                outC.connect(battery.connectionConsume)
+                outC.connect(battery.inC)
             }
         } else {
             throw new Error("missing serialisation for " + fromJSON.prov.type)

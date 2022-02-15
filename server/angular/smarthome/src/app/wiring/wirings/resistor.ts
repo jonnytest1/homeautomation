@@ -22,8 +22,13 @@ export class Resistor extends Collection implements Wiring {
     }
 
 
+    evaluateFunction(options: CurrentOption) {
+        // to implement
+    }
+
     pushCurrent(options: CurrentOption, from: Wiring): CurrentCurrent {
         this.voltageDrop = (options.current * this.resistance)
+        this.evaluateFunction(options)
         return this.outC.pushCurrent({
             ...options,
             voltage: options.voltage - this.voltageDrop

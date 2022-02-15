@@ -5,6 +5,9 @@ import { Battery } from './wirings/battery';
 import { Resistor } from './wirings/resistor';
 import { Parrallel } from './wirings/parrallel';
 import { SerialConnected } from './wirings/serial-block';
+import { Relay } from './wirings/relay';
+import { info } from 'console';
+import { LED } from './wirings/led';
 
 describe('WiringComponent', () => {
 
@@ -15,18 +18,16 @@ describe('WiringComponent', () => {
         const resistor = new Resistor(2)
         const resistor3 = new Resistor(3)
         const resistor5 = new Resistor(5)
-
-        const sC = new SerialConnected(resistor, resistor3, resistor5)
-
-        Wire.connect(battery.connectionProvide, sC.inC)
-        Wire.connect(sC.outC, battery.connectionConsume)
+        battery.controlContainer.addNodes(resistor, resistor3, resistor5)
+        battery.controlContainer.connectContainerNodes();
+        battery.connectTo(battery.controlContainer)
 
         expect(battery.getTotalResistance(null, {})).toBe(10)
         battery.checkContent(1)
         expect(resistor.voltageDrop).toBe(2.4)
         expect(+resistor3.voltageDrop.toPrecision(3)).toBe(3.6)
         expect(+resistor5.voltageDrop.toPrecision(3)).toBe(6)
-        expect(+sC.blockDrop.toPrecision(3)).toBe(12)
+        expect(+battery.controlContainer.blockDrop.toPrecision(3)).toBe(12)
     });
     it('parrallel resistor circuit', () => {
         const battery = new Battery(6, Infinity)
@@ -42,10 +43,10 @@ describe('WiringComponent', () => {
         const parrallelblock = new Parrallel(resistor, resistor3)
         const resistor5 = new Resistor(5)
 
-        const sC = new SerialConnected(parrallelblock, resistor5)
+        battery.connectTo(battery.controlContainer)
+        battery.controlContainer.addNodes(parrallelblock, resistor5)
+        battery.controlContainer.connectContainerNodes();
 
-        Wire.connect(battery.connectionProvide, sC.inC)
-        Wire.connect(sC.outC, battery.connectionConsume)
 
         //expect(+battery.getTotalResistance(null).toPrecision(3)).toBe(1.33)
         battery.checkContent(1)
@@ -67,14 +68,49 @@ describe('WiringComponent', () => {
         const parrallelblock = new Parrallel(resistor, resistor3)
         const resistor5 = new Resistor(5)
 
-        const sC = new SerialConnected(resistor5, parrallelblock)
-
-        Wire.connect(battery.connectionProvide, sC.inC)
-        Wire.connect(sC.outC, battery.connectionConsume)
-
+        battery.connectTo(battery.controlContainer)
+        battery.controlContainer.addNodes(resistor5, parrallelblock)
+        battery.controlContainer.connectContainerNodes();
         //expect(+battery.getTotalResistance(null).toPrecision(3)).toBe(1.33)
         battery.checkContent(1)
         expect(+resistor5.voltageDrop.toPrecision(3)).toBe(4.74)
         expect(+parrallelblock.voltageDrop.toPrecision(3)).toBe(1.26)
+    });
+
+
+    it('test relay resistor circuit', () => {
+        const batteryControl = new Battery(6, Infinity)
+        batteryControl.enabled = true
+
+
+        const relay = new Relay()
+
+        const constrolledBattery = new Battery(6, Infinity)
+        constrolledBattery.enabled = true
+        constrolledBattery.connectTo(constrolledBattery.controlContainer)
+        const testLed = new LED();
+        constrolledBattery.controlContainer.addNodes(relay.switch1, new Resistor(100), testLed)
+        constrolledBattery.controlContainer.connectContainerNodes();
+        ///   const b2 = new Battery()
+
+
+        batteryControl.connectTo(batteryControl.controlContainer)
+        batteryControl.controlContainer.addNodes(relay)
+        batteryControl.controlContainer.connectContainerNodes();
+        constrolledBattery.checkContent(1);
+
+        expect(testLed.brightness).toBe(0);
+        expect(testLed.blown).toBe(false);
+
+
+        //expect(+battery.getTotalResistance(null).toPrecision(3)).toBe(1.33)
+        relay.setSwitchOneEnabled(true)
+        debugger;
+        batteryControl.checkContent(1)
+        constrolledBattery.checkContent(1);
+
+
+        expect(testLed.blown).toBe(false);
+        expect(testLed.brightness).toBe(100)
     });
 });

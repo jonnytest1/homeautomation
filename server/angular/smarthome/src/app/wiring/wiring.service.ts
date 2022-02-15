@@ -6,6 +6,7 @@ import { WireUiComponent } from './wiring-ui/wire-ui/wire-ui.component';
 import { Collection } from './wirings/collection';
 import { Connection } from './wirings/connection';
 import { SerialConnected } from './wirings/serial-block';
+import { Wiring } from './wirings/wiring.a';
 
 @Injectable({ providedIn: "root" })
 export class WiringDataService {
@@ -16,7 +17,7 @@ export class WiringDataService {
     currentWire: { from: InOutComponent | Vector2, to: InOutComponent | Vector2 } = undefined
 
 
-    serialblock: SerialConnected
+    tempSerialBlocks: Array<SerialConnected> = []
 
 
 

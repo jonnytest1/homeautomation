@@ -1,5 +1,8 @@
+import { ControlContainer } from '@angular/forms'
 import { UINode } from '../wiring-ui/ui-node.a'
 import { Connection } from './connection'
+import { ControlCollection } from './control-collection.a'
+import { SerialConnected } from './serial-block'
 import { Wire } from './wire'
 
 
@@ -27,10 +30,14 @@ export abstract class Wiring {
 
     uiNode?: UINode;
 
+    controlContainer?: SerialConnected;
+
     // abstract resistance: number
 
     abstract getTotalResistance(from: Wiring, options: GetResistanceOptions): number
     abstract pushCurrent(options: CurrentOption, from: Wiring | null): CurrentCurrent
 
     abstract register(options: { nodes: any[], until: Wiring, from?: any });
+
+
 }

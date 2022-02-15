@@ -6,7 +6,8 @@ import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatSortModule } from '@angular/material/sort';
 import { MatTableModule } from '@angular/material/table';
 import { BrowserModule } from '@angular/platform-browser';
-import { NetDisplayComponent } from './net-display/net-display.component';
+import { ConnectionViewComponent } from './connection-view/connection-view.component';
+import { NetDisplayComponent } from './connection-view/net-display/net-display.component';
 import { WireUiComponent } from './wiring-ui/wire-ui/wire-ui.component';
 import { WiringUiModule } from './wiring-ui/wiring-ui.module';
 import { WiringComponent } from './wiring.component';
@@ -17,6 +18,6 @@ import { WiringComponent } from './wiring.component';
         MatSidenavModule,
         MatSortModule, MatIconModule,
     ],
-    declarations: [WiringComponent, NetDisplayComponent], exports: []
+    declarations: [WiringComponent, NetDisplayComponent, ConnectionViewComponent], exports: []
 })
 export class WiringModule { }

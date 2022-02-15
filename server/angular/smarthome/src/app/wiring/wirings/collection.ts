@@ -1,10 +1,12 @@
 import { Connection } from './connection';
-import { Wiring } from './wiring.a';
+import { CurrentCurrent, CurrentOption, GetResistanceOptions, Wiring } from './wiring.a';
 
 
-export class Collection {
+export class Collection extends Wiring {
+
 
     constructor(public inC: Connection, public outC: Connection) {
+        super();
         this["id"] = Math.random()
     }
 
@@ -22,5 +24,12 @@ export class Collection {
         return {
             type: this.constructor.name
         }
+    }
+
+    getTotalResistance(from: Wiring, options: GetResistanceOptions): number {
+        throw new Error('Method not implemented.');
+    }
+    pushCurrent(options: CurrentOption, from: Wiring): CurrentCurrent {
+        throw new Error('Method not implemented.');
     }
 }

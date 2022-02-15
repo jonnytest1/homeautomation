@@ -46,7 +46,7 @@ export class JsonSerializer {
             })
 
             element.instance.node = node
-            element.instance.getPosition = () => position
+            element.instance.setPosition(position)
             node.uiNode = element.instance
             optinos.displayNodes.push({
                 uiInstance: element.instance,

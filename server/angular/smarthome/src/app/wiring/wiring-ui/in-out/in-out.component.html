@@ -1,6 +1,7 @@
 <div [ngClass]="{invers:!!invers}">
 
     <label (dragenter)="markDropZone($event)"
+           *ngIf="!noInput"
            (dragleave)="leaveDropZone()"
            (drop)="onDrop($event)"
            (dragover)="$event.preventDefault()"

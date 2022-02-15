@@ -25,7 +25,6 @@ interface HttpOptions extends LogOptions {
 }
 @Injectable()
 export abstract class AbstractHttpService {
-
     constructor(private _http: HttpClient, private router: Router) { }
     /**
      * !!! may include differences for certain option parts
@@ -85,7 +84,8 @@ export abstract class AbstractHttpService {
             Object.assign(logObject, options.logParams);
         }*/
         if (error.status === 0) {
-            location.reload();
+            //debugger;
+            //  location.reload();
             return EMPTY;
         }
         if (error.status === 401) {

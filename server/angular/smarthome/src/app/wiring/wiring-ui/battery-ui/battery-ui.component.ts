@@ -49,14 +49,14 @@ export class BatteryUiComponent extends UINode<Battery>  {
     }
 
     ngOnInit() {
-        this.batteryCollection = new Collection(this.node.connectionConsume, this.node.connectionProvide)
+        this.batteryCollection = new Collection(this.node.inC, this.node.outC)
     }
 
     logStructure(template: TemplateRef<any>) {
 
         this.snackbarRef = this.snackbar.openFromTemplate(template)
 
-        const structureStart = this.batteryCollection?.outC?.connectedTo?.connectedWire?.parent as (SerialConnected | Parrallel)
+        const structureStart = this.batteryCollection?.outC?.connectedTo?.outC?.parent as (SerialConnected | Parrallel)
         console.log(structureStart.getStructure(true));
     }
 

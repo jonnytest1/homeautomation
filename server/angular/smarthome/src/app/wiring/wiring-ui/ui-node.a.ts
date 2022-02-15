@@ -9,13 +9,22 @@ export abstract class UINode<T extends Wiring = Wiring> {
 
     abstract inOutComponent?: InOutComponent
 
+    private position: Vector2
 
     getInOutComponent(): InOutComponent {
         return this.inOutComponent
     }
 
+    setPosition(vector: Vector2) {
+        //debugger;
+        this.position = vector
+        if (this.inOutComponent) {
+            this.inOutComponent.position = vector
+        }
+    }
+
     getPosition(): Vector2 {
-        throw new Error("not implemented")
+        return this.position
     }
 
     constructor(public node: T) {

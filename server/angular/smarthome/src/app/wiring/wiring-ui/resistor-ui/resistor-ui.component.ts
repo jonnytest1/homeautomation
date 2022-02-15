@@ -30,7 +30,9 @@ export class ResistorUiComponent extends UINode<Resistor> implements OnInit {
 
     openSnackbar(template: TemplateRef<any>) {
         this.snackbarRef = this.snackbar.openFromTemplate(template)
-    } static fromJSON(json: any, map: Record<string, FromJson>, context: { inC: Connection; }): Connection {
+    }
+
+    static fromJSON(json: any, map: Record<string, FromJson>, context: { inC: Connection; }): Connection {
 
         debugger;
         return null

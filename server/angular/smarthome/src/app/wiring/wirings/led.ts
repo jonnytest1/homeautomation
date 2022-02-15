@@ -5,7 +5,7 @@ import { Resistor } from './resistor';
 import { CurrentCurrent, CurrentOption, GetResistanceOptions, Wiring } from './wiring.a';
 
 export class LED extends Resistor {
-    brightness: number;
+    brightness: number = 0;
 
     blown = false
 

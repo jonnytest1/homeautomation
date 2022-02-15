@@ -6,6 +6,7 @@ import { Vector2 } from './util/vector';
 import { BatteryUiComponent } from './wiring-ui/battery-ui/battery-ui.component';
 import { InOutComponent, positionInjectionToken } from './wiring-ui/in-out/in-out.component';
 import { LedUiComponent } from './wiring-ui/led-ui/led-ui.component';
+import { RelayUiComponent } from './wiring-ui/relay-ui/relay-ui.component';
 import { ResistorUiComponent } from './wiring-ui/resistor-ui/resistor-ui.component';
 import { SwitchComponent } from './wiring-ui/switch/switch.component';
 import { UINode } from './wiring-ui/ui-node.a';
@@ -52,50 +53,52 @@ export class WiringComponent implements OnInit, AfterContentChecked, OnDestroy {
     led: LED;
     resist: Resistor;
 
-    dataStructure: StrucureReturn
+    dataStructures: Array<StrucureReturn> = []
 
-    nodeTemplates: Array<NodeTemplate> = [BatteryUiComponent, LedUiComponent, ResistorUiComponent, SwitchComponent]
+    wirePositions: Array<{ from: Vector2, to: Vector2 }> = []
+
+    nodeTemplates: Array<NodeTemplate> = [
+        BatteryUiComponent, LedUiComponent, ResistorUiComponent, SwitchComponent, RelayUiComponent
+    ]
+
+
     nodes: Array<NodeEl> = []
     constructor(private cdr: ChangeDetectorRef, private viewRef: ViewContainerRef, public data: WiringDataService) {
-
-        const b1 = new Battery(5, 20)
-        ///   const b2 = new Battery()
-
-        this.led = new LED()
-        this.switch = new Switch()
-        this.resist = new Resistor(100)
-
-
-        const con = new SerialConnected(this.resist, this.led, this.switch)
-
-        Wire.connect(b1.connectionProvide, con.inC)
-        Wire.connect(con.outC, b1.connectionConsume)
 
         this.batteries = []
 
 
         this.interval = setInterval(() => {
             this.cdr.markForCheck()
-            const serialBlcok = this.batteries[this.batteries.length - 1]?.connectionProvide?.connectedTo.connectedWire.parent
 
-            if (serialBlcok && serialBlcok instanceof SerialConnected) {
-                const structreArray = serialBlcok?.getStructure(true)
 
-                if (!this.dataStructure || structreArray.length !== this.dataStructure.length) {
-                    this.dataStructure = structreArray
+            this.dataStructures.length = this.batteries.length + this.data.tempSerialBlocks.length
+            this.batteries.forEach((battery, i) => {
+                const serialBlcok = battery.controlContainer
+
+                if (serialBlcok && serialBlcok instanceof SerialConnected) {
+                    const structreArray = serialBlcok?.getStructure(true)
+
+                    if (!this.dataStructures[i] || structreArray.length !== this.dataStructures[i].length) {
+                        this.dataStructures[i] = structreArray
+                    }
                 }
-            }
+            })
+
+            this.data.tempSerialBlocks.forEach((tempSerial, i) => {
+                this.dataStructures[this.batteries.length + i] = tempSerial.getStructure(true)
+            })
+
+            this.wirePositions = this.getWirePositions()
         }, 100)
     }
 
-    getWires(strucutre = this.dataStructure): Array<Wire> {
-        if (!strucutre) {
+    getWires(strucutres = this.dataStructures): Array<Wire> {
+        if (!strucutres.length) {
             return []
         }
-        return strucutre.flatMap(item => {
-            if (item instanceof Array) {
-                return this.getWires(item)
-            }
+
+        return strucutres.flatMap(item => {
             return item
         })
             .filter((item): item is Wire => item instanceof Wire)
@@ -134,25 +137,28 @@ export class WiringComponent implements OnInit, AfterContentChecked, OnDestroy {
 
     }
     getWirePositions() {
-        const wireList = this.getWires()
+        const wireList = this.getWires(this.dataStructures)
 
         return wireList.map(wire => {
-            const connectionParent = wire.fromConnection?.parent
+            const connectionParent = wire.inC?.parent
             let from = connectionParent?.uiNode?.getInOutComponent()?.getOutVector();
             if (connectionParent instanceof SerialConnected) {
-                from = connectionParent.inC?.connectedTo?.fromConnection?.parent?.uiNode?.getInOutComponent()?.getOutVector()
-                if (!from) {
+                if (!connectionParent.inC.connectedTo) {
                     return undefined
                 }
+                // pass to battery
+                from = connectionParent.inC?.connectedTo?.inC?.parent?.uiNode?.getInOutComponent()?.getOutVector()
+
             }
-            const toParent = wire.connectedWire?.parent;
+            const toParent = wire.outC?.parent;
             let to = toParent?.uiNode?.getInOutComponent()?.getInVector();
             if (toParent instanceof SerialConnected) {
 
-                to = toParent.outC?.connectedTo?.connectedWire?.parent?.uiNode?.getInOutComponent()?.getInVector()
-                if (!to) {
-                    return undefined
-                }
+                to = toParent.outC?.connectedTo?.outC?.parent?.uiNode?.getInOutComponent()?.getInVector()
+
+            }
+            if (!to || !from) {
+                return undefined
             }
             return {
                 from: from,
@@ -174,11 +180,14 @@ export class WiringComponent implements OnInit, AfterContentChecked, OnDestroy {
             const position = new Vector2(event).dividedBy(10).rounded().multipliedBy(10);
             this.data.currentWire = { ...this.data.currentWire, to: position }
         }
+        this.wirePositions = this.getWirePositions()
 
     }
     updatePosition(node: NodeEl, event: DragEvent) {
-        node.uiInstance.getPosition = () => new Vector2({ x: event.x, y: event.y }).dividedBy(10).rounded().multipliedBy(10)
-        node.uiInstance.getInOutComponent().position = node.uiInstance.getPosition()
+
+        node.uiInstance.setPosition(new Vector2({ x: event.x, y: event.y }).dividedBy(10).rounded().multipliedBy(10));
+        this.wirePositions = this.getWirePositions()
+
     }
 
 
@@ -199,7 +208,7 @@ export class WiringComponent implements OnInit, AfterContentChecked, OnDestroy {
         if (newNode.instance instanceof BatteryUiComponent) {
             this.batteries.push(newNode.instance.node);
         }
-        newNode.instance.getPosition = () => position
+        newNode.instance.setPosition(position)
 
         this.nodes.push({
             componentRef: newNode,

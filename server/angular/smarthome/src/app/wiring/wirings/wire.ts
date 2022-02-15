@@ -6,29 +6,27 @@ import { Connection } from './connection';
 import { Resistor } from './resistor';
 import { CurrentCurrent, CurrentOption, GetResistanceOptions, Wiring } from './wiring.a';
 
-export class Wire extends Wiring {
+export class Wire extends Collection {
 
     constructor(inConnection?: Connection) {
-        super();
-        this.fromConnection = inConnection
+        super(inConnection, null);
         if (inConnection) {
             inConnection.connectedTo = this
         }
     }
     resistance = 0;
 
-    connectedWire: Connection
+    outC: Connection
 
-    fromConnection?: Connection
 
     public isViewWire = true
     getTotalResistance(f: Wiring, options: GetResistanceOptions): number {
-        return this.connectedWire.getTotalResistance(this, options);
+        return this.outC.getTotalResistance(this, options);
     }
 
     pushCurrent(options: CurrentOption, from: Wiring): CurrentCurrent {
 
-        const connection = this.connectedWire
+        const connection = this.outC
         return connection.pushCurrent(options, this)
     }
 
@@ -43,7 +41,7 @@ export class Wire extends Wiring {
     }
 
     connect(other: Connection) {
-        this.connectedWire = other
+        this.outC = other
         other.connectedTo = this
     }
 
@@ -56,13 +54,13 @@ export class Wire extends Wiring {
 
     register(options: { nodes: any[]; until: Wiring; from?: Wiring; }) {
         options.nodes.push(this)
-        return this.connectedWire.register({ ...options, from: this })
+        return this.outC.register({ ...options, from: this })
     }
 
     toJSON() {
         return {
             type: this.constructor.name,
-            connectedWire: this.connectedWire.parent instanceof Battery ? "BatteryRef" : this.connectedWire.parent,
+            connectedWire: this.outC.parent instanceof Battery ? "BatteryRef" : this.outC.parent,
             ui: this.uiNode
         }
     }

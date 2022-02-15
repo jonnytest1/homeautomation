@@ -10,7 +10,8 @@ import { CurrentCurrent, CurrentOption, GetResistanceOptions, Wiring } from './w
 
 export class SerialConnected extends ControlCollection implements Wiring {
 
-    nodes: (Collection & Wiring)[];
+
+    nodes: (Collection & Wiring)[] = [];
 
     innerInC = new Connection(this, "ser_inner_in")
     innerOutC = new Connection(this, "ser_inner_out")
@@ -21,17 +22,7 @@ export class SerialConnected extends ControlCollection implements Wiring {
         this.outC = new Connection(this, "ser_out");
 
 
-        let lastEl = this.innerInC
-        for (let i = 0; i < nodes.length; i++) {
-
-            const currentNode = nodes[i]
-            Wire.connect(lastEl, currentNode.inC)
-            lastEl = currentNode.outC
-        }
-        if (lastEl && nodes.length) {
-            Wire.connect(lastEl, this.innerOutC)
-        }
-        this.nodes = nodes;
+        this.addNodes(...nodes)
     }
     uiNode?: UINode<Wiring>;
 
@@ -45,17 +36,40 @@ export class SerialConnected extends ControlCollection implements Wiring {
 
     private resistanceAfterNodes: number
 
-    public addNode(node: Collection & Wiring) {
+    public addNodes(...nodes: Array<Collection & Wiring>) {
+        nodes.forEach(node => {
+            let lastEl
+            if (this.nodes.length) {
+                lastEl = this.nodes[this.nodes.length - 1].outC;
+            }
+            if (lastEl) {
+                lastEl.connectedTo = undefined
+                Wire.connect(lastEl, node.inC)
+            }
+            node.controlContainer = this
+            this.nodes.push(node)
+            this.connectFirst()
+        })
+    }
 
+    connectLast() {
         let lastEl = this.innerInC
         if (this.nodes.length) {
             lastEl = this.nodes[this.nodes.length - 1].outC;
         }
         lastEl.connectedTo = undefined
-        Wire.connect(lastEl, node.inC)
-        Wire.connect(node.outC, this.innerOutC)
-        this.nodes.push(node)
-
+        Wire.connect(lastEl, this.innerOutC)
+    }
+    connectFirst() {
+        let firstEl
+        if (this.nodes.length) {
+            firstEl = this.nodes[0]?.inC;
+        }
+        Wire.connect(this.innerInC, firstEl)
+    }
+    connectContainerNodes() {
+        this.connectLast()
+        //  this.connectFirst()
     }
 
 

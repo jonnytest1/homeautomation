@@ -1,0 +1,12 @@
+<span>
+    <button *ngIf="data[currentIndex-1]"
+            (click)="currentIndex=currentIndex-1"> &lt; </button>
+    <button *ngIf="data[currentIndex+1]"
+            (click)="currentIndex=currentIndex+1"> > </button>
+</span>
+
+
+<app-net-display *ngIf="data[currentIndex]"
+                 [data]="data[currentIndex]">
+
+</app-net-display>

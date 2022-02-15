@@ -70,6 +70,9 @@ export class SettingsService extends AbstractHttpService {
         }
     }
     updateSenders(data: SenderFe[]) {
+        if (!data) {
+            return
+        }
         const currentSenders = [...this.senders$.value];
         data.forEach(sender => {
             let currentSender = currentSenders.find(cSender => cSender.id === sender.id);
