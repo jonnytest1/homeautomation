@@ -37,6 +37,24 @@ export class BoundingBox {
         return new BoundingBox(topLeft, topLeft.added(diagonal));
     }
 
+    toRectangle() {
+        let left = this.getLeft()
+        let right = this.getRight()
+        let top = this.getTop()
+        let bottom = this.getBottom()
+        if (left > right) {
+            let t = left;
+            left = right;
+            right = t;
+        }
+        if (top > bottom) {
+            let t = top;
+            top = bottom;
+            bottom = t;
+        }
+        return new BoundingBox(new Vector2(left, top), new Vector2(right, bottom))
+    }
+
     axisRotation(convertToDeg = true): number {
         const diagonalVector = this.diagonal();
         const axis = new Vector2(1, 0);

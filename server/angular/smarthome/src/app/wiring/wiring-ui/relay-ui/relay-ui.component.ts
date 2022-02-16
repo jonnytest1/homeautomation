@@ -41,7 +41,7 @@ export class RelayUiComponent extends UINode<Relay> implements OnInit {
 
     public switchRef: Switch;
 
-    mainOffset = new Vector2(-20, -10)
+    mainOffset = new Vector2(-10, -9)
 
     innerSwitchOffset = new Vector2(20, 14)
     outerSwitchOffset = new Vector2(40, 16)
@@ -99,7 +99,10 @@ export class RelayUiComponent extends UINode<Relay> implements OnInit {
         this.switch2uiNode.inOutComponent = this.innerSwitchInOut
     }
     getIcon(): string {
-        return `/assets/icons/relay.png`
+        if (!this.node.switch1.enabled) {
+            return `/assets/icons/relay.png`
+        }
+        return `/assets/icons/relay_right.png`
     }
 
     openSnackbar(template: TemplateRef<any>) {

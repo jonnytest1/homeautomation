@@ -1,7 +1,9 @@
 import { Component, Input, OnInit } from '@angular/core';
+import { BindingBoolean } from '../../../utils/type-checker';
 import { BoundingBox } from '../../util/bounding-box';
 import { Vector2 } from '../../util/vector';
 import { WiringDataService } from '../../wiring.service';
+import { Wire } from '../../wirings/wire';
 import { InOutComponent } from '../in-out/in-out.component';
 
 @Component({
@@ -12,16 +14,26 @@ import { InOutComponent } from '../in-out/in-out.component';
 export class WireUiComponent implements OnInit {
 
     @Input()
-    fromVector: Vector2 | InOutComponent
+    fromVector: Vector2
 
     @Input()
-    toVector: Vector2 | InOutComponent
+    toVector: Vector2
+
+    @Input()
+    wire: Wire
 
     verticalBox: BoundingBox
     horizontalBox: BoundingBox
 
+    highlighted = false
+
+    @Input()
+    below: BindingBoolean
+
     dot: Vector2
     lineWidth = 2
+
+    borderWidth = 2
 
     constructor(private data: WiringDataService) { }
 
@@ -34,18 +46,14 @@ export class WireUiComponent implements OnInit {
     }
 
     calculateWires() {
-        let fromVector: Vector2
-        if (this.fromVector instanceof InOutComponent) {
-            fromVector = this.fromVector.getOutVector()
-        } else {
-            fromVector = this.fromVector
-        }
-        let toVector: Vector2
-        if (this.toVector instanceof InOutComponent) {
-            toVector = this.toVector.getInVector()
-        } else {
-            toVector = this.toVector
-        }
+        let fromVector = this.fromVector
+        const fromBox = new BoundingBox(
+            fromVector.added(-this.lineWidth * 2, -this.lineWidth * 2),
+            fromVector.added(this.lineWidth * 2, this.lineWidth * 2)
+        )
+
+        let toVector = this.toVector
+
 
 
         const wireBox = new BoundingBox(fromVector, toVector)
@@ -53,44 +61,62 @@ export class WireUiComponent implements OnInit {
         const isFalling = direction.y > 0
         const isRight = direction.x > 0
 
-        const firstHorizontal = isFalling == isRight
-        let top = wireBox.getTop()
-        let bottom = wireBox.getBottom()
-        let left = wireBox.getLeft()
-        let right = wireBox.getRight()
+        let left: number
+        let right: number
         let horizonaly;
-        let verticalx
 
         let width = 2
-
-
         if (!isRight) {
             left = wireBox.getRight()
             right = wireBox.getLeft()
-        }
-
-        if (isFalling) {
-            top = wireBox.getBottom()
-            bottom = wireBox.getTop()
-
+        } else {
+            left = wireBox.getLeft()
+            right = wireBox.getRight()
         }
 
         if (isFalling != isRight) {
             horizonaly = toVector.y
-            verticalx = fromVector.x
         } else {
             horizonaly = fromVector.y
-            verticalx = toVector.x
         }
-
-        this.horizontalBox = new BoundingBox(new Vector2(left, horizonaly - width), new Vector2(right, horizonaly + width))
-        this.verticalBox = new BoundingBox(new Vector2(verticalx - width, bottom), new Vector2(verticalx + width, top))
-
         if (isFalling) {
             this.dot = new Vector2(right, horizonaly)
         } else {
             this.dot = new Vector2(left, horizonaly)
         }
-    }
 
+        let fromToDot = this.dot.subtract(fromVector)
+        fromToDot = fromToDot.scaleTo(this.lineWidth + this.borderWidth * 2)
+        const fromLine = new BoundingBox(fromVector.added(fromToDot), this.dot)
+            .toRectangle()
+            .withMargin(new Vector2(width, width))
+
+
+        let toVtoDot = this.dot.subtract(toVector)
+        toVtoDot = toVtoDot.scaleTo(this.lineWidth + this.borderWidth * 2)
+
+        const toLine = new BoundingBox(
+            toVector.added(toVtoDot), this.dot
+        )
+            .toRectangle()
+            .withMargin(new Vector2(width, width))
+
+        this.horizontalBox = toLine
+        this.verticalBox = fromLine//
+
+
+
+
+    }
+    wireClick(event: MouseEvent) {
+        if (!this.data.editingWire) {
+            this.data.editingWire = {
+                component: this,
+                position: new Vector2(event).dividedBy(10).rounded().multipliedBy(10),
+                toPosition: new Vector2(event).dividedBy(10).rounded().multipliedBy(10)
+            }
+        } else {
+            this.data.editingWire = undefined
+        }
+    }
 }

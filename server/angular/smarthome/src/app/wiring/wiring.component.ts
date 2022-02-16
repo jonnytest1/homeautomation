@@ -57,7 +57,7 @@ export class WiringComponent implements OnInit, AfterContentChecked, OnDestroy {
 
     dataStructures: Array<StrucureReturn> = []
 
-    wirePositions: Array<{ from: Vector2, to: Vector2 }> = []
+    wirePositions: Array<{ from: Vector2, to: Vector2, wire: Wire }> = []
 
     nodeTemplates: Array<NodeTemplate> = [
         BatteryUiComponent, LedUiComponent, ResistorUiComponent, SwitchComponent, RelayUiComponent
@@ -91,10 +91,21 @@ export class WiringComponent implements OnInit, AfterContentChecked, OnDestroy {
                 }
 
             })
-            this.wirePositions = this.getWirePositions()
+
+            const positinons = this.getWirePositions();
+            if (JSON.stringify(this.wirePositions) !== JSON.stringify(positinons)) {
+                this.wirePositions = positinons
+            }
         }, 100)
 
         this.initializeSerializerClasses();
+        this.preloadImages()
+    }
+    preloadImages() {
+        for (const image of ["/assets/icons/relay_right.png"]) {
+            let img = new Image();
+            img.src = image;
+        }
     }
 
     private initializeSerializerClasses() {
@@ -153,7 +164,8 @@ export class WiringComponent implements OnInit, AfterContentChecked, OnDestroy {
             }
             return {
                 from: from,
-                to: to
+                to: to,
+                wire: wire
             }
         })
     }
@@ -166,12 +178,23 @@ export class WiringComponent implements OnInit, AfterContentChecked, OnDestroy {
         return bat.ampereSeconds
     }
 
-    mouseMove(event: MouseEvent) {
+    dragMove(event: MouseEvent) {
         if (this.data.currentWire) {
             const position = new Vector2(event).dividedBy(10).rounded().multipliedBy(10);
             this.data.currentWire = { ...this.data.currentWire, to: position }
+        } else if (this.data.editingWire) {
+            const position = new Vector2(event).dividedBy(10).rounded().multipliedBy(10);
+            this.data.editingWire = { ...this.data.editingWire, toPosition: position }
         }
-        this.wirePositions = this.getWirePositions()
+        // this.wirePositions = this.getWirePositions()
+
+    }
+    setEditingPos(event: MouseEvent) {
+        if (this.data.editingWire) {
+            const position = new Vector2(event).dividedBy(10).rounded().multipliedBy(10);
+            this.data.editingWire = { ...this.data.editingWire, toPosition: position }
+        }
+        //this.wirePositions = this.getWirePositions()
 
     }
     updatePosition(node: NodeEl, event: DragEvent) {

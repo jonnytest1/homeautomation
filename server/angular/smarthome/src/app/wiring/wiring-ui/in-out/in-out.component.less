@@ -11,15 +11,34 @@ div{
 
     label{
         user-select: none;
-
+        background-color: transparent;
+        z-index: 999999999999999;
+        width: 10px;
+        height: 10px;
+        text-align: center;
+        line-height: 10px;
         &.dropzone{
 
         }
-        &.draggable{
-            
+        &.draggable:hover{
+            cursor: grab;
+           // position: relative;
+            border:2px solid black;
+            transform: translate(0px,0px);
+            margin: -2px;
+            border-radius: 99999px;
+
+            //background-color: red;
         }
+
+
         &.dropzone.hover{
-            font-size: large;
+            border:2px solid black;
+            transform: translate(0px,0px);
+            margin: -2px;
+            border-radius: 99999px;
+            //font-size: large;
+         
         }
     }
 }

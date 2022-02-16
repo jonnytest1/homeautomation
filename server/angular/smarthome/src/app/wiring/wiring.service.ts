@@ -14,7 +14,13 @@ export class WiringDataService {
 
     wires = new BehaviorSubject<Array<{ from: InOutComponent | Vector2, to: InOutComponent | Vector2 }>>([])
 
-    currentWire: { from: InOutComponent | Vector2, to: InOutComponent | Vector2 } = undefined
+    currentWire: { from: Vector2, to: Vector2 } = undefined
+
+    editingWire: {
+        component: WireUiComponent,
+        position: Vector2
+        toPosition: Vector2
+    }
 
 
 }   

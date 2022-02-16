@@ -1,18 +1,41 @@
-<div class="wire"
+<div class="dot start connector"
+     *ngIf="!below"
+     [class.highlighted]="highlighted"
+     [class.low]="below"
+     [style.top]="fromVector.yStyle"
+     [style.left]="fromVector.xStyle"></div>
+
+<div class="wire horizontal"
+     (click)="wireClick($event)"
+     [class.low]="below"
+     [class.highlighted]="highlighted"
+     (mouseenter)="highlighted=true"
+     (mouseleave)="highlighted=false"
      [style.top]="horizontalBox.getTop()+'px'"
      [style.left]="horizontalBox.getLeft()+'px'"
      [style.width]="horizontalBox.getWidth()+'px'"
      [style.height]="horizontalBox.getHeight()+'px'"></div>
 
-<div class="wire"
+<div class="dot middle"
+     [class.highlighted]="highlighted"
+     [class.low]="below"
+     [style.top]="dot.yStyle"
+     [style.left]="dot.xStyle"></div>
+
+<div class="wire vertical"
+     [class.highlighted]="highlighted"
+     [class.low]="below"
+     (mouseenter)="highlighted=true"
+     (mouseleave)="highlighted=false"
+     (click)="wireClick($event)"
      [style.top]="verticalBox.getTop()+'px'"
      [style.left]="verticalBox.getLeft()+'px'"
      [style.width]="verticalBox.getWidth()+'px'"
      [style.height]="verticalBox.getHeight()+'px'"></div>
 
 
-<div class="dot"
-     [style.top]="dot.yStyle"
-     [style.left]="dot.xStyle"
-     [style.width]="lineWidth *2+'px'"
-     [style.height]="lineWidth *2+'px'"></div>
+<div class="dot end connector"
+     [class.highlighted]="highlighted"
+     [class.low]="below"
+     [style.top]="toVector.yStyle"
+     [style.left]="toVector.xStyle"></div>

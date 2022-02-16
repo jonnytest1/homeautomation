@@ -29,7 +29,8 @@
             <app-connection-view [data]="dataStructures"></app-connection-view>
         </div>
     </mat-sidenav>
-    <mat-sidenav-content (dragover)="mouseMove($event)">
+    <mat-sidenav-content (dragover)="dragMove($event)"
+                         (mousemove)="setEditingPos($event);$event.stopPropagation();">
 
         <p>
             wiring works!<br>
@@ -53,10 +54,15 @@
 
         <app-wire-ui class="tempWire"
                      *ngIf="data.currentWire ; let wire"
+                     [below]="true"
                      [fromVector]="wire.from"
                      [toVector]="wire.to">
         </app-wire-ui>
-
+        <app-wire-ui class="tempWire"
+                     *ngIf="data.editingWire ; let wire"
+                     [fromVector]="wire.position"
+                     [toVector]="wire.toPosition">
+        </app-wire-ui>
         <ng-container *ngFor="let wire of this.wirePositions">
             <app-wire-ui *ngIf="wire"
                          [fromVector]="wire.from"

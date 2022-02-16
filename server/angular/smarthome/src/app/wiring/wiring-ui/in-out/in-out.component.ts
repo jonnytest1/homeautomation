@@ -47,7 +47,7 @@ export class InOutComponent implements OnInit {
     }
 
     public getOutVector() {
-        const outPutOffset = new Vector2(0, 20)
+        const outPutOffset = new Vector2(0, 17)
             .multipliedBy(+this.scale)
             .rotateDeg(this.invers ? 180 : 0)
 
@@ -74,13 +74,14 @@ export class InOutComponent implements OnInit {
     }
 
     clearDragCache() {
+        this.hover = false
         this.wiringService.dragConnection = undefined
         this.wiringService.currentWire = undefined
     }
 
     storeOutgoing() {
         this.wiringService.dragConnection = this.node.outC
-        this.wiringService.currentWire = { from: this, to: this.getOutVector() }
+        this.wiringService.currentWire = { from: this.getOutVector(), to: this.getOutVector() }
     }
 
     onDrop(event) {
