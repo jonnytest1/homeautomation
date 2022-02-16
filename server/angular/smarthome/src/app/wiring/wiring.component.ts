@@ -6,7 +6,6 @@ import { LocalStorageSerialization } from './storage';
 import { FromJson, JsonSerializer } from './serialisation';
 import { Vector2 } from './util/vector';
 import { BatteryUiComponent } from './wiring-ui/battery-ui/battery-ui.component';
-import { InOutComponent, positionInjectionToken } from './wiring-ui/in-out/in-out.component';
 import { LedUiComponent } from './wiring-ui/led-ui/led-ui.component';
 import { RelayUiComponent } from './wiring-ui/relay-ui/relay-ui.component';
 import { ResistorUiComponent } from './wiring-ui/resistor-ui/resistor-ui.component';
@@ -134,7 +133,7 @@ export class WiringComponent implements OnInit, AfterContentChecked, OnDestroy {
             elementMap: this.serialisationMap,
             viewRef: this.viewRef,
             displayNodes: this.nodes,
-            injectorFactory: this.getInjector.bind(this),
+            injectorFactory: () => this.viewRef.injector,
         })
     }
 
@@ -205,19 +204,13 @@ export class WiringComponent implements OnInit, AfterContentChecked, OnDestroy {
     }
 
 
-    getInjector(position: Vector2) {
-        return Injector.create({
-            providers: [{
-                provide: positionInjectionToken, useValue: position
-            }], parent: this.viewRef.injector
-        })
-    }
+
 
     dropped(el: DragEvent, nodeTemplate: NodeTemplate) {
 
         const position = new Vector2({ x: el.x, y: el.y }).dividedBy(10).rounded().multipliedBy(10)
         const newNode = this.viewRef.createComponent(nodeTemplate, {
-            injector: this.getInjector(position)
+            injector: this.viewRef.injector
         })
         if (newNode.instance instanceof BatteryUiComponent) {
             this.batteries.push(newNode.instance.node);

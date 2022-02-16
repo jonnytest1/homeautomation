@@ -1,5 +1,6 @@
-import { Component, Inject, InjectionToken, Input, OnInit, Optional, ViewChild } from '@angular/core';
+import { Component, ElementRef, Inject, InjectionToken, Input, OnInit, Optional, ViewChild } from '@angular/core';
 import { BindingBoolean } from '../../../utils/type-checker';
+import { BoundingBox } from '../../util/bounding-box';
 import { Vector2 } from '../../util/vector';
 import { WiringDataService } from '../../wiring.service';
 import { Battery } from '../../wirings/battery';
@@ -10,7 +11,6 @@ import { Wiring } from '../../wirings/wiring.a';
 import { UINode } from '../ui-node.a';
 import { WireUiComponent } from '../wire-ui/wire-ui.component';
 
-export const positionInjectionToken = new InjectionToken("_ITEM_POSITION_VECTOR")
 @Component({
     selector: 'app-in-out',
     templateUrl: './in-out.component.html',
@@ -27,38 +27,26 @@ export class InOutComponent implements OnInit {
     @Input()
     noInput: BindingBoolean
 
-    @Input()
-    offsetVector: Vector2 = Vector2.ZERO
-
-
-    @Input()
-    scale: number | string = 1
-
     hover = false
 
-    constructor(private wiringService: WiringDataService,
-        @Inject(positionInjectionToken) public position: Vector2) {
+    @ViewChild("inLabel")
+    public inLabel: ElementRef<HTMLElement>
+
+    @ViewChild("outLabel")
+    public outLabel: ElementRef<HTMLElement>
+
+    constructor(private wiringService: WiringDataService) {
 
 
-    }
-
-    private getPosition() {
-        return this.position.added(this.offsetVector);
     }
 
     public getOutVector() {
-        const outPutOffset = new Vector2(0, 17)
-            .multipliedBy(+this.scale)
-            .rotateDeg(this.invers ? 180 : 0)
-
-        return this.getPosition().added(outPutOffset)
+        return new BoundingBox(this.outLabel).center()
     }
 
-
     public getInVector() {
-        const inputOffset = new Vector2(0, 20)
-            .rotateDeg(!this.invers ? 180 : 0)
-        return this.getPosition().added(inputOffset)
+        const inVec = new BoundingBox(this.inLabel).center();
+        return inVec
     }
 
     ngOnInit() {

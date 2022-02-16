@@ -6,10 +6,9 @@
      [style.left]="fromVector.xStyle"></div>
 
 <div class="wire horizontal"
-     (click)="wireClick($event)"
      [class.low]="below"
      [class.highlighted]="highlighted"
-     (mouseenter)="highlighted=true"
+     (mouseenter)="mouseEnter($event)"
      (mouseleave)="highlighted=false"
      [style.top]="horizontalBox.getTop()+'px'"
      [style.left]="horizontalBox.getLeft()+'px'"
@@ -25,9 +24,8 @@
 <div class="wire vertical"
      [class.highlighted]="highlighted"
      [class.low]="below"
-     (mouseenter)="highlighted=true"
+     (mouseenter)="mouseEnter($event)"
      (mouseleave)="highlighted=false"
-     (click)="wireClick($event)"
      [style.top]="verticalBox.getTop()+'px'"
      [style.left]="verticalBox.getLeft()+'px'"
      [style.width]="verticalBox.getWidth()+'px'"
@@ -37,5 +35,15 @@
 <div class="dot end connector"
      [class.highlighted]="highlighted"
      [class.low]="below"
+     *ngIf="!below"
      [style.top]="toVector.yStyle"
      [style.left]="toVector.xStyle"></div>
+
+<div class="dot temp connector"
+     *ngIf="tempConnectorPos"
+     (mouseenter)="highlighted=true"
+     (mouseleave)="highlighted=false;tempConnectorPos=undefined"
+     (click)="wireClick($event)"
+     [class.highlighted]="true"
+     [style.top]="tempConnectorPos.yStyle"
+     [style.left]="tempConnectorPos.xStyle"></div>

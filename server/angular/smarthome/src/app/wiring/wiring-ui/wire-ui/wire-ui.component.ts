@@ -35,7 +35,15 @@ export class WireUiComponent implements OnInit {
 
     borderWidth = 2
 
+
+    tempConnectorPos: Vector2
+
     constructor(private data: WiringDataService) { }
+
+    mouseEnter(event: MouseEvent) {
+        this.highlighted = true
+        this.tempConnectorPos = new Vector2(event)
+    }
 
     ngOnInit() {
         this.calculateWires()
@@ -109,6 +117,8 @@ export class WireUiComponent implements OnInit {
 
     }
     wireClick(event: MouseEvent) {
+        this.tempConnectorPos = undefined
+        this.highlighted = false
         if (!this.data.editingWire) {
             this.data.editingWire = {
                 component: this,

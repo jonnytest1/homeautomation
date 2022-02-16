@@ -37,6 +37,11 @@ export class BoundingBox {
         return new BoundingBox(topLeft, topLeft.added(diagonal));
     }
 
+
+    center() {
+        return this.topLeft.added(this.bottomRight).dividedBy(2)
+    }
+
     toRectangle() {
         let left = this.getLeft()
         let right = this.getRight()

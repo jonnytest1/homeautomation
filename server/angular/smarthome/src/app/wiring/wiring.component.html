@@ -59,12 +59,14 @@
                      [toVector]="wire.to">
         </app-wire-ui>
         <app-wire-ui class="tempWire"
+                     [below]="true"
                      *ngIf="data.editingWire ; let wire"
                      [fromVector]="wire.position"
                      [toVector]="wire.toPosition">
         </app-wire-ui>
         <ng-container *ngFor="let wire of this.wirePositions">
             <app-wire-ui *ngIf="wire"
+                         [wire]="wire.wire"
                          [fromVector]="wire.from"
                          [toVector]="wire.to">
             </app-wire-ui>

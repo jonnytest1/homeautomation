@@ -5,7 +5,7 @@ import { Collection } from '../../wirings/collection';
 import { Relay } from '../../wirings/relay';
 import { Switch } from '../../wirings/switch';
 import { Wire } from '../../wirings/wire';
-import { InOutComponent, positionInjectionToken } from '../in-out/in-out.component';
+import { InOutComponent } from '../in-out/in-out.component';
 import { UINode } from '../ui-node.a';
 
 
@@ -14,9 +14,6 @@ class NestedSwitch extends UINode<Switch>{
     getIcon(): string {
         throw new Error('Method not implemented.');
     }
-
-
-
 
 }
 
@@ -82,16 +79,6 @@ export class RelayUiComponent extends UINode<Relay> implements OnInit {
         this.node.switch1.uiNode = new NestedSwitch(this.node.switch1);
         this.switch2uiNode = new NestedSwitch({} as any);
         this.nestedSwitchColelction = new Collection(null, this.node.switch1.negatedOutC)
-    }
-
-    setPosition(vector: Vector2): void {
-        super.setPosition(vector)
-        if (this.node.switch1.uiNode?.inOutComponent) {
-            this.node.switch1.uiNode.inOutComponent.position = vector
-        }
-        if (this.switch2uiNode?.inOutComponent) {
-            this.switch2uiNode.inOutComponent.position = vector
-        }
     }
 
     ngAfterViewInit() {

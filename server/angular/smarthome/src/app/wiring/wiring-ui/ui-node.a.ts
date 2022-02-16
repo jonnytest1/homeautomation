@@ -30,9 +30,6 @@ export abstract class UINode<T extends Collection = Collection> {
 
     setPosition(vector: Vector2) {
         this.position = vector
-        if (this.inOutComponent) {
-            this.inOutComponent.position = vector
-        }
     }
 
     getPosition(): Vector2 {

@@ -1,6 +1,7 @@
 <div [ngClass]="{invers:!!invers}">
 
     <label (dragenter)="markDropZone($event)"
+           #inLabel
            *ngIf="!noInput"
            (dragleave)="leaveDropZone()"
            (drop)="onDrop($event)"
@@ -10,6 +11,7 @@
     <ng-content></ng-content>
     <label draggable="true"
            class="draggable"
+           #outLabel
            (dragstart)="$event.stopPropagation();storeOutgoing()"
            (dragend)="$event.stopPropagation();clearDragCache()">+</label>
 </div>
