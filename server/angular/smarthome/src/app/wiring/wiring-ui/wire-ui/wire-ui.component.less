@@ -35,10 +35,12 @@
     width:  4px;
     height: 4px;
 
-    &.low &.temp{
+    &.low{
         user-select: none !important;
         z-index: -1  !important;
     }
+
+ 
     
 
     &.highlighted{
@@ -58,5 +60,12 @@
         border: 2px solid black;
         width:  8px;
         height: 8px;
+
+        &.temp{
+            user-select: none !important;
+            z-index: 99999999999  !important;
+            cursor: grab;
+
+        }
     }
 }

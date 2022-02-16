@@ -3,21 +3,26 @@ import { FromJson, FromJsonOptions, JsonSerializer } from '../serialisation';
 import { Connection } from './connection';
 import { Resistor } from './resistor';
 import { Wire } from './wire';
-import { CurrentCurrent, CurrentOption, GetResistanceOptions, Wiring } from './wiring.a';
+import { CurrentCurrent, CurrentOption, GetResistanceOptions, ResistanceReturn, Wiring } from './wiring.a';
 
 export class LED extends Resistor {
     brightness: number = 0;
 
     blown = false
 
+    readonly maxVoltageDrop = 2.4
+
 
     constructor() {
-        super(15)
+        super(5)
     }
 
-    getTotalResistance(from: any, options: GetResistanceOptions): number {
+    getTotalResistance(from: any, options: GetResistanceOptions): ResistanceReturn {
         if (this.blown) {
-            return NaN
+            return {
+                resistance: NaN
+
+            }
         }
         return super.getTotalResistance(from, options)
     }
@@ -25,11 +30,12 @@ export class LED extends Resistor {
     pushCurrent(options: CurrentOption, from: Wiring): CurrentCurrent {
         const returnCurrent = super.pushCurrent(options, from)
         if (options.current > 0) {
-            if (this.voltageDrop > 2.6) {
+            if (this.voltageDrop > this.maxVoltageDrop) {
                 this.blown = true;
                 return
             }
-            this.brightness = 100
+            debugger;
+            this.brightness = this.voltageDrop * 100 / this.maxVoltageDrop
         } else {
             this.brightness = 0
         }
@@ -37,24 +43,19 @@ export class LED extends Resistor {
         return returnCurrent
     }
 
-    backgroundColor() {
-        if (this.blown) {
-            return "red"
-        }
-        return `hsl(54deg,100%,${Math.min(100, this.brightness)}%)`
-    }
-
     toJSON(): any {
         return {
             type: this.constructor.name,
             resistance: this.resistance,
             ui: this.uiNode,
-            outC: this.outC.connectedTo
+            outC: this.outC.connectedTo,
+            uuid: this.uuid
         }
     }
 
     static fromJSON(json: any, context: FromJsonOptions): Wire {
         const self = new LED();
+        self.uuid = json.uuid
         JsonSerializer.createUiRepresation(self, json, context)
         if (context.wire) {
             context.wire.connect(self.inC)

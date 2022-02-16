@@ -2,14 +2,14 @@ import { FromJson, FromJsonOptions } from '../serialisation';
 import { Connection } from './connection';
 import { Switch } from './switch';
 import { Wire } from './wire';
-import { CurrentCurrent, CurrentOption, GetResistanceOptions, Wiring } from './wiring.a';
+import { CurrentCurrent, CurrentOption, GetResistanceOptions, ResistanceReturn, Wiring } from './wiring.a';
 
 export class ToggleSwitch extends Switch {
 
 
 
     negatedOutC = new Connection(this, "switch_out_negated")
-    getTotalResistance(from: any, options: GetResistanceOptions): number {
+    getTotalResistance(from: any, options: GetResistanceOptions): ResistanceReturn {
         if (this.enabled) {
             return super.getTotalResistance(from, options)
         } else {
@@ -51,7 +51,7 @@ export class ToggleSwitch extends Switch {
         if (context.wire) {
             context.wire.connect(self.inC)
         }
-        context.controlRefs[json.controlRef] = self
+        context.controlRefs[json.controlRef] = [self]
         const connected = context.elementMap[json.outC.type].fromJSON(json.outC, { ...context, inC: self.outC })
         if (json.negatedOutC) {
             context.elementMap[json.negatedOutC.type].fromJSON(json.negatedOutC, { ...context, inC: self.negatedOutC })

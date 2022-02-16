@@ -10,6 +10,8 @@
      [class.highlighted]="highlighted"
      (mouseenter)="mouseEnter($event)"
      (mouseleave)="highlighted=false"
+     (drop)="createParrallelWire($event)"
+     (dragover)="$event.preventDefault()"
      [style.top]="horizontalBox.getTop()+'px'"
      [style.left]="horizontalBox.getLeft()+'px'"
      [style.width]="horizontalBox.getWidth()+'px'"
@@ -24,6 +26,8 @@
 <div class="wire vertical"
      [class.highlighted]="highlighted"
      [class.low]="below"
+     (drop)="createParrallelWire($event)"
+     (dragover)="$event.preventDefault()"
      (mouseenter)="mouseEnter($event)"
      (mouseleave)="highlighted=false"
      [style.top]="verticalBox.getTop()+'px'"
@@ -40,10 +44,12 @@
      [style.left]="toVector.xStyle"></div>
 
 <div class="dot temp connector"
-     *ngIf="tempConnectorPos"
+     draggable="true"
+     *ngIf="getTempConnector();let pos"
      (mouseenter)="highlighted=true"
      (mouseleave)="highlighted=false;tempConnectorPos=undefined"
-     (click)="wireClick($event)"
+     (dragstart)="$event.stopPropagation();tempConnectDragStart($event)"
+     (dragend)="$event.stopPropagation();clearTemp()"
      [class.highlighted]="true"
-     [style.top]="tempConnectorPos.yStyle"
-     [style.left]="tempConnectorPos.xStyle"></div>
+     [style.top]="pos.yStyle"
+     [style.left]="pos.xStyle"></div>

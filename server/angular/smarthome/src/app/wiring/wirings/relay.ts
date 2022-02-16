@@ -25,7 +25,7 @@ export class Relay extends Resistor implements ControllerRef {
 
     }
     setControlRef(controlRef: any, key: string) {
-        this.switch1 = controlRef
+        this.switch1 = controlRef[0]
     };
 
     evaluateFunction(options: CurrentOption): void {

@@ -4,8 +4,9 @@ import { Battery } from './battery';
 import { Collection } from './collection';
 import { Connection } from './connection';
 import { Parrallel } from './parrallel';
+import { ParrallelWire } from './parrallel-wire';
 import { Resistor } from './resistor';
-import { CurrentCurrent, CurrentOption, GetResistanceOptions, Wiring } from './wiring.a';
+import { CurrentCurrent, CurrentOption, GetResistanceOptions, ResistanceReturn, Wiring } from './wiring.a';
 
 export class Wire extends Collection {
 
@@ -16,13 +17,14 @@ export class Wire extends Collection {
             inConnection.connectedTo = this
         }
     }
+
     resistance = 0;
 
     outC: Connection
 
 
     public isViewWire = true
-    getTotalResistance(f: Wiring, options: GetResistanceOptions): number {
+    getTotalResistance(f: Wiring, options: GetResistanceOptions): ResistanceReturn {
         return this.outC.getTotalResistance(this, options);
     }
 
@@ -33,16 +35,24 @@ export class Wire extends Collection {
     }
 
 
-    static connectNodes(...nodes: Array<Collection | Array<Collection>>) {
-        let lastEl: Collection
+    static connectNodes(...nodes: Array<Collection | Array<Collection> | ParrallelWire>) {
+        let lastEl: Collection | ParrallelWire
         nodes.forEach(node => {
             if (node instanceof Array) {
                 node = new Parrallel(...node);
             }
 
             if (lastEl) {
-                // lastEl.connectedTo = undefined
-                Wire.connect(lastEl.outC, node.inC)
+
+                if (lastEl instanceof ParrallelWire && !(node instanceof ParrallelWire)) {
+                    lastEl.newOutC(node.inC)
+                } else if (node instanceof ParrallelWire && !(lastEl instanceof ParrallelWire)) {
+                    node.newInC(lastEl.outC)
+                } else if (!(lastEl instanceof ParrallelWire) && !(node instanceof ParrallelWire)) {
+
+                    // lastEl.connectedTo = undefined
+                    Wire.connect(lastEl.outC, node.inC)
+                }
             }
             // node.controlContainer = this
             // this.nodes.push(node)

@@ -42,7 +42,7 @@ export class BatteryUiComponent extends UINode<Battery>  {
     }
 
     constructor(private snackbar: MatSnackBar) {
-        super(new Battery(5, 0.0001))
+        super(new Battery(5, 0.001))
 
 
     }

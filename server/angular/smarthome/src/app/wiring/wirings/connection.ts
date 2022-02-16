@@ -1,19 +1,20 @@
 import { Collection } from './collection';
+import { ParrallelWire } from './parrallel-wire';
 import { Wire } from './wire';
-import { CurrentCurrent, CurrentOption, GetResistanceOptions, Wiring } from './wiring.a';
+import { CurrentCurrent, CurrentOption, GetResistanceOptions, ResistanceReturn, Wiring } from './wiring.a';
 
 export class Connection implements Wiring {
 
 
-    constructor(public parent: Wiring & Collection, private id: string) { }
+    constructor(public parent: Wiring, private id: string) { }
 
 
     resistance: number;
 
 
-    connectedTo?: Wire
+    connectedTo?: Wire | ParrallelWire
 
-    getTotalResistance(from: Wiring | null, options: GetResistanceOptions): number {
+    getTotalResistance(from: Wiring | null, options: GetResistanceOptions): ResistanceReturn {
         let target = this.parent
 
         if (from === this.parent) {
@@ -21,7 +22,9 @@ export class Connection implements Wiring {
 
         }
         if (target == undefined) {
-            return NaN
+            return {
+                resistance: NaN
+            }
         }
         return target.getTotalResistance(this, options)
     }

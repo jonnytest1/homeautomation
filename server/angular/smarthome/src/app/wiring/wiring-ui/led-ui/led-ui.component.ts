@@ -25,6 +25,13 @@ export class LedUiComponent extends UINode<LED> implements OnInit {
 
     ngOnInit() {
     }
+
+    backgroundColor() {
+        if (this.node.blown) {
+            return "red"
+        }
+        return `hsl(54deg,100%,${Math.min(100, this.node.brightness)}%)`
+    }
     static fromJSON(json: any, map: Record<string, FromJson>, context: { inC: Connection; }): Connection {
 
         debugger;

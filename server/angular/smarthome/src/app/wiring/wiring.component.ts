@@ -23,6 +23,7 @@ import { Resistor } from './wirings/resistor';
 import { Switch } from './wirings/switch';
 import { ToggleSwitch } from './wirings/toggle-switch';
 import { Wire } from './wirings/wire';
+import { ParrallelWire } from './wirings/parrallel-wire';
 
 
 
@@ -108,7 +109,7 @@ export class WiringComponent implements OnInit, AfterContentChecked, OnDestroy {
     }
 
     private initializeSerializerClasses() {
-        const serializerClasses: Array<FromJson> = [Parrallel, Wire, ToggleSwitch];
+        const serializerClasses: Array<FromJson> = [Parrallel, Wire, ToggleSwitch, ParrallelWire];
         for (const val of serializerClasses) {
             this.serialisationMap[val.name] = val;
         }
@@ -142,7 +143,18 @@ export class WiringComponent implements OnInit, AfterContentChecked, OnDestroy {
         this.nodes.forEach(node => {
             const nodeWires = node.uiInstance.getWires();
             nodeWires.forEach(wire => {
-                wires.add(wire);
+                if (wire instanceof ParrallelWire) {
+                    for (const inWire of wire.inC) {
+                        for (const outC of wire.outC) {
+                            const tWire = new Wire()
+                            tWire.inC = inWire
+                            tWire.outC = outC
+                            wires.add(tWire)
+                        }
+                    }
+                } else {
+                    wires.add(wire);
+                }
             })
         })
         return wires;
@@ -186,14 +198,6 @@ export class WiringComponent implements OnInit, AfterContentChecked, OnDestroy {
             this.data.editingWire = { ...this.data.editingWire, toPosition: position }
         }
         // this.wirePositions = this.getWirePositions()
-
-    }
-    setEditingPos(event: MouseEvent) {
-        if (this.data.editingWire) {
-            const position = new Vector2(event).dividedBy(10).rounded().multipliedBy(10);
-            this.data.editingWire = { ...this.data.editingWire, toPosition: position }
-        }
-        //this.wirePositions = this.getWirePositions()
 
     }
     updatePosition(node: NodeEl, event: DragEvent) {

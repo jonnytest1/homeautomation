@@ -1,5 +1,6 @@
 <app-in-out [node]="node">
     <img [src]="getIcon()"
+         [title]="node.resistance"
          (click)="openSnackbar(options)" />
 </app-in-out>
 
@@ -11,6 +12,7 @@
 
     <input #resistance
            placeholder="resistance"
+           [value]="node.resistance"
            type="number"
            (change)="setResistance(resistance)" />
     <button>

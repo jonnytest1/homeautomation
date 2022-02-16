@@ -37,10 +37,15 @@ export class LocalStorageSerialization {
 
 
 
-        const controlRegfs = {}
-        const controllerRefs: Record<string, { setControlRef: (controlRef, uuid: string) => void }> = {}
+        return this.parseJson(parsed, options);
 
-        const controlRefsinitialized = new ResolvablePromise<void>()
+    }
+
+    public parseJson(parsed: any, options: Partial<FromJsonOptions & { remote: boolean; }>) {
+        const controlRegfs = {};
+        const controllerRefs: Record<string, { setControlRef: (controlRef, uuid: string) => void; }> = {};
+
+        const controlRefsinitialized = new ResolvablePromise<void>();
 
         const batteries = parsed.map(obj => Battery.fromJSON(obj, {
             ...options,
@@ -51,15 +56,14 @@ export class LocalStorageSerialization {
         }));
 
         Object.keys(controllerRefs).forEach(key => {
-            const controller = controllerRefs[key]
+            const controller = controllerRefs[key];
             const controlRef = controlRegfs[key];
             if (controlRef) {
-                controller.setControlRef(controlRef, key)
+                controller.setControlRef(controlRef, key);
             }
-        })
+        });
 
-        controlRefsinitialized.resolve()
+        controlRefsinitialized.resolve();
         return batteries;
-
     }
 }

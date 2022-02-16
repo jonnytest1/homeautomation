@@ -4,7 +4,7 @@ import { Collection } from './collection';
 import { Connection } from './connection';
 import { ControlCollection } from './control-collection.a';
 import { Wire } from './wire';
-import { CurrentCurrent, CurrentOption, GetResistanceOptions, Wiring } from './wiring.a';
+import { CurrentCurrent, CurrentOption, GetResistanceOptions, ResistanceReturn, Wiring } from './wiring.a';
 
 export class Parrallel extends ControlCollection implements Wiring {
     resistance: number;
@@ -19,7 +19,7 @@ export class Parrallel extends ControlCollection implements Wiring {
     wireRec: Wire;
     inVoltage: number;
     restCurrent: CurrentCurrent;
-    resistanceAfterBlock: number;
+    resistanceAfterBlock: ResistanceReturn;
     innerOutConnection: Connection;
     constructor(...containers: Array<Collection & Wiring>) {
         super(null, null);
@@ -40,12 +40,13 @@ export class Parrallel extends ControlCollection implements Wiring {
 
     }
 
-    getTotalResistance(from: Wiring, options: GetResistanceOptions): number {
+    getTotalResistance(from: Wiring, options: GetResistanceOptions): ResistanceReturn {
         if (from == this.innerOutConnection) {
-            debugger;
             if (options.forParrallel) {
                 if (options.forParrallel === 1) {
-                    return 0;
+                    return {
+                        resistance: 0
+                    };
                 }
                 this.resistanceAfterBlock = this.outC.getTotalResistance(this, { ...options, forParrallel: options.forParrallel - 1 });
                 return this.resistanceAfterBlock;
@@ -56,24 +57,29 @@ export class Parrallel extends ControlCollection implements Wiring {
         }
         let resistancetotal = 0
         this.containers.forEach(res => {
-            debugger;
             const connectionResistance = res.getTotalResistance(this, { ...options, forParrallel: 1 })
-            if (connectionResistance !== 0) {
-                resistancetotal += 1 / connectionResistance;
+            if (connectionResistance.resistance !== 0) {
+                resistancetotal += 1 / connectionResistance.resistance;
             }
         })
         if (resistancetotal == 0) {
-            return 0
+            return {
+                resistance: 0
+            }
         }
         this.resistance = 1 / resistancetotal;
-        return this.resistance + this.outC.getTotalResistance(this, options)
+        const resistanceAfter = this.outC.getTotalResistance(this, options)
+        return {
+            ...resistanceAfter,
+            resistance: resistanceAfter.resistance + this.resistance
+        }
     }
     pushCurrent(options: CurrentOption, from: Wiring): CurrentCurrent {
         if (from == this.innerOutConnection) {
             return this.restCurrent
         }
         this.voltageDrop = (options.current * this.resistance)
-
+        debugger;
         this.restCurrent = this.outC.pushCurrent({
             ...options
             , voltage: options.voltage - this.voltageDrop

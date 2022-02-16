@@ -3,7 +3,7 @@ import { FromJsonOptions, JsonSerializer } from '../serialisation'
 import { Connection } from './connection'
 import { Resistor } from "./resistor"
 import { Wire } from './wire'
-import { GetResistanceOptions } from './wiring.a'
+import { GetResistanceOptions, ResistanceReturn } from './wiring.a'
 export class Switch extends Resistor {
 
 
@@ -15,11 +15,13 @@ export class Switch extends Resistor {
     constructor() {
         super(0)
     }
-    getTotalResistance(from: any, options: GetResistanceOptions): number {
+    getTotalResistance(from: any, options: GetResistanceOptions): ResistanceReturn {
         if (this.enabled) {
             return super.getTotalResistance(from, options)
         }
-        return NaN
+        return {
+            resistance: NaN
+        }
     }
 
     toJSON(): any {
@@ -39,7 +41,7 @@ export class Switch extends Resistor {
             context.wire.connect(self.inC)
         }
         if (json.controlRef) {
-            context.controlRefs[json.controlRef] = self
+            context.controlRefs[json.controlRef] = [self]
         } else {
             JsonSerializer.createUiRepresation(self, json, context)
         }

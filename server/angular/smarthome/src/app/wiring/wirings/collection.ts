@@ -1,5 +1,5 @@
 import { Connection } from './connection';
-import { CurrentCurrent, CurrentOption, GetResistanceOptions, Wiring } from './wiring.a';
+import { CurrentCurrent, CurrentOption, GetResistanceOptions, ResistanceReturn, Wiring } from './wiring.a';
 
 
 export class Collection extends Wiring {
@@ -26,7 +26,7 @@ export class Collection extends Wiring {
         }
     }
 
-    getTotalResistance(from: Wiring, options: GetResistanceOptions): number {
+    getTotalResistance(from: Wiring, options: GetResistanceOptions): ResistanceReturn {
         throw new Error('Method not implemented.');
     }
     pushCurrent(options: CurrentOption, from: Wiring): CurrentCurrent {

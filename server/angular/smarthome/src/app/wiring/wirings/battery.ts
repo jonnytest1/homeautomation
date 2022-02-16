@@ -2,14 +2,14 @@
 import { FromJsonOptions, JsonSerializer } from '../serialisation';
 import { Collection } from './collection';
 import { Connection } from './connection';
-import { CurrentCurrent, CurrentOption, GetResistanceOptions, Wiring } from './wiring.a';
+import { CurrentCurrent, CurrentOption, GetResistanceOptions, ResistanceReturn, Wiring } from './wiring.a';
 
 export class Battery extends Collection {
 
 
     ampereSeconds: number;
 
-    resistance = 0.000;
+    networkResistance = 0.000;
 
     iterationTime: number
 
@@ -38,11 +38,13 @@ export class Battery extends Collection {
      }*/
 
 
-    getTotalResistance(from: Connection, options: GetResistanceOptions): number {
+    getTotalResistance(from: Connection, options: GetResistanceOptions): ResistanceReturn {
         if (!from) {
             return this.outC.getTotalResistance(this, options)
         } else {
-            return 0
+            return {
+                resistance: 0
+            }
         }
 
     }
@@ -52,41 +54,43 @@ export class Battery extends Collection {
             return this.outC.pushCurrent(options, this)
         } else {
             if (options.voltage > 0.001) {
-                throw new Error("voltage should be 0 right here")
+                throw new Error("voltage should be 0 right here but was " + options.voltage.toPrecision(3))
             }
             return {
                 voltage: 0,
                 remainingAmpereHours: this.ampereSeconds,
-                current: 0
+                current: 0,
+                afterBlockCurrent: []
             }
         }
     }
 
 
     checkContent(deltaSeconds: number) {
-        let resistance;
         if (this.enabled) {
-            resistance = this.getTotalResistance(null, {})
+            this.networkResistance = this.getTotalResistance(null, {}).resistance
         } else {
-            resistance = NaN
+            this.networkResistance = NaN
         }
 
-        if (isNaN(resistance) || this.ampereSeconds == 0) {
+        if (isNaN(this.networkResistance) || this.ampereSeconds == 0) {
             this.currentCurrent_ampere = 0
             this.pushCurrent({
                 current: 0,
                 voltage: 0,
                 deltaSeconds: deltaSeconds,
-                resistance: 0
+                resistance: 0,
+                triggerTimestamp: Date.now()
             }, null)
         } else {
-            this.currentCurrent_ampere = this.voltage / resistance
-
+            this.currentCurrent_ampere = this.voltage / this.networkResistance
+            this.currentCurrent_ampere = Math.min(this.maxAmpereSeconds, this.currentCurrent_ampere)
             const result = this.pushCurrent({
                 current: this.currentCurrent_ampere,
                 voltage: this.voltage,
                 deltaSeconds: deltaSeconds,
-                resistance: 0
+                resistance: 0,
+                triggerTimestamp: Date.now()
             }, null)
             const ampereSeconds = this.currentCurrent_ampere * deltaSeconds
             if (ampereSeconds < 0) {

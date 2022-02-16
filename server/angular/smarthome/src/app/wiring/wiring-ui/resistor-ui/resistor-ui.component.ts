@@ -23,7 +23,7 @@ export class ResistorUiComponent extends UINode<Resistor> implements OnInit {
         return `assets/icons/resistor-svgrepo-com.svg`
     }
 
-    constructor(private snackbar: MatSnackBar) { super(new Resistor(100)) }
+    constructor(private snackbar: MatSnackBar) { super(new Resistor(30)) }
 
     ngOnInit() {
     }

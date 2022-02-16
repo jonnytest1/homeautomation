@@ -2,6 +2,7 @@
 
     <app-in-out [node]="node">
         <img [src]="getIcon()"
+             [title]="node.resistance"
              (click)="openSnackbar(options)" />
     </app-in-out>
     <app-in-out #innerSwitch

@@ -3,6 +3,8 @@ import { BindingBoolean } from '../../../utils/type-checker';
 import { BoundingBox } from '../../util/bounding-box';
 import { Vector2 } from '../../util/vector';
 import { WiringDataService } from '../../wiring.service';
+import { Parrallel } from '../../wirings/parrallel';
+import { ParrallelWire } from '../../wirings/parrallel-wire';
 import { Wire } from '../../wirings/wire';
 import { InOutComponent } from '../in-out/in-out.component';
 
@@ -38,7 +40,7 @@ export class WireUiComponent implements OnInit {
 
     tempConnectorPos: Vector2
 
-    constructor(private data: WiringDataService) { }
+    constructor(public data: WiringDataService) { }
 
     mouseEnter(event: MouseEvent) {
         this.highlighted = true
@@ -116,8 +118,14 @@ export class WireUiComponent implements OnInit {
 
 
     }
-    wireClick(event: MouseEvent) {
-        this.tempConnectorPos = undefined
+
+    clearTemp() {
+        console.log("drag end")
+        this.data.editingWire = undefined
+    }
+
+    tempConnectDragStart(event: MouseEvent) {
+        console.log("drag start")
         this.highlighted = false
         if (!this.data.editingWire) {
             this.data.editingWire = {
@@ -127,6 +135,42 @@ export class WireUiComponent implements OnInit {
             }
         } else {
             this.data.editingWire = undefined
+        }
+        this.tempConnectorPos = undefined
+    }
+
+    getTempConnector() {
+        if (this.tempConnectorPos) {
+            return this.tempConnectorPos
+        }
+        if (this.data.editingWire?.component === this) {
+            return this.data.editingWire?.position
+        }
+        return undefined
+    }
+
+    createParrallelWire(event: Event) {
+        const currentWire = this.wire
+        if (this.data.editingWire) {
+
+            const previousWire = this.data.editingWire.component.wire
+
+            const parrallelWireStart = new ParrallelWire();
+            parrallelWireStart.newInC(previousWire.inC)
+            parrallelWireStart.newOutC(previousWire.outC)
+
+
+
+            const parrallelWireEnd = new ParrallelWire()
+            parrallelWireEnd.newInC(currentWire.inC)
+            parrallelWireEnd.newOutC(currentWire.outC)
+
+            Wire.connect(parrallelWireStart.newOutC(), parrallelWireEnd.newInC())
+        } else if (this.data.dragConnection) {
+            const parrallelWireEnd = new ParrallelWire()
+            parrallelWireEnd.newInC(currentWire.inC)
+            parrallelWireEnd.newInC(this.data.dragConnection)
+            parrallelWireEnd.newOutC(currentWire.outC)
         }
     }
 }

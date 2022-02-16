@@ -5,6 +5,8 @@ import { NodeEl, NodeTemplate } from './wiring.component';
 import { Battery } from './wirings/battery';
 import { Collection } from './wirings/collection';
 import { Connection } from './wirings/connection';
+import { Parrallel } from './wirings/parrallel';
+import { ParrallelWire } from './wirings/parrallel-wire';
 import { Switch } from './wirings/switch';
 import { Wire } from './wirings/wire';
 import { Wiring } from './wirings/wiring.a';
@@ -16,12 +18,12 @@ export interface ControllerRef {
 
 export interface FromJsonOptions {
     inC?: Connection,
-    wire?: Wire
+    wire?: Wire | ParrallelWire
     displayNodes?: NodeEl[],
     viewRef?: ViewContainerRef,
     injectorFactory?: (pos: Vector2) => Injector
 
-    controlRefs: Record<string, Switch>
+    controlRefs: Record<string, Array<Wiring>>
     controllerRefs: Record<string, ControllerRef>
 
     constorlRefsInitialized: Promise<void>
