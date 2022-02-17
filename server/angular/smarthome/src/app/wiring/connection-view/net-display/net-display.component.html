@@ -1,10 +1,19 @@
 <div *ngFor="let item of parsedData">
     <div class="nested"
-         *ngIf="isArray(item);else text">
+         *ngIf="isArray(item);else conView">
         <app-net-display [data]="cast(item)"></app-net-display>
     </div>
-
-    <ng-template #text>
-        {{item.constructor.name}}
+    <ng-template #conView>
+        <app-connection-view *ngIf="isObj(item);let item;else text"
+                             [data]="item"></app-connection-view>
     </ng-template>
+    <ng-template #text>
+        <ng-container *ngIf="isItem(item);let asItem">
+            <span (click)="click(asItem)">
+                {{asItem.name??asItem.constructor.name}}
+            </span>
+        </ng-container>
+    </ng-template>
+
+
 </div>

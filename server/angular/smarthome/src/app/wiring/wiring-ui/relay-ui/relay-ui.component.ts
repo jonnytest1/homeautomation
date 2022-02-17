@@ -1,4 +1,4 @@
-import { Component, Inject, OnInit, Optional, TemplateRef, ViewChild, ViewChildren } from '@angular/core';
+import { Component, Inject, Injector, OnInit, Optional, TemplateRef, ViewChild, ViewChildren } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Vector2 } from '../../util/vector';
 import { Collection } from '../../wirings/collection';
@@ -26,15 +26,15 @@ class NestedSwitch extends UINode<Switch>{
 export class RelayUiComponent extends UINode<Relay> implements OnInit {
     public static templateIcon = "asset:/assets/icons/relay.png"
 
-    @ViewChild(InOutComponent)
-    inOutComponent?: InOutComponent;
 
     @ViewChild("innerSwitch", { read: InOutComponent })
     innerSwitchInOut?: InOutComponent;
 
     @ViewChild("outerSwitch", { read: InOutComponent })
     outerSwitchInOut?: InOutComponent;
-    snackbarRef: any;
+
+    @ViewChild("options")
+    public optionsTemplate?: TemplateRef<any>
 
     public switchRef: Switch;
 
@@ -47,8 +47,8 @@ export class RelayUiComponent extends UINode<Relay> implements OnInit {
     nestedSwitchColelction: Collection;
     switch2uiNode: NestedSwitch;
 
-    constructor(private snackbar: MatSnackBar) {
-        super(new Relay())
+    constructor(inj: Injector) {
+        super(new Relay(), inj)
 
 
     }
@@ -76,8 +76,8 @@ export class RelayUiComponent extends UINode<Relay> implements OnInit {
     }
 
     ngOnInit() {
-        this.node.switch1.uiNode = new NestedSwitch(this.node.switch1);
-        this.switch2uiNode = new NestedSwitch({} as any);
+        this.node.switch1.uiNode = new NestedSwitch(this.node.switch1, null);
+        this.switch2uiNode = new NestedSwitch({} as any, null);
         this.nestedSwitchColelction = new Collection(null, this.node.switch1.negatedOutC)
     }
 
@@ -90,10 +90,6 @@ export class RelayUiComponent extends UINode<Relay> implements OnInit {
             return `/assets/icons/relay.png`
         }
         return `/assets/icons/relay_right.png`
-    }
-
-    openSnackbar(template: TemplateRef<any>) {
-        this.snackbarRef = this.snackbar.openFromTemplate(template)
     }
 
 }

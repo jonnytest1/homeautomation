@@ -1,53 +1,50 @@
-import { ControlContainer } from '@angular/forms'
 import { UINode } from '../wiring-ui/ui-node.a'
-import { Connection } from './connection'
-import { ControlCollection } from './control-collection.a'
-import { Wire } from './wire'
+import { RegisterOptions } from './interfaces/registration'
 
 
 export type CurrentCurrent = {
-    voltage: number,
-    current: number,
-    remainingAmpereHours: number,
-    afterBlockCurrent: Array<CurrentCurrent>
+  voltage: number,
+  current: number,
+  remainingAmpereHours: number,
+  afterBlockCurrent: Array<CurrentCurrent>
 }
 
 export type CurrentOption = {
-    /**
+  /**
      * current in ampere
      */
-    current: number
-    voltage: number,
-    resistance: number,
-    deltaSeconds: number,
-    triggerTimestamp: number,
-    currentAfterBlock?: number
-    voltageAfterBlock?: number
+  current: number
+  voltage: number,
+  resistance: number,
+  deltaSeconds: number,
+  triggerTimestamp: number,
+  currentAfterBlock?: number
+  voltageAfterBlock?: number
 }
 
 export type GetResistanceOptions = {
-    forParrallel?: number
+  forParrallel?: number
 }
 
 
 export interface ResistanceReturn {
-    resistance: number
+  resistance: number
 
-    afterBlock?: ResistanceReturn
+  afterBlock?: ResistanceReturn
 }
 
 export abstract class Wiring {
+  name?: string
+  uiNode?: UINode;
 
-    uiNode?: UINode;
+  // controlContainer?: SerialConnected;
 
-    // controlContainer?: SerialConnected;
+  // abstract resistance: number
 
-    // abstract resistance: number
+  abstract getTotalResistance(from: Wiring, options: GetResistanceOptions): ResistanceReturn
+  abstract pushCurrent(options: CurrentOption, from: Wiring | null): CurrentCurrent
 
-    abstract getTotalResistance(from: Wiring, options: GetResistanceOptions): ResistanceReturn
-    abstract pushCurrent(options: CurrentOption, from: Wiring | null): CurrentCurrent
-
-    abstract register(options: { nodes: any[], until: Wiring, from?: any });
+  abstract register(options: RegisterOptions);
 
 
 }

@@ -9,7 +9,8 @@ export class ViewTemplateComponent implements OnInit {
 
     @ViewChild('dynamic', {
         read: ViewContainerRef
-    }) viewContainerRef: ViewContainerRef
+    })
+    viewContainerRef: ViewContainerRef
 
     @ViewChild('dynamic') templateRef: TemplateRef<any>
 

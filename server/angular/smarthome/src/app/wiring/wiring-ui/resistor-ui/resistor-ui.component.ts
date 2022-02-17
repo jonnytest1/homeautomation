@@ -1,4 +1,4 @@
-import { Component, OnInit, TemplateRef, ViewChild } from '@angular/core';
+import { Component, EmbeddedViewRef, Injector, OnInit, TemplateRef, ViewChild, ViewRef, ɵViewRef } from '@angular/core';
 import { MatSnackBar, MatSnackBarRef } from '@angular/material/snack-bar';
 import { FromJson } from '../../serialisation';
 import { Connection } from '../../wirings/connection';
@@ -14,22 +14,16 @@ import { UINode } from '../ui-node.a';
 export class ResistorUiComponent extends UINode<Resistor> implements OnInit {
 
     public static templateIcon = "insights"
-    snackbarRef: MatSnackBarRef<any>;
-
-    @ViewChild(InOutComponent)
-    public inOutComponent?: InOutComponent
 
     getIcon(): string {
         return `assets/icons/resistor-svgrepo-com.svg`
     }
 
-    constructor(private snackbar: MatSnackBar) { super(new Resistor(30)) }
-
-    ngOnInit() {
+    constructor(injector: Injector) {
+        super(new Resistor(30), injector)
     }
 
-    openSnackbar(template: TemplateRef<any>) {
-        this.snackbarRef = this.snackbar.openFromTemplate(template)
+    ngOnInit() {
     }
 
     setResistance(input: HTMLInputElement) {

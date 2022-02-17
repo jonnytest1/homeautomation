@@ -1,69 +1,96 @@
 import { Injectable } from '@angular/core';
 import { MatBottomSheet } from '@angular/material/bottom-sheet';
-import { MatSnackBar } from '@angular/material/snack-bar';
 import { SettingsService } from '../data.service';
 import { ResolvablePromise } from '../utils/resolvable-promise';
 import { ExamplePickerComponent } from './example-wires/example-picker/example-picker.component';
-import { FromJsonOptions } from './serialisation';
+import { FromJson, FromJsonOptions } from './serialisation';
+import { WiringComponent } from './wiring.component';
 import { Battery } from './wirings/battery';
+import { Parrallel } from './wirings/parrallel';
+import { ParrallelWire } from './wirings/parrallel-wire';
+import { ToggleSwitch } from './wirings/toggle-switch';
+import { Wire } from './wirings/wire';
 
 @Injectable()
 export class LocalStorageSerialization {
 
-    constructor(private dataService: SettingsService, private bottomSheet: MatBottomSheet) { }
-    storeToLocal(batteries: Array<Battery>,
-    ) {
+  serialisationMap: Record<string, FromJson> = {}
 
-        const json = JSON.stringify(batteries);
-        localStorage.setItem("el_network", json)
-        console.log(json)
-    }
-    async load(options: Partial<FromJsonOptions & { remote: boolean }>): Promise<Array<Battery>> {
-        let json: string;
-        if (options.remote) {
-            const jsonStrings = await this.dataService.getWiringTemplates().toPromise()
+  constructor(private dataService: SettingsService, private bottomSheet: MatBottomSheet) {
+    this.initializeSerializerClasses()
+  }
 
-            const picked: string = await this.bottomSheet.open(ExamplePickerComponent, {
-                data: jsonStrings
-            })
-                .afterDismissed()
-                .toPromise()
+  private initializeSerializerClasses() {
 
-            json = picked
-        } else {
-            json = localStorage.getItem("el_network");
-        }
-        const parsed = JSON.parse(json)
-
-
-
-        return this.parseJson(parsed, options);
-
+    const t = new WiringComponent(null, null, null, null)
+    clearInterval(t.interval)
+    const serializerClasses: Array<FromJson> = [Parrallel, Wire, ToggleSwitch, ParrallelWire];
+    for (const val of serializerClasses) {
+      this.serialisationMap[val.name] = val;
     }
 
-    public parseJson(parsed: any, options: Partial<FromJsonOptions & { remote: boolean; }>) {
-        const controlRegfs = {};
-        const controllerRefs: Record<string, { setControlRef: (controlRef, uuid: string) => void; }> = {};
+    t.nodeTemplates.forEach(t => {
+      const tempT = new t();
+      let nodeConstructor = tempT.node.constructor as unknown as FromJson;
+      nodeConstructor.uiConstructor = t;
+      this.serialisationMap[nodeConstructor.name] = nodeConstructor;
+    });
+  }
 
-        const controlRefsinitialized = new ResolvablePromise<void>();
 
-        const batteries = parsed.map(obj => Battery.fromJSON(obj, {
-            ...options,
-            elementMap: options.elementMap,
-            controlRefs: controlRegfs,
-            constorlRefsInitialized: controlRefsinitialized,
-            controllerRefs: controllerRefs
-        }));
+  storeToLocal(batteries: Array<Battery>,
+  ) {
 
-        Object.keys(controllerRefs).forEach(key => {
-            const controller = controllerRefs[key];
-            const controlRef = controlRegfs[key];
-            if (controlRef) {
-                controller.setControlRef(controlRef, key);
-            }
-        });
+    const json = JSON.stringify(batteries);
+    localStorage.setItem("el_network", json)
+    console.log(json)
+  }
+  async load(options: Partial<FromJsonOptions & { remote: boolean }>): Promise<Array<Battery>> {
+    let json: string;
+    if (options.remote) {
+      const jsonStrings = await this.dataService.getWiringTemplates().toPromise()
 
-        controlRefsinitialized.resolve();
-        return batteries;
+      const picked: string = await this.bottomSheet.open(ExamplePickerComponent, {
+        data: jsonStrings
+      })
+        .afterDismissed()
+        .toPromise()
+
+      json = picked
+    } else {
+      json = localStorage.getItem("el_network");
     }
+    const parsed = JSON.parse(json)
+
+
+
+    return this.parseJson(parsed, options);
+
+  }
+
+  public parseJson(parsed: Array<any>, options: Partial<FromJsonOptions>): Array<Battery> {
+    const controlRegfs = {};
+    const controllerRefs: Record<string, { setControlRef: (controlRef, uuid: string) => void; }> = {};
+
+    const controlRefsinitialized = new ResolvablePromise<void>();
+
+    const batteries = parsed.map(obj => Battery.fromJSON(obj, {
+      ...options,
+      elementMap: this.serialisationMap,
+      controlRefs: controlRegfs,
+      constorlRefsInitialized: controlRefsinitialized,
+      controllerRefs: controllerRefs
+    }));
+
+    Object.keys(controllerRefs).forEach(key => {
+      const controller = controllerRefs[key];
+      const controlRef = controlRegfs[key];
+      if (controlRef) {
+        controller.setControlRef(controlRef, key);
+      }
+    });
+
+    controlRefsinitialized.resolve();
+    return batteries;
+  }
 }

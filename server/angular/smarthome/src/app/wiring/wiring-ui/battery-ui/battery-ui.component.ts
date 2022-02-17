@@ -1,4 +1,4 @@
-import { Component, ElementRef, Inject, InjectionToken, OnInit, TemplateRef, ViewChild } from '@angular/core';
+import { Component, ElementRef, Inject, InjectionToken, Injector, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import { MatSnackBar, MatSnackBarRef } from '@angular/material/snack-bar';
 import { BottomSheetHandler } from '../../../settings/bottom-sheet-handler';
 import { FromJson } from '../../serialisation';
@@ -20,11 +20,7 @@ export class BatteryUiComponent extends UINode<Battery>  {
 
     public static templateIcon = "battery_charging_full"
     batteryCollection: Collection;
-    snackbarRef: MatSnackBarRef<any>;
 
-
-    @ViewChild(InOutComponent)
-    public inOutComponent?: InOutComponent
     getIcon(): string {
         const percent = this.getChargedPercent()
         const perSeven = Math.floor(percent / (100 / 7))
@@ -41,8 +37,8 @@ export class BatteryUiComponent extends UINode<Battery>  {
         return +(this.node.ampereSeconds * 100 / this.node.maxAmpereSeconds).toPrecision(5)
     }
 
-    constructor(private snackbar: MatSnackBar) {
-        super(new Battery(5, 0.001))
+    constructor(injector: Injector) {
+        super(new Battery(5, 0.001), injector)
 
 
     }
@@ -56,8 +52,8 @@ export class BatteryUiComponent extends UINode<Battery>  {
     }
 
     logStructure(template: TemplateRef<any>) {
-
-        this.snackbarRef = this.snackbar.openFromTemplate(template)
+        this.openSnackbar()
+        // this.snackbarRef = this.snackbar.openFromTemplate(template)
 
         /*const structureStart = this.node.get batteryCollection?.outC?.connectedTo?.outC?.parent as (SerialConnected | Parrallel)
         console.log(structureStart.getStructure(true));*/

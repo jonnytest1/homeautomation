@@ -1,1 +1,16 @@
-{}
+{
+  "editor.tabSize": 2,
+  "editor.insertSpaces": true,
+  "eslint.format.enable": true,
+  "editor.suggestSelection": "first",
+  "[html]": {
+    "editor.defaultFormatter": "vscode.html-language-features",
+  },
+  "html.format.wrapAttributes": "force-aligned",
+  "javascript.preferences.importModuleSpecifier": "relative",
+  "javascript.preferences.quoteStyle": "single",
+  "javascript.format.insertSpaceAfterOpeningAndBeforeClosingEmptyBraces": false,
+  "typescript.preferences.importModuleSpecifier": "relative",
+  "typescript.preferences.quoteStyle": "single",
+  "typescript.format.insertSpaceAfterOpeningAndBeforeClosingEmptyBraces": false,
+}

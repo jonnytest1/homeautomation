@@ -7,18 +7,17 @@ import { ConnectionViewComponent } from './connection-view/connection-view.compo
 import { NetDisplayComponent } from './connection-view/net-display/net-display.component';
 import { ExamplePickerComponent } from './example-wires/example-picker/example-picker.component';
 import { LocalStorageSerialization } from './storage';
-import { WireUiComponent } from './wiring-ui/wire-ui/wire-ui.component';
 import { WiringUiModule } from './wiring-ui/wiring-ui.module';
 import { WiringComponent } from './wiring.component';
 
 @NgModule({
-    imports: [
-        CommonModule, WiringUiModule,
-        MatSidenavModule,
-        MatSortModule, MatIconModule,
-    ],
-    declarations: [WiringComponent, NetDisplayComponent, ConnectionViewComponent, ExamplePickerComponent],
-    exports: [],
-    providers: [LocalStorageSerialization]
+  imports: [
+    CommonModule, WiringUiModule,
+    MatSidenavModule,
+    MatSortModule, MatIconModule,
+  ],
+  declarations: [WiringComponent, NetDisplayComponent, ConnectionViewComponent, ExamplePickerComponent],
+  exports: [],
+  providers: [LocalStorageSerialization]
 })
-export class WiringModule { }
+export class WiringModule {}

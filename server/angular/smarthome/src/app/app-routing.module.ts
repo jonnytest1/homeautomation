@@ -8,35 +8,35 @@ import { TodoComponent } from './todo/todo.component';
 import { WiringComponent } from './wiring/wiring.component';
 
 const routes: Routes = [{
-    path: 'setup',
-    loadChildren: () => import('./settings/settings.module').then(m => m.SettingsModule)
+  path: 'setup',
+  loadChildren: () => import('./settings/settings.module').then(m => m.SettingsModule)
 }, {
-    path: 'options',
-    loadChildren: () => import('./options/options.module').then(m => m.OptionsModule)
+  path: 'options',
+  loadChildren: () => import('./options/options.module').then(m => m.OptionsModule)
 }, {
-    path: 'camera',
-    component: CameraComponent
+  path: 'camera',
+  component: CameraComponent
 }, {
-    path: 'code',
-    component: MonacoEditorComponent
+  path: 'code',
+  component: MonacoEditorComponent
 }, {
-    path: 'timers',
-    component: TimersComponent
+  path: 'timers',
+  component: TimersComponent
 }, {
-    path: 'inventory',
-    component: InventoryComponent
+  path: 'inventory',
+  component: InventoryComponent
 }, {
-    path: 'todo',
-    component: TodoComponent
+  path: 'todo',
+  component: TodoComponent
 }, {
-    path: 'wiring',
-    component: WiringComponent
+  path: 'wiring',
+  component: WiringComponent
 }
 
 ];
 
 @NgModule({
-    imports: [RouterModule.forRoot(routes)],
-    exports: [RouterModule]
+  imports: [RouterModule.forRoot(routes)],
+  exports: [RouterModule]
 })
-export class AppRoutingModule { }
+export class AppRoutingModule {}

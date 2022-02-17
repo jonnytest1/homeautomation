@@ -5,105 +5,105 @@ import { catchError } from 'rxjs/operators';
 
 
 function base64safe(value: string) {
-    try {
-        btoa(value);
-        return value;
-    } catch (e) {
-        return value.replace(/./g, c => {
-            if (c.charCodeAt(0) > 256) {
-                return '_';
-            }
-            return c;
-        });
-    }
+  try {
+    btoa(value);
+    return value;
+  } catch (e) {
+    return value.replace(/./g, c => {
+      if (c.charCodeAt(0) > 256) {
+        return '_';
+      }
+      return c;
+    });
+  }
 }
 
 export async function logKibana(level: 'INFO' | 'ERROR' | 'DEBUG', message, error?) {
-    let logStack;
-    try {
-        throw new Error('origin');
-    } catch (e) {
-        logStack = base64safe(e.stack);
-    }
+  let logStack;
+  try {
+    throw new Error('origin');
+  } catch (e) {
+    logStack = base64safe(e.stack);
+  }
 
-    const devMode = location.host === 'localhost:4200';
-    const jsonData: { [key: string]: string } = {
-        Severity: level,
-        application: `SmartHomeFe${devMode ? '_debug' : ''}`,
-        log_stack: logStack
-    };
-    if (!message && error) {
-        jsonData.message = base64safe(error.message);
-    } else if (message instanceof Object) {
-        if (message['message']) {
-            jsonData.message = base64safe(message['message']);
-            delete message['message'];
-            for (const i in message) {
-                if (typeof message[i] !== 'number' && typeof message[i] !== 'string') {
-                    jsonData[i] = base64safe(JSON.stringify(message[i]));
-                } else {
-                    jsonData[i] = base64safe(message[i]);
-                }
-            }
+  const devMode = location.host === 'localhost:4200';
+  const jsonData: { [key: string]: string } = {
+    Severity: level,
+    application: `SmartHomeFe${devMode ? '_debug' : ''}`,
+    log_stack: logStack
+  };
+  if (!message && error) {
+    jsonData.message = base64safe(error.message);
+  } else if (message instanceof Object) {
+    if (message['message']) {
+      jsonData.message = base64safe(message['message']);
+      delete message['message'];
+      for (const i in message) {
+        if (typeof message[i] !== 'number' && typeof message[i] !== 'string') {
+          jsonData[i] = base64safe(JSON.stringify(message[i]));
         } else {
-            jsonData.message = base64safe(JSON.stringify(message));
+          jsonData[i] = base64safe(message[i]);
         }
+      }
     } else {
-        jsonData.message = base64safe(message);
+      jsonData.message = base64safe(JSON.stringify(message));
     }
-    if (error) {
-        const displayMessage = jsonData.message;
-        // tslint:disable-next-line: forin
-        for (const key in error) {
-            try {
-                JSON.stringify(error[key]);
-                jsonData['error_' + key] = base64safe(error[key]);
-            } catch (e) {
-                jsonData['error_' + key] = `${error[key]}`;
-            }
-        }
-        jsonData.error_message = base64safe(error.message);
-        jsonData.error_stacktrace = base64safe(error.stack);
+  } else {
+    jsonData.message = base64safe(message);
+  }
+  if (error) {
+    const displayMessage = jsonData.message;
+    // tslint:disable-next-line: forin
+    for (const key in error) {
+      try {
+        JSON.stringify(error[key]);
+        jsonData['error_' + key] = base64safe(error[key]);
+      } catch (e) {
+        jsonData['error_' + key] = `${error[key]}`;
+      }
+    }
+    jsonData.error_message = base64safe(error.message);
+    jsonData.error_stacktrace = base64safe(error.stack);
 
-        if (displayMessage && error.message) {
-            jsonData.message = base64safe(displayMessage);
-        }
+    if (displayMessage && error.message) {
+      jsonData.message = base64safe(displayMessage);
+    }
 
-    }
-    console.log(jsonData);
-    if (devMode) {
-        return;
-    }
-    fetch(`https://pi4.e6azumuvyiabvs9s.myfritz.net/tm/libs/log/index.php`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'text/plain'
-        },
-        body: btoa(JSON.stringify(jsonData))
-    });
+  }
+  console.log(jsonData);
+  if (devMode) {
+    return;
+  }
+  fetch(`https://pi4.e6azumuvyiabvs9s.myfritz.net/tm/libs/log/index.php`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'text/plain'
+    },
+    body: btoa(JSON.stringify(jsonData))
+  });
 }
 @Injectable({
-    providedIn: 'root'
+  providedIn: 'root'
 })
 export class CustomErrorHandler implements HttpInterceptor {
-    intercept(req: HttpRequest<unknown>, next: HttpHandler): Observable<HttpEvent<unknown>> {
-        // do request error handling
-        return next.handle(req).pipe(
-            catchError((error: HttpErrorResponse) => {
-                logKibana('ERROR', 'request error', error);
+  intercept(req: HttpRequest<unknown>, next: HttpHandler): Observable<HttpEvent<unknown>> {
+    // do request error handling
+    return next.handle(req).pipe(
+      catchError((error: HttpErrorResponse) => {
+        logKibana('ERROR', 'request error', error);
 
-                throw error;
-            })
-        );
-    }
+        throw error;
+      })
+    );
+  }
 
 }
 @Injectable()
 export class CustomGlobalErrorHandler implements ErrorHandler {
 
-    handleError(error: Error): void {
-        logKibana('ERROR', 'global error', error);
-        console.error(error);
-    }
+  handleError(error: Error): void {
+    logKibana('ERROR', 'global error', error);
+    console.error(error);
+  }
 
 }

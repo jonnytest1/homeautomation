@@ -1,4 +1,5 @@
 import { Component, Input, OnInit, SimpleChanges } from '@angular/core';
+import { type } from 'os';
 import { skip } from 'rxjs/operators';
 import { Battery } from '../../wirings/battery';
 import { Collection } from '../../wirings/collection';
@@ -21,10 +22,19 @@ export class NetDisplayComponent implements OnInit {
     indentItem = []
     constructor() { }
 
-    isArray(item: StrucureReturn | Wiring) {
+    isArray(item: any) {
         return item instanceof Array
     }
+    isObj(item: any): Array<StrucureReturn> {
+        if (typeof item === "string") {
+            return undefined
+        }
+        return item.parrallel
+    }
 
+    isItem(el): Wiring {
+        return el
+    }
     cast(item): StrucureReturn {
         return item
     }
@@ -33,6 +43,10 @@ export class NetDisplayComponent implements OnInit {
         if (event["data"].currentValue) {
             this.ngOnInit()
         }
+    }
+
+    click(item: Wiring) {
+        item.uiNode?.openSnackbar()
     }
 
     ngOnInit() {
@@ -76,6 +90,10 @@ export class NetDisplayComponent implements OnInit {
                     subArray.push(item.outC)
                 }
                 this.parsedData.push(subArray)
+            } else if (item instanceof Array) {
+                this.parsedData.push({
+                    parrallel: item
+                })
             } else {
                 this.parsedData.push(item)
             }

@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, Injector, OnInit, ViewChild } from '@angular/core';
 import { FromJson } from '../../serialisation';
 import { Battery } from '../../wirings/battery';
 import { Connection } from '../../wirings/connection';
@@ -13,14 +13,13 @@ import { UINode } from '../ui-node.a';
 })
 export class LedUiComponent extends UINode<LED> implements OnInit {
     public static templateIcon = "emoji_objects"
-    @ViewChild(InOutComponent)
-    public inOutComponent?: InOutComponent
+
     getIcon(): string {
         return `emoji_objects`
     }
 
-    constructor() {
-        super(new LED())
+    constructor(injector: Injector) {
+        super(new LED(), injector)
     }
 
     ngOnInit() {

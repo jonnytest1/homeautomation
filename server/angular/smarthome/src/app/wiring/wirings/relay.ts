@@ -1,62 +1,61 @@
-import { ControllerRef, FromJson, FromJsonOptions, JsonSerializer } from '../serialisation';
+import { ControllerRef, FromJsonOptions, JsonSerializer } from '../serialisation';
 import { Resistor } from './resistor';
 import { v4 } from "uuid"
-import { Switch } from './switch';
-import { CurrentCurrent, CurrentOption, GetResistanceOptions, Wiring } from './wiring.a';
+import { CurrentOption } from './wiring.a';
 import { ToggleSwitch } from './toggle-switch';
 import { Wire } from './wire';
 export class Relay extends Resistor implements ControllerRef {
 
 
-    controlRef = v4()
+  controlRef = v4()
 
-    switch1 = new ToggleSwitch()
+  switch1 = new ToggleSwitch()
 
-    setSwitchOneEnabled(value: boolean) {
-        this.switch1.enabled = value;
+  setSwitchOneEnabled(value: boolean) {
+    this.switch1.enabled = value;
+  }
+
+
+
+  constructor() {
+    super(70)
+    this.setSwitchOneEnabled(false)
+    this.switch1.controlRef = this.controlRef
+
+  }
+  setControlRef(controlRef: any, key: string) {
+    this.switch1 = controlRef[0]
+  }
+
+  evaluateFunction(options: CurrentOption): void {
+    this.setSwitchOneEnabled(false)
+    if (options.current > 0) {
+      this.setSwitchOneEnabled(true)
     }
+  }
 
 
-
-    constructor() {
-        super(70)
-        this.setSwitchOneEnabled(false)
-        this.switch1.controlRef = this.controlRef
-
+  toJSON() {
+    return {
+      type: this.constructor.name,
+      resistance: this.resistance,
+      outC: this.outC.connectedTo,
+      ui: this.uiNode,
+      uuid: this.controlRef
     }
-    setControlRef(controlRef: any, key: string) {
-        this.switch1 = controlRef[0]
-    };
+  }
 
-    evaluateFunction(options: CurrentOption): void {
-        this.setSwitchOneEnabled(false)
-        if (options.current > 0) {
-            this.setSwitchOneEnabled(true)
-        }
+  static fromJSON(json: any, context: FromJsonOptions): Wire {
+    const self = new Relay();
+    self.controlRef = json.uuid
+    context.controllerRefs[json.uuid] = self;
+    if (context.wire) {
+      context.wire.connect(self.inC)
     }
+    JsonSerializer.createUiRepresation(self, json, context)
+    const connected = context.elementMap[json.outC.type].fromJSON(json.outC, { ...context, inC: self.outC })
 
-
-    toJSON() {
-        return {
-            type: this.constructor.name,
-            resistance: this.resistance,
-            outC: this.outC.connectedTo,
-            ui: this.uiNode,
-            uuid: this.controlRef
-        }
-    }
-
-    static fromJSON(json: any, context: FromJsonOptions): Wire {
-        const self = new Relay();
-        self.controlRef = json.uuid
-        context.controllerRefs[json.uuid] = self;
-        if (context.wire) {
-            context.wire.connect(self.inC)
-        }
-        JsonSerializer.createUiRepresation(self, json, context)
-        const connected = context.elementMap[json.outC.type].fromJSON(json.outC, { ...context, inC: self.outC })
-
-        //JsonSerializer.createUiRepresation(tSwitch, json, context)
-        return connected
-    }
+    //JsonSerializer.createUiRepresation(tSwitch, json, context)
+    return connected
+  }
 }

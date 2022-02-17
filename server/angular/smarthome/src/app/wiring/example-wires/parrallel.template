@@ -13,7 +13,7 @@
 						"type": "Wire",
 						"connectedWire": {
 							"type": "Resistor",
-							"resistance": 30,
+							"resistance": 0,
 							"outC": {
 								"type": "ParrallelWire",
 								"uuid": "584d9799-6e79-4aaf-891c-afcb8f62981f",
@@ -62,6 +62,6 @@
 		},
 		"enabled": false,
 		"charge": 0.0009999999999999998,
-		"maxAmpere": 3.5999999999999996
+		"maxAmpere": 20
 	}
 ]

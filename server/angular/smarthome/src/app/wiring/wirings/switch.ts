@@ -8,49 +8,49 @@ export class Switch extends Resistor {
 
 
 
-    enabled = false
-    public controlRef: string
+  enabled = false
+  public controlRef: string
 
-    negatedOutC = new Connection(this, "switch_out_negated")
-    constructor() {
-        super(0)
+  negatedOutC = new Connection(this, "switch_out_negated")
+  constructor() {
+    super(0)
+  }
+  getTotalResistance(from: any, options: GetResistanceOptions): ResistanceReturn {
+    if (this.enabled) {
+      return super.getTotalResistance(from, options)
     }
-    getTotalResistance(from: any, options: GetResistanceOptions): ResistanceReturn {
-        if (this.enabled) {
-            return super.getTotalResistance(from, options)
-        }
-        return {
-            resistance: NaN
-        }
+    return {
+      resistance: NaN
     }
+  }
 
-    toJSON(): any {
-        return {
-            type: this.constructor.name,
-            resistance: this.resistance,
-            controlRef: this.controlRef,
-            outC: this.outC.connectedTo,
-            ui: this.uiNode,
-            enabled: this.enabled,
-        }
+  toJSON(): any {
+    return {
+      type: this.constructor.name,
+      resistance: this.resistance,
+      controlRef: this.controlRef,
+      outC: this.outC.connectedTo,
+      ui: this.uiNode,
+      enabled: this.enabled,
     }
-    static fromJSON(json: any, context: FromJsonOptions): Wire {
-        const self = new Switch();
-        self.enabled = json.enabled ?? false
-        if (context.wire) {
-            context.wire.connect(self.inC)
-        }
-        if (json.controlRef) {
-            context.controlRefs[json.controlRef] = [self]
-        } else {
-            JsonSerializer.createUiRepresation(self, json, context)
-        }
-        const connected = context.elementMap[json.outC.type].fromJSON(json.outC, { ...context, inC: self.outC })
-        if (json.negatedOutC) {
-            context.elementMap[json.negatedOutC.type].fromJSON(json.negatedOutC, { ...context, inC: self.negatedOutC })
-        }
-        //
-        return connected
+  }
+  static fromJSON(json: any, context: FromJsonOptions): Wire {
+    const self = new Switch();
+    self.enabled = json.enabled ?? false
+    if (context.wire) {
+      context.wire.connect(self.inC)
     }
+    if (json.controlRef) {
+      context.controlRefs[json.controlRef] = [self]
+    } else {
+      JsonSerializer.createUiRepresation(self, json, context)
+    }
+    const connected = context.elementMap[json.outC.type].fromJSON(json.outC, { ...context, inC: self.outC })
+    if (json.negatedOutC) {
+      context.elementMap[json.negatedOutC.type].fromJSON(json.negatedOutC, { ...context, inC: self.negatedOutC })
+    }
+    //
+    return connected
+  }
 
 }

@@ -37,6 +37,8 @@
   "devDependencies": {
     "@angular-devkit/build-angular": "^13.2.3",
     "@angular-devkit/schematics": "^13.2.3",
+    "@angular-eslint/eslint-plugin": "^13.1.0",
+    "@angular-eslint/eslint-plugin-template": "^13.1.0",
     "@angular/cli": "^13.2.3",
     "@angular/compiler-cli": "^13.2.2",
     "@angular/language-service": "^13.2.2",
@@ -51,6 +53,9 @@
     "@types/node": "^12.12.41",
     "babel-jest": "^27.5.1",
     "codelyzer": "^6.0.2",
+    "eslint": "^8.9.0",
+    "eslint-plugin-import": "^2.25.4",
+    "eslint-plugin-unused-imports": "^2.0.0",
     "jasmine-core": "~2.99.1",
     "jasmine-spec-reporter": "~4.2.1",
     "jest": "^27.5.1",
