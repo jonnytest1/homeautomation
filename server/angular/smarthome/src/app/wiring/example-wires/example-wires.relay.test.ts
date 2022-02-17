@@ -1,13 +1,13 @@
 
 import { promises } from "fs"
 import { join } from 'path'
+import type { Battery } from '../wirings/battery'
+import type { Relay } from '../wirings/relay'
+import type { ToggleSwitch } from '../wirings/toggle-switch'
 import { LocalStorageSerialization } from '../storage'
-import { Battery } from '../wirings/battery'
-import { Relay } from '../wirings/relay'
-import { ToggleSwitch } from '../wirings/toggle-switch'
 describe("example wires", () => {
   global.Image = (function () {
-
+    // just a mock
   }) as any
 
   it("relay temaplte", async () => {

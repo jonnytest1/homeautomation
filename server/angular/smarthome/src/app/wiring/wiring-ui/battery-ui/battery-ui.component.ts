@@ -1,67 +1,62 @@
-import { Component, ElementRef, Inject, InjectionToken, Injector, OnInit, TemplateRef, ViewChild } from '@angular/core';
-import { MatSnackBar, MatSnackBarRef } from '@angular/material/snack-bar';
-import { BottomSheetHandler } from '../../../settings/bottom-sheet-handler';
-import { FromJson } from '../../serialisation';
-import { Vector2 } from '../../util/vector';
+import type { TemplateRef } from '@angular/core';
+import { Component, Injector } from '@angular/core';
+import type { FromJson } from '../../serialisation';
 import { Battery } from '../../wirings/battery';
 import { Collection } from '../../wirings/collection';
-import { Connection } from '../../wirings/connection';
-import { Parrallel } from '../../wirings/parrallel';
-import { Wiring } from '../../wirings/wiring.a';
-import { InOutComponent } from '../in-out/in-out.component';
-import { UINode } from '../ui-node.a';
+import type { Connection } from '../../wirings/connection';
+import { UINode } from '../ui-node';
 
 @Component({
-    selector: 'app-battery-ui',
-    templateUrl: './battery-ui.component.html',
-    styleUrls: ['./battery-ui.component.less']
+  selector: 'app-battery-ui',
+  templateUrl: './battery-ui.component.html',
+  styleUrls: ['./battery-ui.component.less']
 })
 export class BatteryUiComponent extends UINode<Battery>  {
 
-    public static templateIcon = "battery_charging_full"
-    batteryCollection: Collection;
+  public static templateIcon = "battery_charging_full"
+  batteryCollection: Collection;
 
-    getIcon(): string {
-        const percent = this.getChargedPercent()
-        const perSeven = Math.floor(percent / (100 / 7))
+  getIcon(): string {
+    const percent = this.getChargedPercent()
+    const perSeven = Math.floor(percent / (100 / 7))
 
-        if (perSeven == 7) {
-            return `battery_full`
-        }
-        return `battery_${perSeven}_bar`
-
-
+    if (perSeven == 7) {
+      return `battery_full`
     }
-
-    getChargedPercent() {
-        return +(this.node.ampereSeconds * 100 / this.node.maxAmpereSeconds).toPrecision(5)
-    }
-
-    constructor(injector: Injector) {
-        super(new Battery(5, 0.001), injector)
+    return `battery_${perSeven}_bar`
 
 
-    }
+  }
 
-    ngOnInit() {
-        this.batteryCollection = new Collection(this.node.inC, this.node.outC)
-    }
+  getChargedPercent() {
+    return +(this.node.ampereSeconds * 100 / this.node.maxAmpereSeconds).toPrecision(5)
+  }
 
-    refill() {
-        this.node.ampereSeconds = this.node.maxAmpereSeconds;
-    }
+  constructor(injector: Injector) {
+    super(new Battery(5, 0.001), injector)
 
-    logStructure(template: TemplateRef<any>) {
-        this.openSnackbar()
-        // this.snackbarRef = this.snackbar.openFromTemplate(template)
 
-        /*const structureStart = this.node.get batteryCollection?.outC?.connectedTo?.outC?.parent as (SerialConnected | Parrallel)
+  }
+
+  ngOnInit() {
+    this.batteryCollection = new Collection(this.node.inC, this.node.outC)
+  }
+
+  refill() {
+    this.node.ampereSeconds = this.node.maxAmpereSeconds;
+  }
+
+  logStructure(template: TemplateRef<any>) {
+    this.openSnackbar()
+    // this.snackbarRef = this.snackbar.openFromTemplate(template)
+
+    /*const structureStart = this.node.get batteryCollection?.outC?.connectedTo?.outC?.parent as (SerialConnected | Parrallel)
         console.log(structureStart.getStructure(true));*/
-    }
+  }
 
-    static fromJSON(json: any, map: Record<string, FromJson>, context: { inC: Connection; }): Connection {
+  static fromJSON(json: any, map: Record<string, FromJson>, context: { inC: Connection; }): Connection {
 
-        throw new Error("not implemented")
+    throw new Error("not implemented")
 
-    };
+  }
 }

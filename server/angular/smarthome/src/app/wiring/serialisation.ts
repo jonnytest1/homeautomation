@@ -1,11 +1,11 @@
-import { Injector, ViewContainerRef } from '@angular/core';
+import type { Injector, ViewContainerRef } from '@angular/core';
 import { Vector2 } from './util/vector';
-import { NodeEl, NodeTemplate } from './wiring.component';
-import { Collection } from './wirings/collection';
-import { Connection } from './wirings/connection';
-import { ParrallelWire } from './wirings/parrallel-wire';
-import { Wire } from './wirings/wire';
-import { Wiring } from './wirings/wiring.a';
+import type { NodeEl, NodeTemplate } from './wiring.component';
+import type { Collection } from './wirings/collection';
+import type { Connection } from './wirings/connection';
+import type { ParrallelWire } from './wirings/parrallel-wire';
+import type { Wire } from './wirings/wire';
+import type { Wiring } from './wirings/wiring.a';
 
 
 export interface ControllerRef {

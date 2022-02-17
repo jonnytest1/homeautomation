@@ -2,9 +2,11 @@
 import { promises } from "fs"
 import { join } from 'path'
 import { LocalStorageSerialization } from '../storage'
-import { Battery } from '../wirings/battery'
+import type { Battery } from '../wirings/battery'
 describe("example wires", () => {
-  global.Image = (function () {}) as any
+  global.Image = (function () {
+    //mocked
+  }) as any
 
   function flatten(ar: Array<any>) {
     return ar.map(el => {

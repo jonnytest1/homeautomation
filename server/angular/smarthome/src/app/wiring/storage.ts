@@ -3,7 +3,7 @@ import { MatBottomSheet } from '@angular/material/bottom-sheet';
 import { SettingsService } from '../data.service';
 import { ResolvablePromise } from '../utils/resolvable-promise';
 import { ExamplePickerComponent } from './example-wires/example-picker/example-picker.component';
-import { FromJson, FromJsonOptions } from './serialisation';
+import type { FromJson, FromJsonOptions } from './serialisation';
 import { WiringComponent } from './wiring.component';
 import { Battery } from './wirings/battery';
 import { Parrallel } from './wirings/parrallel';
@@ -19,6 +19,7 @@ export class LocalStorageSerialization {
   constructor(private dataService: SettingsService, private bottomSheet: MatBottomSheet) {
     this.initializeSerializerClasses()
   }
+
 
   private initializeSerializerClasses() {
 

@@ -1,6 +1,6 @@
 
 import { FromJsonOptions, JsonSerializer } from '../serialisation';
-import { UINode } from '../wiring-ui/ui-node.a';
+import { UINode } from '../wiring-ui/ui-node';
 import { Collection } from './collection';
 import { Connection } from './connection';
 import { Wire } from './wire';

@@ -1,20 +1,18 @@
-import { AfterContentChecked, ChangeDetectorRef, Component, ComponentRef, OnDestroy, OnInit, ViewContainerRef } from '@angular/core';
+import type { AfterContentChecked, ComponentRef, OnDestroy, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, ViewContainerRef } from '@angular/core';
 import { LocalStorageSerialization } from './storage';
 import { Vector2 } from './util/vector';
 import { BatteryUiComponent } from './wiring-ui/battery-ui/battery-ui.component';
-import { LedUiComponent } from './wiring-ui/led-ui/led-ui.component';
-import { RelayUiComponent } from './wiring-ui/relay-ui/relay-ui.component';
-import { ResistorUiComponent } from './wiring-ui/resistor-ui/resistor-ui.component';
-import { SwitchComponent } from './wiring-ui/switch/switch.component';
-import { UINode } from './wiring-ui/ui-node.a';
+import type { UINode } from './wiring-ui/ui-node';
 import { WiringDataService } from './wiring.service';
-import { Battery } from './wirings/battery';
-import { StrucureReturn } from './wirings/control-collection.a';
-import { LED } from './wirings/led';
-import { Resistor } from './wirings/resistor';
-import { Switch } from './wirings/switch';
+import type { Battery } from './wirings/battery';
+import type { StrucureReturn } from './wirings/control-collection.a';
+import type { LED } from './wirings/led';
+import type { Resistor } from './wirings/resistor';
+import type { Switch } from './wirings/switch';
 import { Wire } from './wirings/wire';
 import { ParrallelWire } from './wirings/parrallel-wire';
+import { NODE_TEMPLATES } from './node-templates';
 
 
 
@@ -30,6 +28,7 @@ export type NodeEl = {
   uiInstance: UINode
 
 }
+
 
 @Component({
   selector: 'app-wiring',
@@ -50,9 +49,7 @@ export class WiringComponent implements OnInit, AfterContentChecked, OnDestroy {
 
   wirePositions: Array<{ from: Vector2, to: Vector2, wire: Wire }> = []
 
-  nodeTemplates: Array<NodeTemplate> = [
-    BatteryUiComponent, LedUiComponent, ResistorUiComponent, SwitchComponent, RelayUiComponent
-  ]
+  nodeTemplates: Array<NodeTemplate> = NODE_TEMPLATES
 
 
   nodes: Array<NodeEl> = []

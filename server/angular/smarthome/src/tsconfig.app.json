@@ -1,19 +1,19 @@
 {
-    "extends": "../tsconfig.json",
-    "compilerOptions": {
-        "outDir": "../out-tsc/app",
-        "types": [],
-        "emitDecoratorMetadata": true
-    },
-    "angularCompilerOptions": {
-        "strictTempaltes": true
-    },
-    "exclude": [
-        "test.ts",
-        "**/*.spec.ts"
-    ],
-    "files": [
-        "main.ts",
-        "polyfills.ts"
-    ]
+  "extends": "../tsconfig.json",
+  "compilerOptions": {
+    "outDir": "../out-tsc/app",
+    "types": [],
+    "emitDecoratorMetadata": true,
+  },
+  "angularCompilerOptions": {
+    "strictTempaltes": true
+  },
+  "exclude": [
+    "test.ts",
+    "**/*.spec.ts"
+  ],
+  "files": [
+    "main.ts",
+    "polyfills.ts"
+  ]
 }

@@ -1,4 +1,4 @@
-import { UINode } from '../wiring-ui/ui-node.a'
+import { UINode } from '../wiring-ui/ui-node'
 import { RegisterOptions } from './interfaces/registration'
 
 
