@@ -1,7 +1,6 @@
 
 
 
-import { template } from '@babel/core'
 import { GET, HttpRequest, HttpResponse, Path } from 'express-hibernate-wrapper'
 import { readdir, readFile } from "fs/promises"
 import { join } from "path"
@@ -14,7 +13,7 @@ async function findTemplates(dir = gitRootFodler) {
     const entries = await readdir(dir, { withFileTypes: true });
     const entryEntries: Array<Array<{ name: string, content: string }>> = await Promise.all(entries.map(async entry => {
         const next = join(dir, entry.name)
-        if (entry.isDirectory() && !next.endsWith("node_modules") && !next.endsWith(".angular") && !next.endsWith("__pycache__")) {
+        if (entry.isDirectory() && !entry.name.startsWith(".") && !next.endsWith("node_modules") && !next.endsWith(".angular") && !next.endsWith("__pycache__")) {
             return findTemplates(next)
         } else if (entry.name.endsWith(".template")) {
             return [{
