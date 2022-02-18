@@ -1,8 +1,10 @@
 
-import { FromJsonOptions, JsonSerializer } from '../serialisation';
+import type { FromJsonOptions } from '../serialisation';
+import { JsonSerializer } from '../serialisation';
+import { noConnection } from './resistance-return';
 import { Resistor } from './resistor';
-import { Wire } from './wire';
-import { CurrentCurrent, CurrentOption, GetResistanceOptions, ResistanceReturn, Wiring } from './wiring.a';
+import type { Wire } from './wire';
+import type { CurrentCurrent, CurrentOption, GetResistanceOptions, ResistanceReturn, Wiring } from './wiring.a';
 
 export class LED extends Resistor {
   brightness: number = 0;
@@ -18,10 +20,7 @@ export class LED extends Resistor {
 
   getTotalResistance(from: any, options: GetResistanceOptions): ResistanceReturn {
     if (this.blown) {
-      return {
-        resistance: NaN
-
-      }
+      return noConnection()
     }
     return super.getTotalResistance(from, options)
   }
@@ -39,16 +38,6 @@ export class LED extends Resistor {
     }
 
     return returnCurrent
-  }
-
-  toJSON(): any {
-    return {
-      type: this.constructor.name,
-      resistance: this.resistance,
-      ui: this.uiNode,
-      outC: this.outC.connectedTo,
-      uuid: this.uuid
-    }
   }
 
   static fromJSON(json: any, context: FromJsonOptions): Wire {

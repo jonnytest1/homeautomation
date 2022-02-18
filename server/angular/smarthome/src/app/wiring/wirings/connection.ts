@@ -1,7 +1,8 @@
-import { RegisterOptions } from './interfaces/registration';
-import { ParrallelWire } from './parrallel-wire';
+import type { RegisterOptions } from './interfaces/registration';
+import type { ParrallelWire } from './parrallel-wire';
+import { noConnection } from './resistance-return';
 import { Wire } from './wire';
-import { CurrentCurrent, CurrentOption, GetResistanceOptions, ResistanceReturn, Wiring } from './wiring.a';
+import type { CurrentCurrent, CurrentOption, GetResistanceOptions, ResistanceReturn, Wiring } from './wiring.a';
 
 export class Connection implements Wiring {
 
@@ -12,47 +13,49 @@ export class Connection implements Wiring {
   resistance: number;
 
 
-  connectedTo?: Wire | ParrallelWire
+  connectedTo?: Wire | ParrallelWire;
 
   getTotalResistance(from: Wiring | null, options: GetResistanceOptions): ResistanceReturn {
-    let target = this.parent
+    let target = this.parent;
 
     if (from === this.parent) {
-      target = this.connectedTo
+      target = this.connectedTo;
 
     }
     if (target == undefined) {
-      return {
-        resistance: NaN
-      }
+      return noConnection();
     }
-    return target.getTotalResistance(this, options)
+    return target.getTotalResistance(this, options);
   }
 
   pushCurrent(options: CurrentOption, from: Wiring): CurrentCurrent {
-    let target = this.parent
+    let target = this.parent;
 
     if (from === this.parent) {
-      target = this.connectedTo
+      target = this.connectedTo;
 
     }
     if (target == undefined) {
-      return
+      return;
     }
-    return target.pushCurrent(options, this)
+    return target.pushCurrent(options, this);
 
   }
   register(options: RegisterOptions) {
-    options.nodes.push(this)
-    let target = this.parent
+    options.nodes.push(this);
+    let target = this.parent;
 
     if (options.from === this.parent) {
-      target = this.connectedTo
+      target = this.connectedTo;
 
     }
-    if (target == undefined) {
-      return
+    if (target === undefined) {
+      return;
     }
-    target.register({ ...options, from: this })
+    target.register({ ...options, from: this });
+  }
+
+  connectTo(other: Connection) {
+    Wire.connect(this, other);
   }
 }

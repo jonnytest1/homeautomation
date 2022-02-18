@@ -1,12 +1,11 @@
 /* tslint:disable:no-unused-variable */
 
-import { Wire } from './wirings/wire';
-import { Battery } from './wirings/battery';
-import { Resistor } from './wirings/resistor';
-import { Parrallel } from './wirings/parrallel';
-import { Relay } from './wirings/relay';
-import { LED } from './wirings/led';
-import { ParrallelWire } from './wirings/parrallel-wire';
+import { Wire } from './wire';
+import { Battery } from './battery';
+import { Resistor } from './resistor';
+import { Parrallel } from './parrallel';
+import { Relay } from './relay';
+import { LED } from './led';
 
 describe('WiringComponent', () => {
 
@@ -114,86 +113,4 @@ describe('WiringComponent', () => {
     expect(+testLed.brightness.toPrecision(2)).toBe(12)
   });
 
-
-  it('parrallel wire circuit', () => {
-    const battery = new Battery(6, Infinity)
-    battery.enabled = true
-    ///   const b2 = new Battery()
-
-
-    const resistor = new Resistor(2)
-    const resistor3 = new Resistor(4)
-
-
-    const parrallelStart = new ParrallelWire()
-    parrallelStart.newOutC(resistor.inC)
-    parrallelStart.newOutC(resistor3.inC)
-
-    const parrallelEnd = new ParrallelWire()
-    parrallelEnd.newInC(resistor.outC)
-    parrallelEnd.newInC(resistor3.outC)
-
-    const resistor5 = new Resistor(5)
-    Wire.connectNodes(battery, parrallelStart, parrallelEnd, resistor5, battery)
-
-    expect(+battery.getTotalResistance(null, {}).resistance.toPrecision(3)).toBe(6.33)
-    battery.checkContent(1)
-    expect(+resistor5.voltageDrop.toPrecision(3)).toBe(4.74)
-    expect(+parrallelStart.resistance.toPrecision(3)).toBe(1.33)
-    expect(+parrallelStart.voltageDrop.toPrecision(3)).toBe(1.26)
-    const resistorCurrents = {
-      2: +resistor.incomingCurrent.current.toPrecision(3),
-      4: +resistor3.incomingCurrent.current.toPrecision(3),
-      5: +resistor5.incomingCurrent.current.toPrecision(3),
-    }
-    expect(resistorCurrents).toEqual({
-      "2": 0.474,  // seems about right oO
-      "4": 0.237,
-      "5": 0.947
-    })
-    // TODO verify
-    //expect(+resistor.voltageDrop.toPrecision(3)).toBe(1.89)
-    // expect(+resistor3.voltageDrop.toPrecision(3)).toBe(3.79)
-  });
-
-
-  it("parrallel shorting", () => {
-    const battery = new Battery(6, Infinity)
-    battery.enabled = true
-    ///   const b2 = new Battery()
-
-
-    const resistor = new Resistor(3)
-    const resistor3 = new Resistor(0)
-
-
-    const parrallelStart = new ParrallelWire()
-    parrallelStart.newOutC(resistor.inC)
-    parrallelStart.newOutC(resistor3.inC)
-
-    const parrallelEnd = new ParrallelWire()
-    parrallelEnd.newInC(resistor.outC)
-    parrallelEnd.newInC(resistor3.outC)
-
-    const resistor5 = new Resistor(3)
-    Wire.connectNodes(battery, parrallelStart, parrallelEnd, resistor5, battery)
-
-
-    expect(+battery.getTotalResistance(null, {}).resistance.toPrecision(3)).toBe(3)
-
-    battery.checkContent(1)
-    expect(+resistor5.voltageDrop.toPrecision(3)).toBe(6)
-    // expect(+parrallelStart.voltageDrop.toPrecision(3)).toBe(1.26)
-    const resistorCurrents = {
-      2: +resistor.incomingCurrent.current.toPrecision(3),
-      0: +resistor3.incomingCurrent.current.toPrecision(3),
-      5: +resistor5.incomingCurrent.current.toPrecision(3),
-    }
-    //also seems to be right
-    expect(resistorCurrents).toEqual({
-      "2": 0,
-      "0": 2,
-      "5": 2
-    })
-  })
 });

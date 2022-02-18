@@ -34,11 +34,7 @@
     <p>
       wiring works!<br>
 
-      <span *ngFor="
-                         let
-                         bat
-                         of
-                         batteries">
+      <span *ngFor="let bat of batteries">
         battery capacity {{getRemainingBattery(bat)}} <br>
         drain at {{bat.currentCurrent_ampere||'0'}}A <br>
         duraiton : {{ bat.getProjectedDurationMinutes() }} seconds <br>
@@ -48,6 +44,7 @@
 
     <div *ngFor="let node of nodes"
          (dragend)="updatePosition(node,$event)"
+         (dragstart)="startDragNode(node,$event)"
          class="node-wrapper"
          draggable="true"
          [style.left]="node.uiInstance.getPosition().x+'px'"

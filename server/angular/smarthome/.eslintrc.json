@@ -27,7 +27,12 @@
       "rules": {
         "@angular-eslint/no-empty-lifecycle-method": "warn",
         "indent": "off",
-        "@typescript-eslint/consistent-type-imports": "error",
+        "@typescript-eslint/consistent-type-imports": [
+          "error",
+          {
+            "disallowTypeAnnotations": false
+          }
+        ],
         "@typescript-eslint/indent": [
           "warn",
           2, //space multiplier for options below (1 below = 2 spaces)

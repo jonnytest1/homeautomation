@@ -1,14 +1,29 @@
-import { FromJsonOptions } from '../serialisation';
+import type { FromJsonOptions } from '../serialisation';
 import { Connection } from './connection';
 import { Switch } from './switch';
-import { Wire } from './wire';
-import { CurrentCurrent, CurrentOption, GetResistanceOptions, ResistanceReturn, Wiring } from './wiring.a';
+import type { Wire } from './wire';
+import type { CurrentCurrent, CurrentOption, GetResistanceOptions, ResistanceReturn, Wiring } from './wiring.a';
 
 export class ToggleSwitch extends Switch {
 
 
 
   negatedOutC = new Connection(this, "switch_out_negated")
+
+  static fromJSON(json: any, context: FromJsonOptions): Wire {
+    const self = new ToggleSwitch();
+    self.controlRef = json.controlRef
+    if (context.wire) {
+      context.wire.connect(self.inC)
+    }
+    context.controlRefs[json.controlRef] = [self]
+    const connected = context.elementMap[json.outC.type].fromJSON(json.outC, { ...context, inC: self.outC })
+    if (json.negatedOutC) {
+      context.elementMap[json.negatedOutC.type].fromJSON(json.negatedOutC, { ...context, inC: self.negatedOutC })
+    }
+    //JsonSerializer.createUiRepresation(tSwitch, json, context)
+    return connected
+  }
   getTotalResistance(from: any, options: GetResistanceOptions): ResistanceReturn {
     if (this.enabled) {
       return super.getTotalResistance(from, options)
@@ -34,29 +49,8 @@ export class ToggleSwitch extends Switch {
     }
 
   }
-
-  toJSON(): any {
-    return {
-      type: this.constructor.name,
-      resistance: this.resistance,
-      controlRef: this.controlRef,
-      outC: this.outC.connectedTo,
-      negatedOutC: this.negatedOutC.connectedTo,
-      ui: this.uiNode
-    }
-  }
-  static fromJSON(json: any, context: FromJsonOptions): Wire {
-    const self = new ToggleSwitch();
-    self.controlRef = json.controlRef
-    if (context.wire) {
-      context.wire.connect(self.inC)
-    }
-    context.controlRefs[json.controlRef] = [self]
-    const connected = context.elementMap[json.outC.type].fromJSON(json.outC, { ...context, inC: self.outC })
-    if (json.negatedOutC) {
-      context.elementMap[json.negatedOutC.type].fromJSON(json.negatedOutC, { ...context, inC: self.negatedOutC })
-    }
-    //JsonSerializer.createUiRepresation(tSwitch, json, context)
-    return connected
+  applytoJson(json: Record<string, any>): void {
+    super.applytoJson(json)
+    json.negatedOutC = this.negatedOutC.connectedTo
   }
 }

@@ -1,12 +1,12 @@
 
-import { FromJsonOptions, JsonSerializer } from '../serialisation'
+import type { FromJsonOptions } from '../serialisation';
+import { JsonSerializer } from '../serialisation'
 import { Connection } from './connection'
+import { noConnection } from './resistance-return';
 import { Resistor } from "./resistor"
-import { Wire } from './wire'
-import { GetResistanceOptions, ResistanceReturn } from './wiring.a'
+import type { Wire } from './wire'
+import type { GetResistanceOptions, ResistanceReturn } from './wiring.a'
 export class Switch extends Resistor {
-
-
 
   enabled = false
   public controlRef: string
@@ -19,21 +19,16 @@ export class Switch extends Resistor {
     if (this.enabled) {
       return super.getTotalResistance(from, options)
     }
-    return {
-      resistance: NaN
-    }
+    return noConnection()
   }
 
-  toJSON(): any {
-    return {
-      type: this.constructor.name,
-      resistance: this.resistance,
-      controlRef: this.controlRef,
-      outC: this.outC.connectedTo,
-      ui: this.uiNode,
-      enabled: this.enabled,
-    }
+
+  applytoJson(json: Record<string, any>): void {
+    super.applytoJson(json);
+    json.controlRef = this.controlRef
+    json.enabled = this.enabled
   }
+
   static fromJSON(json: any, context: FromJsonOptions): Wire {
     const self = new Switch();
     self.enabled = json.enabled ?? false

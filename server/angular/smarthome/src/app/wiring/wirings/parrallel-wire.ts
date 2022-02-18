@@ -1,10 +1,12 @@
 import { Connection } from './connection';
-import { CurrentCurrent, CurrentOption, GetResistanceOptions, ResistanceReturn, Wiring } from './wiring.a';
+import type { CurrentCurrent, CurrentOption, GetResistanceOptions, ResistanceReturn } from './wiring.a';
+import { Wiring } from './wiring.a';
 import { v4 } from "uuid"
 import { Battery } from './battery';
-import { FromJsonOptions } from '../serialisation';
+import type { FromJsonOptions } from '../serialisation';
 import { Wire } from './wire';
-import { RegisterOptions } from './interfaces/registration';
+import type { RegisterOptions } from './interfaces/registration';
+import { noConnection } from './resistance-return';
 
 export class ParrallelWire extends Wiring {
 
@@ -24,22 +26,33 @@ export class ParrallelWire extends Wiring {
   resistancetotal: number;
 
   getTotalResistance(from: Wiring, options: GetResistanceOptions): ResistanceReturn {
-    if (this.inC.length > 0 && options.forParrallel == 1) {
+    if (!this.outC.length) {
+      return noConnection()
+    }
+
+    let parrallelIndex = options.forParrallel;
+    if (this.inC.length > 1) {
+      parrallelIndex--;
+    }
+
+    /* if (this.inC.length > 0 && options.forParrallel == 1) {
       if (this.outC.length > 1) {
         throw new Error("not implemented")
       }
       const resistanceAfterBlock = this.outC[0].getTotalResistance(this, { ...options, forParrallel: options.forParrallel - 1 });
-
       return {
         resistance: 0,
-        afterBlock: resistanceAfterBlock
+        afterBlock: [...resistanceAfterBlock.afterBlock, resistanceAfterBlock]
       }
-    }
+    }*/
 
     this.resistancetotal = 0
-    let resistanceAfter: ResistanceReturn | "NaN"
+    let resistanceAfter: Array<ResistanceReturn> | "NaN"
     this.outC.forEach(res => {
-      const connectionResistance = res.getTotalResistance(this, { ...options, forParrallel: (options.forParrallel ?? 0) + 1 })
+      const connectionResistance = res.getTotalResistance(this, {
+        ...options,
+        forParrallel: parrallelIndex + 1
+      })
 
       if (connectionResistance.resistance !== 0) {
         this.outCResistancePrecentageMap.set(res, 1 / connectionResistance.resistance)
@@ -48,28 +61,37 @@ export class ParrallelWire extends Wiring {
         this.resistancetotal += Infinity
         this.outCResistancePrecentageMap.set(res, Infinity)
       }
-      resistanceAfter = connectionResistance.afterBlock
+      if (!resistanceAfter && connectionResistance.afterBlock) {
+        resistanceAfter = connectionResistance.afterBlock
+      }
       if (isNaN(connectionResistance.resistance) && resistanceAfter === undefined) {
         resistanceAfter = "NaN"
       }
     })
-    if (this.resistancetotal == 0) {
-      return {
-        resistance: 0
-      }
+    if (resistanceAfter == "NaN") {
+      return noConnection()
     }
     this.resistance = 1 / this.resistancetotal;
-    //return this.resistance + this.outC.getTotalResistance(this, options)
+    if (this.inC.length > 1) {
+      resistanceAfter.push({
+        resistance: this.resistance,
+        afterBlock: []
+      })
+    }
 
-    if (resistanceAfter === "NaN") {
+    if (this.resistancetotal == 0 || this.inC.length > 1) {
       return {
-        resistance: NaN
+        resistance: 0,
+        afterBlock: resistanceAfter
       }
     }
+    const resistanceAfterEl = resistanceAfter.pop()
+    //return this.resistance + this.outC.getTotalResistance(this, options)
 
     return {
       ...resistanceAfter,
-      resistance: resistanceAfter.resistance + this.resistance
+      resistance: resistanceAfterEl.resistance + this.resistance,
+      afterBlock: resistanceAfter
     }
   }
 
@@ -80,7 +102,7 @@ export class ParrallelWire extends Wiring {
       }
 
       if (!this.lastTriggerTimestamp || this.lastTriggerTimestamp !== options.triggerTimestamp) {
-
+        this.lastTriggerTimestamp = options.triggerTimestamp
         this.restCurrent = this.outC[0].pushCurrent({
           ...options
           , current: options.currentAfterBlock,
@@ -211,24 +233,31 @@ export class ParrallelWire extends Wiring {
 
   public setControlRef(controlRef: Array<ParrallelWire>, key) {
     const inMap = {}
-    const OutMap = {}
+    const outMap = {}
 
     this.inC.forEach(c => {
       if ("uuid" in c.parent) {
         inMap[c.parent["uuid"]] = c
       }
     })
-
+    this.outC.forEach(c => {
+      if ("uuid" in c.parent) {
+        outMap[c.parent["uuid"]] = c
+      }
+    })
     controlRef.forEach(c => {
       c.inC.forEach(iC => {
-        if (!inMap[iC.parent?.["uuid"]]) {
+        if (!inMap[iC.parent?.["uuid"]] || !iC.parent?.["uuid"]) {
           this.newInC(iC)
+          inMap[iC.parent?.["uuid"]] = iC
         } else {
-          debugger;
         }
       })
       c.outC.forEach(outC => {
-        this.newOutC(outC)
+        if (!outMap[outC.parent?.["uuid"]] || !outC.parent?.["uuid"]) {
+          this.newOutC(outC)
+          outMap[outC.parent?.["uuid"]] = outC
+        }
       })
     })
   }

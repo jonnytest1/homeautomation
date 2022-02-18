@@ -3,10 +3,9 @@ import { MatBottomSheet } from '@angular/material/bottom-sheet';
 import { SettingsService } from '../data.service';
 import { ResolvablePromise } from '../utils/resolvable-promise';
 import { ExamplePickerComponent } from './example-wires/example-picker/example-picker.component';
+import { NODE_TEMPLATES } from './node-templates';
 import type { FromJson, FromJsonOptions } from './serialisation';
-import { WiringComponent } from './wiring.component';
 import { Battery } from './wirings/battery';
-import { Parrallel } from './wirings/parrallel';
 import { ParrallelWire } from './wirings/parrallel-wire';
 import { ToggleSwitch } from './wirings/toggle-switch';
 import { Wire } from './wirings/wire';
@@ -14,25 +13,22 @@ import { Wire } from './wirings/wire';
 @Injectable()
 export class LocalStorageSerialization {
 
-  serialisationMap: Record<string, FromJson> = {}
+  serialisationMap: Partial<FromJsonOptions["elementMap"]> = {};
 
   constructor(private dataService: SettingsService, private bottomSheet: MatBottomSheet) {
-    this.initializeSerializerClasses()
+    this.initializeSerializerClasses();
   }
 
 
   private initializeSerializerClasses() {
-
-    const t = new WiringComponent(null, null, null, null)
-    clearInterval(t.interval)
-    const serializerClasses: Array<FromJson> = [Parrallel, Wire, ToggleSwitch, ParrallelWire];
+    const serializerClasses: Array<FromJson> = [Wire, ToggleSwitch, ParrallelWire];
     for (const val of serializerClasses) {
       this.serialisationMap[val.name] = val;
     }
 
-    t.nodeTemplates.forEach(t => {
-      const tempT = new t();
-      let nodeConstructor = tempT.node.constructor as unknown as FromJson;
+    NODE_TEMPLATES.forEach(t => {
+      const tempT = new t(null);
+      const nodeConstructor = tempT.node.constructor as unknown as FromJson;
       nodeConstructor.uiConstructor = t;
       this.serialisationMap[nodeConstructor.name] = nodeConstructor;
     });
@@ -43,25 +39,25 @@ export class LocalStorageSerialization {
   ) {
 
     const json = JSON.stringify(batteries);
-    localStorage.setItem("el_network", json)
-    console.log(json)
+    localStorage.setItem('el_network', json);
+    console.log(json);
   }
   async load(options: Partial<FromJsonOptions & { remote: boolean }>): Promise<Array<Battery>> {
     let json: string;
     if (options.remote) {
-      const jsonStrings = await this.dataService.getWiringTemplates().toPromise()
+      const jsonStrings = await this.dataService.getWiringTemplates().toPromise();
 
       const picked: string = await this.bottomSheet.open(ExamplePickerComponent, {
         data: jsonStrings
       })
         .afterDismissed()
-        .toPromise()
+        .toPromise();
 
-      json = picked
+      json = picked;
     } else {
-      json = localStorage.getItem("el_network");
+      json = localStorage.getItem('el_network');
     }
-    const parsed = JSON.parse(json)
+    const parsed = JSON.parse(json);
 
 
 
@@ -77,7 +73,7 @@ export class LocalStorageSerialization {
 
     const batteries = parsed.map(obj => Battery.fromJSON(obj, {
       ...options,
-      elementMap: this.serialisationMap,
+      elementMap: this.serialisationMap as FromJsonOptions["elementMap"],
       controlRefs: controlRegfs,
       constorlRefsInitialized: controlRefsinitialized,
       controllerRefs: controllerRefs

@@ -1,9 +1,10 @@
-import { ControllerRef, FromJsonOptions, JsonSerializer } from '../serialisation';
+import type { ControllerRef, FromJsonOptions } from '../serialisation';
+import { JsonSerializer } from '../serialisation';
 import { Resistor } from './resistor';
 import { v4 } from "uuid"
-import { CurrentOption } from './wiring.a';
+import type { CurrentOption } from './wiring.a';
 import { ToggleSwitch } from './toggle-switch';
-import { Wire } from './wire';
+import type { Wire } from './wire';
 export class Relay extends Resistor implements ControllerRef {
 
 
@@ -14,8 +15,6 @@ export class Relay extends Resistor implements ControllerRef {
   setSwitchOneEnabled(value: boolean) {
     this.switch1.enabled = value;
   }
-
-
 
   constructor() {
     super(70)
@@ -34,16 +33,6 @@ export class Relay extends Resistor implements ControllerRef {
     }
   }
 
-
-  toJSON() {
-    return {
-      type: this.constructor.name,
-      resistance: this.resistance,
-      outC: this.outC.connectedTo,
-      ui: this.uiNode,
-      uuid: this.controlRef
-    }
-  }
 
   static fromJSON(json: any, context: FromJsonOptions): Wire {
     const self = new Relay();

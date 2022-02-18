@@ -1,12 +1,13 @@
 
-import { FromJsonOptions, JsonSerializer } from '../serialisation';
-import { UINode } from '../wiring-ui/ui-node';
+import type { FromJsonOptions } from '../serialisation';
+import { JsonSerializer } from '../serialisation';
+import type { UINode } from '../wiring-ui/ui-node';
 import { Collection } from './collection';
 import { Connection } from './connection';
-import { Wire } from './wire';
-import { CurrentCurrent, CurrentOption, GetResistanceOptions, ResistanceReturn, Wiring } from './wiring.a';
+import type { Wire } from './wire';
+import type { CurrentCurrent, CurrentOption, GetResistanceOptions, ResistanceReturn, Wiring } from './wiring.a';
 import { v4 } from "uuid"
-import { RegisterOptions } from './interfaces/registration';
+import type { RegisterOptions } from './interfaces/registration';
 
 export class Resistor extends Collection implements Wiring {
 
@@ -46,20 +47,21 @@ export class Resistor extends Collection implements Wiring {
     options.nodes.push(this)
     return this.outC.register({ ...options, from: this })
   }
+  applytoJson(json: Record<string, any>): void {
+    json.resistance = this.resistance
+    json.outC = this.outC.connectedTo
+    json.ui = this.uiNode
+    json.uuid = this.uuid
+  }
 
-  toJSON(): any {
-    return {
-      type: this.constructor.name,
-      resistance: this.resistance,
-      outC: this.outC.connectedTo,
-      ui: this.uiNode,
-      uuid: this.uuid
-    }
+  readFromJson(json: Record<string, any>) {
+    this.uuid = json.uuid
+    this.resistance = json.resistance
   }
 
   static fromJSON(json: any, context: FromJsonOptions): Wire {
     const self = new Resistor(json.resistance);
-    self.uuid = json.uuid
+    self.readFromJson(json)
     if (context.wire) {
       context.wire.connect(self.inC)
     }

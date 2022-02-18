@@ -1,3 +1,6 @@
 <div *ngFor="let str of data">
   <button (click)="choose(str)">{{str.name}}</button>
 </div>
+<div>
+  <button (click)="choose({name:'manual',content:''})">manual</button>
+</div>

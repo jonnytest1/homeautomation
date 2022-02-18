@@ -1,5 +1,5 @@
 import { Collection } from './collection';
-import { Wiring } from './wiring.a';
+import type { Wiring } from './wiring.a';
 
 
 export interface StrucureReturn extends Array<Wiring | StrucureReturn | { parrallel: StrucureReturn }> {}
@@ -7,6 +7,6 @@ export interface StrucureReturn extends Array<Wiring | StrucureReturn | { parral
 
 export abstract class ControlCollection extends Collection {
 
-  abstract getStructure(detailed?: boolean): StrucureReturn
+  abstract getStructure(detailed?: boolean): StrucureReturn;
 
 }
