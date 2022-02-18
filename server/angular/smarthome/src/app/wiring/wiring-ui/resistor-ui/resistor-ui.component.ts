@@ -1,4 +1,5 @@
-import { Component, Injector, OnInit } from '@angular/core';
+import type { OnInit } from '@angular/core';
+import { Component, Injector } from '@angular/core';
 import { Resistor } from '../../wirings/resistor';
 import { UINode } from '../ui-node';
 

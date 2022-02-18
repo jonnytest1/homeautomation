@@ -13,33 +13,39 @@ import { UINode } from '../ui-node';
 })
 export class BatteryUiComponent extends UINode<Battery>  {
 
-  public static templateIcon = "battery_charging_full"
+  constructor(injector: Injector) {
+    super(new Battery(5, 0.01), injector);
+
+
+  }
+
+  public static templateIcon = 'battery_charging_full';
   batteryCollection: Collection;
 
-  getIcon(): string {
-    const percent = this.getChargedPercent()
-    const perSeven = Math.floor(percent / (100 / 7))
+  static fromJSON(json: any, map: Record<string, FromJson>, context: { inC: Connection; }): Connection {
 
-    if (perSeven == 7) {
-      return `battery_full`
+    throw new Error('not implemented');
+
+  }
+
+  getIcon(): string {
+    const percent = this.getChargedPercent();
+    const perSeven = Math.floor(percent / (100 / 7));
+
+    if (perSeven === 7) {
+      return `battery_full`;
     }
-    return `battery_${perSeven}_bar`
+    return `battery_${perSeven}_bar`;
 
 
   }
 
   getChargedPercent() {
-    return +(this.node.ampereSeconds * 100 / this.node.maxAmpereSeconds).toPrecision(5)
-  }
-
-  constructor(injector: Injector) {
-    super(new Battery(5, 0.001), injector)
-
-
+    return +(this.node.ampereSeconds * 100 / this.node.maxAmpereSeconds).toPrecision(5);
   }
 
   ngOnInit() {
-    this.batteryCollection = new Collection(this.node.inC, this.node.outC)
+    this.batteryCollection = new Collection(this.node.inC, this.node.outC);
   }
 
   refill() {
@@ -47,16 +53,10 @@ export class BatteryUiComponent extends UINode<Battery>  {
   }
 
   logStructure(template: TemplateRef<any>) {
-    this.openSnackbar()
+    this.openSnackbar();
     // this.snackbarRef = this.snackbar.openFromTemplate(template)
 
     /*const structureStart = this.node.get batteryCollection?.outC?.connectedTo?.outC?.parent as (SerialConnected | Parrallel)
         console.log(structureStart.getStructure(true));*/
-  }
-
-  static fromJSON(json: any, map: Record<string, FromJson>, context: { inC: Connection; }): Connection {
-
-    throw new Error("not implemented")
-
   }
 }

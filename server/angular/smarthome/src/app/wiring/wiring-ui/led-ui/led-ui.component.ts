@@ -1,6 +1,5 @@
-import { Component, Injector, OnInit } from '@angular/core';
-import { FromJson } from '../../serialisation';
-import { Connection } from '../../wirings/connection';
+import type { OnInit } from '@angular/core';
+import { Component, Injector } from '@angular/core';
 import { LED } from '../../wirings/led';
 import { UINode } from '../ui-node';
 
@@ -10,14 +9,15 @@ import { UINode } from '../ui-node';
   styleUrls: ['./led-ui.component.less']
 })
 export class LedUiComponent extends UINode<LED> implements OnInit {
-  public static templateIcon = "emoji_objects"
-
-  getIcon(): string {
-    return `emoji_objects`
-  }
 
   constructor(injector: Injector) {
-    super(new LED(), injector)
+    super(new LED(), injector);
+  }
+  public static templateIcon = 'emoji_objects';
+
+
+  getIcon(): string {
+    return `emoji_objects`;
   }
 
   ngOnInit() {
@@ -25,14 +25,8 @@ export class LedUiComponent extends UINode<LED> implements OnInit {
 
   backgroundColor() {
     if (this.node.blown) {
-      return "red"
+      return 'red';
     }
-    return `hsl(54deg,100%,${Math.min(100, this.node.brightness)}%)`
-  }
-  static fromJSON(json: any, map: Record<string, FromJson>, context: { inC: Connection; }): Connection {
-
-    debugger;
-    return null
-
+    return `hsl(54deg,100%,${Math.min(100, this.node.brightness)}%)`;
   }
 }

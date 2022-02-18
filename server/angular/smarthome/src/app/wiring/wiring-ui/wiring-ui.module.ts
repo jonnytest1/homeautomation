@@ -10,15 +10,16 @@ import { SwitchComponent } from './switch/switch.component';
 import { MatBottomSheetModule } from '@angular/material/bottom-sheet';
 import { WireUiComponent } from './wire-ui/wire-ui.component';
 import { RelayUiComponent } from './relay-ui/relay-ui.component';
+import { TransformatorUiComponent } from './transformator-ui/transformator-ui.component';
 
 @NgModule({
-    imports: [
-        CommonModule, MatIconModule, MatBottomSheetModule
-    ],
-    declarations: [InOutComponent, LedUiComponent,
+  imports: [
+    CommonModule, MatIconModule, MatBottomSheetModule
+  ],
+  declarations: [InOutComponent, LedUiComponent, TransformatorUiComponent,
 
-        RelayUiComponent,
-        BatteryUiComponent, ResistorUiComponent, SwitchComponent, WireUiComponent,
-        ViewTemplateComponent], exports: [ViewTemplateComponent, WireUiComponent]
+    RelayUiComponent,
+    BatteryUiComponent, ResistorUiComponent, SwitchComponent, WireUiComponent,
+    ViewTemplateComponent], exports: [ViewTemplateComponent, WireUiComponent]
 })
-export class WiringUiModule { }
+export class WiringUiModule {}
