@@ -1,10 +1,11 @@
-import { ConnectionFe, EventHistoryFe, ItemFe, ReceiverFe, ResponseData, SenderFe, SocketResponses, TimerFe, TransformFe } from './settings/interfaces';
+import type { ConnectionFe, EventHistoryFe, ItemFe, ReceiverFe, ResponseData, SenderFe, SocketResponses, TimerFe, TransformFe } from './settings/interfaces';
 import { environment } from '../environments/environment';
 import { AbstractHttpService } from './utils/http-service';
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
-import { BehaviorSubject, Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 import { map, tap } from 'rxjs/operators';
 import { v4 as uuid } from 'uuid';
 
@@ -42,7 +43,7 @@ export class SettingsService extends AbstractHttpService {
 
   private readonly inventory = new BehaviorSubject<Array<ItemFe>>([]);
 
-  public inventory$ = this.inventory
+  public inventory$ = this.inventory.asObservable()
   private websocket: WebSocket;
 
   constructor(http: HttpClient, router: Router) {

@@ -1,46 +1,46 @@
-import { CdkCellDef, DataRowOutlet } from '@angular/cdk/table';
-import { Component, EmbeddedViewRef, Injector, Input, IterableChangeRecord, OnInit, ViewContainerRef } from '@angular/core';
-import { MatCell, MatCellDef, MatColumnDef, MatRow, MatRowDef, MatTable } from '@angular/material/table';
-import { TableItemFe } from '../inventory.component';
+import type { OnInit } from '@angular/core';
+import { Component, Input, ViewContainerRef } from '@angular/core';
+import { MatColumnDef } from '@angular/material/table';
+import type { TableItemFe } from '../inventory.component';
 
 @Component({
-    selector: 'app-regex-highlighted',
-    templateUrl: './regex-highlighted.component.html',
-    styleUrls: ['./regex-highlighted.component.less']
+  selector: 'app-regex-highlighted',
+  templateUrl: './regex-highlighted.component.html',
+  styleUrls: ['./regex-highlighted.component.less']
 })
 export class RegexHighlightedComponent implements OnInit {
-    data: TableItemFe;
+  data: TableItemFe;
 
-    @Input()
-    text: string
+  @Input()
+  text: string
 
-    constructor(private columnDef: MatColumnDef, ref: ViewContainerRef) {
-        //   const views
-        this.data = ref["_hostLView"][8].$implicit;
-        this.text = this.data[columnDef.name]
-    }
+  constructor(private columnDef: MatColumnDef, ref: ViewContainerRef) {
+    //   const views
+    this.data = ref["_hostLView"][8].$implicit;
+    this.text = `${this.data[columnDef.name] ?? ''}`
+  }
 
-    isHighlighted() {
+  isHighlighted() {
 
-        const highlighted = !!this.data.regexMatch && this.columnDef.name == this.data.columnName;
-        return highlighted
-    }
+    const highlighted = !!this.data.regexMatch && this.columnDef.name == this.data.columnName;
+    return highlighted
+  }
 
-    ngOnInit() {
-    }
-
-
-    getParts() {
-        return this.data.regexMatch.map((str, i) => {
-            return {
-                str,
-                highlighted: i % 2 == 1
-            }
-        })
-    }
+  ngOnInit() {
+  }
 
 
-    ngAfterViewInit() {
-    }
+  getParts() {
+    return this.data.regexMatch.map((str, i) => {
+      return {
+        str,
+        highlighted: i % 2 == 1
+      }
+    })
+  }
+
+
+  ngAfterViewInit() {
+  }
 
 }

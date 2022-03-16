@@ -295,5 +295,4 @@ export class ParrallelWire extends Wiring {
     }
     return returnWire
   }
-
 }

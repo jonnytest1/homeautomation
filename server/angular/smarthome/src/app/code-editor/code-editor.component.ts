@@ -1,6 +1,8 @@
-import { CodeEditor } from './code-editor';
-import { ChangeDetectorRef, Component, ElementRef, forwardRef, Injector, Input, OnInit, ViewChild } from '@angular/core';
-import { ControlValueAccessor, NgModel, NG_VALUE_ACCESSOR } from '@angular/forms';
+import type { CodeEditor } from './code-editor';
+import type { AfterViewInit, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, ElementRef, forwardRef, Injector, Input, ViewChild } from '@angular/core';
+import type { ControlValueAccessor } from '@angular/forms';
+import { NgModel, NG_VALUE_ACCESSOR } from '@angular/forms';
 import * as CodeMirror from 'codemirror';
 
 const customcss = require('./custom.css');
@@ -19,7 +21,7 @@ export const CUSTOM_INPUT_CONTROL_VALUE_ACCESSOR: any = {
   styleUrls: ['./code-editor.component.less'],
   providers: [CUSTOM_INPUT_CONTROL_VALUE_ACCESSOR],
 })
-export class CodeEditorComponent implements OnInit, ControlValueAccessor {
+export class CodeEditorComponent implements OnInit, ControlValueAccessor, AfterViewInit {
 
   substitute;
 
@@ -42,7 +44,7 @@ export class CodeEditorComponent implements OnInit, ControlValueAccessor {
   generalErrors: Array<string>;
 
   recentlySaved = false;
-  constructor(private injector: Injector, private cdr: ChangeDetectorRef) { }
+  constructor(private injector: Injector, private cdr: ChangeDetectorRef) {}
   writeValue(obj: string): void {
     if (!this.codeMirror) {
       this.cachedValue = obj;

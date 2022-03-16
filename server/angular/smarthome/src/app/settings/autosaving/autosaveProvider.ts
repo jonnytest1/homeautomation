@@ -1,20 +1,20 @@
 import { Directive, Input } from '@angular/core';
 
 @Directive({
-    selector: '[autosaving-provider]',
+  selector: '[autosaving-provider]',
 })
-export class AutosavingDirectiveProvider {
+export class AutosavingDirectiveProviderDirective {
 
-    @Input()
-    public dataRef: string | number;
+  @Input()
+  public dataRef: string | number;
 
-    @Input()
-    public dataRefName = 'dataRef';
+  @Input()
+  public dataRefName = 'dataRef';
 
-    @Input()
-    public resource: string;
+  @Input()
+  public resource: string;
 
-    constructor() {
-        //
-    }
+  constructor() {
+    //
+  }
 }

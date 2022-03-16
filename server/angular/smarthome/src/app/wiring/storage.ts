@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { MatBottomSheet } from '@angular/material/bottom-sheet';
-import { SettingsService } from '../data.service';
+import { SettingsService } from '../settings.service';
 import { ResolvablePromise } from '../utils/resolvable-promise';
 import { ExamplePickerComponent } from './example-wires/example-picker/example-picker.component';
 import { NODE_TEMPLATES } from './node-templates';

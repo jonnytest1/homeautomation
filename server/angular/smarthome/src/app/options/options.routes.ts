@@ -1,9 +1,9 @@
 import { OptionsComponent } from './options.component';
-import { Route } from '@angular/router';
+import type { Route } from '@angular/router';
 
 export const routes: Array<Route> = [
-    {
-        path: '',
-        component: OptionsComponent
-    }
+  {
+    path: '',
+    component: OptionsComponent
+  }
 ];

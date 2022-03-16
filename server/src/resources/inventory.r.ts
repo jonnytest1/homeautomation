@@ -1,9 +1,8 @@
-import { assign, HttpRequest, HttpResponse, Path, POST } from 'express-hibernate-wrapper';
-import { load, queries, save, SqlCondition } from 'hibernatets';
+import { FrontendWebsocket } from './frontend-update';
 import { FrontendOrder, Item } from '../models/inventory/item';
 import { Order } from '../models/inventory/order';
-import websocketmessaging from '../services/websocketmessaging';
-import { FrontendWebsocket } from './frontend-update';
+import { assign, HttpRequest, HttpResponse, Path, POST } from 'express-hibernate-wrapper';
+import { load, queries, save, SqlCondition } from 'hibernatets';
 
 
 
@@ -58,7 +57,7 @@ export class INventoryResource {
 
             for (const item of order.items) {
 
-                let storedItem = productLinkMap[item.productLink]
+                const storedItem = productLinkMap[item.productLink]
 
                 if (storedItem) {
                     await assign(storedItem, item, { onlyWhenFalsy: false })

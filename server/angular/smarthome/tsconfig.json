@@ -22,7 +22,6 @@
     "lib": [
       "es2018",
       "dom",
-      "ESNext.Array",
       "ES2019.Object"
     ],
   }

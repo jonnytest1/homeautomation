@@ -1,5 +1,6 @@
 import { BarcodeDetector } from "./barcode";
-import { AfterViewInit, ChangeDetectorRef, Component, ElementRef, OnInit, ViewChild } from '@angular/core';
+import type { AfterViewInit, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, ElementRef, ViewChild } from '@angular/core';
 
 @Component({
   selector: 'app-mobile-sender-scan',

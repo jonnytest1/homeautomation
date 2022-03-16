@@ -1,38 +1,39 @@
-import { AfterViewInit, Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
-import flv from 'flv.js';
+import type { AfterViewInit, OnDestroy, OnInit } from '@angular/core';
+import { Component, ElementRef, ViewChild } from '@angular/core';
+import type flv from 'flv.js';
 import { v4 as uuid } from 'uuid';
 @Component({
-    selector: 'app-camera',
-    templateUrl: './camera.component.html',
-    styleUrls: ['./camera.component.scss']
+  selector: 'app-camera',
+  templateUrl: './camera.component.html',
+  styleUrls: ['./camera.component.scss']
 })
 export class CameraComponent implements AfterViewInit, OnInit, OnDestroy {
 
-    videoId;
-    streamName = 'test';
+  videoId;
+  streamName = 'test';
 
-    @ViewChild('videoElement')
-    videoElement: ElementRef<HTMLVideoElement>;
-
-
-    player: flv.Player;
-    constructor() {
-        //
-    }
+  @ViewChild('videoElement')
+  videoElement: ElementRef<HTMLVideoElement>;
 
 
-    ngOnInit() {
-        this.videoId = 'video_' + uuid().replace(/-/g, '');
-    }
-    ngAfterViewInit(): void {
-        /* this.player = flv.createPlayer({
+  player: flv.Player;
+  constructor() {
+    //
+  }
+
+
+  ngOnInit() {
+    this.videoId = 'video_' + uuid().replace(/-/g, '');
+  }
+  ngAfterViewInit(): void {
+    /* this.player = flv.createPlayer({
            type: 'flv',
            url: `https://192.168.178.54/live/${this.streamName}.flv`
          });
          this.player.attachMediaElement(this.videoElement.nativeElement);
          this.player.load();*/
-        // flvPlayer.play();
-        /*const flvjs = null;
+    // flvPlayer.play();
+    /*const flvjs = null;
         if (flvjs.isSupported()) {
           var videoElement = document.getElementById('videoElement');
 
@@ -47,11 +48,11 @@ export class CameraComponent implements AfterViewInit, OnInit, OnDestroy {
             flvPlayer.play();
           }
         }*/
-    }
+  }
 
-    ngOnDestroy(): void {
-        this.player?.detachMediaElement();
-        this.player?.unload();
-        this.player?.destroy();
-    }
+  ngOnDestroy(): void {
+    this.player?.detachMediaElement();
+    this.player?.unload();
+    this.player?.destroy();
+  }
 }

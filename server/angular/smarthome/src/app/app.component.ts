@@ -1,7 +1,7 @@
 import { ChangeDetectorRef, Component } from '@angular/core';
 import { fromEvent } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
-import { SettingsService } from './data.service';
+import { SettingsService } from './settings.service';
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',

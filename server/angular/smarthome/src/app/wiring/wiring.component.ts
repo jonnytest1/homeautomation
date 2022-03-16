@@ -50,7 +50,6 @@ export class WiringComponent implements OnInit, AfterContentChecked, OnDestroy {
 
   nodes: Array<NodeEl> = [];
 
-
   constructor(private cdr: ChangeDetectorRef,
     private viewRef: ViewContainerRef,
     public data: WiringDataService,

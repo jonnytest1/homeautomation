@@ -16,7 +16,7 @@ import { HTTP_INTERCEPTORS } from '@angular/common/http';
 import { TimersComponent } from './timers/timers.component';
 import { MatGridListModule } from '@angular/material/grid-list';
 import { NgCircleProgressModule } from 'ng-circle-progress';
-import { SettingsService } from './data.service';
+import { SettingsService } from './settings.service';
 import { TodoComponent } from './todo/todo.component';
 import { InventoryComponent } from './inventory/inventory.component';
 import { MatInputModule } from '@angular/material/input';

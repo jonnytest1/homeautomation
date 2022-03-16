@@ -1,9 +1,9 @@
 import type { SocketResponses } from './websocket-response';
 import { Timer } from '../models/timer';
 import { senderLoader } from '../services/sender-loader';
+import { Item } from '../models/inventory/item';
 import { HttpRequest, Websocket, WS } from 'express-hibernate-wrapper';
 import { load, SqlCondition } from 'hibernatets';
-import { Item } from '../models/inventory/item';
 
 
 @WS({ path: "/updates" })

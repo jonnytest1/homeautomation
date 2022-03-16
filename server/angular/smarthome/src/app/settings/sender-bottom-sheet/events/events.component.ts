@@ -1,5 +1,7 @@
-import { EventHistoryFe, SenderFe } from '../../interfaces';
-import { AfterViewInit, Component, ElementRef, Inject, OnInit, ViewChild } from '@angular/core';
+import type { EventHistoryFe } from '../../interfaces';
+import { SenderFe } from '../../interfaces';
+import type { AfterViewInit, OnInit } from '@angular/core';
+import { Component, ElementRef, Inject, ViewChild } from '@angular/core';
 import { MAT_DIALOG_DATA } from '@angular/material/dialog';
 
 import { GoogleCharts } from 'google-charts';
@@ -16,7 +18,7 @@ export class EventsComponent implements OnInit, AfterViewInit {
 
 
 
-  constructor(@Inject(MAT_DIALOG_DATA) public sender: SenderFe) { }
+  constructor(@Inject(MAT_DIALOG_DATA) public sender: SenderFe) {}
 
   ngOnInit() {
     //
@@ -31,7 +33,7 @@ export class EventsComponent implements OnInit, AfterViewInit {
         get: () => _props,
         set: (val) => {
           this.drawChart(this.prepareData());
-          return _props = val;
+          _props = val;
         }
       })
 

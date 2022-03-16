@@ -1,10 +1,10 @@
-import { Sound as BeSound } from "../../../../../src/models/sound"
-import { SafeUrl } from '@angular/platform-browser';
+import type { Sound as BeSound } from "../../../../../src/models/sound"
+import type { SafeUrl } from '@angular/platform-browser';
 
 export interface Sound extends BeSound {
-    url?: SafeUrl
+  url?: SafeUrl
 
-    file?: File
+  file?: File
 
-    resolver: Promise<void>
+  resolver: Promise<void>
 }

@@ -1,5 +1,6 @@
 import { SenderFe } from '../../interfaces';
-import { AfterViewInit, Component, ElementRef, Inject, OnInit, ViewChild } from '@angular/core';
+import type { AfterViewInit, OnInit } from '@angular/core';
+import { Component, ElementRef, Inject, ViewChild } from '@angular/core';
 import { MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { GoogleCharts } from 'google-charts';
 @Component({
@@ -15,7 +16,7 @@ export class BatteryComponent implements OnInit, AfterViewInit {
 
   smallest: number = Number.MAX_VALUE;
 
-  constructor(@Inject(MAT_DIALOG_DATA) public sender: SenderFe) { }
+  constructor(@Inject(MAT_DIALOG_DATA) public sender: SenderFe) {}
 
   ngOnInit() {
     //
@@ -33,7 +34,7 @@ export class BatteryComponent implements OnInit, AfterViewInit {
         get: () => _props,
         set: (val) => {
           this.drawChart(this.prepareData());
-          return _props = val;
+          _props = val;
         }
       })
 

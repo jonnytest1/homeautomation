@@ -1,7 +1,7 @@
-import { settable } from 'express-hibernate-wrapper';
-import { column, mapping, Mappings, primary, table } from 'hibernatets';
 import { Location } from "./location"
 import { Order } from './order';
+import { settable } from 'express-hibernate-wrapper';
+import { column, mapping, Mappings, primary, table } from 'hibernatets';
 @table()
 export class Item {
 

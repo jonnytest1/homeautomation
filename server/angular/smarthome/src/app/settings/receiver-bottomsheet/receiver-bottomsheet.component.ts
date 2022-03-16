@@ -1,5 +1,6 @@
 import { ReceiverFe } from '../interfaces';
-import { Component, Inject, OnInit } from '@angular/core';
+import type { OnInit } from '@angular/core';
+import { Component, Inject } from '@angular/core';
 import { MAT_SNACK_BAR_DATA, MatSnackBarRef } from '@angular/material/snack-bar';
 
 
@@ -11,7 +12,7 @@ import { MAT_SNACK_BAR_DATA, MatSnackBarRef } from '@angular/material/snack-bar'
 export class ReceiverBottomsheetComponent implements OnInit {
 
   constructor(@Inject(MAT_SNACK_BAR_DATA) public data: ReceiverFe,
-    private snackbarRef: MatSnackBarRef<unknown>) { }
+    private snackbarRef: MatSnackBarRef<unknown>) {}
 
 
 

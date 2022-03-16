@@ -1,16 +1,13 @@
 
-
-
-
 declare global {
-    const BarcodeDetector: BarcodeDetector
+  const BarcodeDetector: BarcodeDetector
 
 
 }
 
 export interface BarcodeDetector {
-    getSupportedFormats: () => any
-    new(args: any)
+  getSupportedFormats: () => any
+  new(args: any)
 
-    detect: (arg) => any
+  detect: (arg) => any
 }

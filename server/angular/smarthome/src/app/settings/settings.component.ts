@@ -2,13 +2,12 @@
 import { BottomSheetHandler } from './bottom-sheet-handler';
 import { ConnectionHandler } from './connection-handler';
 import type { ReceiverFe, SenderFe } from './interfaces';
-import { SettingsService } from '../data.service';
+import { SettingsService } from '../settings.service';
 import { AppComponent } from '../app.component';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import type { AfterViewInit, OnDestroy, OnInit } from '@angular/core';
-import { ChangeDetectorRef, ElementRef } from '@angular/core';
-import { Component, ViewChild } from '@angular/core';
+import { ChangeDetectorRef, ElementRef, Component, ViewChild } from '@angular/core';
 
 @Component({
   selector: 'app-settings',
