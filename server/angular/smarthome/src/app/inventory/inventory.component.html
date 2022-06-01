@@ -27,7 +27,9 @@
       </th>
       <td mat-cell
           *matCellDef="let element">
-        <app-regex-highlighted></app-regex-highlighted>
+        <app-regex-highlighted [data]="element"
+                               [highlightInfo]="element?.highlightInfo|async"
+                               [text]="element.description"></app-regex-highlighted>
       </td>
     </ng-container>
 
@@ -47,7 +49,10 @@
       <td mat-cell
           *matCellDef="let element">
         <a [href]="element.productLink">
-          <app-regex-highlighted [text]="getProductId(element)"></app-regex-highlighted>
+          <app-regex-highlighted [data]="element"
+                                 [highlightInfo]="element?.highlightInfo|async"
+                                 [text]="getProductId(element)">
+          </app-regex-highlighted>
 
         </a>
       </td>
@@ -66,7 +71,12 @@
           mat-sort-header
           *matHeaderCellDef> Loc </th>
       <td mat-cell
-          *matCellDef="let element;"> {{element.location?.description || element.location ||'-'}} </td>
+          *matCellDef="let element;">
+        <app-regex-highlighted [data]="element"
+                               [highlightInfo]="element?.highlightInfo|async"
+                               [text]="element.location?.description || element.location ||'-'">
+        </app-regex-highlighted>
+      </td>
     </ng-container>
 
     <ng-container matColumnDef="order">

@@ -22,7 +22,7 @@ import { InventoryComponent } from './inventory/inventory.component';
 import { MatInputModule } from '@angular/material/input';
 import { RegexHighlightedComponent } from './inventory/regex-highlighted/regex-highlighted.component';
 import { WiringModule } from './wiring/wiring.module';
-
+import { MatSortModule } from '@angular/material/sort';
 
 @NgModule({
   declarations: [
@@ -36,7 +36,7 @@ import { WiringModule } from './wiring/wiring.module';
   imports: [
     BrowserModule, HammerModule,
     AppRoutingModule, SettingsModule, FormsModule, MatInputModule, WiringModule, MatTableModule,
-    MatSidenavModule, MatListModule, MatIconModule, MatGridListModule,
+    MatSidenavModule, MatListModule, MatIconModule, MatGridListModule, MatSortModule,
     BrowserAnimationsModule, NgCircleProgressModule.forRoot()
   ],
   providers: [

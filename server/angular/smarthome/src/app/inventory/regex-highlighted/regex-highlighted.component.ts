@@ -1,42 +1,56 @@
-import type { OnInit } from '@angular/core';
-import { Component, Input, ViewContainerRef } from '@angular/core';
+import type { OnChanges, OnInit } from '@angular/core';
+import { Component, Input, ChangeDetectorRef } from '@angular/core';
 import { MatColumnDef } from '@angular/material/table';
-import type { TableItemFe } from '../inventory.component';
+import { TableItemFe } from '../inventory.component';
 
 @Component({
   selector: 'app-regex-highlighted',
   templateUrl: './regex-highlighted.component.html',
   styleUrls: ['./regex-highlighted.component.less']
 })
-export class RegexHighlightedComponent implements OnInit {
+export class RegexHighlightedComponent implements OnInit, OnChanges {
+
+  @Input()
   data: TableItemFe;
 
   @Input()
   text: string
 
-  constructor(private columnDef: MatColumnDef, ref: ViewContainerRef) {
+  @Input()
+  highlightInfo: {
+    regexMatch?: RegExpExecArray,
+    columnName?: string
+  }
+
+  parts: Array<{
+    str: string,
+    highlighted: boolean
+  }> = []
+
+  isHighlighted = false
+
+
+  displayText: string
+
+  constructor(private columnDef: MatColumnDef, private cdr: ChangeDetectorRef) {
     //   const views
-    this.data = ref["_hostLView"][8].$implicit;
-    this.text = `${this.data[columnDef.name] ?? ''}`
+    //this.data = ref["_hostLView"][8].$implicit;
   }
 
-  isHighlighted() {
-
-    const highlighted = !!this.data.regexMatch && this.columnDef.name == this.data.columnName;
-    return highlighted
+  ngOnInit(): void {
+    // throw new Error('Method not implemented.');
+    this.displayText = this.text
   }
 
-  ngOnInit() {
-  }
+  ngOnChanges() {
+    //this.text = `${this.data?.[this.columnDef.name] ?? ''}`
 
-
-  getParts() {
-    return this.data.regexMatch.map((str, i) => {
-      return {
-        str,
-        highlighted: i % 2 == 1
-      }
-    })
+    this.parts = this.highlightInfo?.regexMatch?.map((str, i) => ({
+      str,
+      highlighted: i % 2 == 1
+    })) ?? []
+    this.isHighlighted = !!this.highlightInfo?.regexMatch && this.columnDef.name == this.highlightInfo?.columnName
+    this.cdr.markForCheck()
   }
 
 
