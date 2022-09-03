@@ -38,8 +38,8 @@ export class SettingsService extends AbstractHttpService {
 
   public timers$ = this.timers.asObservable();
 
-
-  readonly senders$ = new BehaviorSubject<Array<SenderFe>>([]);
+  private readonly _senders$ = new BehaviorSubject<Array<SenderFe>>([]);
+  readonly senders$ = this._senders$.asObservable();
 
   private readonly inventory = new BehaviorSubject<Array<ItemFe>>([]);
 
@@ -74,7 +74,7 @@ export class SettingsService extends AbstractHttpService {
     if (!data) {
       return
     }
-    const currentSenders = [...this.senders$.value];
+    const currentSenders = [...this._senders$.value];
     data.forEach(sender => {
       let currentSender = currentSenders.find(cSender => cSender.id === sender.id);
       if (currentSender) {
@@ -91,7 +91,7 @@ export class SettingsService extends AbstractHttpService {
     });
 
 
-    this.senders$.next(currentSenders);
+    this._senders$.next(currentSenders);
   }
 
   sort(array: Array<TransformFe>, events: SenderFe['events']): Array<TransformFe> {

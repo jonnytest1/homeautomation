@@ -3,29 +3,60 @@
     Sender {{sender.id}}
   </p>
 
+  <mat-tab-group mat-stretch-tabs
+                 [selectedIndex]="currentTab"
+                 (selectedIndexChange)="indexChange($event)">
 
-  <mat-select [(value)]="transformer">
-    <mat-select-trigger *ngIf="transformer"
-                        [className]="debug(sender)">
-      {{transformer.name}}({{transformer.transformationKey}})
-    </mat-select-trigger>
+    <mat-tab label="connections">
 
-    <mat-option routerLink="add">
-      Add Router
-    </mat-option>
+      <div class="list">
 
-    <mat-option *ngFor="let transformation of sender.transformation"
-                [value]="transformation">
+        <mat-card *ngFor="let item of sender.connections"
+                  class="connection"
+                  fxFlexAlign="stretch"
+                  [attr.item]="item.id">
+          <!--  [routerLink]="getRouterLink(currentIndex,item.id)"
+                                          (click)="setActive(item,$event)" -->
+          <mat-card-title>
+            {{item.receiver.id}} {{item.receiver.name}}
+          </mat-card-title>
+          <mat-card-subtitle>
+            {{item.description}}
+          </mat-card-subtitle>
+        </mat-card>
+      </div>
+    </mat-tab>
+    <mat-tab label="transformations">
+      <mat-select [(value)]="transformer">
+        <mat-select-trigger *ngIf="transformer"
+                            [className]="debug(sender)">
+          {{transformer.name}}({{transformer.transformationKey}})
+        </mat-select-trigger>
+
+        <mat-option routerLink="add">
+          Add Router
+        </mat-option>
+
+        <mat-option *ngFor="let transformation of sender.transformation"
+                    [value]="transformation">
 
 
-      <button mat-icon-button
-              class="right"
-              aria-label="Example icon button with a vertical three dot icon">
-        <mat-icon>delete</mat-icon>
-      </button>
-      {{transformation.name}} ({{transformation.transformationKey}})
+          <button mat-icon-button
+                  class="right"
+                  aria-label="Example icon button with a vertical three dot icon">
+            <mat-icon>delete</mat-icon>
+          </button>
+          {{transformation.name}} ({{transformation.transformationKey}})
 
-    </mat-option>
-  </mat-select>
+        </mat-option>
+      </mat-select>
+
+      <app-monaco-editor [ngModel]="transformer.transformation"
+                         [readonly]="true"
+                         [definition]="transformer.definitionFile"></app-monaco-editor>
+    </mat-tab>
+  </mat-tab-group>
+
+
 
 </ng-container>

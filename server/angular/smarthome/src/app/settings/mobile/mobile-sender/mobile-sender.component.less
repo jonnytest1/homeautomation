@@ -1,0 +1,38 @@
+
+:host{
+  width: 100%
+}
+
+
+p{
+  text-align: center;
+}
+
+
+.list{
+  display: flex;
+  gap: 8px;
+  flex-direction: column;
+  align-content: stretch;
+  align-items: stretch;
+  padding: 4px;
+
+  .list-item {
+  display: inline-flex;
+
+
+  &.iconlistitem {
+    justify-content: center;
+    cursor: pointer;
+
+    mat-icon {
+      margin-right: 32px;
+    }
+  }
+}
+}
+
+
+textarea{
+  width: 100%;
+}

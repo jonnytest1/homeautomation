@@ -23,6 +23,7 @@ import { MatInputModule } from '@angular/material/input';
 import { RegexHighlightedComponent } from './inventory/regex-highlighted/regex-highlighted.component';
 import { WiringModule } from './wiring/wiring.module';
 import { MatSortModule } from '@angular/material/sort';
+import { IframeComponent } from './iframe/iframe.component';
 
 @NgModule({
   declarations: [
@@ -31,7 +32,8 @@ import { MatSortModule } from '@angular/material/sort';
     TimersComponent,
     TodoComponent,
     InventoryComponent,
-    RegexHighlightedComponent
+    RegexHighlightedComponent,
+    IframeComponent
   ],
   imports: [
     BrowserModule, HammerModule,

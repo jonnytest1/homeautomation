@@ -129,7 +129,7 @@ export class InventoryComponent implements OnInit, AfterViewInit {
     this.dataSource.filter = input.value
     if (input.value == "") {
       items.forEach(item => {
-        item.highlightInfo.next({
+        item.highlightInfo?.next({
           ...item.highlightInfo.value,
           regexMatch: undefined
         })

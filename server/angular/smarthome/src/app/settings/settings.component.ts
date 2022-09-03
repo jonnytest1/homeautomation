@@ -8,6 +8,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import type { AfterViewInit, OnDestroy, OnInit } from '@angular/core';
 import { ChangeDetectorRef, ElementRef, Component, ViewChild } from '@angular/core';
+import { filter, first } from 'rxjs/operators';
 
 @Component({
   selector: 'app-settings',
@@ -51,8 +52,8 @@ export class SettingsComponent implements OnInit, AfterViewInit, OnDestroy {
       if (this.canvas) {
         this.connectionHandler.setCanvas(this.canvas.nativeElement);
       }
-      setTimeout(async () => {
-        await this.bottomSheetHandler.checkSnackbar(this.senders);
+      setTimeout(() => {
+        this.bottomSheetHandler.checkSnackbar(this.senders);
         this.cdr.detectChanges();
       });
 
@@ -89,11 +90,17 @@ export class SettingsComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   ngOnInit() {
+    AppComponent.isMobile()
+      .pipe(filter(m => m), first())
+      .subscribe(() => {
+        this.router.navigate(["mobile"], { relativeTo: this.activeRoute })
+      })
+
     //
   }
 
   ngAfterViewInit() {
-    if (this.connectionHandler) {
+    if (this.connectionHandler && this.canvas) {
       this.connectionHandler.setCanvas(this.canvas.nativeElement);
     }
   }

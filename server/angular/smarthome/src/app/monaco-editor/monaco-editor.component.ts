@@ -2,8 +2,10 @@ import type { OnDestroy, OnInit } from '@angular/core';
 import { ChangeDetectorRef, Component, EventEmitter, forwardRef, Injector, Input, Output } from '@angular/core';
 import type { ControlValueAccessor } from '@angular/forms';
 import { NgModel, NG_VALUE_ACCESSOR } from '@angular/forms';
+import type { SandBox, AST, SandboxFactory, Main, MonacoGlobal, Decoration } from './editor';
 
-declare let monaco;
+
+declare let monaco: MonacoGlobal;
 
 @Component({
   selector: 'app-monaco-editor',
@@ -20,19 +22,23 @@ export class MonacoEditorComponent implements OnInit, OnDestroy, ControlValueAcc
   constructor(private injector: Injector, private cdr: ChangeDetectorRef) {
     this.getSandBox().then(this.initializeEditor.bind(this));
   }
-  static editorArgs: { main: unknown; _tsWorker: unknown; sandboxFactory: unknown; };
+  static editorArgs: { main: Main; sandboxFactory: SandboxFactory; };
 
-  onChange;
+  onChange: (value: string) => void;
 
   onTouch;
 
-  sandbox;
+  sandbox: SandBox;
 
-  cachedText;
+  cachedText?: string;
 
 
   @Input()
-  definition;
+  definition: string;
+
+  @Input()
+  readonly = false
+
   ngModel: NgModel;
 
 
@@ -44,9 +50,9 @@ export class MonacoEditorComponent implements OnInit, OnDestroy, ControlValueAcc
 
   recentlySaved = false;
 
-  decorators = [];
+  decorators: Array<Decoration> = [];
 
-  ast;
+  ast: AST;
   previousText: string;
 
 
@@ -73,9 +79,9 @@ export class MonacoEditorComponent implements OnInit, OnDestroy, ControlValueAcc
     });
     return new Promise<void>(resolver => {
       requireFnc(['vs/editor/editor.main', 'vs/language/typescript/tsWorker', 'sandbox/index'], (
-        main, _tsWorker, sandboxFactory
+        main: Main, _tsWorker, sandboxFactory: SandboxFactory
       ) => {
-        MonacoEditorComponent.editorArgs = { main, _tsWorker, sandboxFactory };
+        MonacoEditorComponent.editorArgs = { main, sandboxFactory };
         resolver();
       });
     });
@@ -84,7 +90,7 @@ export class MonacoEditorComponent implements OnInit, OnDestroy, ControlValueAcc
 
   private async initializeEditor() {
     const { main, sandboxFactory } = MonacoEditorComponent.editorArgs;
-    document.getElementById('loader').parentNode.removeChild(document.getElementById('loader'));
+    document.getElementById('loader')?.parentNode?.removeChild(document.getElementById('loader'));
     const models = monaco.editor.getModels();
 
     let hasModels = false;
@@ -101,7 +107,7 @@ export class MonacoEditorComponent implements OnInit, OnDestroy, ControlValueAcc
     }
   }
 
-  private createEditor(sandboxFactory, main) {
+  private createEditor(sandboxFactory: SandboxFactory, main: Main) {
     this.createTheme();
     this.setupGlobalTypes();
 
@@ -110,45 +116,50 @@ export class MonacoEditorComponent implements OnInit, OnDestroy, ControlValueAcc
       domID: 'monaco-editor-embed',
       monacoSettings: {
         theme: 'vs-dark-e',
-        lineHeight: '18px',
+        lineHeight: 18,
+        readOnly: this.readonly
       }
     };
-
-
+    window['ts'].Debug.setAssertionLevel(3)
     this.sandbox = sandboxFactory.createTypeScriptSandbox(sandboxConfig, main, window['ts']);
+
     this.sandbox.updateCompilerSettings({
       alwaysStrict: false,
       noImplicitUseStrict: true,
     });
-    this.sandbox.editor.onDidChangeModelDecorations(async () => {
+    this.sandbox.editor.onDidChangeModelDecorations(async (e) => {
       const model = this.sandbox.getModel();
       const errors = model.getAllDecorations()
         .filter(dec => dec.options.className === 'squiggly-error');
-      const text = this.sandbox.getModel().getValue();
+
+      const text = model.getValue();
       this.saveCode(errors, text);
       if (text !== this.previousText) {
         this.previousText = text;
         if (!this.ast) {
           this.ast = await this.sandbox.getAST();
         }
+        // debugger
         this.decorators = [];
         this.checkFnc(this.ast);
       }
     });
     this.sandbox.editor.focus();
+
   }
 
-  private async saveCode(errors, text: string) {
+  private async saveCode(errors: Array<Decoration>, text: string) {
     if (!errors.length) {
       const js = await this.sandbox.getRunnableJS();
-      if (text !== `({\n\n}) as TransformationResponse`) {
+      if (text !== `({\n\n}) as TransformationResponse` && !this.readonly) {
+
         this.jsCodeChange.emit(js);
         this.onChange(text);
       }
     }
   }
 
-  async checkFnc(element) {
+  async checkFnc(element: AST) {
     if (element.arguments) {
       this.addFunctionHighlighting(element.expression);
       await Promise.all(element.arguments.map(child => this.checkFnc(child)));
@@ -158,7 +169,13 @@ export class MonacoEditorComponent implements OnInit, OnDestroy, ControlValueAcc
     await Promise.all(element.getChildren().map(child => this.checkFnc(child)));
   }
 
-  addFunctionHighlighting(element) {
+  addFunctionHighlighting(element: AST) {
+    const test = element.getText()
+    console.log(test, element.kind)
+    if (element.kind === 198) {
+      return
+    }
+
     const start = this.sandbox.getModel().getPositionAt(element.pos);
     const end = this.sandbox.getModel().getPositionAt(element.end);
     this.decorators = this.sandbox.editor.deltaDecorations([], [
@@ -218,13 +235,7 @@ export class MonacoEditorComponent implements OnInit, OnDestroy, ControlValueAcc
       this.cachedText = obj;
     } else {
       this.sandbox.getModel().setValue(obj);
-      setTimeout(() => {
-        this.sandbox.getAST().then(ast => {
-          this.ast = ast;
-          this.cdr.markForCheck();
-        });
-      }, 200);
-
+      this.ast = undefined
     }
   }
   registerOnChange(fn): void {

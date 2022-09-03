@@ -71,6 +71,7 @@
           mat-sort-header
           *matHeaderCellDef> Loc </th>
       <td mat-cell
+          class="location"
           *matCellDef="let element;">
         <app-regex-highlighted [data]="element"
                                [highlightInfo]="element?.highlightInfo|async"

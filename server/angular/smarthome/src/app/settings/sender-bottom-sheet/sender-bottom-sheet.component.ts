@@ -76,7 +76,7 @@ export class SenderBottomSheetComponent implements OnInit {
     }
 
     await this.service.send(dataObj).toPromise();
-    if (this.transformer && this.transformer.tsTransformation.includes('delay')
+    if (this.transformer && this.transformer.tsTransformation?.includes('delay')
       && this.transformer.tsTransformation.includes('promise')) {
       this.displayTimers();
     }

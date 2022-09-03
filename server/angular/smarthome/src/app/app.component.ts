@@ -1,14 +1,13 @@
 import { ChangeDetectorRef, Component } from '@angular/core';
 import { fromEvent } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
-import { SettingsService } from './settings.service';
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.less']
 })
 export class AppComponent {
-  constructor(private cdr: ChangeDetectorRef, private data: SettingsService) {
+  constructor(private cdr: ChangeDetectorRef) {
     window["defaultLog"] = true
     //
   }
