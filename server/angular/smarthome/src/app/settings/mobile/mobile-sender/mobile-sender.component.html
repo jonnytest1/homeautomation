@@ -26,10 +26,10 @@
         </mat-card>
       </div>
     </mat-tab>
-    <mat-tab label="transformations">
+    <mat-tab label="transformations"
+             bodyClass="transform-body">
       <mat-select [(value)]="transformer">
-        <mat-select-trigger *ngIf="transformer"
-                            [className]="debug(sender)">
+        <mat-select-trigger *ngIf="transformer">
           {{transformer.name}}({{transformer.transformationKey}})
         </mat-select-trigger>
 
@@ -54,6 +54,10 @@
       <app-monaco-editor [ngModel]="transformer.transformation"
                          [readonly]="true"
                          [definition]="transformer.definitionFile"></app-monaco-editor>
+
+      <button mat-raised-button
+              (click)="triggerTransformer(sender)"
+              color="primary">test</button>
     </mat-tab>
   </mat-tab-group>
 

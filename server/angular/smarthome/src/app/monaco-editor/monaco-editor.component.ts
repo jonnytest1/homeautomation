@@ -3,9 +3,15 @@ import { ChangeDetectorRef, Component, EventEmitter, forwardRef, Injector, Input
 import type { ControlValueAccessor } from '@angular/forms';
 import { NgModel, NG_VALUE_ACCESSOR } from '@angular/forms';
 import type { SandBox, AST, SandboxFactory, Main, MonacoGlobal, Decoration } from './editor';
+import { AST_KIND } from './editor';
 
 
 declare let monaco: MonacoGlobal;
+
+interface IMports {
+  main: Main; sandboxFactory: SandboxFactory;
+}
+let importsPromise: Promise<IMports>
 
 @Component({
   selector: 'app-monaco-editor',
@@ -19,9 +25,7 @@ declare let monaco: MonacoGlobal;
 })
 export class MonacoEditorComponent implements OnInit, OnDestroy, ControlValueAccessor {
 
-  constructor(private injector: Injector, private cdr: ChangeDetectorRef) {
-    this.getSandBox().then(this.initializeEditor.bind(this));
-  }
+
   static editorArgs: { main: Main; sandboxFactory: SandboxFactory; };
 
   onChange: (value: string) => void;
@@ -56,15 +60,21 @@ export class MonacoEditorComponent implements OnInit, OnDestroy, ControlValueAcc
   previousText: string;
 
 
-  async getSandBox() {
-    if (window.require && 'ts' in window) {
-      return;
+  constructor(private injector: Injector, private cdr: ChangeDetectorRef) {
+    if (!importsPromise) {
+      importsPromise = this.getSandBox()
     }
+    importsPromise.then(args => {
+      this.initializeEditor(args)
+    });
+  }
 
+  async getSandBox(): Promise<IMports> {
     if (window.require) {
       return this.setupRequire();
     } else {
-      return new Promise(res => setTimeout(res, 100)).then(this.getSandBox.bind(this));
+      return new Promise(res => setTimeout(res, 100))
+        .then(() => this.getSandBox());
     }
   }
 
@@ -77,19 +87,18 @@ export class MonacoEditorComponent implements OnInit, OnDestroy, ControlValueAcc
       },
       ignoreDuplicateModules: ['vs/editor/editor.main'],
     });
-    return new Promise<void>(resolver => {
+    return new Promise<IMports>(resolver => {
       requireFnc(['vs/editor/editor.main', 'vs/language/typescript/tsWorker', 'sandbox/index'], (
         main: Main, _tsWorker, sandboxFactory: SandboxFactory
       ) => {
-        MonacoEditorComponent.editorArgs = { main, sandboxFactory };
-        resolver();
+        resolver({ main, sandboxFactory });
       });
     });
 
   }
 
-  private async initializeEditor() {
-    const { main, sandboxFactory } = MonacoEditorComponent.editorArgs;
+  private async initializeEditor(args: IMports) {
+    const { main, sandboxFactory } = args;
     document.getElementById('loader')?.parentNode?.removeChild(document.getElementById('loader'));
     const models = monaco.editor.getModels();
 
@@ -127,13 +136,13 @@ export class MonacoEditorComponent implements OnInit, OnDestroy, ControlValueAcc
       alwaysStrict: false,
       noImplicitUseStrict: true,
     });
+
     this.sandbox.editor.onDidChangeModelDecorations(async (e) => {
       const model = this.sandbox.getModel();
       const errors = model.getAllDecorations()
         .filter(dec => dec.options.className === 'squiggly-error');
 
       const text = model.getValue();
-      this.saveCode(errors, text);
       if (text !== this.previousText) {
         this.previousText = text;
         if (!this.ast) {
@@ -142,6 +151,9 @@ export class MonacoEditorComponent implements OnInit, OnDestroy, ControlValueAcc
         // debugger
         this.decorators = [];
         this.checkFnc(this.ast);
+
+        this.saveCode(errors, text);
+
       }
     });
     this.sandbox.editor.focus();
@@ -160,10 +172,24 @@ export class MonacoEditorComponent implements OnInit, OnDestroy, ControlValueAcc
   }
 
   async checkFnc(element: AST) {
-    if (element.arguments) {
+    if (element.kind === AST_KIND.CLASS_INSTANCE) {
+      return //new Date()
+    }
+
+    if (element.parent?.kind == AST_KIND.CLASS_INSTANCE_CALL) {
+      this.addFunctionHighlighting(element);
+    }
+
+    if (element.expression) {
+      debugger;
       this.addFunctionHighlighting(element.expression);
+    }
+
+    if (element.arguments) {
       await Promise.all(element.arguments.map(child => this.checkFnc(child)));
-      return;
+    }
+    if (element.expression) {
+      await Promise.all(element.expression.getChildren().map(child => this.checkFnc(child)));
     }
 
     await Promise.all(element.getChildren().map(child => this.checkFnc(child)));
@@ -171,10 +197,15 @@ export class MonacoEditorComponent implements OnInit, OnDestroy, ControlValueAcc
 
   addFunctionHighlighting(element: AST) {
     const test = element.getText()
-    console.log(test, element.kind)
-    if (element.kind === 198) {
+    if (element.kind === 198
+      || element.kind == AST_KIND.BRACKETS || element.kind == AST_KIND.BRACKETS_2
+      || element.kind == AST_KIND.STATEMENT
+      || element.kind == AST_KIND.OBJECT_CREATION
+      || element.kind == AST_KIND.CLASS_INSTANCE) {
       return
     }
+    // debugger;
+    console.log(test, element.kind)
 
     const start = this.sandbox.getModel().getPositionAt(element.pos);
     const end = this.sandbox.getModel().getPositionAt(element.end);
@@ -231,11 +262,13 @@ export class MonacoEditorComponent implements OnInit, OnDestroy, ControlValueAcc
     });
   }
   writeValue(obj: string): void {
-    if (!this.sandbox) {
-      this.cachedText = obj;
-    } else {
-      this.sandbox.getModel().setValue(obj);
-      this.ast = undefined
+    if (typeof obj == "string") {
+      if (!this.sandbox) {
+        this.cachedText = obj;
+      } else {
+        this.sandbox.getModel().setValue(obj);
+        this.ast = undefined
+      }
     }
   }
   registerOnChange(fn): void {

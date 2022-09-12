@@ -2,6 +2,8 @@ import type { TimerFe } from '../../interfaces';
 import { SenderFe } from '../../interfaces';
 import { SettingsService } from '../../../settings.service';
 import type { OnDestroy, OnInit } from '@angular/core';
+import { Optional } from '@angular/core';
+import { Input } from '@angular/core';
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Inject } from '@angular/core';
 import { MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { combineLatest, Subscription, timer } from 'rxjs';
@@ -28,9 +30,16 @@ export class TimersComponent implements OnInit, OnDestroy {
 
   first = true;
 
-  constructor(@Inject(MAT_DIALOG_DATA) public sender: SenderFe,
+  @Input()
+  public sender: SenderFe
+
+  @Input()
+  maxCols: number
+
+  constructor(@Optional() @Inject(MAT_DIALOG_DATA) sender: SenderFe,
     private service: SettingsService,
     private cdr: ChangeDetectorRef) {
+    this.sender = sender
   }
   ngOnInit() {
     this.subscription.add(combineLatest([this.service.timers$, timer(0, 600)])
@@ -61,6 +70,10 @@ export class TimersComponent implements OnInit, OnDestroy {
 
   private recalc() {
     this.cols = Math.ceil(Math.sqrt(this.timers.length));
+    if (this.maxCols !== undefined) {
+      this.cols = Math.min(this.cols, this.maxCols)
+    }
+
     const rows = Math.ceil(this.timers.length / this.cols);
 
     if (rows === 1) {

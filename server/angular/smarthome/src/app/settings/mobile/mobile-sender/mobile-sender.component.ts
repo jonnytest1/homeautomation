@@ -21,7 +21,7 @@ export class MobileSenderComponent implements OnInit {
   transformer: TransformFe = {};
 
   currentTab = this.activeRoute.snapshot.queryParams.tabIndex ?? 0;
-  constructor(private activeRoute: ActivatedRoute, dataHolder: SettingsService, private router: Router,) {
+  constructor(private activeRoute: ActivatedRoute, private dataHolder: SettingsService, private router: Router,) {
 
     this.sender$ = dataHolder.senders$.pipe(
       map(senders => senders.find(sender => sender.id === +this.activeRoute.snapshot.params.id)),
@@ -51,7 +51,24 @@ export class MobileSenderComponent implements OnInit {
     })
   }
 
-  debug(sender) {
-    // console.log(sender)
+  async triggerTransformer(sender: SenderFe) {
+    const dataObj: { [key: string]: unknown } = {
+      deviceKey: sender.deviceKey
+    };
+    // if (!this.isManual()) {
+    // dataObj.testsend = true
+    //}
+    if (sender.transformationAttribute && this.transformer) {
+      dataObj[sender.transformationAttribute] = this.transformer.transformationKey;
+    }
+
+    await this.dataHolder.send(dataObj).toPromise();
+    if (this.transformer && this.transformer.tsTransformation?.includes('delay')
+      && this.transformer.tsTransformation.includes('promise')) {
+      this.displayTimers(sender)
+    }
+  }
+  displayTimers(sender: SenderFe) {
+    this.router.navigate(["timers"], { relativeTo: this.activeRoute, state: { sender: sender } })
   }
 }

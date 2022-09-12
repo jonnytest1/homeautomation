@@ -28,7 +28,17 @@
     }
   
     
+}
+
+.white-icon {
+  color: white;
+}
+
+
+#monaco-editor-embed{
+  width: 600px;
+  @media screen and(max-width: 600px){
+    width:100%
   }
-  .white-icon {
-    color: white;
-  }
+  height: 250px;
+}

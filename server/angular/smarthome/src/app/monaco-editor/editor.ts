@@ -17,6 +17,7 @@ interface Position {
 }
 
 export interface MonacoModel {
+  onDidChangeContent(arg0: (c: any) => void): unknown
   getAllDecorations(): Array<Decoration>
 
   getValue(): string
@@ -44,19 +45,32 @@ export interface Editor {
   focus()
 }
 
+export const AST_KIND = {
+  CLASS_INSTANCE: 201,
+  VARIABLE_NAME: 78, // literally any variable in any scope
+  BRACKETS: 221,
+  BRACKETS_2: 204,
+  STATEMENT: 213,
+  OBJECT_CREATION: 197,
+  CLASS_INSTANCE_CALL: 198
+} as const
+
+
 export interface AST {
+  parent: AST
   text: string
   getText(): string
   pos: number
   end: number
   arguments?: Array<AST>
   expression: AST
-  kind: 198 | 78 | 200 | 201
+  kind: 198 | 78 | 200 | 201 | typeof AST_KIND[keyof typeof AST_KIND]
   getChildren(): Array<AST>
   update(val?: string, range?: Range)
 }
 
 export type SandBox = {
+  getWorkerProcess(): Promise<any>
   getModel(): MonacoModel
   editor: Editor
   updateCompilerSettings(params)

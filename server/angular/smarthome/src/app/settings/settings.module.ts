@@ -33,6 +33,7 @@ import { NgCircleProgressModule } from 'ng-circle-progress';
 import { RouterModule } from '@angular/router';
 import { MatTabsModule } from '@angular/material/tabs';
 import { HammerGestureConfig, HammerModule, HAMMER_GESTURE_CONFIG } from '@angular/platform-browser';
+import { MobileTimersComponent } from './mobile/timers/timers.component';
 
 @Injectable()
 export class MyHammerConfig extends HammerGestureConfig {
@@ -54,7 +55,7 @@ export class MyHammerConfig extends HammerGestureConfig {
     MonacoEditorComponent,
     TransformerDropDownComponent,
     TimersComponent,
-    TransformationEditorComponent, SettingsMobileComponent, DebounceClickDirective
+    TransformationEditorComponent, SettingsMobileComponent, DebounceClickDirective, MobileTimersComponent
   ],
   imports: [
     CommonModule,
