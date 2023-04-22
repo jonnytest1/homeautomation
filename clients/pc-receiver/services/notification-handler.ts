@@ -28,6 +28,7 @@ export class NotificationHandler {
 
     async show(ws: Websocket) {
         console.log(new Date().toLocaleString(), this.data.notification.title)
+        let audioHandler: RepeatingAudio | undefined = undefined;
         if (this.data.notification.sound && typeof this.data.notification.sound === 'string') {
             if (this.data.notification.sound.match(/[^a-zA-Z0-9]/g)) {
                 console.error("invalid sound string");
@@ -42,14 +43,16 @@ export class NotificationHandler {
                     return;
                 }
                 const responseBlob = (await response.json())[0];
-                const charCodeArray: Array<number> = responseBlob.bytes.split(",")
-                    .map(c => +c)
-                await promises.writeFile(RepeatingAudio.prefixPath + this.data.notification.sound, Uint8Array.from(charCodeArray))
+                if (responseBlob.bytes) {
+                    const charCodeArray: Array<number> = responseBlob.bytes.split(",")
+                        .map(c => +c)
+                    await promises.writeFile(RepeatingAudio.prefixPath + this.data.notification.sound, Uint8Array.from(charCodeArray))
+                }
             }
+            audioHandler = new RepeatingAudio(this.data.notification.sound, this.data.notification.volume)
 
         }
 
-        const audio = new RepeatingAudio(this.data.notification.sound, this.data.notification.volume)
         const actions = ['do1', 'do2'];
 
         if (!this.data.notification.body && this.data.notification.title) {
@@ -64,7 +67,7 @@ export class NotificationHandler {
             ...this.data.notification,
             message: this.data.notification.body,
             wait: true,
-        }, ((error, response: 'dismissed' | 'timeout' | (typeof actions[0]), metadata) => {
+        }, (async (error, response: 'dismissed' | 'timeout' | (typeof actions[0]), metadata) => {
             console.log(`closing notification with ${response} timeout was ` + timeout);
             if (error) {
                 console.error(error);
@@ -76,7 +79,10 @@ export class NotificationHandler {
                     console.error(e);
                 }
             }
-            audio.stop()
+            if (response === "dismissed") {
+                await new Promise(res => setTimeout(res, 2000))
+            }
+            audioHandler?.stop()
         }).bind(this));
     }
 }

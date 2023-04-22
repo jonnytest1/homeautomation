@@ -1,12 +1,12 @@
 import { spawn, ChildProcessWithoutNullStreams } from "child_process"
-
+import { existsSync } from "fs"
 export class RepeatingAudio {
 
     private static readonly vlcExe = 'C:\\Program Files\\VideoLAN\\VLC\\vlc.exe'
 
     public static readonly prefixPath = 'D:\\Jonathan\\Projects\\node\\homeautomation\\clients\\pc-receiver\\services\\sounds\\'
 
-    private startArguments = []
+    private startArguments: Array<string> = []
 
     audioHandle: ChildProcessWithoutNullStreams;
 
@@ -24,6 +24,13 @@ export class RepeatingAudio {
             this.startArguments.push(`--volume=10`);
         }
         this.startAudio(audio);
+    }
+
+
+    public static check() {
+        if (!existsSync(this.vlcExe)) {
+            throw new Error("missing vlc")
+        }
     }
 
 

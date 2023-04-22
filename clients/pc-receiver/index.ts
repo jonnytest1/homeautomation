@@ -2,7 +2,6 @@
 import { NotificationHandler } from './services/notification-handler';
 import registration from './services/registration';
 import { config } from "dotenv"
-import { UrlService } from './services/url-service';
 import { ExpressWs } from 'express-hibernate-wrapper';
 import { RepeatingAudio } from './services/repeating-audio-player';
 
@@ -14,7 +13,7 @@ const express = require('express');
 const serverIp = process.env.serverip || '192.168.178.54'
 const listenOnPort = process.env.listenport || '12345'
 
-
+RepeatingAudio.check()
 registration.register(serverIp, +listenOnPort)
     .then(() => {
         const app: ExpressWs = express();
