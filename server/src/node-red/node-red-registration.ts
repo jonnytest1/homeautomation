@@ -96,14 +96,7 @@ export async function registerType(options: TypeOptions) {
 
         const registrationString = stringify(options.classRef.frontendDefinition)
         console.log(registrationString)
-        registeredModules[options.moduleName] = {
-            name: moduleNamE,
-            id: moduleNamE,
-            nodes: {
-                [typeName]: {
-                    enabled: true,
-                    help: {
-                        de: `<script>
+        const helpScript = `<script>
                                 if(!window.registeredLinks){
                                     window.registeredLinks=true;
                                    (${stringify(globalSCript)})();
@@ -127,6 +120,16 @@ export async function registerType(options: TypeOptions) {
                                 
                                 document.body.appendChild(formScr)
                             </script>`
+
+        registeredModules[options.moduleName] = {
+            name: moduleNamE,
+            id: moduleNamE,
+            nodes: {
+                [typeName]: {
+                    enabled: true,
+                    help: {
+                        de: helpScript,
+                        ["de-DE"]: helpScript
                     },
                     config: `
                        

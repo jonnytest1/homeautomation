@@ -13,4 +13,5 @@
   "typescript.preferences.importModuleSpecifier": "relative",
   "typescript.preferences.quoteStyle": "single",
   "typescript.format.insertSpaceAfterOpeningAndBeforeClosingEmptyBraces": false,
+  "cmake.configureOnOpen": false,
 }

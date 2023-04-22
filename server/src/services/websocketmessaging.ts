@@ -3,6 +3,14 @@ import { Websocket, WS } from 'express-hibernate-wrapper';
 import { client as WebSocketClient } from 'websocket';
 
 
+export class WebsocketError extends Error {
+
+
+    constructor(message: string, public type: "connectFailed" | "error after connect") {
+        super(message)
+    }
+}
+
 @WS({
     path: 'ws'
 })
@@ -24,7 +32,7 @@ class WebsocketMessaging {
             this.client.on('connect', (connection) => {
                 connection.on('error', function (error) {
                     console.log('Connection Error: ' + error.toString());
-                    err(error);
+                    err(new WebsocketError(error, "error after connect"));
                 });
                 connection.on('close', () => {
                     console.log('Connection Closed');
@@ -38,7 +46,7 @@ class WebsocketMessaging {
             });
             this.client.on('connectFailed', () => {
                 console.log(`connection to ws://${ip} failed`);
-                err(`connection to ws://${ip} failed`);
+                err(new WebsocketError(`connection to ws://${ip} failed`, "connectFailed"));
             });
             const connectionUrl = new URL(`ws://${ip}`);
             connectionUrl.searchParams.append('data', JSON.stringify(data));

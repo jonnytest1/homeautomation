@@ -1,7 +1,7 @@
 import type { ReceiverData } from './receiver-data';
 import type { EvaluatedData } from './evaluated-data';
 import { firebasemessageing, FireBaseMessagingPayload } from '../services/firebasemessaging';
-import ws from '../services/websocketmessaging';
+import ws, { WebsocketError } from '../services/websocketmessaging';
 import { logKibana } from '../util/log';
 import { autosaveable, settable } from 'express-hibernate-wrapper';
 import { column, primary, table } from 'hibernatets';
@@ -75,13 +75,23 @@ export class Receiver {
                 "Content-Type": "application/json"
             },
             body: JSON.stringify(evaluatedData.data)
+        }).then(async r => {
+            if (r.status >= 399) {
+                logKibana("ERROR", {
+                    message: "error sending request",
+                    status: r.status,
+                    body: await r.text()
+                })
+            }
         })
         return 0;
     }
 
+
     private sendForWebsocket(evaluatedDataObj: EvaluatedData): number {
         const evaluatedData = evaluatedDataObj.data
         console.log(`notification to ${this.ip} for ${evaluatedData.notification?.title}`)
+        const ts = new Date().toISOString()
         ws.sendWebsocket(this.ip, evaluatedData)
             .then(response => {
                 if (response === "dismissed") {
@@ -93,8 +103,12 @@ export class Receiver {
                     }
                 }
             }).catch(e => {
-                logKibana("ERROR", {
-                    message: "failed connecting to websocket",
+                let errorLevel: "ERROR" | "WARN" = "ERROR"
+                if (e instanceof WebsocketError && e.type === "connectFailed") {
+                    errorLevel = "WARN"
+                }
+                logKibana(errorLevel, {
+                    message: "failed connecting to websocket", ts,
                     evluatedObj: evaluatedDataObj
                 }, e)
             })
@@ -109,6 +123,8 @@ export class Receiver {
         const response = await firebasemessageing.sendNotification(this.firebaseToken, firebaseData);
         if (response.failureCount > 0) {
             logKibana('ERROR', {
+                token: this.firebaseToken,
+                name: this.name,
                 message: 'error sending firebase to receiver',
                 reason: JSON.stringify(response.results)
             });
