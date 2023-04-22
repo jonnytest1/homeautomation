@@ -5,7 +5,7 @@ import type { OnDestroy, OnInit } from '@angular/core';
 import { Optional } from '@angular/core';
 import { Input } from '@angular/core';
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Inject } from '@angular/core';
-import { MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { MAT_LEGACY_DIALOG_DATA as MAT_DIALOG_DATA } from '@angular/material/legacy-dialog';
 import { combineLatest, Subscription, timer } from 'rxjs';
 import { TimerParser } from '../../../utils/time-parser';
 

@@ -1,6 +1,6 @@
 import type { OnChanges, OnInit } from '@angular/core';
 import { Component, Input, ChangeDetectorRef } from '@angular/core';
-import { MatColumnDef } from '@angular/material/table';
+import { MatLegacyColumnDef as MatColumnDef } from '@angular/material/legacy-table';
 import { TableItemFe } from '../inventory.component';
 
 @Component({

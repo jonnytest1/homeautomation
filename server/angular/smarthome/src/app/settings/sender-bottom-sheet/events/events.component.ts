@@ -2,7 +2,7 @@ import type { EventHistoryFe } from '../../interfaces';
 import { SenderFe } from '../../interfaces';
 import type { AfterViewInit, OnInit } from '@angular/core';
 import { Component, ElementRef, Inject, ViewChild } from '@angular/core';
-import { MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { MAT_LEGACY_DIALOG_DATA as MAT_DIALOG_DATA } from '@angular/material/legacy-dialog';
 
 import { GoogleCharts } from 'google-charts';
 @Component({

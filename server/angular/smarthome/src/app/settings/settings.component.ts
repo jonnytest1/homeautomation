@@ -5,7 +5,7 @@ import type { ReceiverFe, SenderFe } from './interfaces';
 import { SettingsService } from '../settings.service';
 import { AppComponent } from '../app.component';
 import { ActivatedRoute, Router } from '@angular/router';
-import { MatSnackBar } from '@angular/material/snack-bar';
+import { MatLegacySnackBar as MatSnackBar } from '@angular/material/legacy-snack-bar';
 import type { AfterViewInit, OnDestroy, OnInit } from '@angular/core';
 import { ChangeDetectorRef, ElementRef, Component, ViewChild } from '@angular/core';
 import { filter, first } from 'rxjs/operators';
