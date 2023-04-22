@@ -1,6 +1,6 @@
 
 #include <map>
-#include "arduino-ref.h"
+#include "arduinoref.h"
 #include <HTTPClient.h>
 #include "http_request.h"
 
@@ -8,6 +8,8 @@ void request(const String url, const std::map<String, String> data, void (*callb
 String serverEndpoint();
 String logEndpoint();
 String getDeviceKey();
+void waitForWifi();
+
 class HttpServer
 {
 public:
@@ -27,5 +29,5 @@ private:
     String (*requestHandle)(HttpRequest *client);
 
     void processRequest();
-    void parseRequest(WiFiClient client);
+    void parseRequest(WiFiClient *client);
 };

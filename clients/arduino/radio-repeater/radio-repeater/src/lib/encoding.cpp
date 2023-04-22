@@ -53,8 +53,3 @@ String base64_encode(const String &in)
         out.push_back('=');
     return out.c_str();
 }
-
-JsonNode parseJson(String body)
-{
-    return JsonNode(body);
-}

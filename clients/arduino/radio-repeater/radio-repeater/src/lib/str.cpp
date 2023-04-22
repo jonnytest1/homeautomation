@@ -1,9 +1,10 @@
 
 
 #include <vector>
-#include "arduino-ref.h"
+#include "arduinoref.h"
 #include <sstream>
-
+#include <string>
+#include <iostream>
 std::vector<String> string_split(String search, String delimiter)
 {
     std::string s = search.c_str();
@@ -27,8 +28,17 @@ int stoi(String str)
 {
     std::stringstream ss;
     int num;
-    ss << str;
+    std::string strVal = str.c_str();
+    ss << strVal;
     ss >> num;
+
+    return num;
+}
+
+bool isWhitespace(char str)
+{
+    int charcode = int(str);
+    return charcode == 10 || charcode == 32;
 }
 
 bool isNumeric(String str)
@@ -37,10 +47,26 @@ bool isNumeric(String str)
     {
         char character = str[i];
         int charcode = int(character);
-        if (charcode < 30 || charcode > 58)
+        if ((charcode < 48 || charcode >= 58))
         {
             return false;
         }
     }
     return true;
+}
+
+std::string str_replace_all(std::string container, std::string first, std::string with)
+{
+    size_t start_pos = container.find(first);
+    while (start_pos != std::string::npos)
+    {
+        container = container.replace(start_pos, first.length(), with);
+        start_pos = container.find(first);
+    }
+    return container;
+}
+
+std::string sub_string(std::string str, int start, int end)
+{
+    return str.substr(start, end - start);
 }
