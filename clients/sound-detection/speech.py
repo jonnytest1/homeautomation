@@ -34,7 +34,10 @@ args["samplerate"] = int(device_info['default_samplerate'])
 args["device"] = device_info["name"]
 history: List[SpeechEvent] = []
 
-with sd.RawInputStream(samplerate=args["samplerate"], blocksize=8000, device=args["device"], dtype='int16',
+device_id = sd._get_device_id(args["device"], "input", raise_on_error=False)
+if device_id == -1:
+    device_id = 1
+with sd.RawInputStream(samplerate=args["samplerate"], blocksize=8000, device=device_id, dtype='int16',
                        channels=1, callback=callback):
     print('#' * 80)
     print('Press Ctrl+C to stop the recording')

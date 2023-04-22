@@ -44,7 +44,8 @@ for sender in senders:
         for transformation in sender.transformation:
             if transformation.name is not None:
                 simpleName = re.sub(
-                    "[^a-zA-Z]", "", transformation.name).lower()
+                    "[^a-zA-Z]", "", transformation.name).lower().replace("camenbert", "cheese")
+
                 triggerMap[simpleName] = transformation.transformationKey
 
 
