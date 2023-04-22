@@ -1,4 +1,4 @@
-#include <Arduino.h>
+#include "arduinoref.h"
 using namespace std::__cxx11;
 
 char const *letters = "abcdefghijklmnopqrstuvwxyz0123456789";

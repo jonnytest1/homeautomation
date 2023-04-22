@@ -1,16 +1,20 @@
 
 #include <map>
-#include <Arduino.h>
+#include "arduinoref.h"
 #include <HTTPClient.h>
+#include "http_request.h"
 
 void request(const String url, const std::map<String, String> data, void (*callback)(int httpCode, String response), boolean b64);
 String serverEndpoint();
 String logEndpoint();
+String getDeviceKey();
+void waitForWifi();
+
 class HttpServer
 {
 public:
     void step();
-    HttpServer(int port, String (*callback)(String header, WiFiClient client));
+    HttpServer(int port, String (*callback)(HttpRequest *client));
     void begin();
     String getIp();
 
@@ -22,8 +26,8 @@ private:
     unsigned long previousTime = 0;
     // Define timeout time in milliseconds (example: 2000ms = 2s)
     const long timeoutTime = 2000;
-    String (*requestHandle)(String header, WiFiClient client);
+    String (*requestHandle)(HttpRequest *client);
 
     void processRequest();
-    void parseRequest(WiFiClient client);
+    void parseRequest(WiFiClient *client);
 };

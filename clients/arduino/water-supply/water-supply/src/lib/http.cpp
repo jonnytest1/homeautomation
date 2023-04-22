@@ -12,7 +12,10 @@ String logEndpoint()
 {
     return logHost;
 }
-
+String getDeviceKey()
+{
+    return deviceKey;
+}
 String localIp;
 
 void waitForWifi()
@@ -23,6 +26,8 @@ void waitForWifi()
     }
     WiFi.mode(WIFI_STA);
     WiFi.disconnect();
+    String hostname = "esp32-devicekey:" + String(deviceKey);
+    WiFi.setHostname(hostname.c_str());
     WiFi.begin(ssid, password);
     int t = 0;
     while (WiFi.status() != WL_CONNECTED)
@@ -36,6 +41,7 @@ void waitForWifi()
             return;
         }
     }
+
     localIp = WiFi.localIP().toString();
     Serial.println(localIp);
 }
@@ -72,7 +78,7 @@ void request(const String url, const std::map<String, String> data, void (*callb
     httpf.end();
 }
 
-HttpServer::HttpServer(int port, String (*callback)(String header, WiFiClient client))
+HttpServer::HttpServer(int port, String (*callback)(HttpRequest *client))
 {
     wifiServer = WiFiServer(port);
     requestHandle = callback;
@@ -86,6 +92,10 @@ void HttpServer::begin()
 
 void HttpServer::step()
 {
+    if (WiFi.status() != WL_CONNECTED)
+    {
+        waitForWifi();
+    }
     WiFiClient client = wifiServer.available();
     if (client)
     {
@@ -93,7 +103,7 @@ void HttpServer::step()
         currentTime = millis();
         previousTime = currentTime;
 
-        parseRequest(client);
+        parseRequest(&client);
     }
 }
 
@@ -102,16 +112,16 @@ String HttpServer::getIp()
     return localIp;
 }
 
-void HttpServer::parseRequest(WiFiClient client)
+void HttpServer::parseRequest(WiFiClient *client)
 {
     String currentLine = "";
     String header = "";
-    while (client.connected() && currentTime - previousTime <= timeoutTime)
+    while (client->connected() && currentTime - previousTime <= timeoutTime)
     { // loop while the client's connected
         currentTime = millis();
-        if (client.available())
+        if (client->available())
         {
-            char c = client.read();
+            char c = client->read();
             header += c;
             if (c == '\n')
             {
@@ -119,16 +129,12 @@ void HttpServer::parseRequest(WiFiClient client)
                 // that's the end of the client HTTP request, so send a response:
                 if (currentLine.length() == 0)
                 {
-
-                    // HTTP headers always start with a response code (e.g. HTTP/1.1 200 OK)
-                    // and a content-type so the client knows what's coming, then a blank line:
-                    client.println("HTTP/1.1 200 OK");
-                    client.println("Content-type:application/json");
-                    client.println("Connection: close");
-                    client.println();
-                    String body = requestHandle(header, client);
-                    client.println(body);
-                    client.println();
+                    HttpRequest request = HttpRequest(header, client, requestHandle);
+                    if (request.asyncSend)
+                    {
+                        Serial.println("keeping async open");
+                        return;
+                    }
                     break;
                 }
                 else
@@ -145,7 +151,6 @@ void HttpServer::parseRequest(WiFiClient client)
 
     header = "";
     // Close the connection
-    client.stop();
     Serial.println("Client disconnected.");
     Serial.println();
 }

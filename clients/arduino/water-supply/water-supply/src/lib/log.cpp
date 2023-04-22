@@ -1,6 +1,6 @@
 #include "http.h"
 #include <map>
-#include <Arduino.h>
+#include "arduinoref.h"
 
 void logResponse(int status, String response)
 {
