@@ -61,7 +61,6 @@ public class MessagingService extends FirebaseMessagingService  {
     @Override
     public void onNewToken(String token) {
         Log.d(TAG, "Refreshed token: " + token);
-
         sendRegistrationToServer(token);
     }
 
@@ -91,9 +90,9 @@ public class MessagingService extends FirebaseMessagingService  {
                     .createObjectNode();
             jsonNode.set("firebaseToken",new TextNode(token));
             jsonNode.set("itemRef",new IntNode(RECEIVER_ID));
-            CustomResponse  updateresponse=new CustomHttp().target("https://192.168.178.54/nodets/rest/receiver")
+            CustomResponse  updateresponse=new CustomHttp().target("https://192.168.178.54/nodets/rest/auto/receiver")
                     .request() //
-                    .put(jsonNode .toString(),"application/json");
+                    .put(jsonNode.toString(),"application/json");
             if(updateresponse.getResponseCode()!=200){
                 Log.e(TAG,"failed updating reeiver"+"\n"+updateresponse.getResponseCode()+"\n"+updateresponse.getContent());
             }

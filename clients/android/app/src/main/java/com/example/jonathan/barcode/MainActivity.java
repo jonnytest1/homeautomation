@@ -28,7 +28,7 @@ public class MainActivity extends FragmentActivity {
             ActivityCompat.requestPermissions(this,new String[]{Manifest.permission.CAMERA},1);
         };
 
-       PagerAdapter  pagerAdapter = new PagerAdapter(this);
+        PagerAdapter  pagerAdapter = new PagerAdapter(this);
         ViewPager2 viewPager = findViewById(R.id.viewPager2);
         viewPager.setAdapter(pagerAdapter);
     }

@@ -13,7 +13,7 @@ public class PagerAdapter extends FragmentStateAdapter {
     public PagerAdapter(@NonNull FragmentActivity fm) {
         super(fm);
         fragments=new Fragment[]{
-                new ScannerFragment(),new SecondFragment(),new IdentFragment(fm)
+                new ScannerFragment(),new SecondFragment(),DebugFragment.newInstance(1)
         };
     }
     @NonNull
