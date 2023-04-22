@@ -181,7 +181,6 @@ export class MonacoEditorComponent implements OnInit, OnDestroy, ControlValueAcc
     }
 
     if (element.expression) {
-      debugger;
       this.addFunctionHighlighting(element.expression);
     }
 
