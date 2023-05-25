@@ -4,6 +4,7 @@
                   class="transformerselection">
     <mat-label>transformer</mat-label>
     <mat-select [(value)]="transformer"
+                [panelClass]="'dropdown'"
                 (valueChange)="checkNew($event)">
       <mat-select-trigger *ngIf="transformer">
         {{transformer.name}}({{transformer.transformationKey}})
@@ -12,14 +13,15 @@
 
       <mat-option *ngFor="let transformation of data.transformation"
                   [value]="transformation">
-        <button mat-icon-button
-                class="right"
-                (click)="transformationLoeschen($event)"
-                aria-label="Example icon button with a vertical three dot icon">
-          <mat-icon>delete</mat-icon>
-        </button>
-        {{transformation.name}} ({{transformation.transformationKey}})
-
+        <span class="listitem">
+          <button mat-icon-button
+                  class="right"
+                  (click)="transformationLoeschen($event)"
+                  aria-label="Example icon button with a vertical three dot icon">
+            <mat-icon>delete</mat-icon>
+          </button>
+          {{transformation.name}} ({{transformation.transformationKey}})
+        </span>
       </mat-option>
       <mat-option *ngFor="let transformationStr of missingKeys"
                   [value]="{id:undefined,transformationKey:transformationStr}">

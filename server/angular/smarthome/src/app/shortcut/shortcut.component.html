@@ -1,0 +1,65 @@
+<div class="gridinset"
+     (mousemove)="updatePosition($event,gridwrapper)"
+     (mouseup)="drop()"
+     (swipedown)="configSwipe()">
+
+  <div class="gridwrapper"
+       #gridwrapper>
+
+    <div *ngFor="let config of (tempNodes??nodes)"
+         (press)="configPressed(config,$event)">
+      <app-button *ngIf="config.type=='button'"
+                  [config]="config"
+                  (actionTrigger)="baseAction(config)">
+      </app-button>
+      <app-progress *ngIf="config.type=='progress'"
+                    [config]="config">
+
+      </app-progress>
+
+    </div>
+    <div>1</div>
+    <div>2</div>
+  </div>
+</div>
+
+<div class="actions-backdrop"
+     (tap)="showActions=false;"
+     *ngIf="showActions">
+  <div class="actions">
+    <ng-container *ngFor="let receiver of receivers$|async">
+      <div *ngFor="let action of receiver.actions"
+           class="actionchoice"
+           (mousedown)="dragNewActionStart($event,receiver,action)"
+           (touchstart)="dragNewActionStart($event,receiver,action)">
+        <ng-container *ngTemplateOutlet="actionDisplay;context:{$implicit:{receiver,action}}"></ng-container>
+      </div>
+    </ng-container>
+  </div>
+</div>
+
+<div class="options"
+     (tap)="editingConfig=undefined;"
+     *ngIf="editingConfig">
+  <div class="optionsmenu">
+    <button mat-raised-button
+            (mouseup)="removeCfg(editingConfig)">remove</button>
+    <button mat-raised-button>edit</button>
+  </div>
+</div>
+
+
+<div class="dragoverlay"
+     [style.top]="tempCursorPos.y+'px'"
+     [style.left]="tempCursorPos.x+'px'"
+     *ngIf="tempNodes && tempCursorPos && tempData">
+  <ng-container *ngTemplateOutlet="actionDisplay;context:{$implicit:tempData}"></ng-container>
+</div>
+
+
+<ng-template #actionDisplay
+             let-context
+             let-receiver>
+  {{context.receiver.name}}<br>
+  {{context.action.name}}
+</ng-template>

@@ -11,6 +11,12 @@
       <a mat-list-item
          (mouseover)="click($event)"
          routerLinkActive="activeRoute"
+         routerLink="shortcut">
+        Shortcuts
+      </a>
+      <a mat-list-item
+         (mouseover)="click($event)"
+         routerLinkActive="activeRoute"
          [routerLink]="(mobile$|async) ? 'setup/mobile':'setup'">
         Setup
       </a>

@@ -4,7 +4,7 @@ import { SenderBottomSheetComponent } from './sender-bottom-sheet/sender-bottom-
 import type { SettingsComponent } from './settings.component';
 import type { SenderFe } from './interfaces';
 import type { ActivatedRoute, Router } from '@angular/router';
-import type { MatLegacySnackBar as MatSnackBar, MatLegacySnackBarRef as MatSnackBarRef } from '@angular/material/legacy-snack-bar';
+import type { MatSnackBar, MatSnackBarRef } from '@angular/material/snack-bar';
 import type { ComponentType } from '@angular/cdk/portal';
 import { combineLatest } from 'rxjs';
 

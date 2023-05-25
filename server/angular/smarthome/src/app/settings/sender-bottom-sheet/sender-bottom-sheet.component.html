@@ -1,77 +1,78 @@
-<form>
-    <mat-card autosaving-provider
-              [dataRef]="data.id"
-              resource="sender"
-              dataRefName="itemRef">
-        <mat-card-title>
-            <mat-form-field class="example-full-width">
-                <input [(ngModel)]="data.name"
-                       matInput
-                       placeholder="Name"
-                       name=name
-                       autosaving>
-            </mat-form-field>
-            <div class="id right">
-                <div class="toprow">
-                    {{data.id}} {{isManual() ?'': data.deviceKey}}
-                    <button mat-icon-button
-                            *ngIf="isManual()"
-                            (click)="deleteSender()"
-                            class="delete_icon">
-                        <mat-icon>delete_forever</mat-icon>
-                    </button>
-                </div>
+<form mat-dialog-content
+      style="width:1000px">
+  <mat-card autosaving-provider
+            [dataRef]="data.id"
+            resource="sender"
+            dataRefName="itemRef">
+    <mat-card-title>
+      <mat-form-field class="example-full-width">
+        <input [(ngModel)]="data.name"
+               matInput
+               placeholder="Name"
+               name=name
+               autosaving>
+      </mat-form-field>
+      <div class="id right">
+        <div class="toprow">
+          {{data.id}} {{isManual() ?'': data.deviceKey}}
+          <button mat-icon-button
+                  *ngIf="isManual()"
+                  (click)="deleteSender()"
+                  class="delete_icon">
+            <mat-icon>delete_forever</mat-icon>
+          </button>
+        </div>
 
-                <div class="center">
-                    <app-transformer-drop-down [data]="data"
-                                               *ngIf="data.transformationAttribute"
-                                               [(transformer)]="transformer">
-                    </app-transformer-drop-down>
-                    <button class="right test-button"
-                            color="primary"
-                            (debouncedClick)="send()"
-                            mat-flat-button>
-                        {{ isManual() ? 'Trigger' : 'Test'}}
-                    </button>
-                    <button mat-icon-button
-                            class="right"
-                            (debouncedClick)="displayTimers()"
-                            aria-label="battery display">
-                        <mat-icon>schedule</mat-icon>
-                    </button>
-                    <button mat-icon-button
-                            class="right"
-                            (debouncedClick)="displayEvents()"
-                            aria-label="battery display">
-                        <mat-icon>date_range</mat-icon>
-                    </button>
-                    <button mat-icon-button
-                            class="right"
-                            (debouncedClick)="displayBattery()"
-                            aria-label="battery display">
-                        <mat-icon>battery_unknown</mat-icon>
-                    </button>
-                </div>
-            </div>
-        </mat-card-title>
-        <mat-card-content>
-            <div class="content">
-                <mat-form-field class="description">
-                    <textarea matInput
-                              class="description"
-                              name=description
-                              multiple
-                              autosaving
-                              maxlength=512
-                              placeholder="description"
-                              [(ngModel)]="data.description"></textarea>
-                </mat-form-field>
+        <div class="center">
+          <app-transformer-drop-down [data]="data"
+                                     *ngIf="data.transformationAttribute"
+                                     [(transformer)]="transformer">
+          </app-transformer-drop-down>
+          <button class="right test-button"
+                  color="primary"
+                  (debouncedClick)="send()"
+                  mat-flat-button>
+            {{ isManual() ? 'Trigger' : 'Test'}}
+          </button>
+          <button mat-icon-button
+                  class="right"
+                  (debouncedClick)="displayTimers()"
+                  aria-label="battery display">
+            <mat-icon fontIcon="schedule"></mat-icon>
+          </button>
+          <button mat-icon-button
+                  class="right"
+                  (debouncedClick)="displayEvents()"
+                  aria-label="battery display">
+            <mat-icon fontIcon="date_range">date_range</mat-icon>
+          </button>
+          <button mat-icon-button
+                  class="right"
+                  (debouncedClick)="displayBattery()"
+                  aria-label="battery display">
+            <mat-icon fontIcon="battery_unknown">battery_unknown</mat-icon>
+          </button>
+        </div>
+      </div>
+    </mat-card-title>
+    <mat-card-content>
+      <div class="content">
+        <mat-form-field class="description">
+          <textarea matInput
+                    class="description"
+                    name=description
+                    multiple
+                    autosaving
+                    maxlength=512
+                    placeholder="description"
+                    [(ngModel)]="data.description"></textarea>
+        </mat-form-field>
 
-                <app-transformation-editor *ngIf="transformer"
-                                           [title]="title$|async"
-                                           [transformer]="transformer">
-                </app-transformation-editor>
-            </div>
-        </mat-card-content>
-    </mat-card>
+        <app-transformation-editor *ngIf="transformer"
+                                   [title]="title$|async"
+                                   [transformer]="transformer">
+        </app-transformation-editor>
+      </div>
+    </mat-card-content>
+  </mat-card>
 </form>

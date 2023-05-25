@@ -6,7 +6,7 @@ import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 import type { Observable } from 'rxjs';
 import { BehaviorSubject } from 'rxjs';
-import { map, tap } from 'rxjs/operators';
+import { map, switchMap, tap } from 'rxjs/operators';
 import { v4 as uuid } from 'uuid';
 
 
@@ -38,6 +38,8 @@ export class SettingsService extends AbstractHttpService {
 
   public timers$ = this.timers.asObservable();
 
+  private readonly _receivers$ = new BehaviorSubject<Record<string, ReceiverFe>>({});
+  readonly receivers$ = this._receivers$.asObservable();
   private readonly _senders$ = new BehaviorSubject<Array<SenderFe>>([]);
   readonly senders$ = this._senders$.asObservable();
 
@@ -66,10 +68,21 @@ export class SettingsService extends AbstractHttpService {
       this.timers.next(messageEvent.data);
     } else if (messageEvent.type === 'senderUpdate') {
       this.updateSenders(messageEvent.data as SenderFe[]);
-    } else if (messageEvent.type == "inventoryUpdate") {
+    } else if (this.isType(messageEvent, 'inventoryUpdate')) {
       this.inventory.next(messageEvent.data)
+    } else if (this.isType(messageEvent, 'receiverUpdate')) {
+      this.updateReceiver(messageEvent.data);
     }
   }
+
+  updateReceiver(receiver: ReceiverFe) {
+    const currentReceivers = { ...this._receivers$.value };
+    currentReceivers[receiver.deviceKey] = receiver;
+    this._receivers$.next(currentReceivers)
+
+
+  }
+
   updateSenders(data: SenderFe[]) {
     if (!data) {
       return
@@ -139,7 +152,12 @@ export class SettingsService extends AbstractHttpService {
   getMissingSenderKeys(senderId: number) {
     return this.get<Array<string>>(`${environment.prefixPath}rest/transformation/keys/${senderId}`);
   }
-
+  triggerAction(deviceKey: string, actionName: string) {
+    return this.postForString(`${environment.prefixPath}rest/receiver/${deviceKey}/action/${actionName}`, {});
+  }
+  confirmAction(deviceKey: string, actionName: string) {
+    return this.postForString(`${environment.prefixPath}rest/receiver/${deviceKey}/action/${actionName}/confirm`, {});
+  }
 
   getSenders() {
     return this.get<Array<SenderFe>>(environment.prefixPath + 'rest/sender').pipe(
@@ -163,7 +181,18 @@ export class SettingsService extends AbstractHttpService {
   }
 
   getReceivers() {
-    return this.get<Array<ReceiverFe>>(environment.prefixPath + 'rest/receiver');
+
+
+    return this.get<Array<ReceiverFe>>(environment.prefixPath + 'rest/receiver')
+      .pipe(
+        tap(receivers => {
+          receivers.forEach(rec => {
+            this.updateReceiver(rec);
+          }),
+            switchMap(() => this._receivers$
+              .pipe(
+                map(receivers => Object.values(receivers) as Array<ReceiverFe>)))
+        }))
   }
   getTitleKeys(id): Observable<string> {
     return this.get<Array<string>>(`${environment.prefixPath}rest/connection/key?itemRef=${id}`).pipe(

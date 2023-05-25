@@ -75,7 +75,7 @@ export class LocalStorageSerialization {
       ...options,
       elementMap: this.serialisationMap as FromJsonOptions["elementMap"],
       controlRefs: controlRegfs,
-      constorlRefsInitialized: controlRefsinitialized,
+      constorlRefsInitialized: controlRefsinitialized.prRef,
       controllerRefs: controllerRefs
     }));
 

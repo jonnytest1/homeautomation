@@ -1,69 +1,72 @@
-
-:host{
-    flex-grow: 1;
+:host {
+  flex-grow: 1;
 }
 
-.content-wrapper{
-    height: 100%;
-    flex: 1;
-    display: flex;
-    justify-content: center;
+.content-wrapper {
+  height: 100%;
+  flex: 1;
+  display: flex;
+  justify-content: center;
 
 
-    td{
-        vertical-align: top;
-    
-        .list-item{
-            display: inline-flex;
-            flex-direction: row;
-            align-items: center;
-
-            &.iconlistitem{
-                justify-content: center;
-                cursor: pointer;
-
-                mat-icon{
-                    margin-right: 32px;
-                }
-            }
-    
-           
-
-            mat-card{
-
-               
-
-                margin: 4px 0px;
-
-           
-
-                &.editable{
-                    min-width: 200px;
-                }
-
-                &.sender{
-                   
-                   
-                }
-
-                .mat-card-subtitle {
-                    overflow: hidden;
-                    text-overflow: ellipsis;
-                    width: 400px;
-
-                    max-height: 3em;
-                    line-height: 1em;
-                }
-            }
+  td {
+    vertical-align: top;
 
 
-            mat-icon.startConnection{
-                cursor: pointer;
+    .mat-list-item {
+      width: 100%;
 
-                &.active{
-                    color: green;
-                }
-            }
+
+      .list-item {
+        display: inline-flex;
+        flex-direction: row;
+        align-items: center;
+        flex-grow: 1;
+        width: 100%;
+
+
+
+        &.iconlistitem {
+          justify-content: center;
+          cursor: pointer;
+
+          mat-icon {
+            margin-right: 32px;
+          }
         }
+
+
+
+        mat-card {
+          margin: 4px 0px;
+          padding: 16px;
+          width: 100%;
+
+          &.editable {
+            min-width: 200px;
+          }
+
+          &.sender {}
+
+          .mat-card-subtitle {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            width: 400px;
+
+            max-height: 3em;
+            line-height: 1em;
+          }
+        }
+
+
+        mat-icon.startConnection {
+          cursor: pointer;
+
+          &.active {
+            color: green;
+          }
+        }
+      }
     }
+  }
 }

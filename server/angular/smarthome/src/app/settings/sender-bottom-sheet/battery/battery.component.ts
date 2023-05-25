@@ -1,12 +1,12 @@
 import { SenderFe } from '../../interfaces';
 import type { AfterViewInit, OnInit } from '@angular/core';
 import { Component, ElementRef, Inject, ViewChild } from '@angular/core';
-import { MAT_LEGACY_DIALOG_DATA as MAT_DIALOG_DATA } from '@angular/material/legacy-dialog';
+import { MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { GoogleCharts } from 'google-charts';
 @Component({
   selector: 'app-battery',
   templateUrl: './battery.component.html',
-  styleUrls: ['./battery.component.css']
+  styleUrls: ['./battery.component.less']
 })
 export class BatteryComponent implements OnInit, AfterViewInit {
 

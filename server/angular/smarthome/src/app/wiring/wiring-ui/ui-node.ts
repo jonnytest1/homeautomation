@@ -5,8 +5,8 @@ import type { Vector2 } from '../util/vector';
 import type { Collection } from '../wirings/collection';
 import type { Wire } from '../wirings/wire';
 import { InOutComponent } from './in-out/in-out.component';
-import type { MatLegacySnackBarRef as MatSnackBarRef } from '@angular/material/legacy-snack-bar';
-import { MatLegacySnackBar as MatSnackBar } from '@angular/material/legacy-snack-bar';
+import type { MatSnackBarRef } from '@angular/material/snack-bar';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import type { ParrallelWire } from '../wirings/parrallel-wire';
 
 @Directive()

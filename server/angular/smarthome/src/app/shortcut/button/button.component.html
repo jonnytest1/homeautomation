@@ -1,0 +1,8 @@
+<div class="wrapper"
+     *ngIf="receiver$ |async;let receiver">
+  <button #buttonRef
+          (click)="buttonClick(buttonRef)"
+          [style.backgroundColor]="getBackgroundColor(receiver)">
+    {{config.receiver}} - {{config.displayText}}
+  </button>
+</div>

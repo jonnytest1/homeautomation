@@ -1,0 +1,70 @@
+.gridinset {
+  padding: 16px;
+  position: absolute;
+  inset: 0px;
+
+  .gridwrapper {
+    display: grid;
+    width: 100%;
+    flex-wrap: wrap;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    grid-column-gap: 1em;
+
+    * {
+      aspect-ratio: 1/1;
+      text-align: center;
+    }
+  }
+}
+
+.options {
+  position: absolute;
+  bottom: 0px;
+  left: 0px;
+  right: 0px;
+  top: 0px;
+
+  background-color: #2626268f;
+
+
+  .optionsmenu {
+    background-color: #c8d7e5;
+    position: absolute;
+
+    bottom: 0px;
+    left: 0px;
+    right: 0px;
+    //height: 200px;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+
+    button {
+      width: 100%;
+    }
+  }
+}
+
+
+.actions-backdrop {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+
+  .actions {
+    max-height: 200px;
+    overflow: auto;
+    display: flex;
+
+    .actionchoice {
+      text-align: center;
+      border: 1px solid black;
+    }
+  }
+}
+
+
+.dragoverlay {
+  position: fixed;
+}

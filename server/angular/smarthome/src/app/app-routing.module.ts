@@ -12,8 +12,12 @@ import { WiringComponent } from './wiring/wiring.component';
 const routes: Routes = [
   {
     path: "",
-    redirectTo: "setup",
+    redirectTo: "shortcut",
     pathMatch: "full"
+  },
+  {
+    path: 'shortcut',
+    loadComponent: () => import('./shortcut/shortcut.component').then(m => m.ShortcutComponent)
   },
   {
     path: 'setup',

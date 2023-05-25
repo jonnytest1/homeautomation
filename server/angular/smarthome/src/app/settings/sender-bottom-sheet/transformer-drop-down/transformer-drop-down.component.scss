@@ -2,9 +2,10 @@
 .container{
   display: inline-flex;
 
+  
 
   mat-form-field{
-    height: 50px;
+    //height: 50px;
   
     &.transformerselection{
       margin-right: 14px;
@@ -21,7 +22,18 @@
   }
   
 }
-
+::ng-deep{
+  .cdk-overlay-pane{
+    width: unset !important;
+  }
+}
  ::ng-deep .mat-select-panel  {
     max-height: 400px !important;
+  }
+
+  ::ng-deep{
+  .listitem{
+    white-space: nowrap !important;
+  }
+
   }

@@ -13,7 +13,7 @@ import { NgxDropzoneModule } from 'ngx-dropzone';
 import { MatLegacyInputModule as MatInputModule } from '@angular/material/legacy-input';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
-import { MatLegacyButtonModule as MatButtonModule } from '@angular/material/legacy-button';
+import { MatButtonModule } from '@angular/material/button';
 @NgModule({
   imports: [
     CommonModule,
@@ -28,4 +28,4 @@ import { MatLegacyButtonModule as MatButtonModule } from '@angular/material/lega
   declarations: [OptionsComponent],
   providers: [OptionsService]
 })
-export class OptionsModule { }
+export class OptionsModule {}

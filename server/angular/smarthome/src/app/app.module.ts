@@ -7,10 +7,10 @@ import { ErrorHandler, NgModule } from '@angular/core';
 
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { MatLegacyListModule as MatListModule } from '@angular/material/legacy-list';
+import { MatListModule } from '@angular/material/list';
 import { MatIconModule } from '@angular/material/icon';
-import { MatLegacyTableModule as MatTableModule } from '@angular/material/legacy-table';
-import { BrowserModule, HammerModule } from '@angular/platform-browser';
+import { MatTableModule } from '@angular/material/table';
+import { BrowserModule, HAMMER_GESTURE_CONFIG, HammerGestureConfig, HammerModule } from '@angular/platform-browser';
 import { FormsModule } from '@angular/forms';
 import { HTTP_INTERCEPTORS } from '@angular/common/http';
 import { TimersComponent } from './timers/timers.component';
@@ -19,11 +19,21 @@ import { NgCircleProgressModule } from 'ng-circle-progress';
 import { SettingsService } from './settings.service';
 import { TodoComponent } from './todo/todo.component';
 import { InventoryComponent } from './inventory/inventory.component';
-import { MatLegacyInputModule as MatInputModule } from '@angular/material/legacy-input';
+import { MatInputModule } from '@angular/material/input';
 import { RegexHighlightedComponent } from './inventory/regex-highlighted/regex-highlighted.component';
 import { WiringModule } from './wiring/wiring.module';
 import { MatSortModule } from '@angular/material/sort';
 import { IframeComponent } from './iframe/iframe.component';
+/**
+ * with sideeffects
+ */
+import { DIRECTION_ALL } from 'hammerjs';
+
+export class MyHammerConfig extends HammerGestureConfig {
+  overrides = <any>{
+    swipe: { direction: DIRECTION_ALL },
+  };
+}
 
 @NgModule({
   declarations: [
@@ -33,7 +43,8 @@ import { IframeComponent } from './iframe/iframe.component';
     TodoComponent,
     InventoryComponent,
     RegexHighlightedComponent,
-    IframeComponent
+    IframeComponent,
+
   ],
   imports: [
     BrowserModule, HammerModule,
@@ -53,6 +64,10 @@ import { IframeComponent } from './iframe/iframe.component';
       provide: HTTP_INTERCEPTORS,
       useClass: CustomErrorHandler,
       multi: true // multiple interceptors are possible
+    },
+    {
+      provide: HAMMER_GESTURE_CONFIG,
+      useClass: MyHammerConfig
     }
   ],
   bootstrap: [AppComponent]

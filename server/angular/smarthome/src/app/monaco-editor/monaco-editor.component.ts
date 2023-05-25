@@ -4,6 +4,7 @@ import type { ControlValueAccessor } from '@angular/forms';
 import { NgModel, NG_VALUE_ACCESSOR } from '@angular/forms';
 import type { SandBox, AST, SandboxFactory, Main, MonacoGlobal, Decoration } from './editor';
 import { AST_KIND } from './editor';
+import { ResolvablePromise } from '../utils/resolvable-promise';
 
 
 declare let monaco: MonacoGlobal;
@@ -116,7 +117,7 @@ export class MonacoEditorComponent implements OnInit, OnDestroy, ControlValueAcc
     }
   }
 
-  private createEditor(sandboxFactory: SandboxFactory, main: Main) {
+  private async createEditor(sandboxFactory: SandboxFactory, main: Main) {
     this.createTheme();
     this.setupGlobalTypes();
 
@@ -130,6 +131,10 @@ export class MonacoEditorComponent implements OnInit, OnDestroy, ControlValueAcc
       }
     };
     window['ts'].Debug.setAssertionLevel(3)
+
+    while (!document.querySelector("#" + sandboxConfig.domID)) {
+      await ResolvablePromise.delayed(10);
+    }
     this.sandbox = sandboxFactory.createTypeScriptSandbox(sandboxConfig, main, window['ts']);
 
     this.sandbox.updateCompilerSettings({

@@ -5,11 +5,12 @@ import type { ControlValueAccessor } from '@angular/forms';
 import { NgModel, NG_VALUE_ACCESSOR } from '@angular/forms';
 import * as CodeMirror from 'codemirror';
 
-const customcss = require('./custom.css');
-const css = require('codemirror/lib/codemirror.css');
-const hintCss = require('codemirror/addon/hint/show-hint.css');
+const customcss = require('./custom.css?raw');
+const css = require('codemirror/lib/codemirror.css?raw');
+const hintCss = require('codemirror/addon/hint/show-hint.css?raw');
 
 const csss = [customcss, hintCss];
+
 export const CUSTOM_INPUT_CONTROL_VALUE_ACCESSOR: any = {
   provide: NG_VALUE_ACCESSOR,
   useExisting: forwardRef(() => CodeEditorComponent),

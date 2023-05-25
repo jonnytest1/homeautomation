@@ -1,11 +1,19 @@
 /* You can add global styles to this file, and also import other style files */
-@import '@angular/material/prebuilt-themes/deeppurple-amber.css';
+@import '~@angular/material/prebuilt-themes/deeppurple-amber.css';
 
-.unlimitedsnackbar{
-    max-width: 100vw !important;
-   // max-width : calc(100% - 50px) !important;
-   // max-height: calc(100% - 50px) !important;
+.unlimitedsnackbar {
+  max-width: 100vw !important;
+  // max-width : calc(100% - 50px) !important;
+  // max-height: calc(100% - 50px) !important;
 
-    //max-width: 94vw !important;
-   // max-height: 56vw !important;
+  //max-width: 94vw !important;
+  // max-height: 56vw !important;
+
+  .mdc-snackbar__surface {
+    max-width: unset !important;
+  }
+}
+
+.mat-icon {
+  color: black
 }

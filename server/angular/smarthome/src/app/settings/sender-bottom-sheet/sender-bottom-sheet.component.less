@@ -1,16 +1,26 @@
 form {
+  min-width: 600px;
+
   mat-card {
+    padding: 16px;
+
+    mat-form-field.example-full-width {
+      margin-top: 32px;
+      transform: translateX(16px);
+    }
+
     .id {
       font-size: 36px;
-       text-align: end;
+      text-align: end;
 
 
-       .toprow{
+      .toprow {
         display: flex;
         justify-content: flex-end;
         align-items: center;
-  
-        .delete_icon{
+        color: black;
+
+        .delete_icon {
           margin-bottom: 4px;
         }
       }
@@ -18,22 +28,22 @@ form {
 
 
 
- 
+
     .right {
       float: right;
-     
+
       .center {
         display: inline-flex;
         float: right;
         font-size: 16px;
         align-items: center;
-    
 
-        mat-form-field{
+
+        mat-form-field {
           height: 60px;
         }
 
-        .test-button{
+        .test-button {
           height: 40px;
         }
       }
@@ -51,7 +61,7 @@ form {
           width: 500px;
         }
 
-       
+
       }
     }
   }

@@ -5,7 +5,7 @@ import type { ReceiverFe, SenderFe } from './interfaces';
 import { SettingsService } from '../settings.service';
 import { AppComponent } from '../app.component';
 import { ActivatedRoute, Router } from '@angular/router';
-import { MatLegacySnackBar as MatSnackBar } from '@angular/material/legacy-snack-bar';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import type { AfterViewInit, OnDestroy, OnInit } from '@angular/core';
 import { ChangeDetectorRef, ElementRef, Component, ViewChild } from '@angular/core';
 import { filter, first } from 'rxjs/operators';
@@ -75,9 +75,13 @@ export class SettingsComponent implements OnInit, AfterViewInit, OnDestroy {
   private fetchData() {
     return Promise.all([
       this.service.senders$.toPromise(),
-      this.service.getReceivers().toPromise().then(receivers => {
-        this.receivers = receivers;
-      })]);
+      this.service.getReceivers()
+        .pipe(
+          filter(r => !!r.length))
+        .toPromise()
+        .then(receivers => {
+          this.receivers = receivers;
+        })]);
   }
 
   setActive(sender: SenderFe, event: MouseEvent) {
