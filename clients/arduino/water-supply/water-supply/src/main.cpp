@@ -4,38 +4,54 @@
 #include "lib/encoding.h"
 #include "lib/http.h"
 #include "lib/http_request.h"
+#include "lib/http_client.h"
 #include "lib/log.h"
+#include "lib/prop.h"
+#include "lib/str.h"
+#include "lib/wi_fi.h"
+#include "lib/smarthome.h"
 #include "ArduinoOTA.h"
 
-#define PORT 80
-
-int pinState = LOW;
 int valvePin = 16;
-int requestCount = 0;
-int enabledCounter = -1;
 
-unsigned long lastLoopMillis = millis();
-unsigned long deltaMillis = 0;
-String deviceKey = "water-supply";
-
-String onRequest(HttpRequest *request)
+void onAction(std::string actionName, SmartHome *sm)
 {
-    requestCount++;
-    String response = "";
+
+    if (actionName == "refill")
+    {
+        setPinHighTimed(valvePin, 1000 * 8.5);
+        // sm->updateState(JsonFactory::TRUE());
+    }
+    else if (actionName == "stop")
+    {
+        digitalWrite(valvePin, LOW);
+        // sm->updateState(JsonFactory::FALSE());
+    }
+}
+
+SmartHome smarthome(onAction);
+
+std::string onRequest(HttpRequest *request)
+{
+    std::string response = "";
     if (request->path.startsWith("/healthcheck"))
     {
-        response = "ok" + String(requestCount);
+        request->responseStatus = 200;
+        response = "ok";
     }
     else if (request->path.startsWith("/open"))
     {
-        digitalWrite(valvePin, HIGH);
-        response = "opened " + String(requestCount);
-        enabledCounter = 1000 * 10;
+        setPinHighTimed(valvePin, 1000 * 9);
+        smarthome.updateState(JsonFactory::TRUE());
+        request->responseStatus = 200;
+        response = "opened ";
     }
     else if (request->path.startsWith("/close"))
     {
         digitalWrite(valvePin, LOW);
-        response = "closed" + String(requestCount);
+        smarthome.updateState(JsonFactory::FALSE());
+        request->responseStatus = 200;
+        response = "closed";
     }
     else
     {
@@ -44,15 +60,30 @@ String onRequest(HttpRequest *request)
     return response;
 }
 
-HttpServer server(PORT, onRequest);
-
-void triggerHandler(int code, String data)
+JsonNode getReceiver()
 {
-    if (code != HTTP_CODE_OK && code != 409)
-    {
-        Serial.println(data);
-        logData("ERROR", "error in request", {{"application", deviceKey}, {"code", String(code)}, {"error", data}});
-    }
+
+    JsonNode actions = JsonFactory::list( //
+        {                                 //
+         JsonFactory::obj(                //
+             {
+                 //
+                 {"name", JsonFactory::str("refill")},
+                 {"confirm", JsonFactory::TRUE()},
+             }),
+         JsonFactory::obj( //
+             {
+                 //
+                 {"name", JsonFactory::str("stop")},
+             })
+
+        });
+    return JsonFactory::obj({
+        {"name", JsonFactory::str("water supply")},
+        {"state", JsonFactory::str("boolean")},
+        {"description", JsonFactory::str("refill water")},
+        {"actions", actions} //
+    });
 }
 
 void setup()
@@ -60,40 +91,26 @@ void setup()
     Serial.begin(115200);
     Serial.println("start");
 
-    String otaPassword = generateUuid();
     pinMode(valvePin, OUTPUT);
+    digitalWrite(valvePin, LOW);
+    std::string otaPassword = "7kg8s02n-ixy07d7k-sww9za8x-pdv36fj7"; // generateUuid();
 
-    Serial.println("ota password: " + otaPassword);
-    Serial.println(serverEndpoint());
-    server.begin();
-    logData("INFO", "startup log", {{"application", deviceKey}, {"otaPassword", otaPassword}, {"ip", server.getIp()}});
-    request("https://192.168.178.54/nodets/rest/receiver", {
-                                                               {"deviceKey", deviceKey.c_str()},
-                                                               {"port", String(PORT).c_str()},
-                                                               {"type", "http"},
-                                                               {"name", "water supply"},
-                                                               {"description", "refill water"},
-                                                           },
-            triggerHandler, false);
+    Serial.println(("ota password: " + otaPassword).c_str());
+
+    smarthome.fallbackRequestHandler = onRequest;
+    smarthome.getReceiverConfig = getReceiver;
+
+    smarthome.init();
+
     // put your setup code here, to run once:
-    ArduinoOTA.setHostname(("esp32-" + deviceKey + "_ota").c_str());
+    ArduinoOTA.setHostname(("esp32-" + getDeviceKey() + "_ota").c_str());
     ArduinoOTA.setPassword(otaPassword.c_str());
     ArduinoOTA.begin();
+    logData("INFO", "startup log", {{"otaPassword", otaPassword}});
 }
 
 void loop()
 {
-    server.step();
+    smarthome.step();
     ArduinoOTA.handle();
-    if (enabledCounter > 0)
-    {
-        enabledCounter -= deltaMillis;
-        if (enabledCounter <= 0)
-        {
-            Serial.println("switched off");
-            digitalWrite(valvePin, LOW);
-        }
-    }
-    deltaMillis = millis() - lastLoopMillis;
-    lastLoopMillis = millis();
 }
