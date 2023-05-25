@@ -4,6 +4,7 @@
 #include "ArduinoOTA.h"
 #include "lib/http.h"
 #include "lib/str.h"
+#include "lib/prop.h"
 #include "lib/jsonnode.h"
 #include <bits/basic_string.h>
 #include "read-entry.h"
@@ -128,7 +129,14 @@ uint8_t bufferPwr[] = {
     0b11101000, // long short
     0b10000000, // short -
 };
-
+void readSignals()
+{
+    cc1101.setMHZ(433.92);
+    cc1101.setTXPwr(TX_PLUS_10_DBM);
+    cc1101.setDataRate(10000);
+    cc1101.setModulation(ASK_OOK);
+    cc1101.setRx();
+}
 void sendBits(uint8_t bitBuffer[], int bSize, int baud)
 {
     isSending = true;
@@ -159,11 +167,7 @@ void sendBits(uint8_t bitBuffer[], int bSize, int baud)
 
     Serial.println("loop done");
     isSending = false;
-    cc1101.setMHZ(433.92);
-    cc1101.setTXPwr(TX_PLUS_10_DBM);
-    cc1101.setDataRate(10000);
-    cc1101.setModulation(ASK_OOK);
-    cc1101.setRx();
+    readSignals();
 }
 
 String onRequest(HttpRequest *request)
@@ -287,11 +291,7 @@ void setup()
     Serial.println("init cc1101 ");
     Serial.printf("CC1101: 0x%02x, version: 0x%02x\n", cc1101.getPartnum(), cc1101.getVersion());
     Serial.println("firmware vs 13");
-    cc1101.setMHZ(433.92);
-    cc1101.setTXPwr(TX_PLUS_10_DBM);
-    cc1101.setDataRate(10000);
-    cc1101.setModulation(ASK_OOK);
-    cc1101.setRx();
+    readSignals();
     attachInterrupt(RADIO_OUTPUT_PIN, radioHandlerOnChange, CHANGE);
 }
 
