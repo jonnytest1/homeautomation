@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.media.AudioAttributes;
 import android.media.RingtoneManager;
 import android.net.Uri;
+import android.os.Build;
 import android.util.Log;
 
 import com.example.jonathan.http.CustomHttp;
@@ -33,6 +34,7 @@ import java.net.MalformedURLException;
 import androidx.core.app.NotificationCompat;
 
 import static com.example.jonathan.service.registration.ReceiverRegistration.RECEIVER_ID;
+import static com.example.jonathan.service.registration.Registration.getReceiverDeviceName;
 
 public class MessagingService extends FirebaseMessagingService  {
     private static final String TAG = "MyFirebaseMsgService";
@@ -72,29 +74,18 @@ public class MessagingService extends FirebaseMessagingService  {
 
                 ArrayNode node =(ArrayNode) new ObjectMapper().readTree(content);
                 for (JsonNode item : node) {
-                    if (item.get("deviceKey").asText().equals(Registration.BARCODE_SENDER_DEVICE_KEY)) {
+                    if (item.get("deviceKey").asText().equals(getReceiverDeviceName())) {
                         RECEIVER_ID = item.get("id").asInt();
                     }
                 }
             }
-            if(RECEIVER_ID==null){
-                try {
-                    new ReceiverRegistration().call();
-                } catch (Exception e) {
-                    return;
-                }
-            }
-
+            ReceiverRegistration rReg = new ReceiverRegistration();
+            rReg.token=token;
             Log.d(TAG,"updating token");
-            ObjectNode jsonNode = new ObjectMapper() //
-                    .createObjectNode();
-            jsonNode.set("firebaseToken",new TextNode(token));
-            jsonNode.set("itemRef",new IntNode(RECEIVER_ID));
-            CustomResponse  updateresponse=new CustomHttp().target("https://192.168.178.54/nodets/rest/auto/receiver")
-                    .request() //
-                    .put(jsonNode.toString(),"application/json");
-            if(updateresponse.getResponseCode()!=200){
-                Log.e(TAG,"failed updating reeiver"+"\n"+updateresponse.getResponseCode()+"\n"+updateresponse.getContent());
+            try {
+                rReg.call();
+            } catch (Exception ex) {
+                ex.printStackTrace();
             }
         } catch (IOException e) {
             e.printStackTrace();

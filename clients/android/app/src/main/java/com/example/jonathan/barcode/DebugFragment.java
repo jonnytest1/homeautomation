@@ -5,6 +5,9 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.example.jonathan.service.registration.ReceiverRegistration;
+import com.google.firebase.messaging.FirebaseMessaging;
+
 import androidx.fragment.app.Fragment;
 
 /**
@@ -42,7 +45,24 @@ public class DebugFragment extends Fragment {
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.debug_view, container, false);
         view.findViewById(R.id.firebaseupdate).setOnClickListener((e)->{
-               // new MessagingService().onNewToken();
+
+
+            FirebaseMessaging.getInstance().deleteToken().onSuccessTask(runnable -> {
+                return FirebaseMessaging.getInstance().getToken();
+            }).addOnCompleteListener(str->{
+                new Thread(()->{
+                    ReceiverRegistration rReg = new ReceiverRegistration();
+                    rReg.token=str.getResult();
+                    try {
+                        rReg.call();
+                    } catch (Exception ex) {
+                        ex.printStackTrace();
+                    }
+                }).start();
+            });
+
+
+
         });
         return view;
     }

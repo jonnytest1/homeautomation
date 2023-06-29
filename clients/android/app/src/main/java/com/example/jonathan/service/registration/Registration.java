@@ -2,6 +2,7 @@ package com.example.jonathan.service.registration;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.os.Build;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -16,6 +17,13 @@ public class Registration {
     public Registration(Context context){
 
         this.context=context;
+    }
+
+    public static String getReceiverDeviceName(){
+        if(Build.MODEL.equals("SM-X200")){
+            return BARCODE_SENDER_DEVICE_KEY+"-tablet";
+        }
+        return BARCODE_SENDER_DEVICE_KEY;
     }
 
     public void checkRegistration(){
