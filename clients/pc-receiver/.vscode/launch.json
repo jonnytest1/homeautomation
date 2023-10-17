@@ -1,58 +1,54 @@
 {
-    // Use IntelliSense to learn about possible attributes.
-    // Hover to view descriptions of existing attributes.
-    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
-    "version": "0.2.0",
-    "configurations": [
-        {
-            "type": "node",
-            "request": "launch",
-            "name": "launch local receiver",
-            //"program": "${workspaceFolder}\\index.ts",
-            "autoAttachChildProcesses": true,
-            "cwd": "${workspaceFolder}",
-            "runtimeArgs": [
-                "-r",
-                "ts-node/register"
-            ],
-            "env": {
-                "serverip": "http://127.0.0.1:8080/",
-                "listenport": "12356"
-            },
-            "args": [
-                "${workspaceFolder}\\index.ts"
-            ],
-            "restart": true,
-        },
-        {
-            "type": "node",
-            "request": "launch",
-            "name": "prod launch local receiver",
-            "console": "internalConsole",
-            //"program": "${workspaceFolder}\\index.ts",
-            "autoAttachChildProcesses": true,
-            "cwd": "${workspaceFolder}",
-            "runtimeArgs": [
-                "-r",
-                "ts-node/register"
-            ],
-            "env": {
-                "serverip": "https://192.168.178.54/nodets/",
-                "listenport": "13579"
-            },
-            "args": [
-                "${workspaceFolder}\\index.ts",
-                "--sm_server=https://192.168.178.54/nodets/",
-                "--listenport=13579"
-            ],
-            "restart": true,
-        },
-        {
-            "type": "node",
-            "request": "attach",
-            "name": "Attach to prod receiver",
-            "address": "127.0.0.1",
-            "port": 29220
-        },
-    ]
+  // Use IntelliSense to learn about possible attributes.
+  // Hover to view descriptions of existing attributes.
+  // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "launch local receiver",
+      //"program": "${workspaceFolder}\\index.ts",
+      "autoAttachChildProcesses": true,
+      "cwd": "${workspaceFolder}",
+      "runtimeArgs": [
+        "-r",
+        "ts-node/register"
+      ],
+      "env": {
+        "profile": "DEV"
+      },
+      "args": [
+        "${workspaceFolder}\\index.ts"
+      ],
+      "restart": true,
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "prod launch local receiver",
+      "console": "internalConsole",
+      //"program": "${workspaceFolder}\\index.ts",
+      "autoAttachChildProcesses": true,
+      "cwd": "${workspaceFolder}",
+      "runtimeArgs": [
+        "-r",
+        "ts-node/register"
+      ],
+      "env": {
+        "profile": "PROD"
+      },
+      "args": [
+        "${workspaceFolder}\\index.ts"
+      ],
+      "restart": true,
+    },
+    {
+      "type": "node",
+      "request": "attach",
+      "name": "Attach to prod receiver",
+      "address": "127.0.0.1",
+      "port": 29220
+    },
+  ]
 }

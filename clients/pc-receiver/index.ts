@@ -13,7 +13,10 @@ import { traceTransform } from './services/log-handler';
 import { SocketService } from './services/socket-service';
 import { handleActionConfirmEvent, handleActionEvent, isActionEvent, isEvent } from './services/events/event-handler';
 parseArgsToEnv()
-config();
+
+config({
+  path: `${process.env.profile == "PROD" ? ".env.prod.env" : ".env"}`
+});
 
 //new SocketService(19999);
 
