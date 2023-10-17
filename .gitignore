@@ -10,3 +10,7 @@ clients/sound-detection/model
 sftp.json
 clients/arduino/water-supply/water-supply/platformio.ini
 .history
+clients/arduino/**/src/lib/*
+clients/pc-receiver/services/speech_files
+clients/pc-receiver/.env
+clients/pc-receiver/.env.prod.env
