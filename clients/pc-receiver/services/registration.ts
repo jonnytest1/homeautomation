@@ -1,4 +1,5 @@
 import { fetchHttps } from '../util/request';
+import { eventHandlerMap } from './events/event-handler';
 import type { FrontendReceiver } from './server-interfaces';
 class Registration {
 
@@ -16,7 +17,11 @@ class Registration {
                     port,
                     type: 'ws',
                     name: 'PC Receiver',
-                    description: 'Receiver located on the local machine for advanced permissions'
+                    description: 'Receiver located on the local machine for advanced permissions',
+                    actions: Object.keys(eventHandlerMap).map(key => ({
+                        name: key
+                    }))
+
                 } as FrontendReceiver)
             });
             if (saveResponse.status == 409) {

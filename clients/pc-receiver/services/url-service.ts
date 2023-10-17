@@ -1,5 +1,5 @@
 import { spawn, ChildProcessWithoutNullStreams } from "child_process"
-import { log } from './log';
+import { logKibana } from '../util/log';
 
 export class UrlService {
 
@@ -9,7 +9,7 @@ export class UrlService {
         try {
             const response = await this.command(process.env.CHROME_EXE, [this.url])
         } catch (err) {
-            log("ERROR", err.message);
+            logKibana("ERROR", err.message, err);
         }
 
     }
