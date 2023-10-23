@@ -6,32 +6,32 @@ import { column, mapping, Mappings, primary, table } from 'hibernatets';
 export class Item {
 
 
-    @primary()
-    id
+  @primary()
+  id
 
-    @column()
-    @settable
-    description: string
+  @column()
+  @settable
+  description: string
 
-    @mapping(Mappings.OneToOne, Location, l => l.id)
-    location: Location
+  @mapping(Mappings.OneToOne, Location, l => l.id)
+  location: Location
 
-    @settable
-    @column({ type: "number" })
-    amount: number
-
-
-    @mapping(Mappings.OneToOne, Order, l => l.id)
-    order: Order
+  @settable
+  @column({ type: "number" })
+  amount: number
 
 
-    @column()
-    @settable
-    productLink: string
+  @mapping(Mappings.OneToOne, Order, l => l.id)
+  order: Order
 
-    @column()
-    @settable
-    orderImageSrc: string
+
+  @column()
+  @settable
+  productLink: string
+
+  @column({ size: "large" })
+  @settable
+  orderImageSrc: string
 }
 
 

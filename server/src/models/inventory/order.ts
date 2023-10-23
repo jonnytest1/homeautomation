@@ -5,23 +5,23 @@ import { column, primary, table } from 'hibernatets';
 export class Order {
 
 
-    @primary()
-    id: number
+  @primary()
+  id: number
 
 
-    @column()
-    type: "amazon" = "amazon"
+  @column()
+  type: "amazon" = "amazon"
 
-    @column()
-    @settable
-    trackingInfo: string
+  @column()
+  @settable
+  trackingInfo: string
 
-    @column()
-    @settable
-    orderId: string
+  @column()
+  @settable
+  orderId: string
 
 
-    @column()
-    @settable
-    orderStatus: "pending" | "received"
+  @column()
+  @settable
+  orderStatus: "pending" | "received" | "storniert"
 }

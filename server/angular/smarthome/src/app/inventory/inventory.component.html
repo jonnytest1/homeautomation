@@ -73,10 +73,17 @@
       <td mat-cell
           class="location"
           *matCellDef="let element;">
-        <app-regex-highlighted [data]="element"
-                               [highlightInfo]="element?.highlightInfo|async"
-                               [text]="element.location?.description || element.location ||'-'">
-        </app-regex-highlighted>
+        <ng-container *ngIf="element.order?.orderStatus == 'pending';else dsiplay">
+          <a [href]="getTrackingLink(element)"
+             target="_blank">(pending)</a>
+        </ng-container>
+        <ng-template #dsiplay>
+          <app-regex-highlighted [data]="element"
+                                 [highlightInfo]="element?.highlightInfo|async"
+                                 [text]="getLocation(element)">
+          </app-regex-highlighted>
+        </ng-template>
+
       </td>
     </ng-container>
 

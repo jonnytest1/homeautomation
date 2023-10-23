@@ -53,10 +53,14 @@ export class InventoryComponent implements OnInit, AfterViewInit {
 
   ngOnInit() {
     this.inventory$ = this.dataService.inventory$.pipe(tap(inv => {
-      this.dataSource.data = inv.map(item => ({
-        ...item,
-        highlightInfo: new BehaviorSubject(null)
-      }))
+      this.dataSource.data = inv
+        .filter(item => item.order?.orderStatus !== "storniert")
+        .reverse()
+        .map(item => ({
+
+          ...item,
+          highlightInfo: new BehaviorSubject(null)
+        }))
       console.log("new inv")
       if (!this.keys && inv[0]) {
 
@@ -91,7 +95,7 @@ export class InventoryComponent implements OnInit, AfterViewInit {
               column: str
             }
           }
-          const matches = regex.exec(str.value.toLowerCase());
+          const matches = regex.exec(str.value?.toLowerCase());
           if (matches) {
             matches.shift()
             data.highlightInfo.next({
@@ -122,6 +126,14 @@ export class InventoryComponent implements OnInit, AfterViewInit {
   }
   getProductId(item: ItemFe) {
     return item.productLink?.split("/product/")?.[1] ?? ''
+  }
+
+  getLocation(item: ItemFe) {
+    return item.location?.description || item.location as string || (item.order.orderStatus == "pending" ? "(pending)" : undefined) || '-'
+  }
+
+  getTrackingLink(item: ItemFe) {
+    return `https://www.amazon.de/gp/your-account/order-details/ref=dp_iou_view_order_details?ie=UTF8&orderID=${item.order.orderId}`
   }
 
   setFilter(event: Event, items: Array<TableItemFe>) {
