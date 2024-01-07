@@ -58,7 +58,12 @@ export class TimerService {
             continue
           }
           if (!this.systemStartBuffer()) {
-            console.log("didnt reach phone")
+            console.log("pc started just a few minutes ago")
+            continue
+          }
+          await new Promise(res => setTimeout(res, 1000 * 10))
+          if (!this.systemStartBuffer()) {
+            console.log("pc started just a few minutes ago")
             continue
           }
           data.lastRunEv = today
@@ -80,9 +85,9 @@ export class TimerService {
   }
 
   phoneReachable() {
-    const logOut = execSync("ping 192.168.178.31", { encoding: "utf8" })
+    const logOut = execSync("ping 192.168.178.123", { encoding: "utf8" })
 
-    return logOut.includes("Antwort von ")
+    return !logOut.includes("Zielhost nicht erreichbar")
   }
   async run() {
     try {
@@ -95,10 +100,16 @@ export class TimerService {
       await new Promise(res => setTimeout(res, 550));
 
       await fetchHttps(this.runUrl)
-      for (let i = 0; i < 40; i++) {
+      for (let i = 0; i < 43; i++) {
         await fetchHttps(this.fasterUrl)
         await new Promise(res => setTimeout(res, 160));
       }
+      setTimeout(async () => {
+        for (let i = 0; i < 6; i++) {
+          await fetchHttps(this.fasterUrl)
+          await new Promise(res => setTimeout(res, 160));
+        }
+      }, 1000 * 60 * 10)
       console.log("reached peak")
     } catch (e) {
       console.log("error", e)
