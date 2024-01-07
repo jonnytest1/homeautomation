@@ -3,6 +3,7 @@ import type { ErrorHandler } from '@angular/core';
 import { Injectable } from '@angular/core';
 import type { Observable } from 'rxjs';
 import { catchError } from 'rxjs/operators';
+import { environment } from '../environments/environment';
 
 
 function base64safe(value: string) {
@@ -75,7 +76,7 @@ export async function logKibana(level: 'INFO' | 'ERROR' | 'DEBUG', message, erro
   if (devMode) {
     return;
   }
-  fetch(`https://pi4.e6azumuvyiabvs9s.myfritz.net/tm/libs/log/index.php`, {
+  fetch(environment.logEndpoint, {
     method: 'POST',
     mode: "no-cors",
     headers: {
