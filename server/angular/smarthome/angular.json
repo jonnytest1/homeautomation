@@ -74,6 +74,7 @@
           "options": {
             "browserTarget": "smarthome:build",
             "ssl": true
+
           },
           "configurations": {
             "production": {

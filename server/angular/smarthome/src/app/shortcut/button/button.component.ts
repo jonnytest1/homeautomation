@@ -7,15 +7,16 @@ import { BaseComponent } from '../base/base.component';
 import { ButtonConfig } from '../shortcut-config';
 import type { ReceiverFe } from '../../settings/interfaces';
 import { SettingsService } from '../../settings.service';
-import { map } from 'rxjs/operators';
+import { filter, map } from 'rxjs/operators';
 import type { Observable } from 'rxjs';
 import { CommonModule } from '@angular/common';
+import { DiagramComponent } from '../diagram/diagram.component';
 
 @Component({
   selector: 'app-button',
   templateUrl: './button.component.html',
   styleUrls: ['./button.component.less'],
-  imports: [CommonModule],
+  imports: [CommonModule, DiagramComponent],
   standalone: true
 })
 export class ButtonComponent extends BaseComponent implements OnChanges {
@@ -24,7 +25,7 @@ export class ButtonComponent extends BaseComponent implements OnChanges {
   public config: ButtonConfig
 
 
-  receiver$: Observable<ReceiverFe>
+  receiver$: Observable<{ receiver: ReceiverFe, iconStr: string }>
 
   @Output()
   actionTrigger = new EventEmitter()
@@ -53,7 +54,17 @@ export class ButtonComponent extends BaseComponent implements OnChanges {
   }
 
   ngOnChanges() {
-    this.receiver$ = this.settings.receivers$.pipe(map(receviers => receviers[this.config.receiver]))
+    this.receiver$ = this.settings.receivers$.pipe(
+      filter(rec => !!rec[this.config.receiver]),
+      map(receviers => {
+        const reciever = receviers[this.config.receiver]
+        const action = reciever.actions.find(action => action.name == this.config.actionName)
+
+        return {
+          receiver: reciever,
+          iconStr: action?.icon ? `data:image/svg+xml;base64,${action.icon}` : undefined
+        }
+      }))
   }
 
 }

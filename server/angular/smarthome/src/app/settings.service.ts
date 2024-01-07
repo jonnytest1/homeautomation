@@ -101,6 +101,9 @@ export class SettingsService extends AbstractHttpService {
         currentSenders.push(sender);
       }
       this.sort(currentSender.transformation, currentSender.events);
+
+
+
     });
 
 
@@ -153,7 +156,7 @@ export class SettingsService extends AbstractHttpService {
     return this.get<Array<string>>(`${environment.prefixPath}rest/transformation/keys/${senderId}`);
   }
   triggerAction(deviceKey: string, actionName: string) {
-    return this.postForString(`${environment.prefixPath}rest/receiver/${deviceKey}/action/${actionName}`, {});
+    return this.postForString(`${environment.prefixPath}rest/receiver/${deviceKey}/action/${encodeURIComponent(actionName)}/trigger`, {});
   }
   confirmAction(deviceKey: string, actionName: string) {
     return this.postForString(`${environment.prefixPath}rest/receiver/${deviceKey}/action/${actionName}/confirm`, {});

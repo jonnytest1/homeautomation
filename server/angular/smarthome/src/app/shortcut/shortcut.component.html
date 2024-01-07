@@ -1,58 +1,74 @@
 <div class="gridinset"
      (mousemove)="updatePosition($event,gridwrapper)"
+     (touchmove)="updatePosition($event,gridwrapper)"
      (mouseup)="drop()"
+     (touchend)="drop()"
      (swipedown)="configSwipe()">
-
   <div class="gridwrapper"
+       [class.configuration]="state.isadding||state.isredrag"
        #gridwrapper>
 
-    <div *ngFor="let config of (tempNodes??nodes)"
-         (press)="configPressed(config,$event)">
-      <app-button *ngIf="config.type=='button'"
-                  [config]="config"
-                  (actionTrigger)="baseAction(config)">
-      </app-button>
-      <app-progress *ngIf="config.type=='progress'"
-                    [config]="config">
+    <div class="griditem"
+         *ngFor="let config of (tempNodes??nodes)">
+      <mat-icon *ngIf="state.isedit"
+                class="delete"
+                (clickcpt)="removeCfg(config,$event);">delete</mat-icon>
+      <mat-icon *ngIf="state.isedit"
+                class="background"
+                (clickcpt)="addBackground(config)">add</mat-icon>
+      <div (press)="configPressed(config,$event)"
+           (mousedown)="redrag(config,$event)"
+           (touchstart)="redrag(config,$event)">
+        <app-button *ngIf="config.type=='button'"
+                    [config]="config"
+                    (actionTrigger)="baseAction(config)">
+        </app-button>
+        <app-progress *ngIf="config.type=='progress'"
+                      [config]="config">
 
-      </app-progress>
-
+        </app-progress>
+        <app-diagram *ngIf="config.type=='diagram'"
+                     [config]="config">
+        </app-diagram>
+      </div>
     </div>
-    <div>1</div>
-    <div>2</div>
+
+
   </div>
 </div>
 
 <div class="actions-backdrop"
-     (tap)="showActions=false;"
-     *ngIf="showActions">
+     (tap)="state.setpressable()"
+     *ngIf="state.ispickingadd||state.isadding||state.isaddbackground">
   <div class="actions">
     <ng-container *ngFor="let receiver of receivers$|async">
-      <div *ngFor="let action of receiver.actions"
-           class="actionchoice"
-           (mousedown)="dragNewActionStart($event,receiver,action)"
-           (touchstart)="dragNewActionStart($event,receiver,action)">
-        <ng-container *ngTemplateOutlet="actionDisplay;context:{$implicit:{receiver,action}}"></ng-container>
-      </div>
+      <ng-container *ngFor="let action of receiver.actions">
+
+        <div class="actionchoice"
+             *ngIf="!state.isaddbackground"
+             (mousedown)="dragNewActionStart($event,receiver,action)"
+             (touchstart)="dragNewActionStart($event,receiver,action)"
+             (touchmove)="updatePosition($event,gridwrapper)"
+             (touchend)="drop()">
+          <ng-container *ngTemplateOutlet="actionDisplay;context:{$implicit:{receiver,action}}"></ng-container>
+        </div>
+        <div *ngIf="{name:'test',type:'diagram'} let action"
+             class="actionchoice"
+             (mousedown)="dragNewActionStart($event,receiver,action)"
+             (touchstart)="dragNewActionStart($event,receiver,action)"
+             (touchmove)="updatePosition($event,gridwrapper)"
+             (touchend)="drop()">
+          <ng-container *ngTemplateOutlet="actionDisplay;context:{$implicit:{receiver,action}}"></ng-container>
+        </div>
+      </ng-container>
     </ng-container>
   </div>
 </div>
 
-<div class="options"
-     (tap)="editingConfig=undefined;"
-     *ngIf="editingConfig">
-  <div class="optionsmenu">
-    <button mat-raised-button
-            (mouseup)="removeCfg(editingConfig)">remove</button>
-    <button mat-raised-button>edit</button>
-  </div>
-</div>
-
-
 <div class="dragoverlay"
      [style.top]="tempCursorPos.y+'px'"
      [style.left]="tempCursorPos.x+'px'"
-     *ngIf="tempNodes && tempCursorPos && tempData">
+     *ngIf="!!tempNodes && !!tempCursorPos && !!tempData">
   <ng-container *ngTemplateOutlet="actionDisplay;context:{$implicit:tempData}"></ng-container>
 </div>
 

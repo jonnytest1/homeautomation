@@ -77,6 +77,7 @@ export async function logKibana(level: 'INFO' | 'ERROR' | 'DEBUG', message, erro
   }
   fetch(`https://pi4.e6azumuvyiabvs9s.myfritz.net/tm/libs/log/index.php`, {
     method: 'POST',
+    mode: "no-cors",
     headers: {
       'Content-Type': 'text/plain'
     },

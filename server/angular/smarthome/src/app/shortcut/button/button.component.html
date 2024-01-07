@@ -1,8 +1,20 @@
 <div class="wrapper"
      *ngIf="receiver$ |async;let receiver">
+
+
   <button #buttonRef
           (click)="buttonClick(buttonRef)"
-          [style.backgroundColor]="getBackgroundColor(receiver)">
-    {{config.receiver}} - {{config.displayText}}
+          [style.backgroundColor]="getBackgroundColor(receiver.receiver)">
+    <div *ngIf="config.backgroundConfig"
+         class="backgrounddiagram">
+      <app-diagram [config]="config.backgroundConfig"
+                   [backgroundMode]="true"></app-diagram>
+    </div>
+    <div class="content">
+      <span class="text">{{config.receiver}} - {{config.displayText}}</span>
+      <img *ngIf="receiver.iconStr"
+           [src]="receiver.iconStr">
+    </div>
+
   </button>
 </div>

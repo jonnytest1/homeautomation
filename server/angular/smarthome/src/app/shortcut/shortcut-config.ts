@@ -6,7 +6,8 @@ export interface BaseConfig {
 
 
 export interface ActiopnConfig extends BaseConfig {
-  actionName: string
+  actionName: string,
+  uuid: string
 }
 
 export interface ProgressConfig extends BaseConfig {
@@ -22,7 +23,11 @@ export interface ButtonConfig extends ActiopnConfig {
   displayText: string
 
   confirm?: boolean
+
+  backgroundConfig?: DiagramConfig
+}
+export interface DiagramConfig extends ActiopnConfig {
+  type: "diagram"
 }
 
-
-export type Configs = ButtonConfig | ProgressConfig
+export type Configs = ButtonConfig | ProgressConfig | DiagramConfig

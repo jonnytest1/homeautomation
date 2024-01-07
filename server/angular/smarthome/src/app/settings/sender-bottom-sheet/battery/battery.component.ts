@@ -2,7 +2,8 @@ import { SenderFe } from '../../interfaces';
 import type { AfterViewInit, OnInit } from '@angular/core';
 import { Component, ElementRef, Inject, ViewChild } from '@angular/core';
 import { MAT_DIALOG_DATA } from '@angular/material/dialog';
-import { GoogleCharts } from 'google-charts';
+import type { ComboChartInstance, DataTable } from '../../../../type/google-charts';
+import { GoogleChartImport } from '../../../../type/google-charts';
 @Component({
   selector: 'app-battery',
   templateUrl: './battery.component.html',
@@ -12,11 +13,11 @@ export class BatteryComponent implements OnInit, AfterViewInit {
 
   @ViewChild('chartRef')
   chartRef: ElementRef<HTMLDivElement>;
-  chart;
+  chart: ComboChartInstance;
 
   smallest: number = Number.MAX_VALUE;
 
-  constructor(@Inject(MAT_DIALOG_DATA) public sender: SenderFe) {}
+  constructor(@Inject(MAT_DIALOG_DATA) public sender: SenderFe) { }
 
   ngOnInit() {
     //
@@ -25,9 +26,9 @@ export class BatteryComponent implements OnInit, AfterViewInit {
 
   ngAfterViewInit() {
 
-    GoogleCharts.load(() => {
+    GoogleChartImport.load(() => {
 
-      this.chart = new GoogleCharts.api.visualization.ComboChart(this.chartRef.nativeElement);
+      this.chart = new GoogleChartImport.api.visualization.ComboChart(this.chartRef.nativeElement);
 
       let _props = this.sender.batteryEntries;
       Object.defineProperty(this.sender, "batteryEntries", {
@@ -91,12 +92,12 @@ export class BatteryComponent implements OnInit, AfterViewInit {
       dataTable.shift()
     }
 
-    return GoogleCharts.api.visualization.arrayToDataTable(dataTable);
+    return GoogleChartImport.api.visualization.arrayToDataTable(dataTable);
   }
 
 
 
-  drawChart(data) {
+  drawChart(data: DataTable) {
     this.chart.draw(data, {
       vAxis: { title: 'level', minValue: this.smallest - 10 },
       seriesType: 'scatter',

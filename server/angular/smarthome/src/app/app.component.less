@@ -1,44 +1,43 @@
 .sidenav-container {
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    background: #eee;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: #eee;
 
-    h4{
-       padding: 0px 32px;
-    }
-
-    .activeRoute{
-        background-color: #d4d4d4;
-    }
-
-
-    .content-wrapper{
-        display: flex;
-        justify-content: center;
-        height:calc(100% - 16px);
-        padding: 8px;
-    
-
-
-        .mouseenter{
-            position: fixed;
-            top: 0px;
-            bottom: 0px;
-            left: 0px;
-            width: 40px;
-            z-index: 99999999999;
-
-            mat-icon{
-                @media screen and(max-width: 600px){
-                    margin: 12px;
-                    transform: scale(2);
-                }
-            }
-        }
-    }
-    
+  h4 {
+    padding: 0px 32px;
   }
-  
+
+  .activeRoute {
+    background-color: #d4d4d4;
+  }
+
+
+  .content-wrapper {
+    display: flex;
+    justify-content: center;
+    height: calc(100% - 16px);
+    padding: 8px;
+
+
+
+    .mouseenter {
+      position: fixed;
+      top: 0px;
+      bottom: 0px;
+      left: 0px;
+      width: 40px;
+      z-index: 99999999999;
+
+      mat-icon {
+        @media screen and(max-width: 600px) {
+          margin: 12px;
+          transform: scale(2);
+        }
+      }
+    }
+  }
+
+}
