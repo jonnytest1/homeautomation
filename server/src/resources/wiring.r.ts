@@ -8,8 +8,12 @@ import { join } from "path"
 const bakcendRootFolder = join(__dirname, "../..")
 const gitRootFodler = join(bakcendRootFolder, "..")
 
+const startTemplateFolder = process.env.BE_TEMPLATES_ONLY ? bakcendRootFolder : gitRootFodler;
+console.log("laoding template in " + startTemplateFolder);
 
-async function findTemplates(dir = gitRootFodler) {
+
+async function findTemplates(dir = startTemplateFolder) {
+
     const entries = await readdir(dir, { withFileTypes: true });
     const entryEntries: Array<Array<{ name: string, content: string }>> = await Promise.all(entries.map(async entry => {
         const next = join(dir, entry.name)

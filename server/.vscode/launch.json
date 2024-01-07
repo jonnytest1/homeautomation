@@ -7,7 +7,7 @@
         {
             "type": "node",
             "request": "attach",
-            "name": "Attach to nodemon",
+            "name": "Attach to server",
             "address": "192.168.178.54",
             "port": 14747,
             "localRoot": "${workspaceFolder}",

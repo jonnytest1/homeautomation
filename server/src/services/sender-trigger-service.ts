@@ -5,6 +5,7 @@ import type { Sender } from '../models/sender';
 import type { Transformation } from '../models/transformation';
 import { SmartHomeTrigger } from '../node-red/register-custom-type';
 import { ReceiverData } from '../models/receiver-data';
+import { logKibana } from '../util/log';
 
 export class SenderTriggerService {
 
@@ -33,12 +34,14 @@ export class SenderTriggerService {
         if (pData?.promise) {
             const promiseData = pData.promise
             Promise.all(this.sender.connections.map(async connection => {
-                connection.receiver.send(new ReceiverData({
+                await connection.receiver.send(new ReceiverData({
                     read: {
-                        text: `started ${usedTransformation?.name} in ${Math.round(promiseData.time / (1000 * 60))} minuten`
+                        text: `started ${usedTransformation?.name} in ${Math.round(promiseData.time / (1000 * 60))} minutes`
                     }
                 }))
-            }))
+            })).catch(async e => {
+                await logKibana("ERROR", "error in receiver handling", e)
+            })
 
             TimerFactory.create(this.sender, "checkPromise", pData.promise, usedTransformation);
         }

@@ -1,5 +1,6 @@
 
 import type { Item } from '../models/inventory/item';
+import type { Receiver } from '../models/receiver';
 import type { Sender } from "../models/sender"
 import type { Timer } from '../models/timer';
 export interface SocketResponses {
@@ -9,4 +10,6 @@ export interface SocketResponses {
 
 
     inventoryUpdate: Array<Item>
+
+    receiverUpdate: Receiver
 }
