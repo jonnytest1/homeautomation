@@ -1,10 +1,12 @@
 package com.example.jonathan.barcode;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.example.jonathan.service.CLogging;
 import com.example.jonathan.service.registration.ReceiverRegistration;
 import com.google.firebase.messaging.FirebaseMessaging;
 
@@ -51,18 +53,22 @@ public class DebugFragment extends Fragment {
                 return FirebaseMessaging.getInstance().getToken();
             }).addOnCompleteListener(str->{
                 new Thread(()->{
-                    ReceiverRegistration rReg = new ReceiverRegistration();
-                    rReg.token=str.getResult();
                     try {
+                        ReceiverRegistration rReg = new ReceiverRegistration();
+                        rReg.token=str.getResult();
                         rReg.call();
                     } catch (Exception ex) {
+                        Log.e("exception","exception updating token",ex);
                         ex.printStackTrace();
                     }
                 }).start();
+            }).addOnFailureListener(failure->{
+                Log.e("exception","exception updating token",failure);
             });
+        });
+        view.findViewById(R.id.logtest).setOnClickListener((e)->{
 
-
-
+            CLogging.log(CLogging.LogLevel.ERROR,"test error log");
         });
         return view;
     }

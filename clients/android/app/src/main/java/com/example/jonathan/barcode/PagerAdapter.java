@@ -15,6 +15,8 @@ public class PagerAdapter extends FragmentStateAdapter {
         fragments=new Fragment[]{
                 new ScannerFragment(),new SecondFragment(),DebugFragment.newInstance(1)
         };
+
+
     }
     @NonNull
     @Override

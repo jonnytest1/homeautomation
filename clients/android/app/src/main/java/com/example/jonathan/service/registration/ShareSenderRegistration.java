@@ -4,10 +4,12 @@ import android.util.Log;
 
 import com.example.jonathan.http.CustomHttp;
 import com.example.jonathan.http.CustomResponse;
+import com.example.jonathan.service.CLogging;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.node.TextNode;
 
+import java.util.Map;
 import java.util.concurrent.Callable;
 
 import static com.example.jonathan.service.registration.Registration.SHARE_URL_SENDER_DEVICE_KEY;
@@ -32,6 +34,11 @@ public class ShareSenderRegistration  implements Callable<Void> {
             SHARE_SENDER_ID = new ObjectMapper().readTree(postResponse.getContent()).get("id").asInt();
         } else {
             Log.e(TAG,"failed creating receiver"+"\n"+postResponse.getResponseCode()+"\n"+postResponse.getContent());
+
+            CLogging.log(CLogging.LogLevel.ERROR, Map.of(
+                    "message","failed creating receiver",
+                    "responsecode",postResponse.getResponseCode()+"",
+                    "rcontent",postResponse.getContent()));
         }
         return null;
     }

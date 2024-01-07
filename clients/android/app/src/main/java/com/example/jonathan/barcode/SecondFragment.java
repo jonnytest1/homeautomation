@@ -4,9 +4,14 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.webkit.WebView;
+
+import com.example.jonathan.service.CustomWebView;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
+
+import static com.example.jonathan.props.Environment.VIEW_URL;
 
 public class SecondFragment extends Fragment {
 
@@ -29,5 +34,10 @@ public class SecondFragment extends Fragment {
                 //        .navigate(R.id.action_SecondFragment_to_FirstFragment);
             }
         });
+        WebView webView = view.findViewById(R.id.webview);
+        webView.getSettings().setJavaScriptEnabled(true);
+        webView.getSettings().setDomStorageEnabled(true);
+        webView.setWebViewClient(new CustomWebView());
+        webView.loadUrl(VIEW_URL);
     }
 }
