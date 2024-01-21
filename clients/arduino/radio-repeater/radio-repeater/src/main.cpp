@@ -272,9 +272,10 @@ std::string onRequest(HttpRequest *request)
 
     std::string resp = "[";
     bool first = true;
+    Serial.print("current size:");
     Serial.println(entryList.size());
     // std::string origin = request->headers.at("origin").c_str();
-    request->responseHeaders.insert(std::pair<std::string, std::string>("Access-Control-Allow-Origin", "localhost"));
+    request->responseHeaders.insert(std::pair<std::string, std::string>("Access-Control-Allow-Origin", "http://localhost"));
     for (std::list<ReadEntry>::iterator it = entryList.begin(); it != entryList.end(); ++it)
     {
       if (!first)
@@ -282,16 +283,19 @@ std::string onRequest(HttpRequest *request)
         resp += ",";
       }
       first = false;
-      resp += "{\"toHight\":";
-      resp += it->state;
+      resp += "{\"toHeight\":";
+      resp += itos(it->state);
       resp += ",\"duration\":";
-      resp += it->duration;
+      resp += itos(it->duration);
       resp += ",\"ts\":";
-      resp += it->millis;
+      resp += itos(it->millis);
       resp += "}";
     }
     request->responseStatus = 200;
     resp += "]";
+
+    Serial.print("built response, length:");
+    Serial.println(resp.length());
     return resp;
   }
 
