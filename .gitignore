@@ -21,3 +21,6 @@ clients/arduino/radio-repeater/radio-repeater/personal-guide.txt
 __pycache__/
 clients/pc-receiver/data/
 server/angular/smarthome/src/environments/
+server/src/services/tuya.ts
+server/src/services/tuya.spec.ts
+authprovider.py

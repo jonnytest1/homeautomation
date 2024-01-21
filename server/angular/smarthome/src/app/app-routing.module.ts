@@ -8,6 +8,7 @@ import { MonacoEditorComponent } from './monaco-editor/monaco-editor.component';
 import { TimersComponent } from './timers/timers.component';
 import { TodoComponent } from './todo/todo.component';
 import { WiringComponent } from './wiring/wiring.component';
+import { InputsComponent } from './inputs/inputs.component';
 
 const routes: Routes = [
   {
@@ -49,6 +50,9 @@ const routes: Routes = [
     data: {
       src: "https://192.168.178.54/nodered"
     }
+  }, {
+    path: "inputs",
+    component: InputsComponent
   }];
 
 @NgModule({
