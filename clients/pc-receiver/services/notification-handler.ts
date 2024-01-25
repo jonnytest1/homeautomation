@@ -8,83 +8,83 @@ import { FrontendSound } from './server-interfaces';
 const notifier = require('node-notifier');
 
 
-interface NotificationData {
-    notification: {
-        sound: string,
-        volume?: string | number
-        title: string
-        body?: string
-    }
+export interface NotificationData {
+  notification: {
+    sound: string,
+    volume?: string | number
+    title: string
+    body?: string
+  }
 }
 
 export class NotificationHandler {
 
-    data: NotificationData;
+  data: NotificationData;
 
-    constructor(data, private serverIp) {
-        this.data = data;
+  constructor(data: NotificationData, private serverIp) {
+    this.data = data;
+
+  }
+
+  async show(ws: Websocket) {
+    console.log(new Date().toLocaleString(), this.data.notification.title)
+    let audioHandler: RepeatingAudio | undefined = undefined;
+    if (this.data.notification.sound && typeof this.data.notification.sound === 'string') {
+      if (this.data.notification.sound.match(/[^a-zA-Z0-9]/g)) {
+        console.error("invalid sound string");
+        return;
+      }
+
+      if (!existsSync(RepeatingAudio.prefixPath + this.data.notification.sound)) {
+        const soundRequestUrl = new URL(`${this.serverIp}rest/auto/sound/bykey/${encodeURIComponent(this.data.notification.sound)}`);
+        const response = await fetchHttps<Array<FrontendSound>>(soundRequestUrl.href)
+        if (response.status != 200) {
+          ws.send("failure getting sound");
+          return;
+        }
+        const responseBlob = (await response.json())[0];
+        if (responseBlob.bytes) {
+          const charCodeArray: Array<number> = responseBlob.bytes.split(",")
+            .map(c => +c)
+          await promises.writeFile(RepeatingAudio.prefixPath + this.data.notification.sound, Uint8Array.from(charCodeArray))
+        }
+      }
+      audioHandler = new RepeatingAudio(this.data.notification.sound, this.data.notification.volume)
 
     }
 
-    async show(ws: Websocket) {
-        console.log(new Date().toLocaleString(), this.data.notification.title)
-        let audioHandler: RepeatingAudio | undefined = undefined;
-        if (this.data.notification.sound && typeof this.data.notification.sound === 'string') {
-            if (this.data.notification.sound.match(/[^a-zA-Z0-9]/g)) {
-                console.error("invalid sound string");
-                return;
-            }
+    const actions = ['do1', 'do2'];
 
-            if (!existsSync(RepeatingAudio.prefixPath + this.data.notification.sound)) {
-                const soundRequestUrl = new URL(`${this.serverIp}rest/auto/sound/bykey/${encodeURIComponent(this.data.notification.sound)}`);
-                const response = await fetchHttps<Array<FrontendSound>>(soundRequestUrl.href)
-                if (response.status != 200) {
-                    ws.send("failure getting sound");
-                    return;
-                }
-                const responseBlob = (await response.json())[0];
-                if (responseBlob.bytes) {
-                    const charCodeArray: Array<number> = responseBlob.bytes.split(",")
-                        .map(c => +c)
-                    await promises.writeFile(RepeatingAudio.prefixPath + this.data.notification.sound, Uint8Array.from(charCodeArray))
-                }
-            }
-            audioHandler = new RepeatingAudio(this.data.notification.sound, this.data.notification.volume)
-
-        }
-
-        const actions = ['do1', 'do2'];
-
-        if (!this.data.notification.body && this.data.notification.title) {
-            this.data.notification.body = this.data.notification.title;
-        }
-        const timeout = 20
-        notifier.notify({
-            timeout: timeout,
-            appID: "smarthome",
-            //
-            actions: actions,
-            ...this.data.notification,
-            message: this.data.notification.body,
-            wait: true,
-        }, (async (error, response: 'dismissed' | 'timeout' | (typeof actions[0]), metadata) => {
-            console.log(`closing notification with ${response} timeout was ` + timeout);
-            if (error) {
-                console.error(error);
-            } else {
-                try {
-                    ws.send(response);
-                    ws.close();
-                } catch (e) {
-                    console.error(e);
-                }
-            }
-            if (response === "dismissed") {
-                await new Promise(res => setTimeout(res, 2000))
-            }
-            audioHandler?.stop()
-        }).bind(this));
+    if (!this.data.notification.body && this.data.notification.title) {
+      this.data.notification.body = this.data.notification.title;
     }
+    const timeout = 20
+    notifier.notify({
+      timeout: timeout,
+      appID: "smarthome",
+      //
+      actions: actions,
+      ...this.data.notification,
+      message: this.data.notification.body,
+      wait: true,
+    }, (async (error, response: 'dismissed' | 'timeout' | (typeof actions[0]), metadata) => {
+      console.log(`closing notification with ${response} timeout was ` + timeout);
+      if (error) {
+        console.error(error);
+      } else {
+        try {
+          ws.send(response);
+          ws.close();
+        } catch (e) {
+          console.error(e);
+        }
+      }
+      if (response === "dismissed") {
+        await new Promise(res => setTimeout(res, 2000))
+      }
+      audioHandler?.stop()
+    }).bind(this));
+  }
 }
 
 /**

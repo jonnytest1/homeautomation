@@ -24,3 +24,4 @@ server/angular/smarthome/src/environments/
 server/src/services/tuya.ts
 server/src/services/tuya.spec.ts
 authprovider.py
+clients/pc-receiver/bash.exe.stackdump

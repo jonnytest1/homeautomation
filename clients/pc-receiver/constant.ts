@@ -4,3 +4,11 @@ export const root = __dirname
 export const pythonExe = 'C:\\Python39\\python.exe'
 export const dataDir = join(root, "data")
 export const lastRun = join(dataDir, "last.json")
+
+
+
+export const SECOND = 1000
+export const MINUTE = SECOND * 60
+
+export const HOUR = MINUTE * 60
+export const DAY = HOUR * 24
