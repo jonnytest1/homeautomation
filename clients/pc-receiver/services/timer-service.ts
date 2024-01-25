@@ -5,13 +5,19 @@ import { lastRun } from '../constant';
 import { fetchHttps } from '../util/request';
 import { TextReader } from './read-text';
 import { getLatestPowerOnEvent } from './event-service';
-
+import moment from 'moment';
+import { heaterOff } from './mqtt';
 type ISODay = `${number}${number}${number}${number}-${number}${number}-${number}${number}`
-interface Data {
-  lastRun?: ISODay
-  lastRunEv?: ISODay
+
+
+type RunPrefixed = typeof TimerService.run_prefixed[number]
+type Data = {
+  [K in RunPrefixed]?: ISODay
 }
 export class TimerService {
+
+
+  static run_prefixed = ["12:", "18:", "23:3"] as const
 
 
   private readonly runUrl = "http://192.168.178.40/pwr"
@@ -32,44 +38,31 @@ export class TimerService {
   }
 
   async timer() {
-    while (true) {
-      const now = new Date();
-      const today = now.toISOString().split("T")[0] as ISODay
-      const hour = new Date().getHours();
-      if (hour == 12) {
-        const data = this.read();
-        console.log(data.lastRun, today)
-        if (data.lastRun !== today) {
-          if (!this.phoneReachable()) {
-            console.log("didnt reach phone")
-            continue
+
+    mainloop: while (true) {
+      const now = moment()
+      const currentIso = now.toISOString(true);
+      const [today, time] = currentIso.split("T") as [ISODay, string]
+
+      const data = this.read();
+      for (const prefix of TimerService.run_prefixed) {
+        const storedTs = data[prefix];
+
+        if (storedTs !== today) {
+          if (time.startsWith(prefix)) {
+            if (!this.phoneReachable()) {
+              console.log("didnt reach phone")
+              continue mainloop
+            }
+            if (!this.systemStartBuffer()) {
+              console.log("pc started just a few minutes ago")
+              continue mainloop
+            }
+            data[prefix] = today
+            console.log("running")
+            await this.run()
+            await this.write(data);
           }
-          data.lastRun = today
-          console.log("running")
-          await this.run()
-          await this.write(data);
-        }
-      } else if (hour == 18) {
-        const data = this.read();
-        console.log(data.lastRunEv, today)
-        if (data.lastRunEv !== today) {
-          if (!this.phoneReachable()) {
-            console.log("didnt reach phone")
-            continue
-          }
-          if (!this.systemStartBuffer()) {
-            console.log("pc started just a few minutes ago")
-            continue
-          }
-          await new Promise(res => setTimeout(res, 1000 * 10))
-          if (!this.systemStartBuffer()) {
-            console.log("pc started just a few minutes ago")
-            continue
-          }
-          data.lastRunEv = today
-          console.log("running")
-          await this.run()
-          await this.write(data);
         }
       }
 
@@ -85,10 +78,13 @@ export class TimerService {
   }
 
   phoneReachable() {
-    const logOut = execSync("ping 192.168.178.123", { encoding: "utf8" })
+    const logOut = execSync("ping Z-Fold5-von-Jonathan", { encoding: "utf8" })
 
     return !logOut.includes("Zielhost nicht erreichbar")
   }
+
+
+
   async run() {
     try {
       await new TextReader({ text: "get off your ass and put your shoes on" }).read();
@@ -104,12 +100,16 @@ export class TimerService {
         await fetchHttps(this.fasterUrl)
         await new Promise(res => setTimeout(res, 160));
       }
+      setTimeout(() => {
+        heaterOff()
+      }, 1000 * 60 * 2)
+
       setTimeout(async () => {
         for (let i = 0; i < 6; i++) {
           await fetchHttps(this.fasterUrl)
           await new Promise(res => setTimeout(res, 160));
         }
-      }, 1000 * 60 * 10)
+      }, 1000 * 60 * 5)
       console.log("reached peak")
     } catch (e) {
       console.log("error", e)
