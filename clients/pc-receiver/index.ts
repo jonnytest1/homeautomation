@@ -1,5 +1,5 @@
 
-import { NotificationHandler } from './services/notification-handler';
+import { NotificationData, NotificationHandler } from './services/notification-handler';
 import registration from './services/registration';
 import { config } from "dotenv"
 import { ExpressWs } from 'express-hibernate-wrapper';
@@ -11,7 +11,7 @@ import { TimerService } from "./services/timer-service"
 import { parseArgsToEnv } from './services/args';
 import { traceTransform } from './services/log-handler';
 import { SocketService } from './services/socket-service';
-import { handleActionConfirmEvent, handleActionEvent, isActionEvent, isEvent } from './services/events/event-handler';
+import { handleActionConfirmEvent, handleActionEvent, isActionEvent, isEvent, startKeySocket } from './services/events/event-handler';
 parseArgsToEnv()
 
 config({
@@ -28,6 +28,7 @@ const serverIp = process.env.serverip || '192.168.178.54'
 const listenOnPort = process.env.listenport || '12345'
 
 RepeatingAudio.check()
+startKeySocket()
 registration.register(serverIp, +listenOnPort)
   .then(() => {
     const app: ExpressWs = express();
@@ -46,7 +47,7 @@ registration.register(serverIp, +listenOnPort)
       try {
         const data = JSON.parse(req.query.data as string) as TransformationRes;
         if (data.notification) {
-          new NotificationHandler(data, serverIp).show(ws);
+          new NotificationHandler(data as NotificationData, serverIp).show(ws);
         } else {
           ws.close();
         }
@@ -107,5 +108,4 @@ registration.register(serverIp, +listenOnPort)
     });
     new TimerService(serverIp);
   });
-
 
