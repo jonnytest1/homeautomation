@@ -38,7 +38,7 @@ export class ReconnectingSocket extends WebSocket {
         connection.removeAllListeners()
         if (self.url && !this.closed) {
           console.log("reconnecting ...", self.url?.href)
-          self.connect(self.url.href)
+          self.connect(self.url.href, undefined, undefined, this.headers, this.opts)
         }
       })
 

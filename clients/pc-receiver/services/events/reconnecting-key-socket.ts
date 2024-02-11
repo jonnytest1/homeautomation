@@ -67,6 +67,6 @@ export class ReconnectingKeySocket {
       this.socketRef.send(JSON.stringify({
         type: "ping"
       }))
-    }, 20000)
+    }, 15000)
   }
 }

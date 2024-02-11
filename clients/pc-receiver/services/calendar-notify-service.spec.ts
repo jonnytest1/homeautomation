@@ -1,16 +1,14 @@
 import { CalenderService, getNextRRule } from './calendar-notify-service'
+import { uidBlackList } from './calendar-uid-blacklist'
 
 
-function nextrruule(start): Date {
-  return getNextRRule(new Date(start), "RRULE:FREQ=DAILY")
-}
 
 
 describe("calender", () => {
   it("alerts", async () => {
 
     const service = new CalenderService()
-    await service.load()
+    await service.load(uidBlackList)
     service.timer()
     await new Promise(res => { })
   }, 99999999)
@@ -22,19 +20,26 @@ describe("calender", () => {
   it("get next rrule", () => {
 
     const z = '2023-09-27T23:01:00.000+02:00'
-    '2023-09-27T21:01:00.000Z'
 
     const t = '2024-01-23T20:30:00.000+01:00'
-    '2024-01-23T19:30:00.000Z'
 
-    const nextT = nextrruule(t).toLocaleString()
-    const nextZ = nextrruule(z).toLocaleString()
+    const nextT = getNextRRule(new Date(t), new Date(), "RRULE:FREQ=DAILY").toLocaleString()
+    const nextZ = getNextRRule(new Date(z), new Date(), "RRULE:FREQ=DAILY").toLocaleString()
 
 
     expect(nextZ).toContain("23:01")
     expect(nextT).toContain("20:30")
+  })
 
 
+  it("get next rrule after", () => {
+    const z = '2023-09-27T23:01:00.000+02:00'
 
+    const next = getNextRRule(new Date(z), new Date(z), "RRULE:FREQ=DAILY").toLocaleString()
+    expect(next).toBe("28.9.2023, 23:01:00")
+
+    const oneMilliPrior = +new Date(z) - 1
+    const nextOneSec = getNextRRule(new Date(z), new Date(oneMilliPrior), "RRULE:FREQ=DAILY").toLocaleString()
+    expect(nextOneSec).toBe("27.9.2023, 23:01:00")
   })
 })

@@ -12,6 +12,8 @@ import { parseArgsToEnv } from './services/args';
 import { traceTransform } from './services/log-handler';
 import { SocketService } from './services/socket-service';
 import { handleActionConfirmEvent, handleActionEvent, isActionEvent, isEvent, startKeySocket } from './services/events/event-handler';
+import { CalenderService } from './services/calendar-notify-service';
+import { uidBlackList } from './services/calendar-uid-blacklist';
 parseArgsToEnv()
 
 config({
@@ -26,6 +28,12 @@ config({
 const express = require('express');
 const serverIp = process.env.serverip || '192.168.178.54'
 const listenOnPort = process.env.listenport || '12345'
+
+const service = new CalenderService()
+service.load(uidBlackList).then(() => {
+  console.log("loaded calendars")
+  service.timer()
+})
 
 RepeatingAudio.check()
 startKeySocket()

@@ -1,11 +1,12 @@
 import { Attendee, Class, DateType, DateWithTimeZone, Method, Organizer, Transparency, VEvent, VEventStatus } from 'node-ical';
 import { DAY, HOUR, MINUTE, SECOND } from '../constant';
-import { boolean } from 'zod';
 
 
 
 export interface AlarmProvider {
   getDateForEventInstance(start_or_rrule_date: Date): Date
+  timeOffset: number
+  relative: boolean
 }
 
 
@@ -17,7 +18,7 @@ class EventAlarm implements AlarmProvider {
   action: "DISPLAY"
 
 
-  private timeOffset: number
+  timeOffset: number
 
 
   relative: boolean

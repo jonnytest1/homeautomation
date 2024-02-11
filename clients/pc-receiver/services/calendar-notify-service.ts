@@ -7,16 +7,20 @@ import { AlarmProvider, EventWithAlarm } from './calendar-event-with-alarm';
 import { pick } from '../util/pick';
 import { spawnSync } from "child_process"
 import { join } from "path"
+import { HOUR } from '../constant';
+import { shouldIgnoreEvent } from './calendar-event-check';
 
 type AlarmContainer = {
   event: EventWithAlarm,
   alarm: AlarmProvider
+  eventInstanceDate: Date
 }
 const rruleSet = new Set()
 
-export function getNextRRule(date: Date, rule: string) {
-  const isoOffsetString = +date
-  const response = spawnSync(`python`, [join(__dirname, "rrule.py"), `${isoOffsetString}`, rule], { encoding: "utf8" })
+export function getNextRRule(event_start: Date, after: Date, rule: string) {
+  const isoOffsetString = +event_start
+  const response = spawnSync(`python`, [
+    join(__dirname, "rrule.py"), `${isoOffsetString}`, `${+after}`, rule], { encoding: "utf8" })
 
   return new Date(response.stdout.trim())
 }
@@ -29,10 +33,12 @@ export class CalenderService {
     getDateForEventInstance(start_or_rrule_date) {
       return new Date(start_or_rrule_date)
     },
+    timeOffset: 0,
+    relative: true
   }
   private reminderList = new LinkedDateEventList<AlarmContainer>()
 
-  async load() {
+  async load(blackList: Set<string> = new Set()) {
 
     const urls = environment.CAL_URL.split("🙌")
 
@@ -44,13 +50,11 @@ export class CalenderService {
 
     for (const calendar of responses) {
       for (const event of Object.values(calendar)) {
-        if (event.type == "VEVENT") {
+        if (event.type == "VEVENT" && !blackList.has(event.uid)) {
           this.addNextForEvent(new EventWithAlarm(event))
         }
       }
     }
-
-    console.log(rruleSet)
   }
 
 
@@ -64,7 +68,7 @@ export class CalenderService {
       alarms = evt.alarms
     }
 
-    let evtDate: Date | undefined = this.getNextEventDate(evt);
+    let evtDate: Date | undefined = this.getNextEventDate(evt, new Date());
     if (!evtDate) {
       // cause in past
       return
@@ -78,12 +82,17 @@ export class CalenderService {
 
   private addReminder(alarm: AlarmProvider, evtDate: Date, evt: EventWithAlarm) {
     const alarmDate = alarm.getDateForEventInstance(evtDate);
+    if (shouldIgnoreEvent(alarm, alarmDate, evtDate, evt)) {
+      return
+    }
+
 
     if (alarmDate > new Date()) {
 
       this.reminderList.add({
         timestamp: alarmDate,
         data: {
+          eventInstanceDate: evtDate,
           event: evt,
           alarm: alarm
         }
@@ -91,13 +100,12 @@ export class CalenderService {
     }
   }
 
-  private getNextEventDate(evt: EventWithAlarm) {
+  private getNextEventDate(evt: EventWithAlarm, after: Date) {
     const rruleEvt = evt.rrule;
-    const now = new Date()
     let evtDate: Date | undefined = undefined;
     if (rruleEvt) {
       const [_, rule] = rruleEvt.toString().split("\n")
-      const next = getNextRRule(evt.start, rule)
+      const next = getNextRRule(evt.start, after, rule)
       if (next) {
         evtDate = next;
 
@@ -113,7 +121,8 @@ export class CalenderService {
   async timer() {
     const nextEvt = this.reminderList.next.value
     const timeDiff = +nextEvt.timestamp - +new Date()
-    console.log(`starting timer for ${nextEvt.data.event.summary} at ${nextEvt.timestamp.toLocaleTimeString()}`)
+    console.log(`${new Date().toLocaleTimeString()} starting timer for ${nextEvt.data.event.summary} at ${nextEvt.timestamp.toLocaleString()}`)
+    console.log(nextEvt.data.event.uid)
 
 
     setTimeout(() => {
@@ -125,9 +134,15 @@ export class CalenderService {
           body: data.event.summary,
           sound: pick(["hintnotification", "wronganswer"])
         }
-      }, environment.serverip).show({ send: console.log, close: () => { } } as any);
+      }, environment.serverip)
+        .show({ send: console.log, close: () => { } } as any);
 
-      let evtDate: Date | undefined = this.getNextEventDate(data.event);
+
+      let evtTime = +nextEvt.data.eventInstanceDate
+      const nextDateMin = new Date(Math.max(Date.now(), evtTime))
+
+      let evtDate: Date | undefined = this.getNextEventDate(data.event, nextDateMin);
+
       this.addReminder(data.alarm, evtDate, data.event)
       this.timer();
     }, timeDiff)

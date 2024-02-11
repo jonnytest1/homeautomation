@@ -28,3 +28,4 @@ clients/pc-receiver/bash.exe.stackdump
 clients/pc-receiver/services/calendar-uid-blacklist.ts
 server/src/services/generic-node/_type
 server/src/services/generic-node/nodes.json
+clients/pc-receiver/services/calendar-event-check.ts
