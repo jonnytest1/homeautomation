@@ -16,6 +16,13 @@ export class Vector2 {
   public x: number;
   public y: number;
 
+  static fromBoundingClientRect(rect: DOMRect, mode: "center") {
+    if (mode == "center") {
+      const dimensions = new Vector2(rect.width, rect.height)
+      return new Vector2(rect).added(dimensions.dividedBy(2))
+    }
+  }
+
   constructor(x: number | { x: number; y: number } | TouchEvent, y?: number) {
     if (typeof x === 'object') {
       if (x instanceof TouchEvent) {

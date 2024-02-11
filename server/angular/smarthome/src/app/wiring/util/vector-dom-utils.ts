@@ -17,13 +17,18 @@ export class VectorDomUtils {
   }
 
   static applyDimensions(element: HTMLElement, box: BoundingBox) {
-    this.applyPosition(element, box);
+    //this.applyPosition(element, box);
 
     const dimensions = box.diagonal();
     element.style.width = dimensions.xStyle;
     element.style.height = dimensions.yStyle;
   }
+  static applyDimensionVector(element: HTMLElement, dimensions: Vector2) {
+    //this.applyPosition(element, box);
 
+    element.style.width = dimensions.xStyle;
+    element.style.height = dimensions.yStyle;
+  }
   static applyRotation(element: HTMLElement, arrowBox: BoundingBox) {
     const rotationOffset = arrowBox.diagonal().length() / 2;
     const degrees = arrowBox.axisRotation();

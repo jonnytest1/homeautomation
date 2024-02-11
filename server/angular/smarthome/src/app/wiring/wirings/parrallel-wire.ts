@@ -237,12 +237,12 @@ export class ParrallelWire extends Wiring {
 
     this.inC.forEach(c => {
       if ("uuid" in c.parent) {
-        inMap[c.parent["uuid"]] = c
+        inMap[c.parent["uuid"] as string] = c
       }
     })
     this.outC.forEach(c => {
       if ("uuid" in c.parent) {
-        outMap[c.parent["uuid"]] = c
+        outMap[c.parent["uuid"] as string] = c
       }
     })
     controlRef.forEach(c => {

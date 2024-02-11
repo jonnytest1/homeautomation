@@ -5,6 +5,7 @@ import { environment } from '../../environments/environment';
 import { filter, map } from 'rxjs/operators';
 import type { Observable, OperatorFunction } from 'rxjs';
 import { Subject } from 'rxjs';
+import { ActivatedRoute } from '@angular/router';
 
 
 export function delayAtLeast<T>(delay: number): OperatorFunction<T, T> {
@@ -43,8 +44,10 @@ export class InputsComponent implements OnInit, OnDestroy {
     delayAtLeast(100)
   )
 
-  constructor() {
-
+  constructor(activeRoute: ActivatedRoute) {
+    if (activeRoute.snapshot.queryParams.kiosk) {
+      document.body.parentElement.classList.add("kiosk")
+    }
 
   }
 

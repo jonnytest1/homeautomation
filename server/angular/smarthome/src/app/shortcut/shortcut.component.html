@@ -2,8 +2,7 @@
      (mousemove)="updatePosition($event,gridwrapper)"
      (touchmove)="updatePosition($event,gridwrapper)"
      (mouseup)="drop()"
-     (touchend)="drop()"
-     (swipedown)="configSwipe()">
+     (touchend)="drop()">
   <div class="gridwrapper"
        [class.configuration]="state.isadding||state.isredrag"
        #gridwrapper>
@@ -72,6 +71,12 @@
   <ng-container *ngTemplateOutlet="actionDisplay;context:{$implicit:tempData}"></ng-container>
 </div>
 
+
+<button mat-fab
+        (click)="configSwipe()"
+        class="add-button">
+  <mat-icon>add</mat-icon>
+</button>
 
 <ng-template #actionDisplay
              let-context

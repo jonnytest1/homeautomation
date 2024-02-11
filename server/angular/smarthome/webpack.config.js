@@ -1,3 +1,8 @@
+
+
+/**
+ * @type {import("webpack").Configuration}
+ */
 module.exports = {
   module: {
     rules: [{
@@ -5,5 +10,10 @@ module.exports = {
       loader: 'raw-loader',
       resourceQuery: /raw/,
     }],
-  },
+  }, resolve: {
+    fallback: {
+      //fs: false,
+      //util: false
+    }
+  }
 };

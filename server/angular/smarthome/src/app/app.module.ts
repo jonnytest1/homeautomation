@@ -27,17 +27,16 @@ import { IframeComponent } from './iframe/iframe.component';
 /**
  * with sideeffects
  */
-import { DIRECTION_ALL } from 'hammerjs';
 import { InputsComponent } from './inputs/inputs.component';
 
 export class MyHammerConfig extends HammerGestureConfig {
   overrides = <any>{
-    swipe: { direction: DIRECTION_ALL },
+    // swipe: { direction: DIRECTION_ALL },
   };
 }
 
 @NgModule({
-  declarations: [	
+  declarations: [
     AppComponent,
     CameraComponent,
     TimersComponent,
@@ -45,8 +44,8 @@ export class MyHammerConfig extends HammerGestureConfig {
     InventoryComponent,
     RegexHighlightedComponent,
     IframeComponent,
-      InputsComponent
-   ],
+    InputsComponent
+  ],
   imports: [
     BrowserModule, HammerModule,
     AppRoutingModule, SettingsModule, FormsModule, MatInputModule, WiringModule, MatTableModule,
