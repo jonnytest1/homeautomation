@@ -6,7 +6,8 @@ import type { Transformation } from '../../../../../src/models/transformation';
 import type { SocketResponses as sR } from "../../../../../src/resources/websocket-response"
 
 export * from "../../../../../src/services/mqtt-types"
-export * from "../../../../../src/services/generic-node/generic-node-type"
+export * from "../../../../../src/services/generic-node/typing/generic-node-type"
+export * from "../../../../../src/services/generic-node/typing/node-options"
 export type { FrontendToBackendEvents } from "../../../../../src/resources/socket-events"
 
 export type SocketResponses = sR;
