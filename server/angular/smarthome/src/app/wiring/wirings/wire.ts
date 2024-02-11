@@ -1,6 +1,5 @@
 
 import type { FromJsonOptions } from '../serialisation';
-import { Battery } from './battery';
 import { Collection } from './collection';
 import type { Connection } from './connection';
 import type { RegisterOptions } from './interfaces/registration';
@@ -97,10 +96,10 @@ export class Wire extends Collection {
     return this.outC.register({ ...options, from: this });
   }
 
-  toJSON() {
+  toJSON(key?) {
     return {
       type: this.constructor.name,
-      connectedWire: this.outC.parent instanceof Battery ? 'BatteryRef' : this.outC.parent,
+      connectedWire: this.outC.parent,
       ui: this.uiNode
     };
   }

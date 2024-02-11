@@ -113,8 +113,11 @@ export class Battery extends Collection {
     this.register({ nodes, until: this.inC, from: this, parrallelLevel: 0, registrationTimestamp: Date.now() });
     return nodes;
   }
-  toJSON() {
+  toJSON(key?) {
 
+    if (key == "connectedWire") {
+      return "BatteryRef"
+    }
     return {
       type: this.constructor.name,
       prov: this.outC.connectedTo,
@@ -128,30 +131,43 @@ export class Battery extends Collection {
 
 
   static fromJSON(fromJSON: jsonType, options: FromJsonOptions): Battery {
-    if (fromJSON.charge == "Infinity") {
-      fromJSON.charge = Infinity
-    }
-    if (fromJSON.maxAmpere == "Infinity") {
-      fromJSON.maxAmpere = Infinity
-    }
-    const battery = new Battery(fromJSON.voltage, fromJSON.charge ?? 0.001);
-    battery.enabled = fromJSON.enabled;
-    battery.maxAmpereSeconds = fromJSON.maxAmpere ?? fromJSON.charge ?? 0.0001;
-    JsonSerializer.createUiRepresation(battery, fromJSON, options);
-    if (options.elementMap[fromJSON.prov.type]) {
-      const outC = options.elementMap[fromJSON.prov.type].fromJSON(fromJSON.prov, {
-        ...options,
-        inC: battery.outC,
-      });
-      if (outC) {
-        outC.connect(battery.inC);
+    if (typeof fromJSON !== "string") {
+
+      if (fromJSON.charge == "Infinity") {
+        fromJSON.charge = Infinity
       }
-    } else {
-      throw new Error('missing serialisation for ' + fromJSON.prov.type);
+      if (fromJSON.maxAmpere == "Infinity") {
+        fromJSON.maxAmpere = Infinity
+      }
+      debugger
+      const battery = new Battery(fromJSON.voltage, +fromJSON.charge ?? 0.001);
+      battery.enabled = fromJSON.enabled;
+      battery.maxAmpereSeconds = +fromJSON.maxAmpere ?? +fromJSON.charge ?? 0.0001;
+      JsonSerializer.createUiRepresation(battery, fromJSON, options);
+
+      const prov = fromJSON.prov
+      if ("type" in prov) {
+        const provType = prov.type as string
+        if (options.elementMap[provType]) {
+          const outC = options.elementMap[provType].fromJSON(prov, {
+            ...options,
+            inC: battery.outC,
+          });
+          if (outC) {
+            outC.connect(battery.inC);
+          }
+        } else {
+          throw new Error('missing serialisation for ' + prov);
+        }
+
+      } else {
+        throw new Error('missing serialisation for ' + prov);
+      }
+
+      return battery;
     }
-    return battery;
 
   }
 }
 
-type jsonType = { [K in keyof ReturnType<(Battery)['toJSON']>]: any };
+type jsonType = ReturnType<(Battery)['toJSON']>

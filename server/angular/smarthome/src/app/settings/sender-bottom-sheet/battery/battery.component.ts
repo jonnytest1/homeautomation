@@ -2,8 +2,8 @@ import { SenderFe } from '../../interfaces';
 import type { AfterViewInit, OnInit } from '@angular/core';
 import { Component, ElementRef, Inject, ViewChild } from '@angular/core';
 import { MAT_DIALOG_DATA } from '@angular/material/dialog';
-import type { ComboChartInstance, DataTable } from '../../../../type/google-charts';
-import { GoogleChartImport } from '../../../../type/google-charts';
+import type { ComboChartInstance, DataTable } from '../../../../type/google-charts-types';
+import { GoogleChartImport } from '../../../../type/google-charts-types';
 @Component({
   selector: 'app-battery',
   templateUrl: './battery.component.html',
@@ -17,7 +17,7 @@ export class BatteryComponent implements OnInit, AfterViewInit {
 
   smallest: number = Number.MAX_VALUE;
 
-  constructor(@Inject(MAT_DIALOG_DATA) public sender: SenderFe) { }
+  constructor(@Inject(MAT_DIALOG_DATA) public sender: SenderFe) {}
 
   ngOnInit() {
     //

@@ -2,8 +2,8 @@ import type { OnDestroy, OnInit } from '@angular/core';
 import { Component, ViewChild, ElementRef, Input } from '@angular/core';
 
 import { BaseComponent } from '../base/base.component';
-import type { DataTable, LineChartInstance } from '../../../type/google-charts';
-import { GoogleChartImport } from '../../../type/google-charts';
+import type { DataTable, LineChartInstance } from '../../../type/google-charts-types';
+import { GoogleChartImport } from '../../../type/google-charts-types';
 import { DiagramConfig } from '../shortcut-config';
 import { SettingsService } from '../../settings.service';
 import { filter, map, takeUntil } from 'rxjs/operators';
