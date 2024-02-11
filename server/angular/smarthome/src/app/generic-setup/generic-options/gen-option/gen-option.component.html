@@ -1,0 +1,26 @@
+<ng-container *ngIf="definition.type=='select';else checkMonaco">
+  <select name="{{name}}">
+    <option *ngFor="let opt of definition.options"
+            [attr.selected]="opt===value?true:null">
+      {{opt}}
+    </option>
+  </select>
+</ng-container>
+<ng-template #checkMonaco>
+  <ng-container *ngIf="definition.type=='monaco';else inputEl">
+    <textarea hidden
+              #hiddenValue
+              name="{{name}}"></textarea>
+    <app-monaco-editor *ngIf="typeDefinition|async ;let types"
+                       [definition]="types"
+                       [(jsCode)]="additionalVal"
+                       [(ngModel)]="code">
+    </app-monaco-editor>
+  </ng-container>
+</ng-template>
+<ng-template #inputEl>
+  <input [type]="definition.type"
+         name="{{name}}"
+         [value]="value ??''">
+
+</ng-template>

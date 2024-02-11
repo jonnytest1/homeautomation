@@ -1,3 +1,4 @@
+import { emitEvent } from '../services/generic-node/generic-node-service';
 import { HttpRequest, WS, Websocket } from 'express-hibernate-wrapper';
 
 
@@ -83,11 +84,17 @@ export class ControlKeysWebsocket {
       const evt = JSON.parse(message) as SendingKeyEvent
       if (evt.type == "keys") {
         this.key_cache = evt
+        emitEvent("key binding", {
+          payload: evt,
+          context: {}
+        })
         this.websockets
           .filter(socket => socket !== websocket)
           .forEach(socket => {
             this.sendKeyData(socket, evt.data)
           })
+
+
       } else if (evt.type == "ping")
         websocket.send(JSON.stringify({ type: "pong" }))
     })

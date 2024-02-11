@@ -1,21 +1,22 @@
 import { EventScheduler } from './src/services/event-scheduler';
 import { logKibana } from './src/util/log';
 import { startNodeRed } from './src/node-red/server';
+import { environment } from './src/environment';
 import { updateDatabase } from 'hibernatets';
 import { HttpRequest, initialize, ResponseCodeError } from 'express-hibernate-wrapper';
-import { config } from 'dotenv';
+
 const fetch = require('node-fetch');
 const NodeMediaServer = require('node-media-server');
 const https = require('https');
 global.fetch = require('node-fetch');
 console.log('server.ts iniz');
 
-const env = config({
-  path: __dirname + '/.env'
-});
-if (env.error) {
-  throw env.error;
+
+if (environment.setup) {
+  require("./test/local-setup.ts")
 }
+
+
 updateDatabase(__dirname + '/src')
   .then(async () => {
     const redirected: string | null = null;
@@ -41,7 +42,7 @@ updateDatabase(__dirname + '/src')
         })
         app.use((req: HttpRequest, res, next) => {
           const forwardedFor = req.headers.http_x_forwarded_for;
-          if ((!forwardedFor || typeof forwardedFor !== 'string' || !forwardedFor.startsWith('192.168.178')) && process.env.DEBUG !== "true") {
+          if ((!forwardedFor || typeof forwardedFor !== 'string' || !forwardedFor.startsWith('192.168.178')) && environment.DEBUG !== "true") {
             res.status(403).send();
             return;
           }
@@ -85,7 +86,7 @@ updateDatabase(__dirname + '/src')
       public: __dirname + '/public'
     });
     new EventScheduler().start();
-    if (process.env.REDIRECT) {
+    if (environment.REDIRECT) {
       console.log("set redirection")
       fetch("https://192.168.178.54/nodets/redirect?port=8080", {
         method: "POST",

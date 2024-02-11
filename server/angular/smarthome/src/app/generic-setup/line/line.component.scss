@@ -1,0 +1,9 @@
+div {
+  background-color: rgb(25, 168, 7);
+  position: fixed;
+
+
+  &.error{
+    background-color: red;
+  }
+}

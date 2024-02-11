@@ -3,14 +3,19 @@ import { Timer } from '../models/timer';
 import { senderLoader } from '../services/sender-loader';
 import { Item } from '../models/inventory/item';
 import { Receiver } from '../models/receiver';
+import { getNodeDefintions, nodes, setNodes } from '../services/generic-node/generic-node-service';
 import { HttpRequest, Websocket, WS } from 'express-hibernate-wrapper';
 import { load, SqlCondition } from 'hibernatets';
 
 
+type ExtendedSocket = Websocket & {
+  isUpdatingNodes?: boolean
+}
+
 @WS({ path: "/updates" })
 export class FrontendWebsocket {
 
-  static websockets: Array<Websocket> = []
+  static websockets: Array<ExtendedSocket> = []
   static async updateTimers() {
     const timers = await load(Timer, Timer.timerQuery)
     this.websockets.forEach(async (socket) => {
@@ -78,7 +83,7 @@ export class FrontendWebsocket {
     ws.send(JSON.stringify(data))
   }
 
-  static onConnected(req: HttpRequest, websocket: Websocket) {
+  static onConnected(req: HttpRequest, websocket: ExtendedSocket) {
     this.websockets.push(websocket)
     websocket.on('close', () => {
       this.websockets = this.websockets.filter(ws => ws !== websocket)
@@ -89,12 +94,29 @@ export class FrontendWebsocket {
     websocket.on("message", async (message) => {
       if (message == "getTimers") {
         this.updateTimersForSocket(websocket)
+      } else {
+        const evt = JSON.parse(message)
+        if (evt.type == "store-nodes") {
+          websocket.isUpdatingNodes = true
+          setNodes(evt.data, evt.changedUuid)
+          websocket.isUpdatingNodes = false
+        } else if (evt.type == "ping") {
+          websocket.send(JSON.stringify({ type: "pong" }))
+        }
       }
       // TODO
     })
     this.updateTimersForSocket(websocket)
     this.updateInventory(websocket)
 
+    this.sendToWebsocket(websocket, {
+      type: "nodeDefinitions",
+      data: getNodeDefintions()
+    })
+    this.sendToWebsocket(websocket, {
+      type: "nodeData",
+      data: nodes.value
+    })
     load(Receiver, SqlCondition.ALL, [], {
       deep: ["actions", "events"]
     }).then(receviers => {
@@ -106,3 +128,16 @@ export class FrontendWebsocket {
 
   }
 }
+
+
+nodes.subscribe(nodeUpdates => {
+  FrontendWebsocket.websockets.forEach(async (socket) => {
+    if (socket.isUpdatingNodes) {
+      return
+    }
+    FrontendWebsocket.sendToWebsocket(socket, {
+      type: "nodeData",
+      data: nodeUpdates
+    })
+  })
+})

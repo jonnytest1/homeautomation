@@ -4,7 +4,6 @@ import { RouterModule } from '@angular/router';
 import { CameraComponent } from './camera/camera.component';
 import { IframeComponent } from './iframe/iframe.component';
 import { InventoryComponent } from './inventory/inventory.component';
-import { MonacoEditorComponent } from './monaco-editor/monaco-editor.component';
 import { TimersComponent } from './timers/timers.component';
 import { TodoComponent } from './todo/todo.component';
 import { WiringComponent } from './wiring/wiring.component';
@@ -23,15 +22,16 @@ const routes: Routes = [
   {
     path: 'setup',
     loadChildren: () => import('./settings/settings.module').then(m => m.SettingsModule)
+  },
+  {
+    path: 'generic-setup',
+    loadComponent: () => import('./generic-setup/generic-setup.component').then(m => m.GenericSetupComponent)
   }, {
     path: 'options',
     loadChildren: () => import('./options/options.module').then(m => m.OptionsModule)
   }, {
     path: 'camera',
     component: CameraComponent
-  }, {
-    path: 'code',
-    component: MonacoEditorComponent
   }, {
     path: 'timers',
     component: TimersComponent

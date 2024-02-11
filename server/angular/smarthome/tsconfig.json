@@ -19,6 +19,7 @@
     "typeRoots": [
       "node_modules/@types"
     ],
+    "types": [],
     "lib": [
       "es2018",
       "dom",
@@ -26,7 +27,7 @@
       "ES2019.Object",
       "ES2015",
       "ESNext",
-      "DOM.Iterable"
+      "DOM.Iterable",
     ],
   }
 }

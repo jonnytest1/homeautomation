@@ -1,15 +1,17 @@
 
 //import type { createTypeScriptSandbox as cr, Sandbox } from "@typescript/sandbox"
+import type { editor, languages } from "monaco-editor"
 
+export type Decoration = editor.IModelDeltaDecoration
 
-export interface Decoration {
+/*{
   options: {
     className?: string
     inlineClassName?: string
   }
 
   range: MonacoRange
-}
+}*/
 
 interface Position {
   column: number
@@ -35,7 +37,8 @@ export interface Range {
   }
 }
 
-export interface Editor {
+export type Editor = editor.ICodeEditor
+/*{
   deltaDecorations(dec: Array<Decoration>, newDecorations: Array<Decoration>): Array<Decoration>
 
 
@@ -43,7 +46,7 @@ export interface Editor {
 
 
   focus()
-}
+}*/
 
 export const AST_KIND = {
   CLASS_INSTANCE: 201,
@@ -68,7 +71,7 @@ export interface AST {
   getChildren(): Array<AST>
   update(val?: string, range?: Range)
 }
-
+type abc = editor.EditorOption
 export type SandBox = {
   getWorkerProcess(): Promise<any>
   getModel(): MonacoModel
@@ -90,23 +93,11 @@ interface MonacoRange {
 
 
 export interface MonacoGlobal {
-  editor: {
-    getModels(): Array<MonacoModel>
-
-    defineTheme(theme: string, options)
-  }
+  editor: typeof editor
 
   Range: new (starLinbe: number, startColun: number, endLine: number, endColumn: number) => MonacoRange;
 
-  languages: {
-    typescript: {
-      getTypeScriptWorker(): Promise<unknown>
-      typescriptDefaults
-      ScriptTarget
-      ModuleResolutionKind
-      ModuleKind
-    }
-  }
+  languages: typeof languages
 }
 
 

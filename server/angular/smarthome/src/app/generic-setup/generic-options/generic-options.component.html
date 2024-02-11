@@ -1,0 +1,50 @@
+<div class="positioning">
+
+  <div id="overlay"
+       popover>
+    <h1>global settings</h1>
+    <form #formglob>
+      <div class="wrapper">
+        <ng-container *ngFor="let entry of options.globalConfig|keyvalue">
+          <div>
+            {{entry.key}}
+          </div>
+          <div>
+            <app-gen-option [definition]="entry.value"
+                            [name]="entry.key"
+                            [node]="node"
+                            [value]="node.parameters?.[entry.key]">
+            </app-gen-option>
+          </div>
+        </ng-container>
+      </div>
+    </form>
+
+  </div>
+  <button class="globalbtn"
+          popovertarget="overlay"
+          *ngIf="options.globalConfig">
+    <mat-icon>settings</mat-icon>
+  </button>
+
+
+  <h2>{{node.type}}</h2>
+
+  <pre>{{node.runtimeContext.outputSchema?.dts ?? ''}}</pre>
+  <form #form>
+    <div class="wrapper">
+      <ng-container *ngFor="let entry of entries;trackBy:entryName">
+        <div>
+          {{entry.name}}
+        </div>
+        <div>
+          <app-gen-option [definition]="entry.value"
+                          [name]="entry.name"
+                          [node]="node"
+                          [value]="node.parameters?.[entry.name]">
+          </app-gen-option>
+        </div>
+      </ng-container>
+    </div>
+  </form>
+</div>

@@ -5,6 +5,10 @@ import type { Item } from '../../../../../src/models/inventory/item';
 import type { Transformation } from '../../../../../src/models/transformation';
 import type { SocketResponses as sR } from "../../../../../src/resources/websocket-response"
 
+export * from "../../../../../src/services/mqtt-types"
+export * from "../../../../../src/services/generic-node/generic-node-type"
+export type { FrontendToBackendEvents } from "../../../../../src/resources/socket-events"
+
 export type SocketResponses = sR;
 
 export interface ResponseData<K extends keyof SocketResponses = keyof SocketResponses> {
@@ -12,7 +16,7 @@ export interface ResponseData<K extends keyof SocketResponses = keyof SocketResp
   data: SocketResponses[K]
 }
 
-type Primitives = string | number | boolean | Date | undefined;
+export type Primitives = string | number | boolean | Date | undefined;
 
 type NestedNonFunctionProperty<K> = K extends Primitives ? K : (K extends Array<unknown> ? Array<FrontendProperties<K[0]>> : FrontendProperties<K>);
 

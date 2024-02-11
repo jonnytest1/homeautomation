@@ -19,6 +19,11 @@
          routerLinkActive="activeRoute"
          [routerLink]="(mobile$|async) ? 'setup/mobile':'setup'">
         Setup
+      </a><a mat-list-item
+         (mouseover)="click($event)"
+         routerLinkActive="activeRoute"
+         [routerLink]="(mobile$|async) ? 'generic-setup':'generic-setup'">
+        GenSetup
       </a>
       <a mat-list-item
          (mouseover)="click($event)"

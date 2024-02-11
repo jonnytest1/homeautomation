@@ -52,12 +52,12 @@ export class MyHammerConfig extends HammerGestureConfig {
     AutosavingDirective,
     AutosavingDirectiveProviderDirective,
     CodeEditorComponent, MobileSenderComponent,
-    MonacoEditorComponent,
     TransformerDropDownComponent,
     TimersComponent,
     TransformationEditorComponent, SettingsMobileComponent, DebounceClickDirective, MobileTimersComponent
   ],
   imports: [
+    MonacoEditorComponent,
     CommonModule,
     FormsModule,
     MatListModule, MatTabsModule, HammerModule,

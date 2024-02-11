@@ -1,0 +1,74 @@
+<div class="page">
+  <div class="wrapper"
+       *ngIf="connections.service.nodeDefinitions|async;let nodeDefs">
+
+
+    <div class="background"
+         id="background-drop"
+         (click)="setActiveNode(undefined)"
+         (drop)="onDrop($event)"
+         (dragover)="dropAllowed($event)">
+      <!-- (dragleave)="state.setdragging()" -->
+
+
+      <ng-container *ngIf="connections.service.nodeData|async;let nodeData">
+
+
+        <div *ngFor="let node of nodeData.nodes;trackBy:nodeByUuid"
+             draggable="true"
+             (dragstart)="startDragUpdate($event,node)"
+             (click)="setActiveNode(node);$event.stopPropagation()"
+             class="node"
+             [position]="node.position">
+          <app-generic-node [prefix]="node.type"
+                            [node]="node"
+                            [selected]="node===activeNode"
+                            [editable]="true"
+                            [inputsCt]="getNodeDefChecked(nodeDefs,node.type).inputs??0"
+                            [outputCt]="getNodeDefChecked(nodeDefs,node.type).outputs??0">
+            {{node.type}}
+          </app-generic-node>
+          <!--    <ng-container *ngIf="node.type=='sender'">
+          <app-sender [editable]="true"></app-sender>
+        </ng-container>
+        <ng-container *ngIf="node.type=='receiver'">
+          <app-receiver [editable]="true"></app-receiver>
+        </ng-container> -->
+        </div>
+      </ng-container>
+    </div>
+
+    <div *ngIf="connections.pendingConnection|async let con">
+      <app-line [line]="con"
+                [editing]="true"></app-line>
+    </div>
+    <ng-container *ngIf="connections.service.nodeData|async;let nodeData">
+      <div *ngFor="let line of nodeData.connections">
+        <app-line [line]="line"></app-line>
+      </div>
+    </ng-container>
+    <div class="properties"
+         *ngIf="activeNode">
+
+      <app-generic-options [options]="getNodeDefChecked(nodeDefs,activeNode.type)"
+                           [node]="activeNode">
+
+      </app-generic-options>
+    </div>
+    <div class="nodelist">
+      <div *ngFor="let n of nodeDefs|keyvalue"
+           class="dragelement"
+           draggable="true"
+           (dragstart)="startDrag($event,n.value)">
+
+        <app-generic-node [prefix]="n.value.type"
+                          [inputsCt]="n.value.inputs??0"
+                          [outputCt]="n.value.outputs??0">
+          {{n.value.type}}
+        </app-generic-node>
+
+      </div>
+
+    </div>
+  </div>
+</div>

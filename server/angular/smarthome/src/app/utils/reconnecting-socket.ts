@@ -18,11 +18,10 @@ export class ReconnectingWebsocket {
       if (this.closed) {
         clearInterval(interval)
       }
-      this.socket.send(JSON.stringify({ type: "ping" }))
-
-    }, 20000)
-
-
+      if (this.socket.readyState === this.socket.OPEN) {
+        this.socket.send(JSON.stringify({ type: "ping" }))
+      }
+    }, 15000)
   }
 
 
@@ -32,7 +31,9 @@ export class ReconnectingWebsocket {
       if (!this.closed)
         this.createSocekt()
     })
-
+    this.socket.addEventListener("error", e => {
+      console.error(e)
+    })
     this.socket.onmessage = (e) => {
       this.messages$.next(e.data)
     };

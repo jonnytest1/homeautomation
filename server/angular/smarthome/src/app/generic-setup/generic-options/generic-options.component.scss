@@ -1,0 +1,32 @@
+.positioning{
+  position: relative;
+
+
+  #overlay{
+    position: fixed;
+    min-width: max(200px,30vw);
+    min-height: max(100px,25vh) ;
+
+    border: 2px solid black
+  }
+
+  .globalbtn{
+    position: absolute;
+    right: 8px;
+    border:0;
+
+    cursor:pointer
+    //top: 8px;
+  }
+
+  form{
+
+
+    .wrapper{
+      padding: 4px;
+      display: grid;
+      grid-template-columns: min-content auto;
+      gap:4px
+    }
+  }
+}

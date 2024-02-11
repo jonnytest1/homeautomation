@@ -1,4 +1,4 @@
-import type { ConnectionFe, EventHistoryFe, ItemFe, ReceiverFe, ResponseData, SenderFe, SocketResponses, TimerFe, TransformFe } from './settings/interfaces';
+import type { ConnectionFe, EventHistoryFe, FrontendToBackendEvents, ItemFe, NodeData, NodeDefintion, ReceiverFe, ResponseData, SenderFe, SocketResponses, TimerFe, TransformFe } from './settings/interfaces';
 import { environment } from '../environments/environment';
 import { AbstractHttpService } from './utils/http-service';
 import { HttpClient } from '@angular/common/http';
@@ -14,13 +14,26 @@ let ws: WebSocket;
 let service: SettingsService;
 
 function openWebsocket() {
-  ws = new WebSocket(getRelativeWebsocketUrl());
-  ws.onclose = () => {
-    openWebsocket();
-  };
-  ws.onmessage = (e) => {
-    service?.onMessage(e);
-  };
+  try {
+    ws = new WebSocket(getRelativeWebsocketUrl());
+    ws.onclose = () => {
+      openWebsocket();
+    };
+    ws.onmessage = (e) => {
+      service?.onMessage(e);
+    };
+  } catch (e) {
+    setTimeout(() => {
+      openWebsocket()
+    }, 10)
+  }
+
+
+}
+
+
+function sendSocketEvent(evt: FrontendToBackendEvents) {
+  ws.send(JSON.stringify(evt))
 }
 
 
@@ -33,7 +46,6 @@ function getRelativeWebsocketUrl() {
 
 @Injectable({ providedIn: 'root' })
 export class SettingsService extends AbstractHttpService {
-
   private readonly timers: BehaviorSubject<Array<TimerFe>> = new BehaviorSubject([]);
 
   public timers$ = this.timers.asObservable();
@@ -46,11 +58,22 @@ export class SettingsService extends AbstractHttpService {
   private readonly inventory = new BehaviorSubject<Array<ItemFe>>([]);
 
   public inventory$ = this.inventory.asObservable()
+
+
+
+  public nodeDefinitions: BehaviorSubject<Record<string, NodeDefintion>> = new BehaviorSubject(undefined);
+  public nodeData: BehaviorSubject<NodeData> = new BehaviorSubject(undefined);
   private websocket: WebSocket;
 
   constructor(http: HttpClient, router: Router) {
     super(http, router);
     openWebsocket();
+    setTimeout(() => {
+      sendSocketEvent({
+        type: "ping"
+      })
+    }, 20000)
+
     service = this;
 
     this.getSenders().toPromise().then(senders => {
@@ -72,7 +95,22 @@ export class SettingsService extends AbstractHttpService {
       this.inventory.next(messageEvent.data)
     } else if (this.isType(messageEvent, 'receiverUpdate')) {
       this.updateReceiver(messageEvent.data);
+    } else if (this.isType(messageEvent, 'nodeDefinitions')) {
+      this.nodeDefinitions.next(messageEvent.data)
+    } else if (this.isType(messageEvent, 'nodeData')) {
+      this.nodeData.next(messageEvent.data)
     }
+  }
+
+  mergeGlobals(options: { [k: string]: FormDataEntryValue; }) {
+    const newglobals = Object.assign({}, this.nodeData.value.globals ?? {}, options)
+
+    this.nodeData.next({ ...this.nodeData.value, globals: newglobals })
+  }
+
+
+  storeNodes(nodes: NodeData, changedUuid?: string) {
+    sendSocketEvent({ type: "store-nodes", data: nodes, changedUuid })
   }
 
   updateReceiver(receiver: ReceiverFe) {
