@@ -1,63 +1,15 @@
-import type { NodeEvent } from './node-event'
+import type { NodeDefOptinos, NodeDefToType } from './node-options'
+import type { NodeEvent } from '../node-event'
 import type { z } from 'zod'
 import type { JSONSchema6 } from 'json-schema'
 
 
-export type Text = {
-  type: "text"
-}
-export type Code = {
-  type: "monaco"
-  default?: string
-}
-
-export type Select<T extends string = string> = {
-  type: "select",
-  options: Array<T> | ReadonlyArray<T>
-  initial?: string
-}
-export type PlaceHolder = {
-  type: "placeholder",
-  of: Exclude<NodeOptionTypes["type"], "placeholder">
-}
-
-type Order = {
-  order?: number
-}
-
-export type NodeOptionTypes = (Select | Text | Code | PlaceHolder) & Order
-
-export type NodeDefOptinos = {
-  [name: string]: NodeOptionTypes
-}
 export type NodeDefintion<G extends NodeDefOptinos = NodeDefOptinos, O extends NodeDefOptinos = NodeDefOptinos> = {
   outputs?: number,
   inputs?: number,
   type: string
   options?: O
   globalConfig?: G
-}
-
-
-
-
-
-type NodeDefType<T extends NodeOptionTypes> = T["type"] extends "text"
-  ? string
-  : T extends Select
-  ? T["options"][number]
-  : T["type"] extends "monaco"
-  ? string
-  : never
-
-export type NodeDefToType<N extends NodeDefOptinos> = {
-  [key in keyof N]?: N[key] extends PlaceHolder ? NodeDefType<NodeOptionTypes & { type: N[key]["of"] }> : NodeDefType<N[key]>
-}
-
-
-export type NodeEventData<C = unknown, T = unknown> = {
-  payload: T
-  context: C,
 }
 
 export type Callbacks = {

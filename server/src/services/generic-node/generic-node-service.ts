@@ -1,9 +1,11 @@
 import { jsonSchemaProvider } from './node-services/json-schema';
-import type { ConnectorDefintion, ElementNode, NodeData, NodeDefOptinos, NodeDefintion, NodeEventData, PreparedNodeData, TypeImplementaiton } from './generic-node-type';
+import type { ConnectorDefintion, ElementNode, NodeData, NodeDefintion, PreparedNodeData, TypeImplementaiton } from './typing/generic-node-type';
 import { mqttSub } from './node-services/mqtt-subscribe';
 
 import { updateTypeSchema } from './generic-type.utils';
 import { NodeEvent } from './node-event';
+import type { NodeDefOptinos } from './typing/node-options';
+import type { NodeEventData } from './typing/node-event-data';
 import { logKibana } from '../../util/log';
 import { BehaviorSubject } from "rxjs"
 import { writeFileSync, readFileSync } from "fs"

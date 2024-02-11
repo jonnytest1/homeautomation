@@ -1,7 +1,7 @@
 import { globalMqttConfig } from './mqtt-global'
 import { mqttConnection } from '../../mqtt-api'
 import { addTypeImpl } from '../generic-node-service'
-import type { ElementNode, ExtendedJsonSchema, Select } from '../generic-node-type'
+import type { ElementNode, ExtendedJsonSchema, Select } from '../typing/generic-node-type'
 import { generateDtsFromSchema, generateZodTypeFromSchema } from '../json-schema-type-util'
 import { connect } from 'mqtt'
 

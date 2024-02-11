@@ -1,4 +1,4 @@
-import type { ExtendedJsonSchema } from './generic-node-type'
+import type { ExtendedJsonSchema } from './typing/generic-node-type'
 import { zodScripts } from './generic-node-constants'
 import { Diagnostic, Program, ScriptKind, ScriptTarget, TypeFormatFlags, createCompilerHost, createProgram, createSourceFile, factory, getPreEmitDiagnostics, isTypeAliasDeclaration } from 'typescript'
 import { generateSchema } from 'typescript-json-schema'

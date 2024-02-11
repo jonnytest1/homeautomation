@@ -2,7 +2,7 @@
 
 import { generateDtsFromSchema, jsonSchemaFromDts } from '../json-schema-type-util';
 import { addTypeImpl } from '../generic-node-service';
-import type { ElementNode, NodeDefToType } from '../generic-node-type';
+import type { ElementNode, NodeDefToType } from '../typing/generic-node-type';
 import { Json2dts } from "json2dts"
 import * as z from "zod"
 import { createCompilerHost } from 'typescript';

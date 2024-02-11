@@ -1,4 +1,4 @@
-import type { NodeOptionTypes } from './generic-node/generic-node-type'
+import type { NodeOptionTypes } from './generic-node/typing/generic-node-type'
 import type { CommandsEvent } from './mqtt-types'
 
 

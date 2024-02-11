@@ -1,7 +1,7 @@
 
 
 
-import type { ExtendedJsonSchema, TypeImplementaiton } from '../generic-node-type'
+import type { ExtendedJsonSchema, TypeImplementaiton } from '../typing/generic-node-type'
 import { parseTypeSafe } from '../generic-type.utils'
 import { generateDtsFromSchema } from '../json-schema-type-util'
 

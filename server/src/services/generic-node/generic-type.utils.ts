@@ -1,5 +1,5 @@
 
-import type { ElementNode, ExtendedJsonSchema, PreparedNodeData, SchemaCollection } from './generic-node-type';
+import type { ElementNode, ExtendedJsonSchema, PreparedNodeData, SchemaCollection } from './typing/generic-node-type';
 import { CompilerError, expansionType, generateDtsFromSchema, generateZodTypeFromSchema, jsonSchemaFromDts, mainTypeName } from './json-schema-type-util';
 import { typeData } from './generic-node-constants';
 import { logKibana } from '../../util/log';

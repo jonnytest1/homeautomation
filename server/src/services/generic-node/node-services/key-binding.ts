@@ -1,7 +1,7 @@
 import { ControlKeysWebsocket } from '../../../resources/control-keys.ws'
 import type { DeviceConfig } from '../../mqtt-tasmota'
 import { addTypeImpl } from '../generic-node-service'
-import type { ElementNode, ExtendedJsonSchema } from '../generic-node-type'
+import type { ElementNode, ExtendedJsonSchema } from '../typing/generic-node-type'
 import { generateDtsFromSchema } from '../json-schema-type-util'
 import type { NodeEvent } from '../node-event'
 

@@ -1,13 +1,15 @@
-import type { NodeDefOptinos, NodeDefToType, NodeEventData } from './generic-node-type';
+
+import type { NodeEventData } from './typing/node-event-data';
+import type { NodeDefOptinos, NodeDefToType } from './typing/node-options';
 
 export class NodeEvent<C = unknown, P = unknown, G extends NodeDefOptinos = NodeDefOptinos> {
 
   declare payload: P
   declare context: C
 
-  declare globalConfig: NodeDefToType<NodeDefOptinos>
+  declare globalConfig: NodeDefToType<G>
 
-  constructor(data: NodeEventData, globals: NodeDefToType<NodeDefOptinos>) {
+  constructor(data: NodeEventData, globals: NodeDefToType<G>) {
     Object.defineProperty(this, 'payload', {
       enumerable: true,
       configurable: true,

@@ -1,6 +1,6 @@
 import { mqttConnection } from '../../mqtt-api'
 import type { DeviceConfig } from '../../mqtt-tasmota'
-import type { ElementNode, TypeImplementaiton } from '../generic-node-type'
+import type { ElementNode, TypeImplementaiton } from '../typing/generic-node-type'
 import type { NodeEvent } from '../node-event'
 
 export const mqttSub: TypeImplementaiton<{ topic: string }> = {
