@@ -3,7 +3,7 @@ import type { FromJsonOptions } from '../serialisation';
 import { Collection } from './collection';
 import type { Connection } from './connection';
 import type { RegisterOptions } from './interfaces/registration';
-import { Parrallel } from './parrallel';
+import type { Parrallel } from './parrallel';
 import { ParrallelWire } from './parrallel-wire';
 import type { CurrentCurrent, CurrentOption, GetResistanceOptions, ResistanceReturn, Wiring } from './wiring.a';
 
