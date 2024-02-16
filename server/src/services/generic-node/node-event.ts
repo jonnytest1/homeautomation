@@ -2,6 +2,14 @@
 import type { NodeEventData } from './typing/node-event-data';
 import type { NodeDefOptinos, NodeDefToType } from './typing/node-options';
 
+
+export type NodeEventJsonData<P = unknown> = {
+  payload: P,
+  context: unknown
+}
+
+
+
 export class NodeEvent<C = unknown, P = unknown, G extends NodeDefOptinos = NodeDefOptinos> {
 
   declare payload: P
@@ -38,7 +46,7 @@ export class NodeEvent<C = unknown, P = unknown, G extends NodeDefOptinos = Node
   }
 
 
-  copy(): unknown {
+  copy(): NodeEventJsonData {
     return JSON.parse(JSON.stringify(this))
   }
 

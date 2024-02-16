@@ -1,15 +1,14 @@
 
 import type { ElementNode, ExtendedJsonSchema, PreparedNodeData, SchemaCollection } from './typing/generic-node-type';
-import { CompilerError, expansionType, generateDtsFromSchema, generateZodTypeFromSchema, jsonSchemaFromDts, mainTypeName } from './json-schema-type-util';
+import { CompilerError, expansionType, generateDtsFromSchema, generateJsonSchemaFromDts, mainTypeName } from './json-schema-type-util';
 import { typeData } from './generic-node-constants';
 import { logKibana } from '../../util/log';
-import * as z from "zod"
 import { generateSchema } from 'typescript-json-schema';
 import { join, dirname } from "path"
 import { writeFile, mkdir } from "fs/promises"
 
 const schemaMap: Record<string, SchemaCollection> = {}
-
+/*
 export async function parseTypeSafe(node: ElementNode<unknown>, data: unknown) {
   let validator = schemaMap[node.uuid]?.zodValidator
   if (!validator) {
@@ -19,8 +18,13 @@ export async function parseTypeSafe(node: ElementNode<unknown>, data: unknown) {
     }
     validator = schema!.zodValidator
   }
-  return validator.parse(data)
-}
+  try {
+    return validator.parse(data)
+  } catch (e) {
+    debugger;
+    throw e;
+  }
+}*/
 
 async function getComputeSchema(node: ElementNode<unknown>) {
   if (!node.runtimeContext?.outputSchema?.jsonSChema) {
@@ -29,14 +33,14 @@ async function getComputeSchema(node: ElementNode<unknown>) {
   const schemaString = JSON.stringify(node.runtimeContext?.outputSchema?.jsonSChema)
   let nodeCahce = schemaMap[node.uuid]
   if (!nodeCahce || schemaString !== nodeCahce.schemaCache) {
-    const [dts, zodParser] = await Promise.all([
+    const [dts] = await Promise.all([
       generateDtsFromSchema(node.runtimeContext?.outputSchema?.jsonSChema),
-      generateZodTypeFromSchema(node.runtimeContext?.outputSchema?.jsonSChema)
+      // generateZodTypeFromSchema(node.runtimeContext?.outputSchema?.jsonSChema)
     ])
     nodeCahce = schemaMap[node.uuid] = {
       schemaCache: schemaString,
       dts: dts,
-      zodValidator: zodParser,
+      //zodValidator: zodParser,
       mainTypeName: mainTypeName
     }
     const target = join(typeData, node.uuid + ".ts");
@@ -48,9 +52,10 @@ async function getComputeSchema(node: ElementNode<unknown>) {
 
 export async function updateTypeSchema(node: ElementNode, nodeData: PreparedNodeData) {
   let schema: SchemaCollection | null = null
-  if (nodeData.targetConnectorMap[node.uuid]) {
+  const connectionsTargetingCurrentNode = nodeData.targetConnectorMap[node.uuid];
+  if (connectionsTargetingCurrentNode) {
 
-    const schemata = await Promise.all(nodeData.targetConnectorMap[node.uuid].map(async con => {
+    const schemata = await Promise.all(connectionsTargetingCurrentNode.map(async con => {
       const connectionNode = nodeData.nodeMap[con.uuid]
       const compSchema = await getComputeSchema(connectionNode)
       if (compSchema?.dts && node.runtimeContext.inputSchema) {
@@ -76,7 +81,7 @@ export async function updateTypeSchema(node: ElementNode, nodeData: PreparedNode
     type ResultType=NodeInput.${mainTypeName}
 `;
           writeFile(join(typeData, `${node.uuid}__${connectionNode.uuid}.ts`), str)
-          const result = jsonSchemaFromDts(str, "ResultType")
+          const result = generateJsonSchemaFromDts(str, "ResultType")
           delete con.error
         } catch (e) {
           if (e instanceof CompilerError) {
@@ -117,7 +122,7 @@ export async function updateTypeSchema(node: ElementNode, nodeData: PreparedNode
   if (schema == null) {
     schema = {
       dts: `type ${mainTypeName}=any`,
-      zodValidator: z.never(),
+      //zodValidator: z.never(),
       schemaCache: "",
       mainTypeName
     }

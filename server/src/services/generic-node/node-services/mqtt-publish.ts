@@ -1,8 +1,9 @@
 import { globalMqttConfig } from './mqtt-global'
 import { mqttConnection } from '../../mqtt-api'
 import { addTypeImpl } from '../generic-node-service'
-import type { ElementNode, ExtendedJsonSchema, Select } from '../typing/generic-node-type'
+import type { ElementNode, ExtendedJsonSchema } from '../typing/generic-node-type'
 import { generateDtsFromSchema, generateZodTypeFromSchema } from '../json-schema-type-util'
+import type { Select } from '../typing/node-options'
 import { connect } from 'mqtt'
 
 
@@ -31,7 +32,7 @@ addTypeImpl({
       argument = newPayload
     }
 
-    if (argument == undefined) {
+    if (argument === undefined) {
       return
     }
     const argStr = argument
@@ -62,13 +63,21 @@ addTypeImpl({
       },
       argument: {
         type: "placeholder",
-        of: "select"
+        of: ["text", "select"]
       }
     },
     globalConfig: globalMqttConfig
   }),
   async nodeChanged(node, prev) {
     if (node.parameters?.topic) {
+
+      if (prev?.parameters?.topic && node.parameters?.topic !== prev?.parameters?.topic) {
+        delete node.parameters.command
+        delete node.parameters.argument
+        delete node.runtimeContext.parameters?.argument
+        delete node.runtimeContext.parameters?.command
+      }
+
       const device = mqttConnection.getDevice(node.parameters?.topic)
       node.runtimeContext ??= {}
       node.runtimeContext.info = device.friendlyName
@@ -77,41 +86,53 @@ addTypeImpl({
 
         const commandOtpinos = device.commands.map(c => c.name)
         node.runtimeContext.parameters["command"] = { type: "select", options: commandOtpinos }
+
+
+
         if (node.parameters.command == undefined) {
           node.parameters.command = commandOtpinos[0]
         }
         if (node.parameters?.command) {
+          if (prev?.parameters?.command && node.parameters?.command !== prev?.parameters?.command) {
+            delete node.parameters.argument
+          }
           const command = device.commands.find(c => c.name == node.parameters?.command)
           if (command?.argument) {
-            const cmdArg = command.argument as Select
-            node.runtimeContext.parameters["argument"] = {
-              type: "select",
-              options: [...cmdArg.options, "<payload>"]
+            if (command.argument.type == "select") {
+              const cmdArg = command.argument as Select
+              node.runtimeContext.parameters["argument"] = {
+                type: "select",
+                options: [...cmdArg.options, "<payload>"]
+              }
+              if (node.parameters.argument == undefined) {
+                node.parameters.argument = cmdArg.options[0]
+              } else {
+                node.runtimeContext.info = `${device.friendlyName} - ${node.parameters.command} - ${node.parameters.argument}`
+                if (node.parameters.argument === "<payload>") {
+                  const jsonSchema: ExtendedJsonSchema = {
+                    type: "string",
+                    enum: [...cmdArg.options]
+                  }
+                  node.runtimeContext.inputSchema = {
+                    jsonSchema: jsonSchema,
+                    dts: await generateDtsFromSchema(jsonSchema)
+                  }
+                } else {
+                  delete node.runtimeContext.inputSchema
+                }
+              }
+            } else {
+              node.runtimeContext.parameters["argument"] = command.argument as typeof node.runtimeContext.parameters["argument"]
             }
 
-            if (node.parameters.argument == undefined) {
-              node.parameters.argument = cmdArg.options[0]
-            } else {
-              node.runtimeContext.info = `${device.friendlyName} - ${node.parameters.command} - ${node.parameters.argument}`
-              if (node.parameters.argument === "<payload>") {
-                const jsonSchema: ExtendedJsonSchema = {
-                  type: "string",
-                  enum: [...cmdArg.options]
-                }
-                node.runtimeContext.inputSchema = {
-                  jsonSchema: jsonSchema,
-                  dts: await generateDtsFromSchema(jsonSchema)
-                }
-              } else {
-                delete node.runtimeContext.inputSchema
-              }
-            }
+
+          } else {
+            //use empty string for no argument command
+            node.parameters.argument = ""
           }
         }
 
-        if (prev?.parameters?.command && prev?.parameters?.command != node.parameters?.command) {
-          delete node.parameters.argument
-        }
+
       }
 
     }

@@ -1,7 +1,10 @@
 import type { ExtendedJsonSchema } from './typing/generic-node-type'
 import { zodScripts } from './generic-node-constants'
-import { Diagnostic, Program, ScriptKind, ScriptTarget, TypeFormatFlags, createCompilerHost, createProgram, createSourceFile, factory, getPreEmitDiagnostics, isTypeAliasDeclaration } from 'typescript'
-import { generateSchema } from 'typescript-json-schema'
+import {
+  Diagnostic, Program, ScriptKind, ScriptTarget, TypeFormatFlags, createCompilerHost, createProgram, createSourceFile,
+  factory, getPreEmitDiagnostics, isExpressionStatement, isTypeAliasDeclaration, Node
+} from 'typescript'
+import { generateSchema, buildGenerator } from 'typescript-json-schema'
 import { FetchingJSONSchemaStore, InputData, JSONSchemaInput, quicktype } from 'quicktype-core'
 
 import type * as z from "zod"
@@ -16,6 +19,8 @@ declare module "typescript" {
   }
 
 }
+
+
 export const expansionType = `
   type ExpandRecursively<T> = T extends Date 
       ? T 
@@ -79,9 +84,13 @@ function canDoSchema(jsonSchema: ExtendedJsonSchema) {
     return false
   } else if (jsonSchema.type == "number") {
     return false
+  } else if (jsonSchema.anyOf) {
+    return true
+  } else if (jsonSchema.$ref) {
+    return true
   }
   debugger
-  return false
+  return true
 }
 
 
@@ -98,6 +107,18 @@ export async function generateDtsFromSchema(jsonSchema: ExtendedJsonSchema) {
       additionalProperties: false
     }
   }
+
+  const definistionStr = ""
+  /*if (jsonSchema.definitions) {
+    for (const def in jsonSchema.definitions) {
+      jsonSchema.definitions[def]
+      definistionStr = `${definistionStr}
+      
+      ${await generateDtsFromSchema(jsonSchema.definitions[def] as ExtendedJsonSchema)}
+      `
+    }
+  }*/
+
   const schemaInput = new JSONSchemaInput(new FetchingJSONSchemaStore());
   await schemaInput.addSource({ name: mainTypeName, schema: JSON.stringify(jsonSchema) });
 
@@ -109,10 +130,11 @@ export async function generateDtsFromSchema(jsonSchema: ExtendedJsonSchema) {
     lang: "ts",
     inferDateTimes: true,
     allPropertiesOptional: false,
+    ignoreJsonRefs: false,
     rendererOptions: {
       'just-types': 'true',
       "prefer-unions": true,
-      "prefer-const-values": true
+      // "prefer-const-values": true "Use string instead of enum for string enums with single value",
       //'explicit-unions': 'true',
       //'acronym-style': 'camel',
     }
@@ -163,9 +185,31 @@ export class CompilerError extends Error {
 
   }
 }
+export function postfix(schema: ExtendedJsonSchema, definitions) {
+  if (!schema.$ref) {
+    schema.additionalProperties = false
+  }
 
 
-export function jsonSchemaFromDts(dts: string, mainType: string) {
+  if (schema.properties) {
+    for (const prop in schema.properties) {
+      const sub = schema.properties[prop]
+      if (typeof sub == "object") {
+        postfix(sub, definitions)
+      }
+    }
+  }
+  if (schema.definitions) {
+    for (const prop in schema.definitions) {
+      const sub = schema.definitions[prop]
+      if (typeof sub == "object") {
+        postfix(sub, definitions)
+      }
+    }
+  }
+}
+
+export function generateJsonSchemaFromDts(dts: string, mainType: string | boolean) {
 
   const program = programFromSource("text.ts", `
       ${dts}
@@ -177,7 +221,24 @@ export function jsonSchemaFromDts(dts: string, mainType: string) {
       .map(r => ({ ...r, file: null }))
     throw new CompilerError("typescript compiler error while generating schema", jsonSafeResults, program.program)
   }
+  if (typeof mainType == "boolean") {
+    const gnerator = buildGenerator(program.program, {
+      ref: false
+    })
+    const typeChecker = program.program.getTypeChecker()
+    let statement: Node = program.tsSourceFile.statements[program.tsSourceFile.statements.length - 1]
+    if (isExpressionStatement(statement)) {
+      statement = statement.expression
+    }
+    const typeDecl = typeChecker.getTypeAtLocation(statement)
+    //@ts-ignore
+    const generated = gnerator?.getTypeDefinition(typeDecl, false, undefined, undefined, undefined, undefined, true) as ExtendedJsonSchema;
+    //@ts-ignore
+    generated.definitions = gnerator?.reffedDefinitions
 
+    postfix(generated, generated.definitions)
+    return generated as ExtendedJsonSchema
+  }
   const schema = generateSchema(program.program, mainType, {
     //required: true, constAsEnum: true, noExtraProps: true,
   }, ["test.ts"])
@@ -226,12 +287,16 @@ export async function generateZodTypeFromSchema(jsonSchema: ExtendedJsonSchema) 
   const target = join(zodScripts, v4() + ".ts");
   await mkdir(dirname(target), { recursive: true })
   await writeFile(target, str)
+
   const module = require(target)
 
-  if (wrapper) {
-    debugger;
-  }
+
   rm(target)
-  const zodValidator = module[`${mainTypeName}Schema`] as z.ZodType
-  return zodValidator
+  const zodValidator = module[`${mainTypeName}Schema`] as z.ZodObject<{ wrapper: never }>
+
+  if (wrapper) {
+    return zodValidator.shape.wrapper as z.ZodObject<never>
+  }
+  return zodValidator as z.ZodObject<never>
+
 }

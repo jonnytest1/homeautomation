@@ -1,0 +1,105 @@
+<head>
+  <style>
+    #columns-wrapper {
+      display: flex;
+      gap: 8px;
+    }
+
+    .column {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-around;
+      gap: 8px;
+    }
+
+    .item input {
+      height: 16px;
+      width: 16px;
+    }
+
+    .label {
+      display: inline-block;
+      transform: translateY(-2px);
+    }
+
+    .item input:checked+label.label {
+      font-weight: bold;
+    }
+  </style>
+</head>
+
+<body style="width:fit-content;margin: unset;">
+  <form id="propertyform"
+        style="width: fit-content;">
+    <div id="columns-wrapper">
+
+    </div>
+  </form>
+
+  <script>
+    addEventListener("message", e => {
+      /**
+       * @type {{type:"data",data:unknown,current:string}}
+       */
+      const evt = JSON.parse(e.data)
+
+      if(evt.type === "data") {
+        /**
+         * @type {Array<Array<string>>}
+         */
+        const data = evt.data
+        const port = e.ports[0]
+
+        document.body.style.width = "20000px"
+        document.body.style.height = "20000px"
+
+        for(const column of data) {
+          const columnItem = document.createElement("div")
+          columnItem.classList.add("column")
+
+          for(const item of column) {
+
+            const itemWrapper = document.createElement("div")
+            itemWrapper.classList.add("item")
+            const inputItem = document.createElement("input")
+            inputItem.type = "radio"
+            inputItem.name = "key"
+            //inputItem.hidden = true
+            inputItem.id = "key_" + item
+            inputItem.value = item
+            inputItem.classList.add("input")
+            inputItem.checked = item === evt.current
+
+            itemWrapper.appendChild(inputItem)
+
+            const labelItem = document.createElement("label")
+            labelItem.setAttribute("for", "key_" + item)
+            labelItem.textContent = item
+            labelItem.classList.add("label")
+
+            itemWrapper.appendChild(labelItem)
+
+            columnItem.appendChild(itemWrapper)
+
+          }
+
+          document.querySelector("#columns-wrapper").appendChild(columnItem)
+        }
+        const form = document.querySelector("#propertyform")
+        form.addEventListener("change", e => {
+          const options = Object.fromEntries(new FormData(form).entries())
+          port.postMessage(JSON.stringify({
+            type: "change",
+            data: options.key
+          }))
+        })
+        const rect = form.getBoundingClientRect()
+        port.postMessage(JSON.stringify({
+          type: "size",
+          size: rect
+        }))
+      }
+    })
+  </script>
+
+</body>

@@ -1,4 +1,5 @@
-import type { NodeDefOptinos } from '../typing/generic-node-type';
+import type { NodeDefOptinos } from '../typing/node-options';
+
 
 export const globalMqttConfig = {
   mqtt_server: { type: "text" }

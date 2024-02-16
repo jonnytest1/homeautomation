@@ -1,8 +1,7 @@
-import type { NodeDefOptinos, NodeDefToType } from './node-options'
+import type { NodeDefOptinos, NodeDefToRUntime, NodeDefToType } from './node-options'
 import type { NodeEvent } from '../node-event'
-import type { z } from 'zod'
+import type { ElementNodeImpl } from '../element-node'
 import type { JSONSchema6 } from 'json-schema'
-
 
 export type NodeDefintion<G extends NodeDefOptinos = NodeDefOptinos, O extends NodeDefOptinos = NodeDefOptinos> = {
   outputs?: number,
@@ -19,18 +18,22 @@ export type Callbacks = {
 
 
 export type TypeImplementaiton<Context = unknown, Globals extends NodeDefOptinos = NodeDefOptinos, Opts extends NodeDefOptinos = NodeDefOptinos> = {
+  context_type?(t: Context): Context
   process: (node: ElementNode<NodeDefToType<Opts>>, data: NodeEvent<Context, unknown, Globals>, callbacks: Callbacks) => void | Promise<void>
   nodeDefinition: () => NodeDefintion<Globals, Opts>
-  nodeChanged?: (node: ElementNode<NodeDefToType<Opts>>, prevNode: ElementNode<NodeDefToType<Opts>> | null) => void | Promise<void>
+  nodeChanged?: (node: ElementNodeImpl<NodeDefToType<Opts>, NodeDefToRUntime<Opts>>, prevNode: ElementNode<NodeDefToType<Opts>> | null) => void | Promise<void>
   connectionTypeChanged?(node: ElementNode<NodeDefToType<Opts>>, schema: SchemaCollection): void | Promise<void>
+  initializeServer?(nodes: Array<ElementNode<NodeDefToType<Opts>>>, globals: NodeDefToType<Globals>): void | Promise<void>
+  unload?(nodeas: Array<ElementNode<NodeDefToType<Opts>>>, globals: NodeDefToType<Globals>): void | Promise<void>
+  _file?: string
 }
 
 
 
-export type ExtendedJsonSchema = JSONSchema6 & { merged?: boolean }
+export type ExtendedJsonSchema = JSONSchema6 & { merged?: boolean, _optional?: Array<string> }
 
 export type ElementNode<T = { [optinoskey: string]: string }, P = NodeDefOptinos> = {
-  parameters?: T
+  parameters?: Partial<T>
   position: {
     x: number,
     y: number
@@ -47,16 +50,16 @@ export type ElementNode<T = { [optinoskey: string]: string }, P = NodeDefOptinos
       jsonSChema: ExtendedJsonSchema
       dts: string
     }
+    editorSchema?: {
+      dts: string
+    }
     info?: string
-    lastEvent?: unknown
-    lastEventTime?: number
-    lastOutputEventTime?: number
-    parameters?: P
+    parameters?: Partial<P>
 
-    connections?: {
+    /*connections?: {
       incoming: Array<Connection & { node?: ElementNode }>,
       outgoing: Array<Connection & { node?: ElementNode }>,
-    }
+    }*/
   },
   globalContext?: NodeDefOptinos
 }
@@ -91,6 +94,8 @@ export type PreparedNodeData = {
 export type SchemaCollection = {
   schemaCache: string
   dts: string,
-  zodValidator: z.ZodType
+  //zodValidator: z.ZodType
   mainTypeName: "Main"
 }
+
+export type NodeEventTimes = Record<string, { input: number, output: number }>

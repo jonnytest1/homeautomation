@@ -1,8 +1,11 @@
 
 
-import { generateDtsFromSchema, jsonSchemaFromDts } from '../json-schema-type-util';
+import { CompilerError, generateDtsFromSchema, generateJsonSchemaFromDts } from '../json-schema-type-util';
 import { addTypeImpl } from '../generic-node-service';
-import type { ElementNode, NodeDefToType } from '../typing/generic-node-type';
+import type { ElementNode } from '../typing/generic-node-type';
+import type { NodeDefToType } from '../typing/node-options';
+import { TscCompiler } from '../../../util/tsc-compiler';
+import type { Delayed } from '../../../models/connection-response';
 import { Json2dts } from "json2dts"
 import * as z from "zod"
 import { createCompilerHost } from 'typescript';
@@ -30,6 +33,23 @@ const codeSchema = z.object({
 
 
 const jsCache: Record<string, z.infer<typeof codeSchema> & { script: Script }> = {}
+const isMapFunctionREgex = /function\s*map\s*\(\s*input\s*:\s*InputType/
+
+
+function getContext(sendData) {
+  return {
+    data: sendData,
+    delay: (<T>(sekunden: number, objectToSend?: T): Delayed<T | void> | T => {
+      const millis = sekunden * 1000;
+      return {
+        time: millis,
+        sentData: sendData,
+        nestedObject: objectToSend
+      }
+    }) as typeof delay
+  }
+}
+
 
 addTypeImpl({
   process(node, data, callbacks) {
@@ -42,6 +62,7 @@ addTypeImpl({
       }
     }
     const returnValue = nodeScript.script.runInNewContext({
+      ...getContext(data.payload),
       payload: data.payload
     })
     data.updatePayload(returnValue)
@@ -62,34 +83,72 @@ addTypeImpl({
   nodeChanged(node, prev) {
     const prevtsCode = jsCache[node.uuid]?.tsCode
     cacheNodeScript(node);
-    if (prevtsCode === jsCache[node.uuid].tsCode) {
-      return
-    }
-    /*node.runtimeContext.connections?.incoming.forEach(incomingConnection => {
-      incomingConnection.node?.runtimeContext.schema
 
-    })*/
+
   },
   async connectionTypeChanged(node, connectionSchema) {
+    node.runtimeContext.editorSchema = {
+      dts: `
 
+   type MappedObject<T extends string> = {
+  [key in T]: any
+}
+
+${connectionSchema.dts}
+
+type InputType=${connectionSchema.mainTypeName}
+
+${TscCompiler.responseINterface?.replace("sentData: unknown", "sentData: InputType") ?? ''}
+
+
+declare function mapOnObject<T, K extends keyof T>(input: T, key: K, mapping: MappedObject<T[K] & string>)
+      `
+    }
     if (!jsCache[node.uuid]) {
       cacheNodeScript(node)
 
     }
+    if (!jsCache[node.uuid]?.tsCode?.length) {
+      return
+    }
 
-    const jsonSchema = jsonSchemaFromDts(`
-      ${connectionSchema.dts}
 
-      type InputType=${connectionSchema.mainTypeName}
-      
-      ${jsCache[node.uuid].tsCode}\n
-      type OutputType=ReturnType<typeof map>
-    `, "OutputType")
+    try {
 
-    if (jsonSchema) {
-      node.runtimeContext.outputSchema = {
-        jsonSChema: jsonSchema,
-        dts: await generateDtsFromSchema(jsonSchema)
+      let code = `
+          ${connectionSchema.dts}
+
+          type InputType=${connectionSchema.mainTypeName}
+          
+          ${jsCache[node.uuid].tsCode}\n
+          type OutputType=ReturnType<typeof map>
+        `
+      let statementoverride: false | undefined = undefined
+      if (!code.match(isMapFunctionREgex)) {
+        statementoverride = false
+        code = `
+        ${node.runtimeContext.editorSchema.dts}
+
+         ${jsCache[node.uuid].tsCode}`
+      }
+
+
+      const jsonSchema = generateJsonSchemaFromDts(code, statementoverride ?? "OutputType")
+
+      if (jsonSchema) {
+        node.runtimeContext.outputSchema = {
+          jsonSChema: jsonSchema,
+          dts: await generateDtsFromSchema(jsonSchema)
+        }
+      }
+    } catch (e) {
+      if (e.message == "Not supported: root type undefined") {
+        console.warn("undefined return type to functiuon")
+      } else if (e instanceof CompilerError) {
+        console.error(e)
+      } else {
+
+        throw e;
       }
     }
   }
@@ -99,8 +158,14 @@ function cacheNodeScript(node: ElementNode<NodeDefToType<{ code: { type: "monaco
     const codePAram = JSON.parse(node.parameters.code ?? '{}');
     const parsedCodeAData = codeSchema.parse(codePAram)
     if (parsedCodeAData) {
+      let code = parsedCodeAData.jsCode
+      if (code.startsWith("function map(input)")) {
+        code = `(${code})(payload)`
+      }
+
+
       jsCache[node.uuid] = {
-        script: new Script(`(${parsedCodeAData.jsCode})(payload)`),
+        script: new Script(code),
         ...parsedCodeAData
       };
     }
@@ -108,4 +173,3 @@ function cacheNodeScript(node: ElementNode<NodeDefToType<{ code: { type: "monaco
 
   return jsCache[node.uuid]
 }
-

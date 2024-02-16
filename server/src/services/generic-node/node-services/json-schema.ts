@@ -1,9 +1,10 @@
 
 
 
-import type { ExtendedJsonSchema, TypeImplementaiton } from '../typing/generic-node-type'
-import { parseTypeSafe } from '../generic-type.utils'
-import { generateDtsFromSchema } from '../json-schema-type-util'
+import type { ExtendedJsonSchema } from '../typing/generic-node-type'
+import { generateDtsFromSchema, generateZodTypeFromSchema } from '../json-schema-type-util'
+import { addTypeImpl } from '../generic-node-service'
+import type { ZodType } from 'zod'
 
 function createSchema(schemaOBject: unknown) {
   const schema: ExtendedJsonSchema = {}
@@ -62,10 +63,40 @@ function mergeSchema(old: ExtendedJsonSchema, newSchema: ExtendedJsonSchema): Ex
           }
 
           if (typeof old.required == "object" && !old.required.includes(key)) {
-            old.required.push(key)
+            if (!old._optional?.includes(key)) {
+              old.required.push(key)
+            }
           }
         }
         old.additionalProperties = false
+        return old
+      } else if (keysNew.size > 0) {
+        old.required ??= []
+        for (const key of keysOld) {
+          const oldKeyProp = oldProps[key]
+          const newKeyProp = newProps[key]
+          if (oldKeyProp && typeof oldKeyProp == "object" && newKeyProp && typeof newKeyProp == "object") {
+            mergeSchema(oldKeyProp, newKeyProp)
+          }
+
+          if (typeof old.required == "object" && !old.required.includes(key)) {
+            if (!old._optional?.includes(key)) {
+              old.required.push(key)
+            }
+          }
+        }
+        for (const newKey of keysNew) {
+          oldProps[newKey] = newProps[newKey]
+        }
+        return old
+      } else if (oldKeys.size > 0) {
+        for (const okey of oldKeys) {
+          old._optional ??= []
+          if (!old._optional.includes(okey)) {
+            old._optional.push(okey)
+          }
+          old.required = old.required?.filter(key => key !== okey)
+        }
         return old
       }
       debugger
@@ -130,7 +161,10 @@ function updateSchema(newObject: unknown, oldSchema: ExtendedJsonSchema | null) 
 
 }
 
-export const jsonSchemaProvider: TypeImplementaiton = {
+
+const zodMap: Record<string, Promise<ZodType>> = {}
+
+addTypeImpl({
   async process(node, data, callbacks) {
     if (typeof data.payload == "string") {
       try {
@@ -151,13 +185,23 @@ export const jsonSchemaProvider: TypeImplementaiton = {
           jsonSChema: updated,
           dts: await generateDtsFromSchema(updated)
         }
+        zodMap[node.uuid] = generateZodTypeFromSchema(updated)
         callbacks.updateNode()
       }
     } catch (e) {
       debugger
     }
     if (node.runtimeContext?.outputSchema?.jsonSChema) {
-      data.updatePayload(await parseTypeSafe(node, data.payload))
+      try {
+        if (!zodMap[node.uuid]) {
+          zodMap[node.uuid] = generateZodTypeFromSchema(node.runtimeContext?.outputSchema?.jsonSChema)
+        }
+        const schema = await zodMap[node.uuid]
+        data.updatePayload(await schema.parse(data.payload))
+      } catch (e) {
+        debugger
+        throw e;
+      }
     }
     //const newSchema = json2dts.getCode()
     //node.runtimeContext.schema = newSchema
@@ -177,4 +221,4 @@ export const jsonSchemaProvider: TypeImplementaiton = {
     outputs: 1,
     type: "jsonschema"
   })
-}
+})

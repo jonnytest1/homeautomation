@@ -1,22 +1,36 @@
-import { ControlKeysWebsocket } from '../../../resources/control-keys.ws'
+import { globalMqttConfig } from './mqtt-global'
 import type { DeviceConfig } from '../../mqtt-tasmota'
 import { addTypeImpl } from '../generic-node-service'
 import type { ElementNode, ExtendedJsonSchema } from '../typing/generic-node-type'
 import { generateDtsFromSchema } from '../json-schema-type-util'
-import type { NodeEvent } from '../node-event'
+import { getLastEvent } from '../last-event-service'
+import { MqttClient, connect } from 'mqtt'
+import { BehaviorSubject, firstValueFrom } from 'rxjs'
+import { z } from 'zod'
+import { readFile } from 'fs/promises'
+import { join } from 'path'
 
+
+let mqttConneciton: MqttClient;
+
+const layoutType = z.record(z.array(z.array(z.string())))
+
+
+
+const layoutSubject = new BehaviorSubject<z.infer<typeof layoutType>>({})
 
 addTypeImpl({
-  process(node: ElementNode<{ board?: string, key?: string, mode?: "press" | "release" }>, evt: NodeEvent<{ board: string, device?: DeviceConfig }>, callbacks) {
+  context_type: (t: { board: string, device?: DeviceConfig }) => t,
+  process(node: ElementNode<{ board?: string, key?: string, mode?: "press" | "release" }>, evt, callbacks) {
     if (!node?.parameters?.board) {
       return
     }
     node.runtimeContext ??= {}
 
     let prevBoardData: Array<string> = []
-    if (node.runtimeContext.lastEvent) {
-      const lEvt = node.runtimeContext.lastEvent as { payload: { data: { [board: string]: Array<string> } } }
-      prevBoardData = lEvt.payload.data[node?.parameters?.board]
+    const lastEvent = getLastEvent<{ data: { [board: string]: Array<string> } }>(node)
+    if (lastEvent) {
+      prevBoardData = lastEvent.payload.data[node?.parameters?.board]
     }
     const newEvt = evt.payload as { data: { [board: string]: Array<string> } }
     const newBoardData = newEvt.data[node?.parameters?.board]
@@ -49,22 +63,34 @@ addTypeImpl({
     type: "key binding",
     options: {
       board: {
-        type: "select",
-        options: Object.keys(ControlKeysWebsocket.key_cache?.data ?? {})
+        type: "placeholder",
+        of: "select",
+        invalidates: ["key"]
       },
       key: {
-        type: "text"
+        type: "placeholder",
+        "of": "iframe"
       },
       mode: {
         type: "select",
         options: ["press", "release"] as const,
       }
-    }
+    },
+    globalConfig: globalMqttConfig
   }),
-  async nodeChanged(node) {
+  async nodeChanged(node, prev) {
+
+    node.checkInvalidations(this, prev)
+    const layouts = await firstValueFrom(layoutSubject)
+
+    node.updateRuntimeParameter("board", {
+      type: "select",
+      options: Object.keys(layouts),
+      order: 2
+    })
     if (!node.parameters?.board) {
       node.parameters ??= {}
-      node.parameters.board = Object.keys(ControlKeysWebsocket.key_cache?.data ?? {})[0]
+      node.parameters.board = Object.keys(layouts)[0]
     }
     if (!node.runtimeContext?.inputSchema) {
       node.runtimeContext ??= {}
@@ -97,7 +123,6 @@ addTypeImpl({
             }],
           "$schema": "http://json-schema.org/draft-07/schema#"
         }
-        debugger
 
       } else if (node.parameters.mode == "press") {
         jsonSchema = {
@@ -131,16 +156,43 @@ addTypeImpl({
       //TODO:
 
     }
+    if (node.parameters.key && node.parameters.key != node.parameters.key.toUpperCase()) {
+      node.parameters.key = node.parameters.key.toUpperCase()
+    }
 
     if (node.parameters?.board) {
       node.runtimeContext ??= {}
       node.runtimeContext.info = node.parameters?.board
+
+
+      node.runtimeContext.parameters ??= {}
+      const fileContent = await readFile(join(__dirname, "key-binding-property.html"), { encoding: "utf8" })
+
+      node.runtimeContext.parameters.key = {
+        type: "iframe",
+        document: fileContent,
+        data: layouts[node.parameters?.board]
+      }
+
       if (node.parameters.key) {
         node.runtimeContext.info = `${node.parameters?.board} - ${node.parameters?.key}`
       }
     }
-    if (node.parameters.key && node.parameters.key != node.parameters.key.toUpperCase()) {
-      node.parameters.key = node.parameters.key.toUpperCase()
+
+  },
+  initializeServer(node, globals): void | Promise<void> {
+    if (globals.mqtt_server) {
+      mqttConneciton = connect(globals.mqtt_server)
+      mqttConneciton.on("message", (e, data) => {
+        const evt = JSON.parse(data.toString())
+        const parsedEvt = layoutType.parse(evt.layout)
+        layoutSubject.next(parsedEvt)
+      })
+      mqttConneciton.subscribe("personal/discovery/key-sender/layout")
     }
+
+  },
+  unload(nodeas, globals) {
+    mqttConneciton?.end()
   },
 })
