@@ -16,6 +16,8 @@ export class ConnectionLines {
 
   //connections = new BehaviorSubject<Array<Connection>>([])
 
+  debugMode = new BehaviorSubject<boolean>(false)
+
   pendingConnection = new BehaviorSubject<Connection | PendingConnection>(undefined)
 
 

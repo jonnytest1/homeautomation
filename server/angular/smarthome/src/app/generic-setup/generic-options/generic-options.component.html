@@ -30,7 +30,6 @@
 
   <h2>{{node.type}}</h2>
 
-  <pre>{{node.runtimeContext.outputSchema?.dts ?? ''}}</pre>
   <form #form>
     <div class="wrapper">
       <ng-container *ngFor="let entry of entries;trackBy:entryName">
@@ -47,4 +46,19 @@
       </ng-container>
     </div>
   </form>
+
+  <ng-container *ngIf="con.debugMode|async">
+    <br><br>
+    <span>
+      {{node.uuid}}
+    </span><br>
+    input:
+    <pre>{{node.runtimeContext.inputSchema?.dts ?? ''}}</pre><br>
+    output:
+    <pre>{{node.runtimeContext.outputSchema?.dts ?? ''}}</pre>
+    props:
+    <span>{{node.parameters| json}}</span><br>
+    <span>{{node.runtimeContext?.parameters| json}}</span>
+  </ng-container>
+
 </div>

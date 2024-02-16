@@ -3,13 +3,16 @@ import { Timer } from '../models/timer';
 import { senderLoader } from '../services/sender-loader';
 import { Item } from '../models/inventory/item';
 import { Receiver } from '../models/receiver';
-import { getNodeDefintions, nodes, setNodes } from '../services/generic-node/generic-node-service';
+import { getNodeDefintions, nodes, setNodes, typeImplementations } from '../services/generic-node/generic-node-service';
+import { lastEventTimesObs } from '../services/generic-node/last-event-service';
+import type { NodeData } from '../services/generic-node/typing/generic-node-type';
 import { HttpRequest, Websocket, WS } from 'express-hibernate-wrapper';
 import { load, SqlCondition } from 'hibernatets';
 
 
 type ExtendedSocket = Websocket & {
-  isUpdatingNodes?: boolean
+  isUpdatingNodes?: boolean,
+  nodeCache: NodeData
 }
 
 @WS({ path: "/updates" })
@@ -98,7 +101,7 @@ export class FrontendWebsocket {
         const evt = JSON.parse(message)
         if (evt.type == "store-nodes") {
           websocket.isUpdatingNodes = true
-          setNodes(evt.data, evt.changedUuid)
+          await setNodes(evt.data, evt.changedUuid)
           websocket.isUpdatingNodes = false
         } else if (evt.type == "ping") {
           websocket.send(JSON.stringify({ type: "pong" }))
@@ -117,6 +120,11 @@ export class FrontendWebsocket {
       type: "nodeData",
       data: nodes.value
     })
+    websocket.nodeCache = JSON.parse(JSON.stringify(nodes.value))
+    this.sendToWebsocket(websocket, {
+      type: "lastEventTimes",
+      data: lastEventTimesObs.value
+    })
     load(Receiver, SqlCondition.ALL, [], {
       deep: ["actions", "events"]
     }).then(receviers => {
@@ -129,15 +137,66 @@ export class FrontendWebsocket {
   }
 }
 
-
 nodes.subscribe(nodeUpdates => {
   FrontendWebsocket.websockets.forEach(async (socket) => {
     if (socket.isUpdatingNodes) {
       return
     }
+    const cacheData = socket.nodeCache
+
+    if (JSON.stringify({
+      c: cacheData.connections,
+      g: cacheData.globals
+    }) == JSON.stringify({
+      c: cacheData.connections,
+      g: cacheData.globals
+    })) {
+      if (nodeUpdates.nodes.length < cacheData.nodes.length) {
+        FrontendWebsocket.sendToWebsocket(socket, {
+          type: "nodeData",
+          data: nodeUpdates
+        })
+        return
+      }
+      for (const node of nodeUpdates.nodes) {
+        if (JSON.stringify(node) != JSON.stringify(cacheData.nodes.find(n => n.uuid === node.uuid))) {
+          FrontendWebsocket.sendToWebsocket(socket, {
+            type: "nodeUpdate",
+            data: node
+          })
+        }
+      }
+    } else {
+      FrontendWebsocket.sendToWebsocket(socket, {
+        type: "nodeData",
+        data: nodeUpdates
+      })
+    }
+
+
+    socket.nodeCache = JSON.parse(JSON.stringify(nodeUpdates))
+  })
+})
+
+
+lastEventTimesObs.subscribe(times => {
+  FrontendWebsocket.websockets.forEach(async (socket) => {
+    if (socket.isUpdatingNodes) {
+      return
+    }
     FrontendWebsocket.sendToWebsocket(socket, {
-      type: "nodeData",
-      data: nodeUpdates
+      type: "lastEventTimes",
+      data: times
+    })
+  })
+})
+
+
+typeImplementations.subscribe(typeImpl => {
+  FrontendWebsocket.websockets.forEach(async (socket) => {
+    FrontendWebsocket.sendToWebsocket(socket, {
+      type: "nodeDefinitions",
+      data: getNodeDefintions()
     })
   })
 })

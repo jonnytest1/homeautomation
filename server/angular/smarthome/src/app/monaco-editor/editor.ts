@@ -74,7 +74,7 @@ export interface AST {
 type abc = editor.EditorOption
 export type SandBox = {
   getWorkerProcess(): Promise<any>
-  getModel(): MonacoModel
+  getModel(): MonacoModel | null
   editor: Editor
   updateCompilerSettings(params)
 

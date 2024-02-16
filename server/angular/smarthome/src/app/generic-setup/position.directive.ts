@@ -10,7 +10,7 @@ export class PositionDirective implements OnChanges {
   @Input()
   position: Vector2 | { x: number, y: number }
   constructor(private elementRef: ElementRef<HTMLElement>) {
-    this.elementRef.nativeElement.style.position = "fixed"
+    this.elementRef.nativeElement.style.position = "absolute"
   }
 
   ngOnChanges(changes: SimpleChanges): void {

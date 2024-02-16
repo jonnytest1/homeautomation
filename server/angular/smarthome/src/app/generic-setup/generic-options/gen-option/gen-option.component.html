@@ -1,25 +1,36 @@
 <ng-container *ngIf="definition.type=='select';else checkMonaco">
   <select name="{{name}}">
-    <option *ngFor="let opt of definition.options"
+    <option *ngFor="let opt of definition.options;let index=index"
+            [value]="opt"
             [attr.selected]="opt===value?true:null">
-      {{opt}}
+      {{definition.optionDisplayNames?definition.optionDisplayNames[index] :opt}}
     </option>
   </select>
 </ng-container>
 <ng-template #checkMonaco>
-  <ng-container *ngIf="definition.type=='monaco';else inputEl">
+  <ng-container *ngIf="definition.type=='monaco';else checkFrame">
     <textarea hidden
               #hiddenValue
               name="{{name}}"></textarea>
     <app-monaco-editor *ngIf="typeDefinition|async ;let types"
+                       (keyup)="$event.stopPropagation()"
                        [definition]="types"
-                       [(jsCode)]="additionalVal"
-                       [(ngModel)]="code">
+                       (code)="updateCode($event)"
+                       [jsCode]="additionalVal"
+                       [ngModel]="code">
     </app-monaco-editor>
+  </ng-container>
+</ng-template>
+<ng-template #checkFrame>
+  <ng-container *ngIf="definition.type=='iframe';else inputEl">
+    <app-frame-option [definition]="definition"
+                      [name]="name"
+                      [currentValue]="value"></app-frame-option>
   </ng-container>
 </ng-template>
 <ng-template #inputEl>
   <input [type]="definition.type"
+         (keyup)="$event.stopPropagation()"
          name="{{name}}"
          [value]="value ??''">
 

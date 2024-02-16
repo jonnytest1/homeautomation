@@ -8,32 +8,32 @@ import { column, primary, table } from 'hibernatets';
 export class Transformation {
 
 
-    @primary()
-    id: number
+  @primary()
+  id: number
 
-    @column({
-        size: "large"
-    })
+  @column({
+    size: "large"
+  })
 
-    @settable
-    public transformation: string
+  @settable
+  public transformation: string
 
-    @column({
-        size: "large"
-    })
-    @settable
-    tsTransformation: string
+  @column({
+    size: "large"
+  })
+  @settable
+  tsTransformation: string
 
-    @column({
-        size: "medium"
-    })
-    @settable
-    transformationKey?: string
+  @column({
+    size: "medium"
+  })
+  @settable
+  transformationKey?: string
 
-    @column()
-    @settable
-    name
+  @column()
+  @settable
+  name: string
 
-    definitionFile?
+  definitionFile?
 
 }

@@ -1,5 +1,5 @@
-import type { ElementRef, OnChanges, OnInit, SimpleChanges } from '@angular/core';
-import { Component, Input, ViewChild } from '@angular/core';
+import type { ElementRef, OnChanges, OnInit, Sanitizer, SimpleChanges } from '@angular/core';
+import { Component, Input, SecurityContext, ViewChild } from '@angular/core';
 import { ElementNode, NodeOptionTypes } from '../../../settings/interfaces';
 import { CommonModule } from '@angular/common';
 import { MonacoEditorComponent } from '../../../monaco-editor/monaco-editor.component';
@@ -7,6 +7,8 @@ import { FormsModule } from '@angular/forms';
 import { ConnectionLines } from '../../connection-lines';
 import { FetchingJSONSchemaStore, InputData, JSONSchemaInput, quicktype } from 'quicktype-core'
 import { BehaviorSubject } from 'rxjs';
+import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
+import { FrameOptionComponent } from '../frame-option/frame-option.component';
 
 const expansionType = `
   type ExpandRecursively<T> = T extends Date 
@@ -21,10 +23,11 @@ const expansionType = `
   selector: 'app-gen-option',
   templateUrl: './gen-option.component.html',
   styleUrls: ['./gen-option.component.scss'],
-  imports: [CommonModule, MonacoEditorComponent, FormsModule],
+  imports: [CommonModule, MonacoEditorComponent, FormsModule, FrameOptionComponent],
   standalone: true
 })
-export class GenOptionComponent implements OnInit, OnChanges {
+export class GenOptionComponent implements OnChanges {
+
 
   @Input()
   name: string
@@ -50,15 +53,28 @@ export class GenOptionComponent implements OnInit, OnChanges {
     jsCode: string
   }
 
-  set code(val: string) {
-    this._code = val
+
+  frameProps: {
+    trustedDocuemnt: SafeHtml
+  }
+
+  constructor(private con: ConnectionLines) {
+
+  }
+
+
+  updateCode(evt: { js: string; ts: string; }) {
     this.monacoData = {
-      tsCode: val,
-      jsCode: this.monacoData?.jsCode ?? ''
+      tsCode: evt.ts,
+      jsCode: evt.js
     }
+    this._additionalVal = evt.js;
+    this._code = evt.ts
+
     this.elementRef.nativeElement.value = JSON.stringify(this.monacoData)
     this.elementRef.nativeElement.dispatchEvent(new Event('change', { 'bubbles': true }))
   }
+
   get code() {
     if (!this._code) {
       const def = this.definition
@@ -79,73 +95,62 @@ export class GenOptionComponent implements OnInit, OnChanges {
   public get additionalVal(): string {
     return this._additionalVal;
   }
-  public set additionalVal(value: string) {
-    this._additionalVal = value;
-
-    this.monacoData = {
-      jsCode: value,
-      tsCode: this.monacoData?.tsCode ?? ''
-    }
-    this.elementRef.nativeElement.value = JSON.stringify(this.monacoData)
-    this.elementRef.nativeElement.dispatchEvent(new Event('change', { 'bubbles': true }))
-
-  }
 
   typeDefinition = new BehaviorSubject<string>(undefined)
 
-  constructor(private con: ConnectionLines) {
-
-  }
   ngOnChanges(changes: SimpleChanges): void {
-    if (this.definition.type === "monaco" && "value" in changes) {
+    if (this.definition.type === "monaco" && ("value" in changes || "node" in changes)) {
       try {
-        this.monacoData = JSON.parse(this.value)
-        this._code = this.monacoData.tsCode
-        this._additionalVal = this.monacoData.jsCode
+        if (this.value) {
+          this.monacoData = JSON.parse(this.value)
+          this._code = this.monacoData.tsCode
+          this._additionalVal = this.monacoData.jsCode
+        }
       } catch (e) {
         debugger
       }
-    }
-  }
-  ngOnInit() {
+
+
+      const inputs = this.con.getInputConnections(this.node.uuid)
+        .filter(s => !!s.node?.runtimeContext?.outputSchema?.jsonSChema)
+
+      const schemas = Promise.all(inputs
+        .map(async (inp, indx) => {
+          const uuid = inp.node.uuid.replace(/-/g, "");
 
 
 
-    const inputs = this.con.getInputConnections(this.node.uuid)
-      .filter(s => !!s.node?.runtimeContext?.outputSchema?.jsonSChema)
-
-    const schemas = Promise.all(inputs
-      .map(async (inp, indx) => {
-        const uuid = inp.node.uuid.replace(/-/g, "");
-
-
-
-        return `
+          return `
 namespace _${uuid} {
     ${inp.node.runtimeContext.outputSchema.dts}
 }`
 
 
-      })).then(schemas => {
+        })).then(schemas => {
 
-        const inputTypeStr = inputs
-          .map(inp => `_${inp.node.uuid.replace(/-/g, "")}.Main`)
-          .join(" | ")
+          const inputTypeStr = inputs
+            .map(inp => `_${inp.node.uuid.replace(/-/g, "")}.Main`)
+            .join(" | ")
 
-        const typeDefinition = `
+          const typeDefinition = `
           ${schemas.join("\n\n")}
 
           ${expansionType}
-         
+
+          namespace EditorSChema {
+          ${this.node.runtimeContext?.editorSchema?.dts ?? ''}
+          }
 
           \ntype InputType= ExpandRecursively<${inputTypeStr}> ;
           \n;
         `
 
-        this.typeDefinition.next(typeDefinition)
-      })
+          this.typeDefinition.next(typeDefinition)
+        })
 
 
+    } else if (this.definition.type == "iframe") {
 
+    }
   }
 }

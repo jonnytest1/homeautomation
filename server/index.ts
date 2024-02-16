@@ -17,7 +17,7 @@ if (environment.setup) {
 }
 
 
-updateDatabase(__dirname + '/src')
+updateDatabase(__dirname + '/src/models')
   .then(async () => {
     const redirected: string | null = null;
     await initialize(__dirname + '/src/resources', {

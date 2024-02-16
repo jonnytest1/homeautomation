@@ -1,4 +1,4 @@
-import type { ConnectionFe, EventHistoryFe, FrontendToBackendEvents, ItemFe, NodeData, NodeDefintion, ReceiverFe, ResponseData, SenderFe, SocketResponses, TimerFe, TransformFe } from './settings/interfaces';
+import type { ConnectionFe, EventHistoryFe, FrontendToBackendEvents, ItemFe, NodeData, NodeDefintion, NodeEventTimes, ReceiverFe, ResponseData, SenderFe, SocketResponses, TimerFe, TransformFe } from './settings/interfaces';
 import { environment } from '../environments/environment';
 import { AbstractHttpService } from './utils/http-service';
 import { HttpClient } from '@angular/common/http';
@@ -63,6 +63,7 @@ export class SettingsService extends AbstractHttpService {
 
   public nodeDefinitions: BehaviorSubject<Record<string, NodeDefintion>> = new BehaviorSubject(undefined);
   public nodeData: BehaviorSubject<NodeData> = new BehaviorSubject(undefined);
+  public nodeEventTimes: BehaviorSubject<NodeEventTimes> = new BehaviorSubject(undefined);
   private websocket: WebSocket;
 
   constructor(http: HttpClient, router: Router) {
@@ -99,6 +100,22 @@ export class SettingsService extends AbstractHttpService {
       this.nodeDefinitions.next(messageEvent.data)
     } else if (this.isType(messageEvent, 'nodeData')) {
       this.nodeData.next(messageEvent.data)
+    } else if (this.isType(messageEvent, 'lastEventTimes')) {
+      this.nodeEventTimes.next(messageEvent.data)
+    } else if (this.isType(messageEvent, 'nodeUpdate')) {
+      const currentNodes = this.nodeData.value.nodes
+      const changingNodeIndex = currentNodes.findIndex(el => el.uuid === messageEvent.data.uuid)
+
+      if (changingNodeIndex > -1) {
+        currentNodes[changingNodeIndex] = messageEvent.data
+      } else {
+        currentNodes.push(messageEvent.data)
+      }
+
+      this.nodeData.next({
+        ...this.nodeData.value,
+        nodes: currentNodes
+      })
     }
   }
 

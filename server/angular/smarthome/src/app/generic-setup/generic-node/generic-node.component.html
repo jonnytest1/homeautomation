@@ -2,8 +2,8 @@
 
   <div class="border"
        [class.selected]="selected"
-       [class.inputactive]="(inputActive$|async)==true"
-       [class.outputactive]="(outputActive$|async)==true"
+       [class.inputactive]="(is_Active|async)?.input"
+       [class.outputactive]="(is_Active|async)?.output"
        [style.minHeight]="(size+1)*20+'px'">
     <div class="icons">
       <mat-icon *ngIf="node?.runtimeContext?.outputSchema?.jsonSChema">security</mat-icon>
@@ -26,9 +26,10 @@
     <div *ngIf="node?.runtimeContext?.info">
       {{node?.runtimeContext?.info}}
     </div>
-    <div *ngIf="node?.runtimeContext?.lastOutputEventTime">
-      {{localeTime()}}
+    <div *ngIf="(activity$|async)?.output;let output">
+      {{localeTime(output)}}
     </div>
+    <span *ngIf="(con.debugMode|async) && !!node">{{node.uuid}}</span>
     <div #output
          *ngFor="let n of ouputsArray;let indx=index"
          class="connector ouputs"

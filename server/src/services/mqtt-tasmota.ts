@@ -1,4 +1,5 @@
-import type { NodeOptionTypes } from './generic-node/typing/generic-node-type'
+
+import type { NodeOptionTypes } from './generic-node/typing/node-options'
 import type { CommandsEvent } from './mqtt-types'
 
 
@@ -43,7 +44,8 @@ export class DeviceConfig {
     if (this.topicPrefixes.includes("cmnd")) {
       return `cmnd/${this.mqttDeviceName}/`
     }
-    throw new Error("unknown command syntax")
+    console.error("unknown command syntax", this.friendlyName, this.mqttDeviceName)
+    return false
   }
 }
 

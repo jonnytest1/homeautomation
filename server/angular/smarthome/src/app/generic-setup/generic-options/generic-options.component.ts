@@ -33,7 +33,7 @@ export class GenericOptionsComponent implements AfterViewInit, OnChanges {
 
   public entries: Array<{ name: string, value: NodeOptionTypes }> = []
 
-  constructor(private con: ConnectionLines, private settings: SettingsService) {}
+  constructor(public con: ConnectionLines, private settings: SettingsService) {}
 
   async ngOnChanges(): Promise<void> {
     this.entries = []

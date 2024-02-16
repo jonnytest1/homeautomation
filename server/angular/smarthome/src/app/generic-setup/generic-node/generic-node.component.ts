@@ -6,8 +6,9 @@ import { DropDataHandler } from '../drop-data';
 import type { DropData } from '../drop-data-types';
 import type { ElementNode } from '../../settings/interfaces';
 import { MatIconModule } from '@angular/material/icon';
-import { timer } from "rxjs"
-import { map } from 'rxjs/operators';
+import { combineLatest, timer } from "rxjs"
+import { map, startWith } from 'rxjs/operators';
+import { SettingsService } from '../../settings.service';
 const dataHandler = new DropDataHandler<DropData>()
 @Component({
   selector: 'app-generic-node',
@@ -46,15 +47,30 @@ export class GenericNodeComponent implements OnChanges, AfterViewInit, OnDestroy
 
   @ViewChildren("input")
   inputElements: QueryList<ElementRef<HTMLElement>>
-
-  outputActive$ = timer(0, 100).pipe(
-    map(() => this.isOutputActive())
+  activity$ = combineLatest([
+    this.settings.nodeEventTimes,
+    timer(0, 100),
+  ]).pipe(
+    map(([eventTimes]) => {
+      if (!this.node || !eventTimes[this.node.uuid]) {
+        return {
+          input: undefined,
+          output: undefined
+        }
+      }
+      return eventTimes[this.node.uuid]
+    })
   )
-  inputActive$ = timer(0, 100).pipe(
-    map(() => this.isInputActive())
-  )
 
-  constructor(private elementRef: ElementRef<HTMLElement>, private con: ConnectionLines) {
+
+  is_Active = this.activity$.pipe(map(times => {
+    return {
+      output: this.isActive(times.output),
+      input: this.isActive(times.input)
+    }
+  }))
+
+  constructor(private elementRef: ElementRef<HTMLElement>, public con: ConnectionLines, private settings: SettingsService) {
 
 
   }
@@ -69,8 +85,8 @@ export class GenericNodeComponent implements OnChanges, AfterViewInit, OnDestroy
       })
     }
   }
-  localeTime() {
-    return new Date(this.node.runtimeContext.lastOutputEventTime).toLocaleTimeString()
+  localeTime(time: number) {
+    return new Date(time).toLocaleTimeString()
   }
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -106,20 +122,11 @@ export class GenericNodeComponent implements OnChanges, AfterViewInit, OnDestroy
     }
   }
 
-
-  isInputActive() {
-    if (!this.node?.runtimeContext?.lastEventTime) {
+  isActive(time?: number) {
+    if (!time) {
       return false
     }
 
-    return this.node?.runtimeContext?.lastEventTime > (Date.now() - (1000 * 2))
-  }
-
-  isOutputActive() {
-    if (!this.node?.runtimeContext?.lastOutputEventTime) {
-      return false
-    }
-
-    return this.node?.runtimeContext?.lastOutputEventTime > (Date.now() - (1000 * 2))
+    return time > (Date.now() - (1000 * 2))
   }
 }

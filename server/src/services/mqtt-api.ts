@@ -1,10 +1,10 @@
 import { DeviceConfig, DiscoveryConfigEvent } from './mqtt-tasmota'
 import { emitEvent } from './generic-node/generic-node-service'
+import type { CommandsEvent } from './mqtt-types'
 import { environment } from '../environment'
 import { logKibana } from '../util/log'
 import { ResolvablePromise } from '../util/resolvable-promise'
 import { MqttClient, connect } from "mqtt"
-import type { CommandsEvent } from './mqtt-types'
 
 
 
@@ -118,7 +118,9 @@ export class MQTTIntegration {
   }
 
   public getPublishable() {
-    return Object.values(this.deviceMap).map(device => device.getCommandTopic())
+    return Object.values(this.deviceMap)
+      .map(device => device.getCommandTopic())
+      .filter((name): name is string => name !== false)
   }
 }
 

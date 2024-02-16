@@ -57,6 +57,13 @@ export class MonacoEditorComponent implements OnInit, OnDestroy, ControlValueAcc
   @Output()
   jsCodeChange = new EventEmitter<string>();
 
+
+  @Output()
+  code = new EventEmitter<{
+    js: string,
+    ts: string
+  }>();
+
   recentlySaved = false;
 
   decorators: Array<Decoration> = [];
@@ -87,7 +94,7 @@ export class MonacoEditorComponent implements OnInit, OnDestroy, ControlValueAcc
     const requireFnc = (window.require as any);
     requireFnc.config({
       paths: {
-        vs: 'https://typescript.azureedge.net/cdn/4.0.5/monaco/min/vs',
+        vs: 'https://typescript.azureedge.net/cdn/5.0.2/monaco/min/vs',
         sandbox: 'https://www.typescriptlang.org/js/sandbox',
       },
       ignoreDuplicateModules: ['vs/editor/editor.main'],
@@ -154,6 +161,9 @@ export class MonacoEditorComponent implements OnInit, OnDestroy, ControlValueAcc
       saveTimeout = setTimeout(async () => {
         saveTimeout = undefined
         const model = this.sandbox.getModel();
+        if (!model) {
+          return
+        }
         const text = model.getValue();
         const errors = model.getAllDecorations()
           .filter(dec => dec.options.className === 'squiggly-error');
@@ -192,6 +202,11 @@ export class MonacoEditorComponent implements OnInit, OnDestroy, ControlValueAcc
 
       this.jsCodeChange.emit(js);
       this.onChange(text);
+
+      this.code.emit({
+        js: js,
+        ts: text
+      })
     }
   }
 
