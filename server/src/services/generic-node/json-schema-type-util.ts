@@ -1,11 +1,11 @@
 import type { ExtendedJsonSchema } from './typing/generic-node-type'
 import { zodScripts } from './generic-node-constants'
+import { FetchingJSONSchemaStore, InputData, JSONSchemaInput, quicktype } from '../../module-src/module-wrappers'
 import {
   Diagnostic, Program, ScriptKind, ScriptTarget, TypeFormatFlags, createCompilerHost, createProgram, createSourceFile,
   factory, getPreEmitDiagnostics, isExpressionStatement, isTypeAliasDeclaration, Node
 } from 'typescript'
 import { generateSchema, buildGenerator } from 'typescript-json-schema'
-import { FetchingJSONSchemaStore, InputData, JSONSchemaInput, quicktype } from 'quicktype-core'
 
 import type * as z from "zod"
 import { v4 } from "uuid"
@@ -185,7 +185,7 @@ export class CompilerError extends Error {
 
   }
 }
-export function postfix(schema: ExtendedJsonSchema, definitions) {
+export function postfix(schema: ExtendedJsonSchema) {
   if (!schema.$ref) {
     schema.additionalProperties = false
   }
@@ -195,7 +195,7 @@ export function postfix(schema: ExtendedJsonSchema, definitions) {
     for (const prop in schema.properties) {
       const sub = schema.properties[prop]
       if (typeof sub == "object") {
-        postfix(sub, definitions)
+        postfix(sub)
       }
     }
   }
@@ -203,7 +203,7 @@ export function postfix(schema: ExtendedJsonSchema, definitions) {
     for (const prop in schema.definitions) {
       const sub = schema.definitions[prop]
       if (typeof sub == "object") {
-        postfix(sub, definitions)
+        postfix(sub)
       }
     }
   }
@@ -236,13 +236,14 @@ export function generateJsonSchemaFromDts(dts: string, mainType: string | boolea
     //@ts-ignore
     generated.definitions = gnerator?.reffedDefinitions
 
-    postfix(generated, generated.definitions)
+    postfix(generated)
     return generated as ExtendedJsonSchema
   }
   const schema = generateSchema(program.program, mainType, {
     //required: true, constAsEnum: true, noExtraProps: true,
   }, ["test.ts"])
   if (schema) {
+    postfix(schema as ExtendedJsonSchema)
     return schema as ExtendedJsonSchema
   }
   throw new Error("didnt get a schema")

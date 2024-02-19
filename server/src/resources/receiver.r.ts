@@ -67,6 +67,7 @@ export class ReceiverResource {
     const actionName = req.params.actionName + req.params[0]
     const receiver = await load(Receiver, new SqlCondition("deviceKey").equals(req.params.receiverId), [], {
       first: true,
+      interceptArrayFunctions: true,
       deep: {
         actions: {
           filter: new SqlCondition("name").equals(actionName),
@@ -108,6 +109,7 @@ export class ReceiverResource {
     const actionName = req.params.actionName + req.params[0]
     const receiver = await load(Receiver, new SqlCondition("deviceKey").equals(req.params.receiverId), [], {
       first: true,
+      interceptArrayFunctions: true,
       deep: {
         actions: {
           filter: new SqlCondition("name").equals(actionName),
@@ -160,7 +162,10 @@ export class ReceiverResource {
       return res.status(400)
         .send("missing state");
     }
-    const receiver = await load(Receiver, s => s.deviceKey = req.body.deviceKey, [], { first: true, deep: true });
+    const receiver = await load(Receiver, s => s.deviceKey = req.body.deviceKey, [], {
+      first: true, deep: true,
+      interceptArrayFunctions: true,
+    });
 
     if (typeof req.body.state == "number" || typeof req.body.state == "boolean" || typeof req.body.state == "string") {
       receiver.currentState = req.body.state;

@@ -148,8 +148,8 @@ nodes.subscribe(nodeUpdates => {
       c: cacheData.connections,
       g: cacheData.globals
     }) == JSON.stringify({
-      c: cacheData.connections,
-      g: cacheData.globals
+      c: nodeUpdates.connections,
+      g: nodeUpdates.globals
     })) {
       if (nodeUpdates.nodes.length < cacheData.nodes.length) {
         FrontendWebsocket.sendToWebsocket(socket, {

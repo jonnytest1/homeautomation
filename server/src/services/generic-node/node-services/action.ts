@@ -3,6 +3,7 @@ import type { ElementNode } from '../typing/generic-node-type'
 import { Receiver } from '../../../models/receiver'
 import { logKibana } from '../../../util/log'
 import { ReceiverEvent } from '../../../models/receiver-event'
+import { updateRuntimeParameter } from '../element-node'
 import { SqlCondition, load } from 'hibernatets'
 
 
@@ -26,6 +27,7 @@ addTypeImpl({
     const actionName = node.parameters.action
     const receiver = await load(Receiver, new SqlCondition("deviceKey").equals(node.parameters?.receiver), [], {
       first: true,
+      interceptArrayFunctions: true,
       deep: {
         actions: {
           filter: new SqlCondition("name").equals(actionName),
@@ -90,7 +92,8 @@ addTypeImpl({
     options: {
       receiver: {
         type: "placeholder",
-        of: "select"
+        of: "select",
+        invalidates: ["action"]
       },
       action: {
         type: "placeholder",
@@ -106,28 +109,25 @@ addTypeImpl({
     })
 
     const receiversWithAction = receiver.filter(rec => !!rec.actions.length)
-    node.runtimeContext.parameters.receiver = {
+
+
+    updateRuntimeParameter(node, "receiver", {
       type: "select",
       options: receiversWithAction.map(rec => rec.deviceKey)
-    }
-    node.parameters ??= {}
-    node.parameters.receiver ??= node.runtimeContext.parameters?.receiver?.options[0]
+    })
+    const rec = receiversWithAction.find(rec => rec.deviceKey === node.parameters.receiver)
 
-    if (node.parameters?.receiver) {
-      const rec = receiversWithAction.find(rec => rec.deviceKey === node.parameters?.receiver)
+    if (rec) {
 
-      if (rec) {
-        node.runtimeContext.parameters.action = {
-          type: "select",
-          options: rec.actions.map(a => `${a.name}`),
-          optionDisplayNames: rec.actions.map(a => `${a.name} (${a.confirm == "1" ? "confirmed" : "direct"})`),
-        }
-        if (prev?.parameters?.receiver && prev?.parameters?.receiver != node.parameters?.receiver) {
-          delete node.parameters.action
-        }
+      updateRuntimeParameter(node, "action", {
+        type: "select",
+        options: rec.actions.map(a => `${a.name}`),
+        optionDisplayNames: rec.actions.map(a => `${a.name} (${a.confirm == "1" ? "confirmed" : "direct"})`),
+      })
 
-        node.parameters.action ??= node.runtimeContext.parameters.action.options[0]
-      }
+      node.runtimeContext.info = `${node.parameters.receiver} - ${node.parameters.action}`
+
+
     }
 
   }

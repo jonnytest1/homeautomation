@@ -33,3 +33,4 @@ server/test/local-setup.ts
 server/src/services/generic-node/last-event-times.json
 server/src/services/generic-node/last-events.json
 server/src/services/generic-node/type-collapse.test.ts
+server/src/module-src/quicktype-core

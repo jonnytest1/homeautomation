@@ -5,7 +5,7 @@ const env = config({
   path: join(__dirname, '..', ".env")
 });
 if (env.error) {
-  throw env.error;
+  console.error(env.error)
 }
 
 export const environment = process.env as {
@@ -15,4 +15,5 @@ export const environment = process.env as {
   DEBUG: string
   setup: string
   LOG_URL: string
+  GENERIC_NODE_DATA: string
 }

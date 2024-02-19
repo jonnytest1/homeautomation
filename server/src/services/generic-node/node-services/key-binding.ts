@@ -4,6 +4,7 @@ import { addTypeImpl } from '../generic-node-service'
 import type { ElementNode, ExtendedJsonSchema } from '../typing/generic-node-type'
 import { generateDtsFromSchema } from '../json-schema-type-util'
 import { getLastEvent } from '../last-event-service'
+import { updateRuntimeParameter } from '../element-node'
 import { MqttClient, connect } from 'mqtt'
 import { BehaviorSubject, firstValueFrom } from 'rxjs'
 import { z } from 'zod'
@@ -80,20 +81,17 @@ addTypeImpl({
   }),
   async nodeChanged(node, prev) {
 
-    node.checkInvalidations(this, prev)
     const layouts = await firstValueFrom(layoutSubject)
 
-    node.updateRuntimeParameter("board", {
+    updateRuntimeParameter(node, "board", {
       type: "select",
       options: Object.keys(layouts),
       order: 2
     })
     if (!node.parameters?.board) {
-      node.parameters ??= {}
       node.parameters.board = Object.keys(layouts)[0]
     }
     if (!node.runtimeContext?.inputSchema) {
-      node.runtimeContext ??= {}
 
       const keySchema: ExtendedJsonSchema = { "type": "string" }
       if (node.parameters.key) {
@@ -161,11 +159,8 @@ addTypeImpl({
     }
 
     if (node.parameters?.board) {
-      node.runtimeContext ??= {}
       node.runtimeContext.info = node.parameters?.board
 
-
-      node.runtimeContext.parameters ??= {}
       const fileContent = await readFile(join(__dirname, "key-binding-property.html"), { encoding: "utf8" })
 
       node.runtimeContext.parameters.key = {

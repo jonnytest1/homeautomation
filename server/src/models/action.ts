@@ -19,8 +19,8 @@ export class Action {
   icon: string
 
   @settable
-  @column()
-  confirm: boolean
+  @column({ type: "text" })
+  confirm: "1" | "0"
 
   @settable
   @column()

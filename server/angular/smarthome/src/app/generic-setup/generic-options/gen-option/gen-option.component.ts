@@ -1,13 +1,12 @@
-import type { ElementRef, OnChanges, OnInit, Sanitizer, SimpleChanges } from '@angular/core';
-import { Component, Input, SecurityContext, ViewChild } from '@angular/core';
+import type { ElementRef, OnChanges, SimpleChanges } from '@angular/core';
+import { Component, Input, ViewChild } from '@angular/core';
 import { ElementNode, NodeOptionTypes } from '../../../settings/interfaces';
 import { CommonModule } from '@angular/common';
 import { MonacoEditorComponent } from '../../../monaco-editor/monaco-editor.component';
 import { FormsModule } from '@angular/forms';
 import { ConnectionLines } from '../../connection-lines';
-import { FetchingJSONSchemaStore, InputData, JSONSchemaInput, quicktype } from 'quicktype-core'
 import { BehaviorSubject } from 'rxjs';
-import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
+import { SafeHtml } from '@angular/platform-browser';
 import { FrameOptionComponent } from '../frame-option/frame-option.component';
 
 const expansionType = `

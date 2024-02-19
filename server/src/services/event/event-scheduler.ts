@@ -1,9 +1,10 @@
 
-import { SenderTriggerService } from './sender-trigger-service';
-import { Connection } from '../models/connection';
-import { Sender } from '../models/sender';
-import { Timer } from '../models/timer';
-import { logKibana } from '../util/log';
+import { SenderTriggerService } from '../sender-trigger-service';
+import { Connection } from '../../models/connection';
+import { Sender } from '../../models/sender';
+import { Timer } from '../../models/timer';
+import { logKibana } from '../../util/log';
+import { handleTimedEvent } from '../generic-node/node-services/timing';
 import type { LoadOptions } from 'hibernatets/load';
 import type { ConstructorClass } from 'hibernatets/interface/mapping';
 import { load, queries } from 'hibernatets';
@@ -14,11 +15,17 @@ type CallbackClass<T = unknown> = {
   service?: new (classRef: T) => T
 };
 
+
+type Callback<T = unknown> = CallbackClass<T> | ((obj: T) => void)
+
+
 export class EventScheduler {
 
   schedulerInterval: NodeJS.Timeout
 
-  callbackClasses: { [key: string]: CallbackClass } = {}
+  callbackClasses: { [key: string]: Callback } = {
+    "generic-event": handleTimedEvent
+  }
 
 
   repeatedFailures?: number
@@ -78,18 +85,30 @@ export class EventScheduler {
     }
     const timerArguments = JSON.parse(timer.arguments) as [string, never];
     const functionName: string = timerArguments.shift() as string;
-    let thisArgsObject = await load<unknown>(this.callbackClasses[timer.timerClassName].classRef, +timer.timerClassId, undefined, {
-      deep: true
-    }) as Sender | Connection;
-    try {
-      const callbackClass = this.callbackClasses[timer.timerClassName] as CallbackClass<Sender | Connection>
-      if (callbackClass.service) {
-        thisArgsObject = new callbackClass.service(thisArgsObject);
+
+    const callback = this.callbackClasses[timer.timerClassName]
+
+    if (typeof callback === "function") {
+      try {
+        await callback(timerArguments[0]);
+      } catch (e) {
+        logKibana("ERROR", `error in timer execution function:'${timer.timerClassName}' of ${timer.timerClassName}`, e);
       }
-      await (thisArgsObject)[functionName](...timerArguments);
-    } catch (e) {
-      logKibana("ERROR", `error in timer execution function:'${functionName}' of ${timer.timerClassName}`, e);
+    } else {
+      let thisArgsObject = await load<unknown>(callback.classRef, +timer.timerClassId, undefined, {
+        deep: true
+      }) as Sender | Connection;
+      try {
+        const callbackClass = callback as CallbackClass<Sender | Connection>
+        if (callbackClass.service) {
+          thisArgsObject = new callbackClass.service(thisArgsObject);
+        }
+        await (thisArgsObject)[functionName](...timerArguments);
+      } catch (e) {
+        logKibana("ERROR", `error in timer execution function:'${functionName}' of ${timer.timerClassName}`, e);
+      }
     }
+
     timer.alerted = "true";
     await queries(timer);
   }

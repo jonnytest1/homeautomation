@@ -1,7 +1,7 @@
 import { addTypeImpl } from '../generic-node-service'
 import { Sender } from '../../../models/sender';
 import type { Transformation } from '../../../models/transformation';
-import type { NodeEvent } from '../node-event';
+import { updateRuntimeParameter } from '../element-node';
 import { SqlCondition, load } from 'hibernatets';
 
 
@@ -17,10 +17,10 @@ function getHistoryCount(transformer: Transformation & { historyCount?: number }
 
 }
 
-
-
 addTypeImpl({
-  async process(node, evt: NodeEvent<{ deviceKey: string }, { message: string }>, callbacks) {
+  context_type: (t: { deviceKey: string }) => t,
+  payload_type: (p: { message?: string }) => p,
+  async process(node, evt, callbacks) {
     if (!node.parameters?.deviceKey || !node.parameters.transformation) {
       return
     }
@@ -33,8 +33,6 @@ addTypeImpl({
     if (!node.parameters?.transformation.includes(` (${evt.payload.message})`)) {
       return
     }
-
-
     callbacks.continue(evt)
   },
   nodeDefinition: () => ({
@@ -59,12 +57,10 @@ addTypeImpl({
     });
     const deviceKeys = senders.map(dev => dev.deviceKey)
 
-    node.checkInvalidations(this, prev);
-    node.updateRuntimeParameter("deviceKey", {
+    updateRuntimeParameter(node, "deviceKey", {
       type: "select",
       options: deviceKeys
     })
-    node.runtimeContext.parameters ??= {}
 
     if (node.parameters?.deviceKey) {
       const sender = senders.find(sender => sender.deviceKey === node.parameters?.deviceKey)
@@ -74,7 +70,7 @@ addTypeImpl({
       })?.filter(t => t.name?.length && t.transformationKey?.length)
         ?.map(t => `${t.name} (${t.transformationKey})`)
         ?.filter(n => n?.length) ?? []
-      node.updateRuntimeParameter("transformation", {
+      updateRuntimeParameter(node, "transformation", {
         type: "select",
         options: transformations
       })

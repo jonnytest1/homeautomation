@@ -96,7 +96,10 @@ export class SenderResource {
         .send('missing deviceKey');
       return;
     }
-    const existingSender = await load(Sender, s => s.deviceKey = req.body.deviceKey, [], { first: true });
+    const existingSender = await load(Sender, s => s.deviceKey = req.body.deviceKey, [], {
+      first: true,
+      interceptArrayFunctions: true
+    });
     if (existingSender) {
       if (req.body.a_read1) {
         const batteryLevel = new BatteryLevel(req.body.a_read1, req.body.a_read2, req.body.a_read3);
@@ -131,7 +134,10 @@ export class SenderResource {
     path: ':senderid/transformation'
   })
   async addTransformation(req: HttpRequest, res: HttpResponse) {
-    const sender = await load(Sender, s => s.id = +req.params.senderid, undefined, { first: true });
+    const sender = await load(Sender, s => s.id = +req.params.senderid, undefined, {
+      first: true,
+      interceptArrayFunctions: true
+    });
     const transform = new Transformation()
     await assign(transform, req.body);
     sender.transformation.push(transform);

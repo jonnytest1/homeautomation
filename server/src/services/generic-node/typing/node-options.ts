@@ -2,6 +2,11 @@
 export type Text = {
   type: "text"
 }
+
+export type NumberCfg = {
+  type: "number"
+}
+
 export type Code = {
   type: "monaco"
   default?: string
@@ -9,7 +14,7 @@ export type Code = {
 
 export type Select<T extends string = string> = {
   type: "select",
-  options: Array<T> | ReadonlyArray<T>
+  readonly options: ReadonlyArray<T> //  Array<T> | 
   optionDisplayNames?: Array<string>
   initial?: string
 }
@@ -40,7 +45,7 @@ type Invalidated<T extends string> = {
 
 type PlaceholderType<T extends PlaceHolder> = T["of"] extends Array<infer U> ? U : T["of"]
 
-export type NodeOptionTypes<Keys extends string = string> = (Select | Text | Code | PlaceHolder | Frame) & Order & Invalidated<Keys>
+export type NodeOptionTypes<Keys extends string = string> = (Select | Text | Code | PlaceHolder | Frame | NumberCfg) & Order & Invalidated<Keys>
 
 export type NodeDefOptinos = {
   [name: string]: NodeOptionTypes
@@ -49,7 +54,9 @@ export type NodeDefOptinos = {
 
 
 type NodeDefType<T extends NodeOptionTypes<string>> =
-  T["type"] extends "text"
+  T["type"] extends "number"
+  ? string
+  : T["type"] extends "text"
   ? string
   : T extends Frame
   ? string
@@ -60,7 +67,7 @@ type NodeDefType<T extends NodeOptionTypes<string>> =
   : never
 
 
-type MapTypeToParam<T extends NodeOptionTypes<string>, Key extends string> =
+export type MapTypeToParam<T extends NodeOptionTypes<string>, Key extends string> =
   T extends PlaceHolder
   ? NodeDefType<NodeOptionTypes<string> & { type: PlaceholderType<T> }>
   : NodeDefType<T>

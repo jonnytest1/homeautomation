@@ -5,6 +5,7 @@ import { TscCompiler } from '../../../util/tsc-compiler'
 import type { ElementNode } from '../typing/generic-node-type'
 import { ReceiverData } from '../../../models/receiver-data'
 import type { ConnectionResponse } from '../../../models/connection-response'
+import { updateRuntimeParameter } from '../element-node'
 import { SqlCondition, load } from 'hibernatets'
 import type { ZodType } from 'zod'
 import * as z from "zod";
@@ -94,13 +95,11 @@ addTypeImpl({
     });
     const deviceKeys = receivers.map(dev => dev.deviceKey)
 
-    node.checkInvalidations(this, prev);
 
-    node.updateRuntimeParameter("deviceKey", {
+    updateRuntimeParameter(node, "deviceKey", {
       type: "select",
       options: deviceKeys
     })
-    node.runtimeContext.parameters ??= {}
 
     if (!node.runtimeContext.inputSchema) {
       computeTypeSchema(node)

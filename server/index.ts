@@ -1,4 +1,4 @@
-import { EventScheduler } from './src/services/event-scheduler';
+import { EventScheduler } from './src/services/event/event-scheduler';
 import { logKibana } from './src/util/log';
 import { startNodeRed } from './src/node-red/server';
 import { environment } from './src/environment';
@@ -117,9 +117,6 @@ nodeMediaServer.run();
 startNodeRed()
 
 /*
-
-
-
 app.get('/dbtest', async (req, res) => {
     res.send('helloo worl.d');
 });
@@ -133,4 +130,7 @@ process.on('uncaughtException', function (err) {
   logKibana("ERROR", "uncaught global exception", err);
 })
 
-
+process.on('unhandledRejection', function (err) {
+  console.log(err);
+  logKibana("ERROR", "uncaught promise reject", err);
+})

@@ -17,13 +17,14 @@ export type Callbacks = {
 }
 
 
-export type TypeImplementaiton<Context = unknown, Globals extends NodeDefOptinos = NodeDefOptinos, Opts extends NodeDefOptinos = NodeDefOptinos> = {
-  context_type?(t: Context): Context
-  process: (node: ElementNode<NodeDefToType<Opts>>, data: NodeEvent<Context, unknown, Globals>, callbacks: Callbacks) => void | Promise<void>
+export type TypeImplementaiton<Context = unknown, Globals extends NodeDefOptinos = NodeDefOptinos, Opts extends NodeDefOptinos = NodeDefOptinos, P = unknown> = {
+  context_type?(c: Context): Context
+  payload_type?(p: P): P
+  process: (node: ElementNode<NodeDefToType<Opts>>, data: NodeEvent<Context, P, Globals>, callbacks: Callbacks) => void | Promise<void>
   nodeDefinition: () => NodeDefintion<Globals, Opts>
-  nodeChanged?: (node: ElementNodeImpl<NodeDefToType<Opts>, NodeDefToRUntime<Opts>>, prevNode: ElementNode<NodeDefToType<Opts>> | null) => void | Promise<void>
+  nodeChanged?: (this: TypeImplementaiton, node: ElementNodeImpl<NodeDefToType<Opts>, NodeDefToRUntime<Opts>>, prevNode: ElementNode<NodeDefToType<Opts>> | null) => void | Promise<void>
   connectionTypeChanged?(node: ElementNode<NodeDefToType<Opts>>, schema: SchemaCollection): void | Promise<void>
-  initializeServer?(nodes: Array<ElementNode<NodeDefToType<Opts>>>, globals: NodeDefToType<Globals>): void | Promise<void>
+  initializeServer?(nodes: Array<ElementNodeImpl<NodeDefToType<Opts>>>, globals: NodeDefToType<Globals>): void | Promise<void>
   unload?(nodeas: Array<ElementNode<NodeDefToType<Opts>>>, globals: NodeDefToType<Globals>): void | Promise<void>
   _file?: string
 }
