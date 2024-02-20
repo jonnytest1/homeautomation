@@ -23,7 +23,7 @@ export type TypeImplementaiton<Context = unknown, Globals extends NodeDefOptinos
   process: (node: ElementNode<NodeDefToType<Opts>>, data: NodeEvent<Context, P, Globals>, callbacks: Callbacks) => void | Promise<void>
   nodeDefinition: () => NodeDefintion<Globals, Opts>
   nodeChanged?: (this: TypeImplementaiton, node: ElementNodeImpl<NodeDefToType<Opts>, NodeDefToRUntime<Opts>>, prevNode: ElementNode<NodeDefToType<Opts>> | null) => void | Promise<void>
-  connectionTypeChanged?(node: ElementNode<NodeDefToType<Opts>>, schema: SchemaCollection): void | Promise<void>
+  connectionTypeChanged?(node: ElementNode<NodeDefToType<Opts>>, schema: Schemata): void | Promise<void>
   initializeServer?(nodes: Array<ElementNodeImpl<NodeDefToType<Opts>>>, globals: NodeDefToType<Globals>): void | Promise<void>
   unload?(nodeas: Array<ElementNode<NodeDefToType<Opts>>>, globals: NodeDefToType<Globals>): void | Promise<void>
   _file?: string
@@ -32,6 +32,14 @@ export type TypeImplementaiton<Context = unknown, Globals extends NodeDefOptinos
 
 
 export type ExtendedJsonSchema = JSONSchema6 & { merged?: boolean, _optional?: Array<string> }
+
+
+export type Schemata = {
+  jsonSchema: ExtendedJsonSchema
+  dts: string
+  globalModDts?: string
+  mainTypeName: "Main"
+}
 
 export type ElementNode<T = { [optinoskey: string]: string }, P = NodeDefOptinos> = {
   parameters?: Partial<T>
@@ -43,14 +51,8 @@ export type ElementNode<T = { [optinoskey: string]: string }, P = NodeDefOptinos
   uuid: string,
 
   runtimeContext: {
-    inputSchema?: {
-      jsonSchema: ExtendedJsonSchema
-      dts: string
-    }
-    outputSchema?: {
-      jsonSChema: ExtendedJsonSchema
-      dts: string
-    }
+    inputSchema?: Schemata
+    outputSchema?: Schemata
     editorSchema?: {
       dts: string
     }
@@ -91,12 +93,12 @@ export type PreparedNodeData = {
   nodeMap: Record<string, ElementNode>
   typeImpls: Record<string, TypeImplementaiton>
 }
-
+/*
 export type SchemaCollection = {
   schemaCache: string
   dts: string,
   //zodValidator: z.ZodType
   mainTypeName: "Main"
 }
-
+*/
 export type NodeEventTimes = Record<string, { input: number, output: number }>

@@ -1,6 +1,7 @@
 import type { ExtendedJsonSchema } from './typing/generic-node-type'
 import { zodScripts } from './generic-node-constants'
 import { FetchingJSONSchemaStore, InputData, JSONSchemaInput, quicktype } from '../../module-src/module-wrappers'
+import { logKibana } from '../../util/log'
 import {
   Diagnostic, Program, ScriptKind, ScriptTarget, TypeFormatFlags, createCompilerHost, createProgram, createSourceFile,
   factory, getPreEmitDiagnostics, isExpressionStatement, isTypeAliasDeclaration, Node
@@ -94,7 +95,12 @@ function canDoSchema(jsonSchema: ExtendedJsonSchema) {
 }
 
 
-export async function generateDtsFromSchema(jsonSchema: ExtendedJsonSchema) {
+export async function generateDtsFromSchema(jsonSchema: ExtendedJsonSchema, traceId?: string) {
+  if (traceId) {
+    console.log("creating schema for " + traceId)
+  } else {
+    logKibana("WARN", "missing traceid for call")
+  }
   let wrapper = false
   if (!canDoSchema(jsonSchema)) {
     wrapper = true
@@ -186,7 +192,7 @@ export class CompilerError extends Error {
   }
 }
 export function postfix(schema: ExtendedJsonSchema) {
-  if (!schema.$ref) {
+  if (!schema.$ref && schema.type == "object") {
     schema.additionalProperties = false
   }
 
@@ -208,9 +214,35 @@ export function postfix(schema: ExtendedJsonSchema) {
     }
   }
 }
+export function allRequired(schema: ExtendedJsonSchema) {
+  if (!schema.$ref && schema.type == "object") {
+    schema.required = Object.keys(schema.properties ?? {})
+  }
 
-export function generateJsonSchemaFromDts(dts: string, mainType: string | boolean) {
 
+  if (schema.properties) {
+    for (const prop in schema.properties) {
+      const sub = schema.properties[prop]
+      if (typeof sub == "object") {
+        allRequired(sub)
+      }
+    }
+  }
+  if (schema.definitions) {
+    for (const prop in schema.definitions) {
+      const sub = schema.definitions[prop]
+      if (typeof sub == "object") {
+        allRequired(sub)
+      }
+    }
+  }
+}
+export function generateJsonSchemaFromDts(dts: string, mainType: string | boolean, traceId?: string) {
+  if (traceId) {
+    console.log("creating jscon schema from dts for " + traceId)
+  } else {
+    logKibana("WARN", "missing traceid for call")
+  }
   const program = programFromSource("text.ts", `
       ${dts}
   `)
@@ -251,7 +283,12 @@ export function generateJsonSchemaFromDts(dts: string, mainType: string | boolea
 
 
 export const mainTypeName = "Main"
-export async function generateZodTypeFromSchema(jsonSchema: ExtendedJsonSchema) {
+export async function generateZodTypeFromSchema(jsonSchema: ExtendedJsonSchema, traceId?: string) {
+  if (traceId) {
+    console.log("creating zod schema for " + traceId)
+  } else {
+    logKibana("WARN", "missing traceid for call")
+  }
   let wrapper = false
   if (!canDoSchema(jsonSchema)) {
     wrapper = true

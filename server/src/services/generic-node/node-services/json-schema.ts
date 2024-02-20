@@ -2,7 +2,7 @@
 
 
 import type { ExtendedJsonSchema } from '../typing/generic-node-type'
-import { generateDtsFromSchema, generateZodTypeFromSchema } from '../json-schema-type-util'
+import { generateDtsFromSchema, generateZodTypeFromSchema, mainTypeName } from '../json-schema-type-util'
 import { addTypeImpl } from '../generic-node-service'
 import type { ZodType } from 'zod'
 
@@ -175,26 +175,27 @@ addTypeImpl({
     }
     //const jsonSchema = json2dts.parse(data.payload, mainInterfaceName)
 
-    const prevSChema = JSON.stringify(node.runtimeContext?.outputSchema?.jsonSChema)
+    const prevSChema = JSON.stringify(node.runtimeContext?.outputSchema?.jsonSchema)
 
 
     try {
-      const updated = updateSchema(data.payload, node.runtimeContext?.outputSchema?.jsonSChema ?? null)
+      const updated = updateSchema(data.payload, node.runtimeContext?.outputSchema?.jsonSchema ?? null)
       if (JSON.stringify(updated) !== prevSChema) {
         node.runtimeContext.outputSchema = {
-          jsonSChema: updated,
-          dts: await generateDtsFromSchema(updated)
+          jsonSchema: updated,
+          mainTypeName,
+          dts: await generateDtsFromSchema(updated, `${node.type}-${node.uuid}-process !!`)
         }
-        zodMap[node.uuid] = generateZodTypeFromSchema(updated)
+        zodMap[node.uuid] = generateZodTypeFromSchema(updated, `${node.type}-${node.uuid}-process!!`)
         callbacks.updateNode()
       }
     } catch (e) {
       debugger
     }
-    if (node.runtimeContext?.outputSchema?.jsonSChema) {
+    if (node.runtimeContext?.outputSchema?.jsonSchema) {
       try {
         if (!zodMap[node.uuid]) {
-          zodMap[node.uuid] = generateZodTypeFromSchema(node.runtimeContext?.outputSchema?.jsonSChema)
+          zodMap[node.uuid] = generateZodTypeFromSchema(node.runtimeContext?.outputSchema?.jsonSchema, `${node.type}-${node.uuid}-process fallback`)
         }
         const schema = await zodMap[node.uuid]
         data.updatePayload(await schema.parse(data.payload))

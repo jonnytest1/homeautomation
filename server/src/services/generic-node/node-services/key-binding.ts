@@ -2,7 +2,7 @@ import { globalMqttConfig } from './mqtt-global'
 import type { DeviceConfig } from '../../mqtt-tasmota'
 import { addTypeImpl } from '../generic-node-service'
 import type { ElementNode, ExtendedJsonSchema } from '../typing/generic-node-type'
-import { generateDtsFromSchema } from '../json-schema-type-util'
+import { generateDtsFromSchema, mainTypeName } from '../json-schema-type-util'
 import { getLastEvent } from '../last-event-service'
 import { updateRuntimeParameter } from '../element-node'
 import { MqttClient, connect } from 'mqtt'
@@ -147,8 +147,9 @@ addTypeImpl({
         throw new Error("new case ?")
       }
       node.runtimeContext.outputSchema = {
-        jsonSChema: jsonSchema,
-        dts: await generateDtsFromSchema(jsonSchema)
+        jsonSchema: jsonSchema,
+        mainTypeName: mainTypeName,
+        dts: await generateDtsFromSchema(jsonSchema, `${node.type}-${node.uuid}-node change`)
       }
 
       //TODO:

@@ -1,6 +1,6 @@
 
 
-import { CompilerError, generateDtsFromSchema, generateJsonSchemaFromDts } from '../json-schema-type-util';
+import { CompilerError, allRequired, generateDtsFromSchema, generateJsonSchemaFromDts } from '../json-schema-type-util';
 import { addTypeImpl } from '../generic-node-service';
 import type { ElementNode } from '../typing/generic-node-type';
 import type { NodeDefToType } from '../typing/node-options';
@@ -133,12 +133,15 @@ declare function mapOnObject<T, K extends keyof T>(input: T, key: K, mapping: Ma
       }
 
 
-      const jsonSchema = generateJsonSchemaFromDts(code, statementoverride ?? "OutputType")
+      const jsonSchema = generateJsonSchemaFromDts(code, statementoverride ?? "OutputType", `${node.type}-${node.uuid}-output gen`)
+
+      allRequired(jsonSchema)
 
       if (jsonSchema) {
         node.runtimeContext.outputSchema = {
-          jsonSChema: jsonSchema,
-          dts: await generateDtsFromSchema(jsonSchema)
+          jsonSchema: jsonSchema,
+          mainTypeName: "Main",
+          dts: await generateDtsFromSchema(jsonSchema, `${node.type}-${node.uuid}-con type change`)
         }
       }
     } catch (e) {

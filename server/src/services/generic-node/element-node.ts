@@ -1,5 +1,5 @@
 import type { MapTypeToParam, NodeDefOptinos, NodeOptionTypes } from './typing/node-options';
-import type { Callbacks, ElementNode as ELN, ExtendedJsonSchema, TypeImplementaiton } from './typing/generic-node-type';
+import type { Callbacks, ElementNode as ELN, Schemata, TypeImplementaiton } from './typing/generic-node-type';
 import type { NodeEvent } from './node-event';
 export class ElementNodeImpl<T = { [optinoskey: string]: string }, P = Partial<NodeDefOptinos>> implements ELN<T, P>, Callbacks {
 
@@ -8,14 +8,8 @@ export class ElementNodeImpl<T = { [optinoskey: string]: string }, P = Partial<N
   type: string;
   uuid: string;
   runtimeContext: {
-    inputSchema?: {
-      jsonSchema: ExtendedJsonSchema;
-      dts: string;
-    } | undefined;
-    outputSchema?: {
-      jsonSChema: ExtendedJsonSchema;
-      dts: string;
-    } | undefined;
+    inputSchema?: Schemata
+    outputSchema?: Schemata
 
     info?: string | undefined;
     parameters?: Partial<P> | undefined;

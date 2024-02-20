@@ -2,10 +2,13 @@ import { globalMqttConfig } from './mqtt-global'
 import { mqttConnection } from '../../mqtt-api'
 import { addTypeImpl } from '../generic-node-service'
 import type { ElementNode, ExtendedJsonSchema } from '../typing/generic-node-type'
-import { generateDtsFromSchema, generateZodTypeFromSchema } from '../json-schema-type-util'
+import { generateDtsFromSchema, generateZodTypeFromSchema, mainTypeName } from '../json-schema-type-util'
 import type { Select } from '../typing/node-options'
 import { connect } from 'mqtt'
+import type { ZodType } from 'zod'
 
+
+const zodValidators: Record<string, Promise<ZodType>> = {}
 
 addTypeImpl({
   async process(node: ElementNode<{ topic?: string, command?: string, argument?: string }>, evt, callbacks) {
@@ -27,7 +30,7 @@ addTypeImpl({
 
     let argument = node.parameters?.argument
     if (argument == "<payload>" && typeof evt.payload == "string" && node.runtimeContext.inputSchema?.jsonSchema) {
-      const zodValidator = await generateZodTypeFromSchema(node.runtimeContext.inputSchema?.jsonSchema)
+      const zodValidator = await zodValidators[node.uuid]
       const newPayload = zodValidator.parse(evt.payload)
       argument = newPayload
     }
@@ -115,8 +118,10 @@ addTypeImpl({
                   }
                   node.runtimeContext.inputSchema = {
                     jsonSchema: jsonSchema,
-                    dts: await generateDtsFromSchema(jsonSchema)
+                    mainTypeName: mainTypeName,
+                    dts: await generateDtsFromSchema(jsonSchema, `${node.type}-${node.uuid}-node change`)
                   }
+                  zodValidators[node.uuid] = generateZodTypeFromSchema(jsonSchema)
                 } else {
                   delete node.runtimeContext.inputSchema
                 }

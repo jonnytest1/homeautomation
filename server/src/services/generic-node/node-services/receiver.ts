@@ -1,11 +1,10 @@
 import { addTypeImpl } from '../generic-node-service'
 import { Receiver } from '../../../models/receiver'
 import { generateJsonSchemaFromDts } from '../json-schema-type-util'
-import { TscCompiler } from '../../../util/tsc-compiler'
-import type { ElementNode } from '../typing/generic-node-type'
+import { TscCompiler, tscConnectionInterfaceAndGlobals } from '../../../util/tsc-compiler'
 import { ReceiverData } from '../../../models/receiver-data'
 import type { ConnectionResponse } from '../../../models/connection-response'
-import { updateRuntimeParameter } from '../element-node'
+import { ElementNodeImpl, updateRuntimeParameter } from '../element-node'
 import { SqlCondition, load } from 'hibernatets'
 import type { ZodType } from 'zod'
 import * as z from "zod";
@@ -108,16 +107,31 @@ addTypeImpl({
   }
 })
 
-async function computeTypeSchema(node: ElementNode) {
+async function computeTypeSchema(node: ElementNodeImpl) {
   if (!TscCompiler.responseINterface) {
     throw new Error("response interface not yet laoded")
   }
-  const schema = generateJsonSchemaFromDts(`${TscCompiler.responseINterface}`, "ConnectionResponse")
 
+
+  const schema = generateJsonSchemaFromDts(`
+
+export {};
+
+  ${TscCompiler.responseINterface}
+
+`, "ConnectionResponse", `${node.type}-${node.uuid}-input gen for receiver`)
+
+  const conI = tscConnectionInterfaceAndGlobals()
   node.runtimeContext.inputSchema = {
-    dts: `${TscCompiler.responseINterface}
-      export type Main=ConnectionResponse`,
-    jsonSchema: schema
+    dts: `
+    namespace ConnectionType {  
+  ${conI.interfaces}
+}
+
+      export type Main=ConnectionType.ConnectionResponse`,
+    jsonSchema: schema,
+    mainTypeName: "Main",
+    globalModDts: conI.globals
   }
 
 }

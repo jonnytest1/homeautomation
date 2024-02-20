@@ -1,10 +1,9 @@
 import { TimerFactory } from '../../event/timer-factory';
 import { ElementNodeImpl, updateRuntimeParameter } from '../element-node';
 import { addTypeImpl } from '../generic-node-service';
-import { generateDtsFromSchema } from '../json-schema-type-util';
+import { generateDtsFromSchema, mainTypeName } from '../json-schema-type-util';
 import { logKibana } from '../../../util/log';
 import { NodeEvent } from '../node-event';
-import type { ExtendedJsonSchema } from '../typing/generic-node-type';
 import { z } from 'zod';
 import type { JSONSchema6 } from 'json-schema';
 
@@ -152,7 +151,8 @@ addTypeImpl({
         }
         node.runtimeContext.inputSchema = {
           jsonSchema: jsonSchema,
-          dts: await generateDtsFromSchema(jsonSchema)
+          mainTypeName: mainTypeName,
+          dts: await generateDtsFromSchema(jsonSchema, `${node.type}-${node.uuid}-node change`)
         }
 
       } else {
@@ -164,12 +164,13 @@ addTypeImpl({
     }
   },
   async connectionTypeChanged(node, schema) {
-    const schemaParsed = JSON.parse(schema.schemaCache) as ExtendedJsonSchema
+    const schemaParsed = schema.jsonSchema
     const payloadProp = schemaParsed.properties?.payload
     if (payloadProp && typeof payloadProp == "object") {
       node.runtimeContext.outputSchema = {
-        jsonSChema: payloadProp,
-        dts: await generateDtsFromSchema(payloadProp)
+        jsonSchema: payloadProp,
+        mainTypeName: "Main",
+        dts: await generateDtsFromSchema(payloadProp, `${node.type}-${node.uuid}-con change`)
       }
     }
   },

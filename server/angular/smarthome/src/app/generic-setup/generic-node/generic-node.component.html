@@ -6,7 +6,7 @@
        [class.outputactive]="(is_Active|async)?.output"
        [style.minHeight]="(size+1)*20+'px'">
     <div class="icons">
-      <mat-icon *ngIf="node?.runtimeContext?.outputSchema?.jsonSChema">security</mat-icon>
+      <mat-icon *ngIf="node?.runtimeContext?.outputSchema?.jsonSchema">security</mat-icon>
 
     </div>
     <mat-icon class="inputSchema"

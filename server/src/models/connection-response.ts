@@ -1,61 +1,64 @@
 
 
 export interface TransformationRes extends SenderResponse {
-    status?: number;
-    error?: number;
+  status?: number;
+  error?: number;
 
 
-    response?: {
-        [key: string]: unknown
-    }
+  response?: {
+    [key: string]: unknown
+  }
 
 }
 
 
 export interface ConnectionResponse extends TransformationRes {
 
-    withRequest?: boolean
+  withRequest?: boolean
 }
 
 
 export interface Delayed<T> {
 
-    nestedObject: T,
-    sentData: unknown
-    time: number
+  nestedObject: T,
+  sentData: unknown
+  time: number
 }
 
+
+//globals start
 declare global {
-    type TransformationResponse = TransformationRes;
-    function delay(time: number, res: SenderResponse): Delayed<SenderResponse>
-    let data: DataObj
+  type TransformationResponse = TransformationRes;
+  function delay<T extends SenderResponse>(time: number, res: T): Delayed<T>
+  let data: DataObj
 }
 
 
+//globals end
 interface DataObj {
-    usedTransformation: {
-        name: string
-    }
+  usedTransformation: {
+    name: string
+  }
 }
 
 
 interface NotificationData<SoundDef = SoundType> {
-    title?: string;
-    sound?: SoundDef;
-    body?: string;
+  title?: string;
+  sound?: SoundDef;
+  body?: string;
 }
 
 export interface SenderResponse<SoundDef = SoundType, NotificationType = NotificationData<SoundDef>> {
-    promise?: Delayed<SenderResponse>;
-    notification?: NotificationType,
+  promise?: Delayed<SenderResponse>;
+  notification?: NotificationType,
 
-    attributes?: {
-        messageId?: string
-    }
+  attributes?: {
+    messageId?: string
+  }
 
-    read?: {
-        text: string
-    }
+  read?: {
+    text: string
+  }
 
 }
 

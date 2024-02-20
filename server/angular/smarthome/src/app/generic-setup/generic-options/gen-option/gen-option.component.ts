@@ -49,7 +49,8 @@ export class GenOptionComponent implements OnChanges {
 
   monacoData: {
     tsCode: string,
-    jsCode: string
+    jsCode: string,
+    timestamp: number
   }
 
 
@@ -65,6 +66,7 @@ export class GenOptionComponent implements OnChanges {
   updateCode(evt: { js: string; ts: string; }) {
     this.monacoData = {
       tsCode: evt.ts,
+      timestamp: Date.now(),
       jsCode: evt.js
     }
     this._additionalVal = evt.js;
@@ -101,9 +103,15 @@ export class GenOptionComponent implements OnChanges {
     if (this.definition.type === "monaco" && ("value" in changes || "node" in changes)) {
       try {
         if (this.value) {
-          this.monacoData = JSON.parse(this.value)
-          this._code = this.monacoData.tsCode
-          this._additionalVal = this.monacoData.jsCode
+          const monacoData = JSON.parse(this.value) as typeof this.monacoData
+          if (monacoData.timestamp && monacoData.timestamp > this.monacoData.timestamp) {
+            this.monacoData = monacoData
+            this._code = this.monacoData.tsCode
+            this._additionalVal = this.monacoData.jsCode
+          } else {
+            console.log("skipped update due to timing")
+          }
+
         }
       } catch (e) {
         debugger
@@ -111,7 +119,7 @@ export class GenOptionComponent implements OnChanges {
 
 
       const inputs = this.con.getInputConnections(this.node.uuid)
-        .filter(s => !!s.node?.runtimeContext?.outputSchema?.jsonSChema)
+        .filter(s => !!s.node?.runtimeContext?.outputSchema?.jsonSchema)
 
       const schemas = Promise.all(inputs
         .map(async (inp, indx) => {
