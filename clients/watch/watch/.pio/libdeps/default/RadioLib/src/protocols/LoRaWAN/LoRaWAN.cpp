@@ -500,26 +500,21 @@ int16_t LoRaWANNode::beginOTAA(uint64_t joinEUI, uint64_t devEUI, uint8_t *nwkKe
   // set the physical layer configuration
   state = this->setPhyProperties();
   RADIOLIB_ASSERT(state);
-  Serial.println(F("pys propA"));
 
   // select a random pair of Tx/Rx channels
   state = this->selectChannels();
   RADIOLIB_ASSERT(state);
 
-  Serial.println(F("channel sel"));
   // configure for uplink with default configuration
   state = this->configureChannel(RADIOLIB_LORAWAN_CHANNEL_DIR_UPLINK);
   RADIOLIB_ASSERT(state);
 
-  Serial.println(F("channel cfg"));
   // increment devNonce as we are sending another join-request
   this->devNonce += 1;
 
   Serial.println("devNonce");
   Serial.println(this->devNonce);
-#if !defined(RADIOLIB_EEPROM_UNSUPPORTED)
-  // mod->hal->setPersistentParameter<uint32_t>(RADIOLIB_EEPROM_LORAWAN_DEV_NONCE_ID, this->devNonce);
-#endif
+
   // build the join-request message
   uint8_t joinRequestMsg[RADIOLIB_LORAWAN_JOIN_REQUEST_LEN];
 
@@ -1325,14 +1320,12 @@ int16_t LoRaWANNode::downlinkCommon()
 
   // configure for downlink
   int16_t state = this->configureChannel(RADIOLIB_LORAWAN_CHANNEL_DIR_DOWNLINK);
-  Serial.println(F("downlink channel cfg"));
   RADIOLIB_ASSERT(state);
 
   // downlink messages are sent with inverted IQ
   if (!this->FSK)
   {
     state = this->phyLayer->invertIQ(true);
-    Serial.println(F("invert iq"));
     RADIOLIB_ASSERT(state);
   }
 
@@ -1361,8 +1354,6 @@ int16_t LoRaWANNode::downlinkCommon()
     {
       waitLen -= scanGuard;
     }
-    Serial.println("waitlen");
-    Serial.println(waitLen);
     mod->hal->delay(waitLen);
 
     // open Rx window by starting receive with specified timeout
@@ -1383,14 +1374,13 @@ int16_t LoRaWANNode::downlinkCommon()
       // nothing in the first window, configure for the second
       this->phyLayer->standby();
       state = this->phyLayer->setFrequency(this->rx2.freq);
-      Serial.println(F("freq set"));
       RADIOLIB_ASSERT(state);
 
       DataRate_t dataRate;
       findDataRate(this->rx2.drMax, &dataRate);
       state = this->phyLayer->setDataRate(dataRate);
-      Serial.println(F("data rate set"));
       RADIOLIB_ASSERT(state);
+      Serial.println(F("set rx windows props"));
     }
   }
   // Rx windows are now closed
