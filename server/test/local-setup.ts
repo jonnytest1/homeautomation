@@ -28,14 +28,11 @@ ControlKeysWebsocket.key_cache = {
 if (hookKeys) {
   const oscket = new ReconnectingSocket({ tlsOptions: { agent: false, rejectUnauthorized: false } })
   oscket.on("connect", c => {
-
-
-
     const socketPRoxy = new EventEmitter() as EventEmitter & { send?: Function }
     socketPRoxy.send = (...args) => {
       //
     }
-
+    console.log("keysocket connected")
     ControlKeysWebsocket.onConnected({ header: () => null } as any, socketPRoxy as any)
 
     c.on("message", e => {
@@ -45,11 +42,15 @@ if (hookKeys) {
       }
     })
   })
-  oscket.on("connectFailed", c => {
-    debugger
+  oscket.on("connectFailed", e => {
+    console.error(e)
   })
   oscket.connect(env.KEY_ENDPOINT, 'echo-protocol')
-
+  setInterval(() => {
+    oscket.send(JSON.stringify({
+      type: "ping"
+    }))
+  }, 20000)
 }
 
 if (eventReplay) {
@@ -58,7 +59,7 @@ if (eventReplay) {
     .then(async eventHistory => {
 
       for (const event of eventHistory) {
-        await ResolvablePromise.delayed(1000);
+        await ResolvablePromise.delayed(5000);
         const body = JSON.parse(event.data)
         const evt = {
           payload: body,

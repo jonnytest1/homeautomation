@@ -70,7 +70,7 @@ export async function logKibana(level: 'INFO' | 'ERROR' | 'DEBUG' | "WARN", mess
 }, error?) {
   let jsonData: { [key: string]: string } = {
     Severity: level,
-    application: `SmartHome${process.env.DEBUG ? '_debug' : ''}`,
+    application: `SmartHome${environment.DEBUG ? '_debug' : ''}${environment.LOG_SUFFIX ?? ''}`,
   };
   if (!message && error) {
     jsonData.message = error.message;
@@ -101,12 +101,19 @@ export async function logKibana(level: 'INFO' | 'ERROR' | 'DEBUG' | "WARN", mess
         error_message: error
       };
     } else {
-      jsonData = {
-        ...error,
-        ...jsonData,
-      };
-      jsonData.error_message = error.message;
-      jsonData.error_stacktrace = error.stack;
+      let errorCause = error;
+
+      let prefix = "err_"
+      while (errorCause) {
+        for (const key in errorCause) {
+          jsonData[`${prefix}${key}`] = errorCause[key]
+        }
+        jsonData[prefix + "message"] = errorCause.message;
+        jsonData[prefix + "stacktrace"] = errorCause.stack;
+
+        errorCause = errorCause.cause;
+        prefix += "cause_"
+      }
     }
   }
   console.log(jsonData);

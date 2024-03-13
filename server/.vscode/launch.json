@@ -33,7 +33,9 @@
         "ts-node/register"
       ],
       "env": {
-        "setup": "true"
+        "setup": "true",
+        "WATCH_SERVICES": "true",
+        "LOG_SUFFIX": "local"
       },
       "args": [
         "${workspaceFolder}\\index.ts"

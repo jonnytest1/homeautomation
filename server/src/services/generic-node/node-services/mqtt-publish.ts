@@ -1,7 +1,7 @@
 import { globalMqttConfig } from './mqtt-global'
 import { mqttConnection } from '../../mqtt-api'
 import { addTypeImpl } from '../generic-node-service'
-import type { ElementNode, ExtendedJsonSchema } from '../typing/generic-node-type'
+import type { ExtendedJsonSchema } from '../typing/generic-node-type'
 import { generateDtsFromSchema, generateZodTypeFromSchema, mainTypeName } from '../json-schema-type-util'
 import type { Select } from '../typing/node-options'
 import { connect } from 'mqtt'
@@ -11,7 +11,7 @@ import type { ZodType } from 'zod'
 const zodValidators: Record<string, Promise<ZodType>> = {}
 
 addTypeImpl({
-  async process(node: ElementNode<{ topic?: string, command?: string, argument?: string }>, evt, callbacks) {
+  async process(node, evt, callbacks) {
 
     const topic = node?.parameters?.topic
     if (!topic) {
@@ -57,8 +57,8 @@ addTypeImpl({
     type: "mqtt publish",
     options: {
       topic: {
-        type: "select",
-        options: mqttConnection.getPublishable()
+        type: "placeholder",
+        of: "select"
       },
       command: {
         type: "placeholder",
@@ -72,6 +72,16 @@ addTypeImpl({
     globalConfig: globalMqttConfig
   }),
   async nodeChanged(node, prev) {
+    node.runtimeContext ??= {}
+    node.runtimeContext.parameters ??= {}
+    const publishable = mqttConnection.getPublishable()
+    node.runtimeContext.parameters.topic = {
+      type: "select",
+      options: publishable.map(d => `${d.getCommandTopic()}`),
+      optionDisplayNames: publishable.map(d => d.friendlyName),
+      order: 2
+    }
+
     if (node.parameters?.topic) {
 
       if (prev?.parameters?.topic && node.parameters?.topic !== prev?.parameters?.topic) {
@@ -82,7 +92,7 @@ addTypeImpl({
       }
 
       const device = mqttConnection.getDevice(node.parameters?.topic)
-      node.runtimeContext ??= {}
+
       node.runtimeContext.info = device.friendlyName
       if (device.commands) {
         node.runtimeContext.parameters ??= {}

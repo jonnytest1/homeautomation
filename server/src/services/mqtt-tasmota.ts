@@ -2,7 +2,7 @@
 import type { NodeOptionTypes } from './generic-node/typing/node-options'
 import type { CommandsEvent } from './mqtt-types'
 
-
+//  https://tasmota.github.io/docs/Commands/#mqtt
 export interface DiscoveryConfigEvent {
   fn: Array<string | null>
   t: string //topic
@@ -20,6 +20,8 @@ export class DeviceConfig {
   public friendlyName: string
 
   commands: Array<{ name: string, argument?: NodeOptionTypes }> = []
+
+  iscommandsSet = false
   constructor(public discoveryid: string, evt: DiscoveryConfigEvent, commandprops?: CommandsEvent) {
     this.mqttDeviceName = evt.t;
     this.topicPrefixes = evt.tp
@@ -27,11 +29,16 @@ export class DeviceConfig {
 
     if (evt.commands) {
       this.commands = evt.commands
+      this.iscommandsSet = true
     } else if (commandprops) {
       this.commands = commandprops.commands
+      this.iscommandsSet = true
     }
   }
-
+  setCommands(commands: typeof this.commands) {
+    this.commands = commands
+    this.iscommandsSet = true
+  }
 
   getTelemetry() {
     if (this.topicPrefixes.includes("tele")) {
@@ -46,6 +53,52 @@ export class DeviceConfig {
     }
     console.error("unknown command syntax", this.friendlyName, this.mqttDeviceName)
     return false
+  }
+}
+
+
+export function defaultCommandConfig() {
+  return {
+    "commands": [
+      {
+        "name": "Power0",
+        "argument": {
+          "type": "select",
+          "options": [
+            "on",
+            "off"
+          ]
+        }
+      },
+      {
+        "name": "FriendlyName",
+        "argument": {
+          "type": "text"
+        },
+        "flags": {
+          needsRedstart: true
+        }
+      },
+      {
+        "name": "SensorRetain",
+        "argument": {
+          "type": "select",
+          "options": [
+            "on",
+            "off"
+          ]
+        }
+      },
+      {
+        "name": "Restart",
+        "argument": {
+          "type": "select",
+          "options": [
+            "1"
+          ]
+        }
+      }
+    ] satisfies Array<{ name: string, argument: NodeOptionTypes, flags?: Record<string, boolean> }>
   }
 }
 

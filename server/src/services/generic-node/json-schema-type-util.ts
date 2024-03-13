@@ -3,13 +3,14 @@ import { zodScripts } from './generic-node-constants'
 import { FetchingJSONSchemaStore, InputData, JSONSchemaInput, quicktype } from '../../module-src/module-wrappers'
 import { logKibana } from '../../util/log'
 import {
-  Diagnostic, Program, ScriptKind, ScriptTarget, TypeFormatFlags, createCompilerHost, createProgram, createSourceFile,
+  Diagnostic, ScriptKind, ScriptTarget, TypeFormatFlags, createCompilerHost, createProgram, createSourceFile,
   factory, getPreEmitDiagnostics, isExpressionStatement, isTypeAliasDeclaration, Node
 } from 'typescript'
 import { generateSchema, buildGenerator } from 'typescript-json-schema'
 
 import type * as z from "zod"
 import { v4 } from "uuid"
+import type { JSONSchema6Definition } from 'json-schema'
 import { join, dirname } from "path"
 import { writeFile, mkdir, rm } from "fs/promises"
 
@@ -74,7 +75,7 @@ export function typeMerge(newType: string, oldType: string, mainInterfaceName: s
 }
 
 
-function canDoSchema(jsonSchema: ExtendedJsonSchema) {
+function canDoSchema(jsonSchema: ExtendedJsonSchema | (JSONSchema6Definition & object)) {
   if (jsonSchema.type == "object") {
     return true
   } else if (jsonSchema.type == "string" && (jsonSchema.enum?.length || jsonSchema.const)) {
@@ -95,7 +96,7 @@ function canDoSchema(jsonSchema: ExtendedJsonSchema) {
 }
 
 
-export async function generateDtsFromSchema(jsonSchema: ExtendedJsonSchema, traceId?: string) {
+export async function generateDtsFromSchema(jsonSchema: ExtendedJsonSchema | (JSONSchema6Definition & object), traceId?: string) {
   if (traceId) {
     console.log("creating schema for " + traceId)
   } else {
@@ -186,7 +187,7 @@ export function programFromSource(name: string, source: string) {
 
 export class CompilerError extends Error {
 
-  constructor(message: string, public error_diagnostics: Array<Omit<Diagnostic, "file">>, public program: Program) {
+  constructor(message: string, public error_diagnostics: Array<Omit<Diagnostic, "file">>) {
     super(message)
 
   }
@@ -237,7 +238,7 @@ export function allRequired(schema: ExtendedJsonSchema) {
     }
   }
 }
-export function generateJsonSchemaFromDts(dts: string, mainType: string | boolean, traceId?: string) {
+export function generateJsonSchemaFromDts(dts: string, mainType: string | boolean, traceId: string) {
   if (traceId) {
     console.log("creating jscon schema from dts for " + traceId)
   } else {
@@ -246,12 +247,11 @@ export function generateJsonSchemaFromDts(dts: string, mainType: string | boolea
   const program = programFromSource("text.ts", `
       ${dts}
   `)
-
   const emitResults = getPreEmitDiagnostics(program.program)
   if (emitResults.length) {
     const jsonSafeResults = emitResults
       .map(r => ({ ...r, file: null }))
-    throw new CompilerError("typescript compiler error while generating schema", jsonSafeResults, program.program)
+    throw new CompilerError("typescript compiler error while generating schema", jsonSafeResults)
   }
   if (typeof mainType == "boolean") {
     const gnerator = buildGenerator(program.program, {

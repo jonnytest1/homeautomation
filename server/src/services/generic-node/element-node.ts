@@ -1,5 +1,5 @@
 import type { MapTypeToParam, NodeDefOptinos, NodeOptionTypes } from './typing/node-options';
-import type { Callbacks, ElementNode as ELN, Schemata, TypeImplementaiton } from './typing/generic-node-type';
+import type { Callbacks, ElementNode as ELN, ElementNode, TypeImplementaiton } from './typing/generic-node-type';
 import type { NodeEvent } from './node-event';
 export class ElementNodeImpl<T = { [optinoskey: string]: string }, P = Partial<NodeDefOptinos>> implements ELN<T, P>, Callbacks {
 
@@ -7,13 +7,7 @@ export class ElementNodeImpl<T = { [optinoskey: string]: string }, P = Partial<N
   position: { x: number; y: number; };
   type: string;
   uuid: string;
-  runtimeContext: {
-    inputSchema?: Schemata
-    outputSchema?: Schemata
-
-    info?: string | undefined;
-    parameters?: Partial<P> | undefined;
-  };
+  runtimeContext: ELN<T, P>["runtimeContext"]
   globalContext?: NodeDefOptinos | undefined;
 
 
@@ -34,7 +28,12 @@ type SetNodeOption<T extends string> = {
 type SetNodeParamVAlue<K extends string, V extends NodeOptionTypes> = {
   [key in K]: MapTypeToParam<V, K>
 }
-
+export function nodeDescriptor(node: ElementNode<{ name?}, unknown, unknown>) {
+  if (node.parameters?.name) {
+    return `${node.uuid} (${node.parameters.name})`
+  }
+  return node.uuid
+}
 
 export function checkInvalidations<T, P, K extends (keyof P & keyof T & string), V extends NodeOptionTypes & P[K]>(typeImpl: TypeImplementaiton, node: ELN<T, P>, prev: ELN<T, P> | null) {
   if (prev?.parameters) {
@@ -55,8 +54,8 @@ export function checkInvalidations<T, P, K extends (keyof P & keyof T & string),
 
 }
 
-export function updateRuntimeParameter<T, P, K extends (keyof P & keyof T & string), V extends NodeOptionTypes & P[K]>(node: ElementNodeImpl<T, P>,
-  key: K, param: V, inital: number | string | false = 0): asserts node is ElementNodeImpl<T, P> & {
+export function updateRuntimeParameter<T, P, K extends (keyof P & keyof T & string), V extends NodeOptionTypes & P[K]>(node: ElementNode<T, P>,
+  key: K, param: V, inital: number | string | false = 0): asserts node is ElementNode<T, P> & {
     parameters: SetNodeParamVAlue<K, V>,
     runtimeContext: {
       parameters: SetNodeOption<K>
@@ -85,4 +84,9 @@ export function updateRuntimeParameter<T, P, K extends (keyof P & keyof T & stri
 
     node.parameters[key] = value
   }
+}
+
+
+export function nodeTypeName(node: ELN) {
+  return "_" + node.uuid.replace(/-/g, "_")
 }

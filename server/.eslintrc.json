@@ -44,6 +44,8 @@
     "@typescript-eslint/no-inferrable-types": "warn",
     "@typescript-eslint/ban-types": "warn",
     "@typescript-eslint/ban-ts-comment": "off",
+    "@typescript-eslint/no-namespace": "off",
+    "@typescript-eslint/no-explicit-any": "warn",
     "no-var": "warn",
     "prefer-const": "warn",
     "indent": "off",

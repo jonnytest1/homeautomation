@@ -112,22 +112,21 @@ async function computeTypeSchema(node: ElementNodeImpl) {
     throw new Error("response interface not yet laoded")
   }
 
-
+  const tsc = tscConnectionInterfaceAndGlobals()
   const schema = generateJsonSchemaFromDts(`
 
 export {};
 
-  ${TscCompiler.responseINterface}
+  ${tsc.interfaces}
 
 `, "ConnectionResponse", `${node.type}-${node.uuid}-input gen for receiver`)
 
   const conI = tscConnectionInterfaceAndGlobals()
   node.runtimeContext.inputSchema = {
     dts: `
-    namespace ConnectionType {  
-  ${conI.interfaces}
-}
-
+      namespace ConnectionType {  
+        ${conI.interfaces}
+      }
       export type Main=ConnectionType.ConnectionResponse`,
     jsonSchema: schema,
     mainTypeName: "Main",
@@ -135,4 +134,3 @@ export {};
   }
 
 }
-

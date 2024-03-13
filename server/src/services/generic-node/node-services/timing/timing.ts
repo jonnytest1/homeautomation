@@ -1,11 +1,18 @@
-import { TimerFactory } from '../../event/timer-factory';
-import { ElementNodeImpl, updateRuntimeParameter } from '../element-node';
-import { addTypeImpl } from '../generic-node-service';
-import { generateDtsFromSchema, mainTypeName } from '../json-schema-type-util';
-import { logKibana } from '../../../util/log';
-import { NodeEvent } from '../node-event';
+import { TimerFactory } from '../../../event/timer-factory';
+import { ElementNodeImpl, nodeDescriptor, updateRuntimeParameter } from '../../element-node';
+import { addTypeImpl } from '../../generic-node-service';
+import { generateDtsFromSchema, mainTypeName } from '../../json-schema-type-util';
+import { logKibana } from '../../../../util/log';
+import { NodeEvent } from '../../node-event';
+import { jsonClone } from '../../../../util/json-clone';
+import { ResolvablePromise } from '../../../../util/resolvable-promise';
 import { z } from 'zod';
 import type { JSONSchema6 } from 'json-schema';
+import { readFile } from 'fs/promises';
+import { join } from 'path';
+
+const initPr = new ResolvablePromise<void>()
+
 
 const delayUnits = ["seconds", "minutes", "hours", "<payload seconds>"] as const;
 
@@ -24,6 +31,7 @@ type EventData = {
   context: unknown
 }
 export async function handleTimedEvent(data: EventData) {
+  await initPr.prRef
   const node = nodeRegister[data.node]
 
   if (node) {
@@ -61,6 +69,14 @@ addTypeImpl({
       delay: {
         type: "placeholder",
         of: "number"
+      },
+      emitting: {
+        type: "placeholder",
+        of: "select"
+      },
+      schedule: {
+        type: "placeholder",
+        of: "iframe"
       }
     }
   }),
@@ -121,6 +137,26 @@ addTypeImpl({
         nestedObject: evtData,
         sentData: evt.payload
       })
+    } else if (node.parameters.type === "schedule") {
+      if (node.parameters.emitting === "emitting") {
+        throw new Error("emitting doesnt haev inputs")
+      }
+      if (!node.parameters.schedule) {
+        logKibana("INFO", "missing schedule for timing process", {
+          node: nodeDescriptor(node)
+        })
+        return
+      }
+      const schedule = Object.keys(JSON.parse(node.parameters.schedule))
+      const now = new Date()
+      const dayIndex = (now.getDay() + 6) % 7
+      const days = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
+      const currentDay = days[dayIndex].toLowerCase()
+      const currentHours = now.getHours()
+      const lastHour = (currentHours - 1 + 24) % 24
+      if (schedule.includes(`${currentDay}${currentHours}`) || schedule.includes(`${currentDay}${lastHour} `)) {
+        callbacks.continue(evt)
+      }
     }
   },
   async nodeChanged(node, prevNode) {
@@ -147,12 +183,13 @@ addTypeImpl({
 
             }
           },
+          required: ["delay"],
           additionalProperties: false
         }
         node.runtimeContext.inputSchema = {
           jsonSchema: jsonSchema,
           mainTypeName: mainTypeName,
-          dts: await generateDtsFromSchema(jsonSchema, `${node.type}-${node.uuid}-node change`)
+          dts: await generateDtsFromSchema(jsonSchema, `${node.type} -${node.uuid} -node change`)
         }
 
       } else {
@@ -161,16 +198,39 @@ addTypeImpl({
         }, 60)
       }
 
+    } else if (node.parameters?.type === "schedule") {
+      updateRuntimeParameter(node, "emitting", {
+        type: "select",
+        options: ["emitting", "filter"]
+      })
+      updateRuntimeParameter(node, "schedule", {
+        type: "iframe",
+        document: await readFile(join(__dirname, "schedule-frame.html"), { encoding: "utf8" }),
+        data: {}
+      })
+    }
+    node.runtimeContext.info = `${node.parameters?.type} `
+    if (node.parameters?.emitting == "filter") {
+      node.runtimeContext.inputs = 1
+    } else if (node.parameters?.emitting === "emitting") {
+      node.runtimeContext.inputs = 0
     }
   },
   async connectionTypeChanged(node, schema) {
     const schemaParsed = schema.jsonSchema
-    const payloadProp = schemaParsed.properties?.payload
+    if (!schemaParsed.properties?.payload) {
+      return
+    }
+    const payloadProp = jsonClone(schemaParsed.properties.payload)
+    if (typeof payloadProp == "object" && schemaParsed.definitions) {
+      payloadProp.definitions = jsonClone(schemaParsed.definitions)
+    }
+
     if (payloadProp && typeof payloadProp == "object") {
       node.runtimeContext.outputSchema = {
         jsonSchema: payloadProp,
         mainTypeName: "Main",
-        dts: await generateDtsFromSchema(payloadProp, `${node.type}-${node.uuid}-con change`)
+        dts: await generateDtsFromSchema(payloadProp, `${node.type} -${node.uuid} -con change`)
       }
     }
   },
@@ -179,6 +239,7 @@ addTypeImpl({
     for (const node of nodes) {
       nodeRegister[node.uuid] = node
     }
+    initPr.resolve()
   },
   unload(nodeas, globals) {
     for (const key in nodeRegister) {

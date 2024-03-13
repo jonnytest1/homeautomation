@@ -17,6 +17,8 @@ export class NodeEvent<C = unknown, P = unknown, G extends NodeDefOptinos = Node
 
   declare globalConfig: NodeDefToType<G>
 
+  inputIndex: number
+
   constructor(data: NodeEventData, globals: NodeDefToType<G>) {
     Object.defineProperty(this, 'payload', {
       enumerable: true,

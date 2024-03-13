@@ -4,7 +4,7 @@ import { Connection } from '../../models/connection';
 import { Sender } from '../../models/sender';
 import { Timer } from '../../models/timer';
 import { logKibana } from '../../util/log';
-import { handleTimedEvent } from '../generic-node/node-services/timing';
+import { handleTimedEvent } from '../generic-node/node-services/timing/timing';
 import type { LoadOptions } from 'hibernatets/load';
 import type { ConstructorClass } from 'hibernatets/interface/mapping';
 import { load, queries } from 'hibernatets';

@@ -2,38 +2,58 @@
 
 import { addTypeImpl } from '../generic-node-service';
 import type { ElementNode } from '../typing/generic-node-type';
-import type { NodeDefToType } from '../typing/node-options';
-import { Json2dts } from "json2dts"
+import type { NodeDefOptinos, NodeDefToType } from '../typing/node-options';
+import { mainTypeName } from '../json-schema-type-util';
 import * as z from "zod"
-import { createCompilerHost } from 'typescript';
 import { Script } from 'vm';
-
-declare module "typescript" {
-  export interface SourceFile {
-    getNamedDeclarations(): Map<string, Array<Node>>
-  }
-
-}
-
-
-
-const host = createCompilerHost({})
-
-
-
-const json2dts = new Json2dts()
 
 const codeSchema = z.object({
   jsCode: z.string(),
   tsCode: z.string()
 })
 
+const DateMock = function (): Date {
+  const dateRef = new Date();
+  const parts = new Intl.DateTimeFormat("de-DE", {
+    timeStyle: "full",
+    "timeZone": "Europe/Berlin",
+    dateStyle: "full"
+  }).formatToParts(dateRef);
+  dateRef.getHours = () => +parts[8].value;
+  dateRef.getDay = () => +parts[2].value;
 
+  return dateRef;
+};
 const jsCache: Record<string, z.infer<typeof codeSchema> & { script: Script }> = {}
 
+
+
+interface InputContext {
+  timestamp: number;
+  evt: unknown;
+}
+
+
+interface EvaluatedInputContext extends InputContext {
+  secondsAgo: number
+}
+
 addTypeImpl({
+  server_context_type(s: { [index: number]: InputContext }) {
+    return s
+  },
   process(node, data, callbacks) {
-    /*let nodeScript = jsCache[node.uuid]
+
+    if (data.inputIndex !== 0) {
+      node.serverContext ??= {}
+      node.serverContext[data.inputIndex] = {
+        timestamp: Date.now(),
+        evt: data.payload
+      }
+      callbacks.updateNode(false)
+    }
+
+    let nodeScript = jsCache[node.uuid]
     if (!nodeScript) {
       if (node.parameters?.code) {
         nodeScript = cacheNodeScript(node)
@@ -41,11 +61,25 @@ addTypeImpl({
         return
       }
     }
+    const executionTime = Date.now()
+
+    const inputs: Record<number, EvaluatedInputContext> = Object.fromEntries(Object.entries(node.serverContext ?? {})
+      .map(([key, val]) => [key, {
+        ...val,
+        secondsAgo: Math.floor((executionTime - val.timestamp) / 1000)
+      }]))
+
     const returnValue = nodeScript.script.runInNewContext({
-      payload: data.payload
+      payload: data.payload,
+      inputs: inputs,
+      Date: DateMock
     })
-    data.updatePayload(returnValue)*/
-    callbacks.continue(data)
+    if (typeof returnValue !== "boolean") {
+      throw new Error("invalid return type")
+    }
+    if (returnValue) {
+      callbacks.continue(data)
+    }
 
   },
   nodeDefinition: () => ({
@@ -53,52 +87,70 @@ addTypeImpl({
     outputs: 1,
     type: "filter",
     options: {
+      additional: {
+        type: "number",
+        min: 0
+      },
       code: {
         type: "monaco",
-        default: `const filter:Partial<InputType> = {}`
+        default: `function filter(input:InputType):boolean{\n\n}`
       }
     }
   }),
   nodeChanged(node, prev) {
-    /* const prevtsCode = jsCache[node.uuid]?.tsCode
-     cacheNodeScript(node);
-     if (prevtsCode === jsCache[node.uuid].tsCode) {
-       return
-     }*/
+    if (node.parameters) {
+      if (node.parameters.additional !== undefined) {
+        node.runtimeContext.inputs = +node.parameters.additional + 1
+      }
+    }
+
+
+    const prevtsCode = jsCache[node.uuid]?.tsCode
+    cacheNodeScript(node);
+    if (prevtsCode === jsCache[node.uuid]?.tsCode) {
+      return
+    }
+
+
   },
   async connectionTypeChanged(node, connectionSchema) {
 
-    /* if (!jsCache[node.uuid]) {
-       cacheNodeScript(node)
- 
-     }
- 
-     const jsonSchema = jsonSchemaFromDts(`
-       ${connectionSchema.dts}
- 
-       type InputType=${connectionSchema.mainTypeName}
-       
-       ${jsCache[node.uuid].tsCode}\n
-       type OutputType=ReturnType<typeof map>
-     `, "OutputType")
- 
-     if (jsonSchema) {
-       node.runtimeContext.outputSchema = {
-         jsonSChema: jsonSchema,
-         dts: await generateDtsFromSchema(jsonSchema)
-       }
-     }*/
+
+    node.runtimeContext.editorSchema = {
+      dts: `
+${connectionSchema.dts}
+
+type InputType=${connectionSchema.mainTypeName ??= mainTypeName}
+      `, globals: `
+     // type InputType = EditorSchema.InputType;    
+
+
+      ${node.parameters?.additional ? inputsGlobals(+node.parameters.additional) : ''}
+     
+      var context; 
+      `
+    }
+    node.runtimeContext.outputSchema = {
+      jsonSchema: connectionSchema.jsonSchema,
+      dts: connectionSchema.dts,
+      mainTypeName: connectionSchema.mainTypeName
+    }
   }
 })
-function cacheNodeScript(node: ElementNode<NodeDefToType<{ code: { type: "monaco"; default: string; }; }>>) {
-  if (node.parameters) {
-    const codePAram = JSON.parse(node.parameters.code ?? '{}');
-    const parsedCodeAData = codeSchema.parse(codePAram)
-    if (parsedCodeAData) {
-      jsCache[node.uuid] = {
-        script: new Script(`(${parsedCodeAData.jsCode})(payload)`),
-        ...parsedCodeAData
-      };
+function cacheNodeScript(node: ElementNode<NodeDefToType<{ code: { type: "monaco"; default: string; }; }>, NodeDefOptinos, unknown>) {
+  if (node.parameters?.code) {
+    try {
+      const codePAram = JSON.parse(node.parameters.code ?? '{}');
+      const parsedCodeAData = codeSchema.parse(codePAram)
+      if (parsedCodeAData) {
+        jsCache[node.uuid] = {
+          script: new Script(`
+        (${parsedCodeAData.jsCode})(payload)`),
+          ...parsedCodeAData
+        };
+      }
+    } catch (e) {
+      debugger
     }
   }
 
@@ -106,23 +158,16 @@ function cacheNodeScript(node: ElementNode<NodeDefToType<{ code: { type: "monaco
 }
 
 
+function inputsGlobals(count: number) {
 
-/**
- * assdfsdgdfgs sd fsdf
- */
-type A = "asdasd"
-
-
-/**
- * type b comment
- */
-type B = "type B val"
-
-
-type C = A | B
-
-type Obj = {
-  c: C
+  const indices = new Array(count).fill(undefined).map((_, i) => i + 1)
+  return `
+    var inputs:{
+      [key in ${indices.join("|")}]:{
+        timestamp:number, 
+        secondsAgo: number
+        evt: unknown;
+      }
+    }
+  `
 }
-
-

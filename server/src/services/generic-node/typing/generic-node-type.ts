@@ -13,19 +13,26 @@ export type NodeDefintion<G extends NodeDefOptinos = NodeDefOptinos, O extends N
 
 export type Callbacks = {
   continue: (evt: NodeEvent, index?: number) => void
-  updateNode()
+  updateNode(frontendEmit?: boolean)
 }
 
+type DefaultProps = {
+  name: { type: "text" }
+}
 
-export type TypeImplementaiton<Context = unknown, Globals extends NodeDefOptinos = NodeDefOptinos, Opts extends NodeDefOptinos = NodeDefOptinos, P = unknown> = {
+export type EvalNode<Opts extends NodeDefOptinos, S> = ElementNode<NodeDefToType<Opts & DefaultProps>, NodeDefToRUntime<Opts & DefaultProps>, S>
+
+
+export type TypeImplementaiton<Context = unknown, Globals extends NodeDefOptinos = NodeDefOptinos, Opts extends NodeDefOptinos = NodeDefOptinos, P = unknown, S = object> = {
   context_type?(c: Context): Context
   payload_type?(p: P): P
-  process: (node: ElementNode<NodeDefToType<Opts>>, data: NodeEvent<Context, P, Globals>, callbacks: Callbacks) => void | Promise<void>
+  server_context_type?(s: S): S
+  process: (node: EvalNode<Opts, S>, data: NodeEvent<Context, P, Globals>, callbacks: Callbacks) => void | Promise<void>
   nodeDefinition: () => NodeDefintion<Globals, Opts>
   nodeChanged?: (this: TypeImplementaiton, node: ElementNodeImpl<NodeDefToType<Opts>, NodeDefToRUntime<Opts>>, prevNode: ElementNode<NodeDefToType<Opts>> | null) => void | Promise<void>
-  connectionTypeChanged?(node: ElementNode<NodeDefToType<Opts>>, schema: Schemata): void | Promise<void>
+  connectionTypeChanged?(node: EvalNode<Opts, S>, schema: Schemata): void | Promise<void>
   initializeServer?(nodes: Array<ElementNodeImpl<NodeDefToType<Opts>>>, globals: NodeDefToType<Globals>): void | Promise<void>
-  unload?(nodeas: Array<ElementNode<NodeDefToType<Opts>>>, globals: NodeDefToType<Globals>): void | Promise<void>
+  unload?(nodeas: Array<EvalNode<Opts, S>>, globals: NodeDefToType<Globals>): void | Promise<void>
   _file?: string
 }
 
@@ -41,21 +48,25 @@ export type Schemata = {
   mainTypeName: "Main"
 }
 
-export type ElementNode<T = { [optinoskey: string]: string }, P = NodeDefOptinos> = {
+export type ElementNode<T = { [optinoskey: string]: string }, P = NodeDefOptinos, S = object> = {
   parameters?: Partial<T>
   position: {
     x: number,
     y: number
   },
+  view?: string,
   type: NodeDefintion["type"]
   uuid: string,
-
+  serverContext?: S
   runtimeContext: {
     inputSchema?: Schemata
     outputSchema?: Schemata
     editorSchema?: {
-      dts: string
+      dts: string,
+      globals?: string
     }
+    inputs?: number,
+    outputs?: number
     info?: string
     parameters?: Partial<P>
 
@@ -75,7 +86,7 @@ export interface ConnectorDefintion {
 
 export type Connection = {
   source: ConnectorDefintion
-  target?: ConnectorDefintion
+  target: ConnectorDefintion
 
 }
 
@@ -88,8 +99,8 @@ export type NodeData = {
 
 
 export type PreparedNodeData = {
-  connectorMap: Record<string, Array<ConnectorDefintion>>
-  targetConnectorMap: Record<string, Array<ConnectorDefintion>>
+  connectorMap: Record<string, { [outputindex: number]: Array<ConnectorDefintion> }>
+  targetConnectorMap: Record<string, { [inputindex: number]: Array<ConnectorDefintion> }>
   nodeMap: Record<string, ElementNode>
   typeImpls: Record<string, TypeImplementaiton>
 }
@@ -101,4 +112,4 @@ export type SchemaCollection = {
   mainTypeName: "Main"
 }
 */
-export type NodeEventTimes = Record<string, { input: number, output: number }>
+export type NodeEventTimes = Record<string, { input?: number, output?: number }>

@@ -37,7 +37,33 @@ function createSchema(schemaOBject: unknown) {
   return schema
 }
 
-function mergeSchema(old: ExtendedJsonSchema, newSchema: ExtendedJsonSchema): ExtendedJsonSchema {
+
+type MergeSchemaOptions = {
+  old: ExtendedJsonSchema,
+  new: ExtendedJsonSchema,
+  enumKeyList: Array<string>,
+  path: Array<string>,
+  params: {
+    mergeLength: string,
+    [key: `mergeLength_${string}`]: string
+  }
+}
+
+function getLimitForPath(opts: MergeSchemaOptions) {
+  const params = opts.params
+  const pathKey = `mergeLength_${opts.path.join(".")}`
+
+  if (pathKey in params) {
+    return +params[pathKey]
+  }
+  return +params.mergeLength
+}
+
+
+//old: ExtendedJsonSchema, newSchema: ExtendedJsonSchema, enumKeyList: Array<string>, path: Array<string> = []
+function mergeSchema(opts: MergeSchemaOptions): ExtendedJsonSchema {
+  const old = opts.old
+  const newSchema = opts.new
 
   if (old.type === newSchema.type) {
     if (old.type == "object") {
@@ -59,7 +85,12 @@ function mergeSchema(old: ExtendedJsonSchema, newSchema: ExtendedJsonSchema): Ex
           const oldKeyProp = oldProps[key]
           const newKeyProp = newProps[key]
           if (oldKeyProp && typeof oldKeyProp == "object" && newKeyProp && typeof newKeyProp == "object") {
-            mergeSchema(oldKeyProp, newKeyProp)
+            mergeSchema({
+              ...opts,
+              old: oldKeyProp,
+              new: newKeyProp,
+              path: [...opts.path, key],
+            })
           }
 
           if (typeof old.required == "object" && !old.required.includes(key)) {
@@ -76,7 +107,12 @@ function mergeSchema(old: ExtendedJsonSchema, newSchema: ExtendedJsonSchema): Ex
           const oldKeyProp = oldProps[key]
           const newKeyProp = newProps[key]
           if (oldKeyProp && typeof oldKeyProp == "object" && newKeyProp && typeof newKeyProp == "object") {
-            mergeSchema(oldKeyProp, newKeyProp)
+            mergeSchema({
+              ...opts,
+              old: oldKeyProp,
+              new: newKeyProp,
+              path: [...opts.path, key],
+            })
           }
 
           if (typeof old.required == "object" && !old.required.includes(key)) {
@@ -90,12 +126,32 @@ function mergeSchema(old: ExtendedJsonSchema, newSchema: ExtendedJsonSchema): Ex
         }
         return old
       } else if (oldKeys.size > 0) {
+        old.required ??= []
+        old._optional ??= []
+
         for (const okey of oldKeys) {
-          old._optional ??= []
           if (!old._optional.includes(okey)) {
             old._optional.push(okey)
           }
           old.required = old.required?.filter(key => key !== okey)
+        }
+        for (const key of keysOld) {
+          const oldKeyProp = oldProps[key]
+          const newKeyProp = newProps[key]
+          if (oldKeyProp && typeof oldKeyProp == "object" && newKeyProp && typeof newKeyProp == "object") {
+            mergeSchema({
+              ...opts,
+              old: oldKeyProp,
+              new: newKeyProp,
+              path: [...opts.path, key],
+            })
+          }
+
+          if (typeof old.required == "object" && !old.required.includes(key)) {
+            if (!old._optional?.includes(key)) {
+              old.required.push(key)
+            }
+          }
         }
         return old
       }
@@ -115,10 +171,15 @@ function mergeSchema(old: ExtendedJsonSchema, newSchema: ExtendedJsonSchema): Ex
         } else {
           delete old.format
         }
-        if (old.enum.length > 10) {
+
+        const limit = getLimitForPath(opts)
+        if (old.enum.length > limit) {
           old.merged = true
           delete old.enum
+        } else {
+          opts.enumKeyList.push(opts.path.join("."))
         }
+
       }
     } else if (old.type == "number") {
       if (old.merged) {
@@ -127,9 +188,12 @@ function mergeSchema(old: ExtendedJsonSchema, newSchema: ExtendedJsonSchema): Ex
       if (old.enum && newSchema.enum) {
         old.enum = [...new Set([...old.enum, ...newSchema.enum])]
 
-        if (old.enum.length > 10) {
+        const limit = getLimitForPath(opts)
+        if (old.enum.length > limit) {
           old.merged = true
           delete old.enum
+        } else {
+          opts.enumKeyList.push(opts.path.join("."))
         }
       } else {
         debugger
@@ -150,10 +214,16 @@ function mergeSchema(old: ExtendedJsonSchema, newSchema: ExtendedJsonSchema): Ex
 }
 
 
-function updateSchema(newObject: unknown, oldSchema: ExtendedJsonSchema | null) {
+function updateSchema(newObject: unknown, oldSchema: ExtendedJsonSchema | null, enumKeyList: Array<string>, params: MergeSchemaOptions["params"]) {
   const newSchema = createSchema(newObject)
   if (oldSchema) {
-    const merged = mergeSchema(oldSchema, newSchema)
+    const merged = mergeSchema({
+      old: oldSchema,
+      new: newSchema,
+      enumKeyList: enumKeyList,
+      path: [],
+      params
+    })
     return merged
   }
 
@@ -179,7 +249,46 @@ addTypeImpl({
 
 
     try {
-      const updated = updateSchema(data.payload, node.runtimeContext?.outputSchema?.jsonSchema ?? null)
+      const enumKeyList: Array<string> = []
+      const updated = updateSchema(
+        data.payload,
+        node.runtimeContext?.outputSchema?.jsonSchema ?? null,
+        enumKeyList,
+        {
+          ...node.parameters,
+          mergeLength: node.parameters?.mergeLength ?? "10"
+        }
+      )
+      node.parameters ??= {}
+      node.runtimeContext.parameters ??= {}
+
+      let hasChange = false
+      const enumSet = new Set(enumKeyList)
+      for (const key in node.runtimeContext.parameters) {
+        if (key.startsWith("mergeLength_")) {
+          const prop = key.split("mergeLength_")[1]
+          if (!enumSet.has(prop)) {
+            hasChange = true
+            delete node.runtimeContext.parameters[key]
+          }
+        }
+      }
+      for (const enumKey of enumKeyList) {
+        const newPArameter = {
+          type: "number",
+          title: "if an enum length exceeds this length it will be merged into a parent type 'a'|'b' => string"
+        }
+        if (JSON.stringify(newPArameter) !== JSON.stringify(node.runtimeContext.parameters[`mergeLength_${enumKey}`])) {
+          node.runtimeContext.parameters[`mergeLength_${enumKey}`] = newPArameter
+          hasChange = true
+        }
+        const newMErgeLength = node.parameters?.mergeLength ? +node.parameters?.mergeLength : 10
+        if (newMErgeLength !== node.parameters[`mergeLength_${enumKey}`]) {
+          node.parameters[`mergeLength_${enumKey}`] = newMErgeLength
+          hasChange = true
+        }
+      }
+
       if (JSON.stringify(updated) !== prevSChema) {
         node.runtimeContext.outputSchema = {
           jsonSchema: updated,
@@ -187,6 +296,9 @@ addTypeImpl({
           dts: await generateDtsFromSchema(updated, `${node.type}-${node.uuid}-process !!`)
         }
         zodMap[node.uuid] = generateZodTypeFromSchema(updated, `${node.type}-${node.uuid}-process!!`)
+        hasChange = true
+      }
+      if (hasChange) {
         callbacks.updateNode()
       }
     } catch (e) {
@@ -220,6 +332,15 @@ addTypeImpl({
   nodeDefinition: () => ({
     inputs: 1,
     outputs: 1,
-    type: "jsonschema"
-  })
+    type: "jsonschema",
+    options: {
+      mergeLength: {
+        type: "number"
+      }
+    }
+  }),
+  nodeChanged(node, prevNode) {
+    node.parameters ??= {}
+    node.parameters.mergeLength ??= "10"
+  },
 })

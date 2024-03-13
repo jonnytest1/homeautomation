@@ -40,3 +40,6 @@ clients/watch/watch/example-rs-data.txt
 
 !clients/watch/**/.pio/LoRaWAN/LoRaWAN.cpp
 clients/watch/watch/src/lora_config.h
+server/src/services/generic-node/nodes copy.json
+server/bash.exe.stackdump
+server/buildInfoPath

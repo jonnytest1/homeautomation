@@ -4,7 +4,9 @@ export type Text = {
 }
 
 export type NumberCfg = {
-  type: "number"
+  type: "number",
+  min?: number,
+  max?: number
 }
 
 export type Code = {
@@ -42,11 +44,16 @@ type Order = {
 type Invalidated<T extends string> = {
   invalidates?: Array<T>
 }
+type Titled = {
+  title?: string
+}
 
 type PlaceholderType<T extends PlaceHolder> = T["of"] extends Array<infer U> ? U : T["of"]
 
-export type NodeOptionTypes<Keys extends string = string> = (Select | Text | Code | PlaceHolder | Frame | NumberCfg) & Order & Invalidated<Keys>
-
+export type NodeOptionTypes<Keys extends string = string> = (Select | Text | Code | PlaceHolder | Frame | NumberCfg)
+  & Order
+  & Invalidated<Keys>
+  & Titled
 export type NodeDefOptinos = {
   [name: string]: NodeOptionTypes
 }

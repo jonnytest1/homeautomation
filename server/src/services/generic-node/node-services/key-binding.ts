@@ -1,7 +1,7 @@
 import { globalMqttConfig } from './mqtt-global'
 import type { DeviceConfig } from '../../mqtt-tasmota'
 import { addTypeImpl } from '../generic-node-service'
-import type { ElementNode, ExtendedJsonSchema } from '../typing/generic-node-type'
+import type { ExtendedJsonSchema } from '../typing/generic-node-type'
 import { generateDtsFromSchema, mainTypeName } from '../json-schema-type-util'
 import { getLastEvent } from '../last-event-service'
 import { updateRuntimeParameter } from '../element-node'
@@ -19,10 +19,10 @@ const layoutType = z.record(z.array(z.array(z.string())))
 
 
 const layoutSubject = new BehaviorSubject<z.infer<typeof layoutType>>({})
-
+// { board?: string, key?: string, mode?: "press" | "release" }
 addTypeImpl({
   context_type: (t: { board: string, device?: DeviceConfig }) => t,
-  process(node: ElementNode<{ board?: string, key?: string, mode?: "press" | "release" }>, evt, callbacks) {
+  process(node, evt, callbacks) {
     if (!node?.parameters?.board) {
       return
     }

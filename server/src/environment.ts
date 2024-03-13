@@ -16,4 +16,5 @@ export const environment = process.env as {
   setup: string
   LOG_URL: string
   GENERIC_NODE_DATA: string
+  LOG_SUFFIX: string
 }

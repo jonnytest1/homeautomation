@@ -1,4 +1,4 @@
-import { DeviceConfig, DiscoveryConfigEvent } from './mqtt-tasmota'
+import { DeviceConfig, DiscoveryConfigEvent, defaultCommandConfig } from './mqtt-tasmota'
 import { emitEvent } from './generic-node/generic-node-service'
 import type { CommandsEvent } from './mqtt-types'
 import { environment } from '../environment'
@@ -62,7 +62,18 @@ export class MQTTIntegration {
             const evtData = new DeviceConfig(configDiscovery.groups?.deviceid, evt as DiscoveryConfigEvent, commandEvent)
             this.deviceMap[evtData.mqttDeviceName] ??= evtData
             console.log(this.deviceMap)
+
+            if (configDiscovery?.groups?.factory === "tasmota") {
+              setTimeout(() => {
+                //if (!evtData.iscommandsSet) {
+                const commandConfig = defaultCommandConfig()
+                this.connection.publish(`tasmota/discovery/${configDiscovery.groups?.deviceid}/commands`, JSON.stringify(commandConfig))
+                //}
+              }, 10000)
+            }
           }
+
+
 
           const commandAddOn = topic.match(MQTTIntegration.commandaddonRegex)
           if (commandAddOn && commandAddOn.groups?.deviceid) {
@@ -70,7 +81,7 @@ export class MQTTIntegration {
               .find(d => d.discoveryid === commandAddOn.groups?.deviceid)
             const evt = JSON.parse(messageStr) as CommandsEvent
             if (matchedDevice) {
-              matchedDevice.commands = evt.commands
+              matchedDevice.setCommands(evt.commands)
             }
             this.commandMap[commandAddOn.groups?.deviceid] = evt
           }
@@ -119,11 +130,8 @@ export class MQTTIntegration {
 
   public getPublishable() {
     return Object.values(this.deviceMap)
-      .map(device => device.getCommandTopic())
-      .filter((name): name is string => name !== false)
+      .filter(device => device.getCommandTopic())
   }
 }
-
-
 
 export const mqttConnection = new MQTTIntegration()

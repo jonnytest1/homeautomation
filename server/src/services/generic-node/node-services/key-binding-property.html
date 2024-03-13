@@ -29,14 +29,68 @@
 </head>
 
 <body style="width:fit-content;margin: unset;">
-  <form id="propertyform"
+  <form id="content"
         style="width: fit-content;">
     <div id="columns-wrapper">
 
     </div>
   </form>
-
   <script>
+    /**
+     * @param {{type:"data",data:Array<Array<string>>,current:string}} evt
+     */
+    function draw(evt) {
+      document.body.style.width = "20000px"
+      document.body.style.height = "20000px"
+      const data = evt.data;
+      ([...document.querySelector("#columns-wrapper").children]).forEach(c => c.remove());
+      for(const column of data) {
+        const columnItem = document.createElement("div")
+        columnItem.classList.add("column")
+
+        for(const item of column) {
+
+          const itemWrapper = document.createElement("div")
+          itemWrapper.classList.add("item")
+          const inputItem = document.createElement("input")
+          inputItem.type = "radio"
+          inputItem.name = "key"
+          //inputItem.hidden = true
+          inputItem.id = "key_" + item
+          inputItem.value = item
+          inputItem.classList.add("input")
+          inputItem.checked = item === evt.current
+
+          itemWrapper.appendChild(inputItem)
+
+          const labelItem = document.createElement("label")
+          labelItem.setAttribute("for", "key_" + item)
+          labelItem.textContent = item
+          labelItem.classList.add("label")
+
+          itemWrapper.appendChild(labelItem)
+
+          columnItem.appendChild(itemWrapper)
+
+        }
+
+        document.querySelector("#columns-wrapper").appendChild(columnItem)
+      }
+    }
+
+
+    let dataScr = document.body.querySelector("#data")
+    draw(JSON.parse(dataScr.textContent))
+
+    const form = document.querySelector("#content")
+    form.addEventListener("change", e => {
+      const options = Object.fromEntries(new FormData(form).entries())
+      window.parent.postMessage(JSON.stringify({
+        type: "change",
+        data: options.key
+      }))
+    })
+
     addEventListener("message", e => {
       /**
        * @type {{type:"data",data:unknown,current:string}}
@@ -44,60 +98,7 @@
       const evt = JSON.parse(e.data)
 
       if(evt.type === "data") {
-        /**
-         * @type {Array<Array<string>>}
-         */
-        const data = evt.data
-        const port = e.ports[0]
-
-        document.body.style.width = "20000px"
-        document.body.style.height = "20000px"
-
-        for(const column of data) {
-          const columnItem = document.createElement("div")
-          columnItem.classList.add("column")
-
-          for(const item of column) {
-
-            const itemWrapper = document.createElement("div")
-            itemWrapper.classList.add("item")
-            const inputItem = document.createElement("input")
-            inputItem.type = "radio"
-            inputItem.name = "key"
-            //inputItem.hidden = true
-            inputItem.id = "key_" + item
-            inputItem.value = item
-            inputItem.classList.add("input")
-            inputItem.checked = item === evt.current
-
-            itemWrapper.appendChild(inputItem)
-
-            const labelItem = document.createElement("label")
-            labelItem.setAttribute("for", "key_" + item)
-            labelItem.textContent = item
-            labelItem.classList.add("label")
-
-            itemWrapper.appendChild(labelItem)
-
-            columnItem.appendChild(itemWrapper)
-
-          }
-
-          document.querySelector("#columns-wrapper").appendChild(columnItem)
-        }
-        const form = document.querySelector("#propertyform")
-        form.addEventListener("change", e => {
-          const options = Object.fromEntries(new FormData(form).entries())
-          port.postMessage(JSON.stringify({
-            type: "change",
-            data: options.key
-          }))
-        })
-        const rect = form.getBoundingClientRect()
-        port.postMessage(JSON.stringify({
-          type: "size",
-          size: rect
-        }))
+        draw(evt)
       }
     })
   </script>

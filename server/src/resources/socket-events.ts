@@ -1,15 +1,16 @@
-export type StoreNodes = {
-  type: "store-nodes",
-  data: {
-    nodes
-    connections
-  }
-  changedUuid?: string
-}
+import type { FrontendToBackendGenericNodeEvent } from '../services/generic-node/typing/frontend-events'
+
+
 export type Ping = {
   type: "ping"
 }
 
+export type GenericNodeEvent = {
+  type: "generic-node-event",
+  data: FrontendToBackendGenericNodeEvent
+}
 
 
-export type FrontendToBackendEvents = StoreNodes | Ping
+
+
+export type FrontendToBackendEvents = GenericNodeEvent | Ping

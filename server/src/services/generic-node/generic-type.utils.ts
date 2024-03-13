@@ -1,12 +1,15 @@
 
 import type { ElementNode, ExtendedJsonSchema, PreparedNodeData, Schemata } from './typing/generic-node-type';
-import { CompilerError, expansionType, generateDtsFromSchema, generateJsonSchemaFromDts, mainTypeName } from './json-schema-type-util';
+import { CompilerError, allRequired, expansionType, generateDtsFromSchema, mainTypeName } from './json-schema-type-util';
+import { getTypes, validate } from './validation/watcher';
+import { nodeDescriptor, nodeTypeName } from './element-node';
 import { typeData } from './generic-node-constants';
+import { SchemaMatchingError, validateJsonSchema } from './validation/json-schema-type.validator';
 import { logKibana } from '../../util/log';
 import { generateSchema } from 'typescript-json-schema';
-import type { DiagnosticMessageChain, DiagnosticRelatedInformation } from 'typescript';
-import { join } from "path"
+import type { Diagnostic, DiagnosticMessageChain, DiagnosticRelatedInformation } from 'typescript';
 import { writeFile } from "fs/promises"
+import { join } from 'path';
 
 /*
 export async function parseTypeSafe(node: ElementNode<unknown>, data: unknown) {
@@ -54,40 +57,59 @@ export async function updateTypeSchema(node: ElementNode, nodeData: PreparedNode
   let schema: Schemata | null = null
   const connectionsTargetingCurrentNode = nodeData.targetConnectorMap[node.uuid];
   if (connectionsTargetingCurrentNode) {
-
-    const schemata = await Promise.all(connectionsTargetingCurrentNode.map(async con => {
+    const allConnectorsToConnection0 = connectionsTargetingCurrentNode[0]
+    const schemata = await Promise.all(allConnectorsToConnection0.map(async con => {
       const connectionNode = nodeData.nodeMap[con.uuid]
       const compSchema = connectionNode.runtimeContext.outputSchema
       if (compSchema?.dts && node.runtimeContext.inputSchema) {
         try {
+          const nodeTypePrefix = nodeTypeName(node)
+          const connectionNodePrefi = nodeTypeName(connectionNode)
+
+          validateJsonSchema({
+            target: node.runtimeContext.inputSchema.jsonSchema,
+            assigning: compSchema.jsonSchema,
+            path: []
+          })
+
           const str = `
-    namespace ConnectionInput {
 
-      ${compSchema?.dts}
+      namespace ${nodeTypePrefix}_NodeWrapper {
+        namespace ConnectionInput {
+
+          ${compSchema?.dts}
+        }
+
+        namespace ${nodeTypePrefix}_NodeInput {
+          
+          ${node.runtimeContext.inputSchema.dts}
+        }
+
+        ${expansionType}
+        
+        type ${connectionNodePrefi}_ExpandedConInput = ExpandRecursively<ConnectionInput.${mainTypeName}>
+        type ${nodeTypePrefix}_ExpandedNodeInput = ExpandRecursively<${nodeTypePrefix}_NodeInput.${mainTypeName}>
+
+        declare let cinInput:${connectionNodePrefi}_ExpandedConInput
+
+        const nodeInput: ${nodeTypePrefix}_ExpandedNodeInput = cinInput
+
+        type ResultType=${nodeTypePrefix}_NodeInput.${mainTypeName}
     }
-
-    namespace NodeInput {
-      
-      ${node.runtimeContext.inputSchema.dts}
-    }
-
-    ${expansionType}
-    
-    type ExpandedConInput = ExpandRecursively<ConnectionInput.${mainTypeName}>
-    type ExpandedNodeInput = ExpandRecursively<NodeInput.${mainTypeName}>
-
-    declare let cinInput:ExpandedConInput
-
-    const nodeInput: ExpandedNodeInput = cinInput
-
-    type ResultType=NodeInput.${mainTypeName}
 `;
-          writeFile(join(typeData, `${node.uuid}__${connectionNode.uuid}.ts`), str)
-          const result = generateJsonSchemaFromDts(str, "ResultType", `${node.type}-${node.uuid}-con input check`)
+          // writeFile(join(typeData, `${node.uuid}__${connectionNode.uuid}.ts`), str)
+          await validate(`connections_to_${node.uuid}`, str, `${node.type}-${node.uuid}-con input check`)
           delete con.error
         } catch (e) {
-          if (e instanceof CompilerError) {
-            let firstError = e.error_diagnostics?.[0] as DiagnosticRelatedInformation | DiagnosticMessageChain
+
+          if (e instanceof SchemaMatchingError) {
+            con.error = e.toMessageString()
+
+          } else {
+            let firstError = e as DiagnosticRelatedInformation | DiagnosticMessageChain
+            if (e instanceof CompilerError) {
+              firstError = e.error_diagnostics[0] as Diagnostic
+            }
 
             while (typeof firstError.messageText != "string" && firstError.messageText?.next?.[0]) {
               firstError = firstError.messageText.next?.[0]
@@ -109,17 +131,45 @@ export async function updateTypeSchema(node: ElementNode, nodeData: PreparedNode
             } else {
               debugger;
             }
+
           }
+
 
         }
       }
-      return compSchema
+      return {
+        schema: compSchema,
+        nodeUuidType: nodeTypeName(connectionNode)
+      }
     }))
-    const filteredSchemas = schemata.filter((sch): sch is NonNullable<typeof sch> => !!sch)
+    const filteredSchemas = schemata.filter((sch): sch is NonNullable<typeof sch> => !!sch?.schema)
     if (filteredSchemas.length > 0) {
-      schema = filteredSchemas[0]
+      schema = filteredSchemas[0].schema || null
       if (filteredSchemas.length > 1) {
-        debugger
+        const schemaDtss = filteredSchemas.map(schema => `
+            namespace ${schema.nodeUuidType} {
+                 ${schema.schema?.dts}
+            }
+          `)
+        const mergingDts = `
+
+          ${schemaDtss.join("\n\n")}
+
+          type ${mainTypeName}=${filteredSchemas.map(s => `${s.nodeUuidType}.${mainTypeName}`).join("|")}
+        `
+        try {
+          const mergedSchema = await getTypes(mergingDts, mainTypeName, `connection-type-merge-${node.uuid}`)
+          allRequired(mergedSchema)
+          schema = {
+            jsonSchema: mergedSchema,
+            mainTypeName: mainTypeName,
+            dts: await generateDtsFromSchema(mergedSchema)
+          }
+        } catch (e) {
+          const err = new Error("error getting merged type for " + filteredSchemas.length + " connections on node " + nodeDescriptor(node), { cause: e, });
+          err["mergingDts"] = mergingDts
+          throw err
+        }
       }
     }
 
@@ -143,11 +193,23 @@ export async function updateTypeSchema(node: ElementNode, nodeData: PreparedNode
 
   await nodeTypeImplemenations.connectionTypeChanged?.(node, schema);
 
+  if (node.runtimeContext?.editorSchema?.dts) {
+    writeFile(join(typeData, `editorschema_${node.uuid}.ts`), node.runtimeContext?.editorSchema.dts)
+  }
+
   const outConnections = nodeData.connectorMap[node.uuid]
 
   if (outConnections) {
-    for (const connector of outConnections) {
-      await updateTypeSchema(nodeData.nodeMap[connector.uuid], nodeData)
+    for (const connectorIndex in outConnections) {
+      for (const connector of outConnections[connectorIndex]) {
+        try {
+          await updateTypeSchema(nodeData.nodeMap[connector.uuid], nodeData)
+        } catch (e) {
+          throw new Error("error validating node " + connector.uuid, {
+            cause: e
+          })
+        }
+      }
     }
   }
 }

@@ -16,9 +16,9 @@ if (environment.setup) {
   require("./test/local-setup.ts")
 }
 
-
 updateDatabase(__dirname + '/src/models')
   .then(async () => {
+    console.log("updated database")
     const redirected: string | null = null;
     await initialize(__dirname + '/src/resources', {
       errorCallback: (e) => {
@@ -85,6 +85,7 @@ updateDatabase(__dirname + '/src/models')
       allowCors: true,
       public: __dirname + '/public'
     });
+    console.log("initialized server")
     new EventScheduler().start();
     if (environment.REDIRECT) {
       console.log("set redirection")
@@ -97,6 +98,8 @@ updateDatabase(__dirname + '/src/models')
     }
     //tuyaSTuffs()
 
+  }).catch(e => {
+    logKibana("ERROR", "failed updating database or server start", e)
   });
 const mediaServerConfig = {
   rtmp: {

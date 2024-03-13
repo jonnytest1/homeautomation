@@ -68,8 +68,10 @@ addTypeImpl({
         node.runtimeContext.info = "pending"
         callbacks.updateNode()
         setTimeout(() => {
-          node.runtimeContext.info = "timedout"
-          callbacks.updateNode()
+          if (node.runtimeContext.info == "pending") {
+            node.runtimeContext.info = "timedout"
+            callbacks.updateNode()
+          }
         }, 10000)
         return
       } else {

@@ -3,6 +3,7 @@ import { Receiver } from '../models/receiver';
 import { logKibana } from '../util/log';
 import { ReceiverEvent } from '../models/receiver-event';
 import { ReceiverData } from '../models/receiver-data';
+import { emitEvent } from '../services/generic-node/generic-node-service';
 import { HttpRequest, assign } from 'express-hibernate-wrapper';
 import { SqlCondition, load, save } from 'hibernatets';
 import { Path, POST, GET, HttpResponse } from 'express-hibernate-wrapper';
@@ -106,6 +107,21 @@ export class ReceiverResource {
       return res.status(400)
         .send();
     }
+
+    if (req.params.receiverId === "generic-node") {
+
+      emitEvent("action-trigger", {
+        payload: {
+          node: req.params.actionName
+        },
+        context: {
+          initialNode: req.params.actionName
+        }
+      })
+      return res.status(200).send();
+
+    }
+
     const actionName = req.params.actionName + req.params[0]
     const receiver = await load(Receiver, new SqlCondition("deviceKey").equals(req.params.receiverId), [], {
       first: true,
