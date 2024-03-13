@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, Input, OnChanges, OnInit, SimpleChanges } from '@angular/core';
+import { Component, Input, OnChanges, OnInit, SimpleChanges, type ElementRef, ViewChild, type AfterViewInit } from '@angular/core';
 import { Frame } from '../../../settings/interfaces';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { BehaviorSubject } from 'rxjs';
@@ -12,7 +12,7 @@ import { filter } from 'rxjs/operators';
   imports: [CommonModule],
   standalone: true
 })
-export class FrameOptionComponent implements OnInit, OnChanges {
+export class FrameOptionComponent implements OnInit, OnChanges, AfterViewInit {
 
 
   @Input()
@@ -25,29 +25,97 @@ export class FrameOptionComponent implements OnInit, OnChanges {
   currentValue: string
 
   trustedDocuemnt: SafeHtml;
-
-
-  initialized = new BehaviorSubject(false)
+  gotsize = new BehaviorSubject(false)
 
   documentCache: string
+  documentDataCache: string
 
-  constructor(private sanitizer: DomSanitizer) {}
 
+  @ViewChild("frameRef")
+  frame: ElementRef<HTMLIFrameElement>
+
+  @ViewChild("hiddenValue")
+  hiddenValue: ElementRef<HTMLTextAreaElement>
+
+  constructor(private sanitizer: DomSanitizer) {
+
+  }
 
   ngOnInit() {
-    this.initialized.next(true)
   }
+  ngAfterViewInit(): void {
+    addEventListener("message", m => {
+      if (m.source === this.frame.nativeElement.contentWindow) {
+        const evt = JSON.parse(m.data)
+        if (evt.type === "size") {
+
+          const size = evt.size as { width: number, height: number }
+
+          this.frame.nativeElement.style.width = size.width + 4 + "px"
+          this.frame.nativeElement.style.height = size.height + 4 + "px"
+          this.gotsize.next(true)
+        } else if (evt.type == "change") {
+          this.hiddenValue.nativeElement.value = evt.data
+          this.hiddenValue.nativeElement.dispatchEvent(new Event('change', { 'bubbles': true }))
+        }
+      }
+    })
+  }
+
 
   ngOnChanges(changes: SimpleChanges): void {
     const currentDef = JSON.stringify({ def: this.definition, value: this.currentValue })
     if (this.documentCache !== currentDef) {
 
-      const parsed = new DOMParser().parseFromString(this.definition.document, "text/html")
-      parsed.querySelectorAll("script").forEach((scr, i) => {
-        scr.textContent += `\n\n//# sourceURL=content.${this.name}.${i}.js`
-      })
-      this.trustedDocuemnt = this.sanitizer.bypassSecurityTrustHtml(`<html style="overflow: hidden">${parsed.head.outerHTML}\n${parsed.body.outerHTML}</html>`)
-      this.documentCache = currentDef
+      const dataCacheDef = JSON.stringify([this.definition.data, this.currentValue]);
+      if (this.frame?.nativeElement && this.documentDataCache !== dataCacheDef) {
+        this.frame.nativeElement.contentWindow!.postMessage(JSON.stringify({
+          type: "data",
+          data: this.definition.data,
+          current: this.currentValue
+        }), "*");
+        this.documentDataCache = dataCacheDef
+      } else {
+        const parsed = new DOMParser().parseFromString(this.definition.document, "text/html")
+        parsed.querySelectorAll("script").forEach((scr, i) => {
+          scr.textContent += `\n\n//# sourceURL=content.${this.name}.${i}.js`
+        })
+
+        const dataScript = document.createElement("script")
+        dataScript.type = "application/json"
+        dataScript.id = "data"
+        dataScript.textContent = JSON.stringify({
+          type: "data",
+          data: this.definition.data,
+          current: this.currentValue
+        })
+        parsed.body.insertBefore(dataScript, parsed.body.children[0])
+
+        const sizeScript = document.createElement("script")
+        sizeScript.textContent = `
+        const contentElement = document.querySelector("#content")
+        new ResizeObserver((observeEntries)=>{
+          const entry=observeEntries[0]
+          if(entry.contentRect.width&&entry.contentRect.height){
+            window.parent.postMessage(JSON.stringify({
+              type: "size",
+              size: entry.contentRect
+            }))
+          }
+         
+        }).observe(contentElement)
+      `
+        parsed.body.appendChild(sizeScript)
+
+
+
+
+        this.trustedDocuemnt = this.sanitizer.bypassSecurityTrustHtml(`<html style="overflow: hidden">${parsed.head.outerHTML}\n${parsed.body.outerHTML}</html>`)
+        this.documentCache = currentDef
+        this.documentDataCache = dataCacheDef
+      }
+
+
     }
 
   }
@@ -56,34 +124,4 @@ export class FrameOptionComponent implements OnInit, OnChanges {
     //this.elementRef.nativeElement.value = JSON.stringify(this.monacoData)
     //this.elementRef.nativeElement.dispatchEvent(new Event('change', { 'bubbles': true }))
   }
-
-  frameLoad(frame: HTMLIFrameElement, valueElement: HTMLTextAreaElement) {
-    this.initialized.pipe(filter(b => !!b)).subscribe(() => {
-      const channel = new MessageChannel()
-      channel.port1.start()
-      channel.port2.start()
-
-      frame.contentWindow.postMessage(JSON.stringify({
-        type: "data",
-        data: this.definition.data,
-        current: this.currentValue
-      }), "*", [channel.port1]);
-
-
-      channel.port2.addEventListener("message", e => {
-        const evt = JSON.parse(e.data)
-        if (evt.type === "size") {
-          const size = evt.size as { width: number, height: number }
-
-          frame.style.width = size.width + 4 + "px"
-          frame.style.height = size.height + 4 + "px"
-        } else if (evt.type == "change") {
-          valueElement.value = evt.data
-          valueElement.dispatchEvent(new Event('change', { 'bubbles': true }))
-        }
-      })
-    })
-
-  }
-
 }

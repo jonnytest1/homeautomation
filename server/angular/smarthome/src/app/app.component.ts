@@ -1,5 +1,5 @@
 import { ChangeDetectorRef, Component } from '@angular/core';
-import { fromEvent } from 'rxjs';
+import { BehaviorSubject, fromEvent } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
 @Component({
   selector: 'app-root',
@@ -14,10 +14,12 @@ export class AppComponent {
   title = 'smarthome';
 
   mobile$ = AppComponent.isMobile();
-  sidenavOpened: boolean;
+  sidenavOpened$ = new BehaviorSubject(false);
 
 
   lastOpen: number | null = null
+
+  sideNavOpenTimeout: NodeJS.Timeout | undefined
 
   public static isMobile() {
     return fromEvent(window, 'resize').pipe(
@@ -37,19 +39,26 @@ export class AppComponent {
     target.click()
   }
   openSideNav() {
-    this.sidenavOpened = true
-    this.lastOpen = Date.now()
-    console.log(this.lastOpen)
+    this.sideNavOpenTimeout = setTimeout(() => {
+      this.sidenavOpened$.next(true)
+      this.lastOpen = Date.now()
+      console.log(this.lastOpen)
+    }, 50)
+
   }
 
   leaveContentHover() {
     this.leaveSideNav()
   }
   leaveSideNav() {
+    if (this.sideNavOpenTimeout) {
+      clearTimeout(this.sideNavOpenTimeout)
+      this.sideNavOpenTimeout = undefined
+    }
     console.log("sidenav init leave")
     this.delayedLeave(() => {
       console.log("sidenavOpened leave")
-      this.sidenavOpened = false;
+      this.sidenavOpened$.next(false);
     })
   }
   async delayedLeave(cb: Function) {

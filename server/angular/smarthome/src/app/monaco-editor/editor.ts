@@ -71,7 +71,7 @@ export interface AST {
   getChildren(): Array<AST>
   update(val?: string, range?: Range)
 }
-type abc = editor.EditorOption
+
 export type SandBox = {
   getWorkerProcess(): Promise<any>
   getModel(): MonacoModel | null

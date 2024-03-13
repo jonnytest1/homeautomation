@@ -8,7 +8,7 @@ import { ButtonConfig } from '../shortcut-config';
 import type { ReceiverFe } from '../../settings/interfaces';
 import { SettingsService } from '../../settings.service';
 import { filter, map } from 'rxjs/operators';
-import type { Observable } from 'rxjs';
+import { of, type Observable } from 'rxjs';
 import { CommonModule } from '@angular/common';
 import { DiagramComponent } from '../diagram/diagram.component';
 
@@ -54,6 +54,13 @@ export class ButtonComponent extends BaseComponent implements OnChanges {
   }
 
   ngOnChanges() {
+    if (this.config.receiver === "generic-node") {
+      this.receiver$ = of({
+        receiver: {} as any,
+        iconStr: undefined
+      })
+      return
+    }
     this.receiver$ = this.settings.receivers$.pipe(
       filter(rec => !!rec[this.config.receiver]),
       map(receviers => {

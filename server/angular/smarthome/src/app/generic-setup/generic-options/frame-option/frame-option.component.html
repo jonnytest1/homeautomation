@@ -4,5 +4,4 @@
 <iframe title="property frame"
         #frameRef
         [srcdoc]="trustedDocuemnt"
-        (load)="frameLoad(frameRef,hiddenValue)"
         (message)="frameMessage($event)"></iframe>

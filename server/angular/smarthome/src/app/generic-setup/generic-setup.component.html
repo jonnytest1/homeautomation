@@ -1,72 +1,77 @@
 <div class="page"
-     *ngIf="connections.service.nodeDefinitions|async;let nodeDefs">
-  <div class="wrapper"
-       #wrapperElement
-       id="wrapper-drop"
-       (dragover)="dropAllowed($event)"
-       (drop)="onDrop($event)"
-       (mousedown)="mouseDragSTart($event,wrapperElement)"
-       (mousemove)="mouseDragMove($event,wrapperElement)"
-       (mouseup)="mouseDragEnd($event,wrapperElement)"
-       (wheel)="onscroll($event);$event.preventDefault()">
-
-
-    <div class="background"
-         [style.transform]="getTransform()"
-         [style.transformOrigin]="'0px 0px'"
-         id="background-drop"
-         (click)="setActiveNode(undefined)"
+     *ngIf="hasNodeDefs$|async;let nodeDefs;else nodata">
+  <ng-container *ngIf="nodeData$|async;let nodeData">
+    <div class="wrapper"
+         #wrapperElement
+         id="wrapper-drop"
+         (dragover)="dropAllowed($event)"
          (drop)="onDrop($event)"
-         (dragover)="dropAllowed($event)">
-      <!-- (dragleave)="state.setdragging()" -->
+         (mousedown)="mouseDragSTart($event,wrapperElement)"
+         (mousemove)="mouseDragMove($event,wrapperElement)"
+         (mouseup)="mouseDragEnd($event,wrapperElement)"
+         (wheel)="onscroll($event);$event.preventDefault()">
+
+      <div *ngrxLet="activeElements$|async ;let activeElements"
+           class="background"
+           [style.transform]="getTransform()"
+           [style.transformOrigin]="'0px 0px'"
+           id="background-drop"
+           (click)="setActiveNode(undefined)"
+           (dragover)="dropAllowed($event)">
+        <!-- (dragleave)="state.setdragging()" -->
 
 
-      <ng-container *ngIf="nodeData|async;let nodeData">
 
 
         <div *ngFor="let node of nodeData.nodes.nodes;trackBy:nodeByUuid"
              draggable="true"
              (dragstart)="startDragUpdate($event,node)"
-             (click)="setActiveNode(node);$event.stopPropagation()"
+             (mousedown)="$event.stopPropagation()"
+             (click)="setActiveNode(node,$event)"
+             (dblclick)="doubleClick(node);"
              class="node"
              [position]="node.position">
           <app-generic-node [prefix]="node.type"
-                            [node]="node"
-                            [selected]="node===activeNode"
+                            [nodeUuid]="node.uuid"
+                            [selected]="isInElements(activeElements,node)"
                             [editable]="true"
-                            [inputsCt]="getNodeDefChecked(nodeDefs,node.type).inputs??0"
-                            [outputCt]="getNodeDefChecked(nodeDefs,node.type).outputs??0">
+                            [highlightText]="isInElements(activeElements,node,true)">
             {{node.type}}
           </app-generic-node>
-          <!--    <ng-container *ngIf="node.type=='sender'">
-          <app-sender [editable]="true"></app-sender>
-        </ng-container>
-        <ng-container *ngIf="node.type=='receiver'">
-          <app-receiver [editable]="true"></app-receiver>
-        </ng-container> -->
-        </div>
-      </ng-container>
-    </div>
 
-    <div *ngIf="connections.pendingConnection|async let con">
-      <app-line [line]="con"
-                [editing]="true"></app-line>
+        </div>
+
+
+      </div>
+
+
     </div>
-    <ng-container *ngIf="connections.service.nodeData|async;let nodeDataC">
-      <div *ngFor="let line of nodeDataC.connections">
-        <app-line [line]="line"></app-line>
+    <ng-container *ngrxLet="activeElements$|async ;let activeElements">
+      <div *ngFor="let line of nodeData.nodes.connections">
+        <app-line [line]="line"
+                  (clicked)="setActiveNode(line,$event)"
+                  [active]="isInElements(activeElements,line)">
+        </app-line>
+      </div>
+      <div *ngIf="connections.pendingConnection|async let con">
+        <app-line [line]="con"
+                  [editing]="true">
+        </app-line>
       </div>
     </ng-container>
 
 
-  </div>
+  </ng-container>
   <div class="properties"
-       *ngIf="activeNode">
-
-    <app-generic-options [options]="getNodeDefChecked(nodeDefs,activeNode.type)"
-                         [node]="activeNode">
-
-    </app-generic-options>
+       *ngIf="activeElement$ |async;let activeEl">
+    <ng-container *ngIf="activeEl.type==='node'">
+      <app-generic-options *ngIf="activeEl.node"
+                           [nodeUuid]="activeEl.node.uuid">
+      </app-generic-options>
+    </ng-container>
+    <div *ngIf="activeEl.type==='connection'">
+      active conection
+    </div>
   </div>
 
   <div class="nodelist">
@@ -75,9 +80,7 @@
          draggable="true"
          (dragstart)="startDrag($event,n.value)">
 
-      <app-generic-node [prefix]="n.value.type"
-                        [inputsCt]="n.value.inputs??0"
-                        [outputCt]="n.value.outputs??0">
+      <app-generic-node [prefix]="n.value.type">
         {{n.value.type}}
       </app-generic-node>
 
@@ -85,3 +88,7 @@
 
   </div>
 </div>
+
+<ng-template #nodata>
+  loading ...
+</ng-template>

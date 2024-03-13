@@ -3,7 +3,7 @@
   <mat-sidenav #sidenav
                mode="push"
                class="sidenav"
-               [opened]="sidenavOpened"
+               [opened]=" sidenavOpened$|async"
                (mouseenter)="openSideNav()"
                (mouseleave)="leaveSideNav()">
     <mat-nav-list>

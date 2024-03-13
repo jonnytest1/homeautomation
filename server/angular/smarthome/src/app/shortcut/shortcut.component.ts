@@ -1,5 +1,5 @@
 import type { OnInit } from '@angular/core';
-import { HostListener, Component } from '@angular/core';
+import { HostListener, Component, Input } from '@angular/core';
 import { ButtonComponent } from './button/button.component';
 import { CommonModule } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
@@ -18,6 +18,14 @@ import { logKibana } from '../global-error-handler';
 import { v4 as uuid } from 'uuid';
 import { CaptureEventDirective } from '../utils/directive/capturing-event';
 import { DiagramComponent } from './diagram/diagram.component';
+import { GenericNodesDataService } from '../generic-setup/generic-node-data-service';
+import { Observable, combineLatest } from 'rxjs';
+import { ActionTemplateComponent } from './action-template/action-template.component';
+import { ShortcutReceiver, type ShortcutAction } from './shortcut-types';
+import { LongPressDirective } from '../utils/directive/longpress-directive';
+
+
+
 
 @Component({
   selector: 'app-shortcut',
@@ -25,7 +33,7 @@ import { DiagramComponent } from './diagram/diagram.component';
   styleUrls: ['./shortcut.component.less'],
   imports: [ButtonComponent, CommonModule, ProgressComponent,
     MatButtonModule, MatIconModule,
-    CaptureEventDirective, DiagramComponent],
+    CaptureEventDirective, DiagramComponent, ActionTemplateComponent, LongPressDirective],
   standalone: true
 })
 export class ShortcutComponent implements OnInit {
@@ -36,16 +44,16 @@ export class ShortcutComponent implements OnInit {
 
   tempNodes: Array<Configs & { temp?: boolean }> | undefined = undefined;
   tempData: {
-    receiver: ReceiverFe,
-    action: ReceiverFe["actions"][number] & {
+    receiver: ShortcutReceiver,
+    action: ShortcutAction & {
       type?: Configs["type"]
     }
-  }
+  } | undefined
   tempCursorPos: {
     x: number
     y: number
-  }
-  editingConfig: Configs & { temp?: boolean; };
+  } | undefined
+  editingConfig: (Configs & { temp?: boolean; }) | undefined;
 
   configModeStart = -1
   editingStart = -1
@@ -65,11 +73,20 @@ export class ShortcutComponent implements OnInit {
 
   addingto?: ButtonConfig
 
-  receivers$ = this.settingsService.receivers$.pipe(
-    map(rec => Object.values(rec))
-  )
-  constructor(private settingsService: SettingsService, private bottomSheet: MatBottomSheet) {
+  genDAtaActions$;
 
+  receivers$: Observable<Array<ShortcutReceiver>> = combineLatest([
+    this.settingsService.receivers$,
+    this.genData.actionTriggers$
+  ])
+    .pipe(
+      map(([rec, genData]): Array<ShortcutReceiver> => {
+        return [...Object.values(rec) as Array<ShortcutReceiver>, genData];
+      })
+    )
+  constructor(private settingsService: SettingsService, private bottomSheet: MatBottomSheet, private genData: GenericNodesDataService) {
+
+    genData.loadActionTriggers()
   }
 
   getNodes() {
@@ -120,15 +137,15 @@ export class ShortcutComponent implements OnInit {
 
   configPressed(config: Configs, event) {
     window.oncontextmenu = function () {
-      window.oncontextmenu = undefined;
+      window.oncontextmenu = null;
       return false;
     }
     console.log(config);
-    event.srcEvent.preventDefault();
-    event.srcEvent.stopPropagation();
+    //event.srcEvent.preventDefault();
+    //event.srcEvent.stopPropagation();
     this.state.setedit()
     this.configModeStart = Date.now();
-    event.srcEvent.stopImmediatePropagation();
+    //event.srcEvent.stopImmediatePropagation();
   }
   configSwipe() {
     if (this.state.isedit) {
@@ -138,7 +155,9 @@ export class ShortcutComponent implements OnInit {
     document.body.style.overscrollBehavior = "none"
   }
 
-  dragNewActionStart(event, rec, action) {
+  dragNewActionStart(event: MouseEvent | TouchEvent, rec: ShortcutReceiver, action: ShortcutAction) {
+    event.preventDefault()
+    event.stopPropagation()
     if (this.state.isaddbackground) {
 
       this.addingto!.backgroundConfig = {
@@ -152,7 +171,6 @@ export class ShortcutComponent implements OnInit {
       return
     }
     this.tempNodes = jsonClone(this.nodes);
-
     this.tempData = {
       receiver: rec,
       action: action
@@ -185,6 +203,9 @@ export class ShortcutComponent implements OnInit {
 
 
   persistReloadTempNOdes() {
+    if (!this.tempNodes) {
+      return
+    }
     this.tempNodes.forEach(t => {
       delete t.temp;
     })
@@ -192,7 +213,7 @@ export class ShortcutComponent implements OnInit {
     const newJsonData = JSON.stringify(this.tempNodes);
 
     localStorage.setItem("shortcutconfig", newJsonData)
-    this.nodes = JSON.parse(localStorage.getItem("shortcutconfig"))
+    this.nodes = JSON.parse(localStorage.getItem("shortcutconfig") ?? "[]")
     this.tempData = undefined
     this.editingConfig = undefined;
     this.logNewState()
@@ -207,6 +228,10 @@ export class ShortcutComponent implements OnInit {
     console.log("update pos")
     if (!this.tempData && !this.editingConfig) {
       return;
+    }
+
+    if (!this.tempNodes) {
+      return
     }
 
     const gridStyles = getComputedStyle(gridElement);
@@ -256,11 +281,14 @@ export class ShortcutComponent implements OnInit {
   }
 
   private createConfig(): Configs & { temp?: boolean; } {
+    if (!this.tempData) {
+      throw new Error("no tempdata")
+    }
     return {
       actionName: this.tempData.action.name,
       uuid: uuid(),
       type: this.tempData.action.type ?? "button",
-      displayText: this.tempData.action.name,
+      displayText: this.tempData.action.displayText ?? this.tempData.action.name,
       receiver: this.tempData.receiver.deviceKey,
       temp: true
     } as Configs & { temp?: boolean; };
@@ -298,3 +326,6 @@ export class ShortcutComponent implements OnInit {
     this.logNewState()
   }
 }
+
+
+

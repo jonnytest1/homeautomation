@@ -35,15 +35,15 @@
         ],
         "@typescript-eslint/indent": [
           "warn",
-          2, //space multiplier for options below (1 below = 2 spaces)
+          2,
           {
             "MemberExpression": 1,
             "FunctionDeclaration": {
               "body": 1,
-              "parameters": "first" //if function parameters wrap they should start at the same position as the first parameter
+              "parameters": "first"
             },
             "CallExpression": {
-              "arguments": "first" //if function arguments wrap they should start at the same position as the first arguments
+              "arguments": "first"
             },
             "ArrayExpression": 1,
             "ImportDeclaration": 1,
@@ -60,6 +60,14 @@
         "@typescript-eslint/no-redeclare": "warn",
         "unused-imports/no-unused-imports": "warn"
       }
+    },
+    {
+      "files": [
+        "*.ts"
+      ],
+      "extends": [
+        "plugin:@ngrx/recommended-requiring-type-checking"
+      ]
     }
   ]
 }

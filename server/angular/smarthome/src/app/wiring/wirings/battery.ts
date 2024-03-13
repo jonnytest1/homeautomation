@@ -9,7 +9,7 @@ import type { CurrentCurrent, CurrentOption, GetResistanceOptions, ResistanceRet
 
 export class Battery extends Collection {
 
-  constructor(public voltage: number, ampereHours: number) {
+  constructor(public voltage: number | null, ampereHours: number) {
     super(null, null);
     this.outC = new Connection(this, 'bat_prov');
     this.inC = new Connection(this, 'bat_cons');

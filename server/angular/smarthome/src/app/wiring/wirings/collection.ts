@@ -9,7 +9,7 @@ import { Wiring } from './wiring.a';
 export class Collection extends Wiring {
 
 
-  constructor(public inC: Connection, public outC: Connection) {
+  constructor(public inC: Connection | null, public outC: Connection | null) {
     super();
     this['id'] = Math.random();
   }
@@ -18,10 +18,10 @@ export class Collection extends Wiring {
   register(options: RegisterOptions) {
     if (options.from == this.outC) {
       options.nodes.push(this);
-      return this.outC.register({ ...options, from: this });
+      return this.outC?.register({ ...options, from: this });
     }
     options.nodes.push(this);
-    return this.inC.register({ ...options, from: this });
+    return this.inC?.register({ ...options, from: this });
   }
 
   applytoJson(json: Record<string, any>) {
@@ -45,7 +45,7 @@ export class Collection extends Wiring {
 
   mockUiNode() {
     import('../wiring-ui/mock-ui').then((mui) => {
-      this.uiNode = new mui.MockUiNode(this, null);
+      this.uiNode = new mui.MockUiNode(this, null as any);
     });
   }
 }

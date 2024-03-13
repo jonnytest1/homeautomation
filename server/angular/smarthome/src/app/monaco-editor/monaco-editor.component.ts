@@ -1,4 +1,4 @@
-import type { OnDestroy, OnInit } from '@angular/core';
+import type { OnChanges, OnDestroy, OnInit, SimpleChanges } from '@angular/core';
 import { ChangeDetectorRef, Component, EventEmitter, forwardRef, Injector, Input, Output } from '@angular/core';
 import type { ControlValueAccessor } from '@angular/forms';
 import { NgModel, NG_VALUE_ACCESSOR } from '@angular/forms';
@@ -11,10 +11,10 @@ import { CommonModule } from '@angular/common';
 
 declare let monaco: MonacoGlobal;
 
-interface IMports {
+interface Imports {
   main: Main; sandboxFactory: SandboxFactory;
 }
-let importsPromise: Promise<IMports>
+let importsPromise: Promise<Imports>
 
 @Component({
   selector: 'app-monaco-editor',
@@ -28,7 +28,7 @@ let importsPromise: Promise<IMports>
   imports: [MatIconModule, CommonModule],
   standalone: true
 })
-export class MonacoEditorComponent implements OnInit, OnDestroy, ControlValueAccessor {
+export class MonacoEditorComponent implements OnInit, OnDestroy, ControlValueAccessor, OnChanges {
 
 
   static editorArgs: { main: Main; sandboxFactory: SandboxFactory; };
@@ -73,24 +73,21 @@ export class MonacoEditorComponent implements OnInit, OnDestroy, ControlValueAcc
 
 
   constructor(private injector: Injector, private cdr: ChangeDetectorRef) {
-    if (!importsPromise) {
-      importsPromise = this.getSandBox()
-    }
     importsPromise.then(args => {
       this.initializeEditor(args)
     });
   }
 
-  async getSandBox(): Promise<IMports> {
+  static async getSandBox(): Promise<Imports> {
     if (window.require) {
-      return this.setupRequire();
+      return MonacoEditorComponent.setupRequire();
     } else {
       return new Promise(res => setTimeout(res, 100))
-        .then(() => this.getSandBox());
+        .then(() => MonacoEditorComponent.getSandBox());
     }
   }
 
-  async setupRequire() {
+  static async setupRequire() {
     const requireFnc = (window.require as any);
     requireFnc.config({
       paths: {
@@ -99,7 +96,7 @@ export class MonacoEditorComponent implements OnInit, OnDestroy, ControlValueAcc
       },
       ignoreDuplicateModules: ['vs/editor/editor.main'],
     });
-    return new Promise<IMports>(resolver => {
+    return new Promise<Imports>(resolver => {
       requireFnc(['vs/editor/editor.main', 'vs/language/typescript/tsWorker', 'sandbox/index'], (
         main: Main, _tsWorker, sandboxFactory: SandboxFactory
       ) => {
@@ -108,7 +105,7 @@ export class MonacoEditorComponent implements OnInit, OnDestroy, ControlValueAcc
     });
   }
 
-  private async initializeEditor(args: IMports) {
+  private async initializeEditor(args: Imports) {
     const { main, sandboxFactory } = args;
     document.getElementById('loader')?.parentNode?.removeChild(document.getElementById('loader'));
     const models = monaco.editor.getModels();
@@ -210,55 +207,6 @@ export class MonacoEditorComponent implements OnInit, OnDestroy, ControlValueAcc
     }
   }
 
-  async checkFnc(element: AST) {
-    if (element.kind === AST_KIND.CLASS_INSTANCE) {
-      return //new Date()
-    }
-
-    if (element.parent?.kind == AST_KIND.CLASS_INSTANCE_CALL) {
-      this.addFunctionHighlighting(element);
-    }
-
-    if (element.expression) {
-      this.addFunctionHighlighting(element.expression);
-    }
-
-    if (element.arguments) {
-      await Promise.all(element.arguments.map(child => this.checkFnc(child)));
-    }
-    if (element.expression) {
-      await Promise.all(element.expression.getChildren().map(child => this.checkFnc(child)));
-    }
-
-    await Promise.all(element.getChildren().map(child => this.checkFnc(child)));
-  }
-
-  addFunctionHighlighting(element: AST) {
-    const test = element.getText()
-    if (element.kind === 198
-      || element.kind == AST_KIND.BRACKETS || element.kind == AST_KIND.BRACKETS_2
-      || element.kind == AST_KIND.STATEMENT
-      || element.kind == AST_KIND.OBJECT_CREATION
-      || element.kind == AST_KIND.CLASS_INSTANCE) {
-      return
-    }
-    // debugger;
-    console.log(test, element.kind)
-
-    const start = this.sandbox.getModel().getPositionAt(element.pos);
-    const end = this.sandbox.getModel().getPositionAt(element.end);
-    /* this.decorators = this.sandbox.editor.deltaDecorations([], [
-       {
-         range: new monaco.Range(start.lineNumber, start.column, end.lineNumber, end.column),
-         options: {
-           inlineClassName: 'is-function',
-         }
-       }
-     ]);*/
-
-
-  }
-
   private setupGlobalTypes() {
     monaco.languages.typescript.typescriptDefaults.setCompilerOptions({
       target: monaco.languages.typescript.ScriptTarget.ES2016,
@@ -269,6 +217,7 @@ export class MonacoEditorComponent implements OnInit, OnDestroy, ControlValueAcc
       typeRoots: ['file:///global']
     });
     monaco.languages.typescript.typescriptDefaults.addExtraLib(this.definition, 'file:///global/global.d.ts');
+
   }
 
   private createTheme() {
@@ -307,6 +256,14 @@ export class MonacoEditorComponent implements OnInit, OnDestroy, ControlValueAcc
       }
     });
   }
+
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if ("definition" in changes && typeof monaco !== "undefined") {
+      monaco?.languages?.typescript?.typescriptDefaults.addExtraLib(this.definition, 'file:///global/global.d.ts');
+    }
+  }
+
   writeValue(obj: string): void {
     if (typeof obj == "string") {
       if (!this.sandbox) {
@@ -332,3 +289,6 @@ export class MonacoEditorComponent implements OnInit, OnDestroy, ControlValueAcc
     }
   }
 }
+
+
+importsPromise = MonacoEditorComponent.getSandBox()

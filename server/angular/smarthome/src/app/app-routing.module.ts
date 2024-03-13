@@ -25,7 +25,8 @@ const routes: Routes = [
   },
   {
     path: 'generic-setup',
-    loadComponent: () => import('./generic-setup/generic-setup.component').then(m => m.GenericSetupComponent)
+    loadChildren: () => import("./generic-setup/generic-setup-module").then(m => m.GenericSetupModule)
+
   }, {
     path: 'options',
     loadChildren: () => import('./options/options.module').then(m => m.OptionsModule)

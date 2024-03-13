@@ -1,0 +1,16 @@
+<div>
+
+  <textarea hidden
+            [minLength]="1"
+            #hiddenValue
+            name="{{name}}"></textarea>
+  <ng-container *ngFor="let cd of [{code,additionalVal}]">
+    <app-monaco-editor *ngIf="typeDefinition|async ;let types"
+                       (keyup)="$event.stopPropagation()"
+                       [definition]="types"
+                       (code)="updateCode($event)"
+                       [jsCode]="cd.additionalVal"
+                       [ngModel]="cd.code">
+    </app-monaco-editor>
+  </ng-container>
+</div>

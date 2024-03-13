@@ -9,16 +9,7 @@
 </ng-container>
 <ng-template #checkMonaco>
   <ng-container *ngIf="definition.type=='monaco';else checkFrame">
-    <textarea hidden
-              #hiddenValue
-              name="{{name}}"></textarea>
-    <app-monaco-editor *ngIf="typeDefinition|async ;let types"
-                       (keyup)="$event.stopPropagation()"
-                       [definition]="types"
-                       (code)="updateCode($event)"
-                       [jsCode]="additionalVal"
-                       [ngModel]="code">
-    </app-monaco-editor>
+    <app-monaco-option [name]="name"></app-monaco-option>
   </ng-container>
 </ng-template>
 <ng-template #checkFrame>
@@ -30,8 +21,11 @@
 </ng-template>
 <ng-template #inputEl>
   <input [type]="definition.type"
+         #inputRef
          (keyup)="$event.stopPropagation()"
          name="{{name}}"
+         [min]="definition.type=='number'?definition.min:undefined"
+         [max]="definition.type=='number'?definition.max:undefined"
          [value]="value ??''">
 
 </ng-template>

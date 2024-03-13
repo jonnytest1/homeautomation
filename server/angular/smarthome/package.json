@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "scripts": {
     "ng": "ng",
-    "start": "ng serve --open --host 0.0.0.0",
+    "start": "ng serve --open --host 0.0.0.0 --port 4201",
     "build": "ng build --configuration production",
     "test": "ng test",
     "lint": "ng lint",
@@ -21,6 +21,9 @@
     "@angular/platform-browser": "^15.2.8",
     "@angular/platform-browser-dynamic": "^15.2.8",
     "@angular/router": "^15.2.8",
+    "@ngrx/component": "^15.4.0",
+    "@ngrx/effects": "^15.4.0",
+    "@ngrx/store": "^15.4.0",
     "@types/hammerjs": "^2.0.41",
     "@types/webpack": "^5.28.5",
     "codemirror": "^5.58.1",
@@ -29,12 +32,10 @@
     "google-charts": "^2.0.0",
     "hammerjs": "^2.0.8",
     "javascript-barcode-reader": "^0.6.8",
-    "monaco-editor": "^0.46.0",
-    "monaco-loader": "^1.0.0",
     "ng-circle-progress": "^1.6.0",
     "ngx-dropzone": "^2.2.2",
     "quicktype-core": "^23.0.81",
-    "rxjs": "^6.5.5",
+    "rxjs": "^7.8.1",
     "uuid": "^8.3.1",
     "webpack": "^5.90.1",
     "zone.js": "~0.11.4"
@@ -53,6 +54,7 @@
     "@babel/plugin-proposal-decorators": "^7.13.5",
     "@babel/preset-env": "^7.16.11",
     "@babel/preset-typescript": "^7.16.7",
+    "@ngrx/eslint-plugin": "^15.4.0",
     "@types/google.visualization": "^0.0.69",
     "@types/jasmine": "~2.8.8",
     "@types/jasminewd2": "~2.0.3",
@@ -73,12 +75,13 @@
     "karma-coverage-istanbul-reporter": "~2.0.1",
     "karma-jasmine": "~1.1.2",
     "karma-jasmine-html-reporter": "^0.2.2",
+    "monaco-editor": "^0.46.0",
     "protractor": "~7.0.0",
     "raw-loader": "^4.0.2",
     "style-loader": "^3.3.2",
     "ts-jest": "^27.1.3",
     "ts-node": "^8.4.1",
     "tslint": "^6.1.2",
-    "typescript": "^4.9"
+    "typescript": "^4.9.3"
   }
 }

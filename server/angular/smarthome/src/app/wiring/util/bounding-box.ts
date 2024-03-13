@@ -131,8 +131,21 @@ export class BoundingBox {
   }
 
   includes(inner: Vector2): boolean {
-    return inner.x < this.bottomRight.x && inner.y < this.bottomRight.y
-      && inner.x > this.topLeft.x && inner.y > this.topLeft.y;
+    let right = this.bottomRight.x
+    let left = this.topLeft.x
+    if (left > right) {
+      left = right
+      right = this.topLeft.x
+    }
+
+    let bottom = this.bottomRight.y
+    let top = this.topLeft.y
+    if (bottom > top) {
+      top = bottom
+      bottom = this.topLeft.y
+    }
+    return inner.x < right && inner.y < top
+      && inner.x > left && inner.y > bottom;
   }
 
   withMargin(boxMargin: Vector2) {

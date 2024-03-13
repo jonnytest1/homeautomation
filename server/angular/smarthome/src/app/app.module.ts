@@ -28,6 +28,8 @@ import { IframeComponent } from './iframe/iframe.component';
  * with sideeffects
  */
 import { InputsComponent } from './inputs/inputs.component';
+import { StoreModule } from '@ngrx/store';
+import { EffectsModule } from '@ngrx/effects';
 
 export class MyHammerConfig extends HammerGestureConfig {
   overrides = <any>{
@@ -50,7 +52,15 @@ export class MyHammerConfig extends HammerGestureConfig {
     BrowserModule, HammerModule,
     AppRoutingModule, SettingsModule, FormsModule, MatInputModule, WiringModule, MatTableModule,
     MatSidenavModule, MatListModule, MatIconModule, MatGridListModule, MatSortModule,
-    BrowserAnimationsModule, NgCircleProgressModule.forRoot()
+    BrowserAnimationsModule, NgCircleProgressModule.forRoot(),
+    EffectsModule.forRoot(),
+    StoreModule.forRoot({}, {
+      runtimeChecks: {
+        // temporary until generic node is refactored for state usage
+        strictStateImmutability: true,
+        strictActionImmutability: true
+      }
+    })
   ],
   providers: [
     SettingsService,

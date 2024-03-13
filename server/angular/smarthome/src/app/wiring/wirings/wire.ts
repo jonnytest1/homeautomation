@@ -11,7 +11,7 @@ export class Wire extends Collection {
 
 
   constructor(inConnection?: Connection) {
-    super(inConnection, null);
+    super(inConnection!, null as any);
     if (inConnection) {
       inConnection.connectedTo = this;
     }

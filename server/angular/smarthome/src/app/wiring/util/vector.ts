@@ -3,6 +3,7 @@ export const DEG_2_RAD = (Math.PI / 180);
 
 export class Vector2 {
 
+
   // eslint-disable-next-line @typescript-eslint/naming-convention
   public static get ZERO() {
     return new Vector2(0, 0);
@@ -20,9 +21,22 @@ export class Vector2 {
     if (mode == "center") {
       const dimensions = new Vector2(rect.width, rect.height)
       return new Vector2(rect).added(dimensions.dividedBy(2))
+    } else {
+      return new Vector2(rect)
     }
   }
+  static fromStyles(el: HTMLElement, mode: "center") {
+    if (mode == "center") {
+      const st = getComputedStyle(el)
+      const dimensions = new Vector2(+st.width.replace("px", ""), +st.height.replace("px", ""))
+      return new Vector2(+st.left.replace("px", ""), +st.top.replace("px", "")).added(dimensions.dividedBy(2))
+    }
+    debugger
+  }
 
+  static center(from: Vector2, to: Vector2) {
+    return new Vector2(from.x + to.x, from.y + to.y).half()
+  }
   constructor(x: number | { x: number; y: number } | TouchEvent, y?: number) {
     if (typeof x === 'object') {
       if (x instanceof TouchEvent) {
@@ -220,6 +234,8 @@ export class Vector2 {
   toString() {
     return `{"lat":${this.x},"lon":${this.y}}`;
   }
-
+  half() {
+    return this.dividedBy(2)
+  }
 
 }
