@@ -9,7 +9,6 @@ import {
   MatLegacyFormFieldModule as MatFormFieldModule
 } from '@angular/material/legacy-form-field';
 import { MatLegacySlideToggleModule as MatSlideToggleModule } from '@angular/material/legacy-slide-toggle';
-import { NgxDropzoneModule } from 'ngx-dropzone';
 import { MatLegacyInputModule as MatInputModule } from '@angular/material/legacy-input';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
@@ -23,7 +22,7 @@ import { MatButtonModule } from '@angular/material/button';
     MatInputModule,
     MatSlideToggleModule,
     FormsModule,
-    NgxDropzoneModule, MatIconModule, MatButtonModule
+    MatIconModule, MatButtonModule
   ],
   declarations: [OptionsComponent],
   providers: [OptionsService]

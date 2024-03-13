@@ -57,6 +57,9 @@ export class OptionsComponent implements OnInit {
 
   async linkDrop(evt) {
     const link: string = evt.dataTransfer.getData('text');
+    if (!link?.length) {
+      return
+    }
     const urlName = new URL(link).pathname.split('/').pop();
     if (!this.addingSound.key) {
       this.addingSound.key = urlName.split('.')[0];
@@ -75,8 +78,8 @@ export class OptionsComponent implements OnInit {
     evt.preventDefault();
   }
   onDrop(event) {
-    if (event.addedFiles.length === 1) {
-      const fl: File = event.addedFiles[0];
+    if (event.dataTransfer.items.length === 1) {
+      const fl: File = event.dataTransfer.items[0].getAsFile()
       this.addingSound.file = fl;
       this.soundName = fl.name;
       if (!this.addingSound.key) {
@@ -84,6 +87,8 @@ export class OptionsComponent implements OnInit {
         this.addingSound.url = this.domSanitizer.bypassSecurityTrustUrl(URL.createObjectURL(fl));
       }
       this.addingSound.resolver = this.readBytes(this.addingSound, fl);
+      event.stopPropagation();
+      event.preventDefault();
 
     }
   }

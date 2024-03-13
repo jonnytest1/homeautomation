@@ -33,7 +33,6 @@
     "hammerjs": "^2.0.8",
     "javascript-barcode-reader": "^0.6.8",
     "ng-circle-progress": "^1.6.0",
-    "ngx-dropzone": "^2.2.2",
     "quicktype-core": "^23.0.81",
     "rxjs": "^7.8.1",
     "uuid": "^8.3.1",
