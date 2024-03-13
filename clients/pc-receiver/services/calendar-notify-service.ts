@@ -118,35 +118,45 @@ export class CalenderService {
     return evtDate;
   }
 
-  async timer() {
+  timer() {
     const nextEvt = this.reminderList.next.value
     const timeDiff = +nextEvt.timestamp - +new Date()
     console.log(`${new Date().toLocaleTimeString()} starting timer for ${nextEvt.data.event.summary} at ${nextEvt.timestamp.toLocaleString()}`)
     console.log(nextEvt.data.event.uid)
 
 
-    setTimeout(() => {
-      const data = nextEvt.data;
-      this.reminderList.shift()
-      new NotificationHandler({
-        notification: {
-          title: `EVENT`,
-          body: data.event.summary,
-          sound: pick(["hintnotification", "wronganswer"])
-        }
-      }, environment.serverip)
-        .show({ send: console.log, close: () => { } } as any);
-
-
-      let evtTime = +nextEvt.data.eventInstanceDate
-      const nextDateMin = new Date(Math.max(Date.now(), evtTime))
-
-      let evtDate: Date | undefined = this.getNextEventDate(data.event, nextDateMin);
-
-      this.addReminder(data.alarm, evtDate, data.event)
-      this.timer();
+    setTimeout(async () => {
+      if ((+nextEvt.timestamp + 1000) >= (Date.now())) {
+        await new Promise(res => setTimeout(res, 100))
+        this.timer()
+      } else {
+        this.doAlarm(nextEvt);
+      }
     }, timeDiff)
   }
 
 
+
+  private doAlarm(nextEvt: { timestamp?: Date; data: AlarmContainer; }) {
+    console.log(`${new Date().toLocaleTimeString()} trigger alarm`)
+    const data = nextEvt.data;
+    this.reminderList.shift();
+    new NotificationHandler({
+      notification: {
+        title: `EVENT`,
+        body: data.event.summary,
+        sound: pick(["hintnotification", "wronganswer"])
+      }
+    }, environment.serverip)
+      .show({ send: console.log, close: () => { } } as any);
+
+
+    let evtTime = +nextEvt.data.eventInstanceDate;
+    const nextDateMin = new Date(Math.max(Date.now() + (1000), evtTime));
+
+    let evtDate: Date | undefined = this.getNextEventDate(data.event, nextDateMin);
+    console.log(`${new Date().toLocaleTimeString()} adding for ${evtDate.toISOString()}`)
+    this.addReminder(data.alarm, evtDate, data.event);
+    this.timer();
+  }
 }

@@ -4,8 +4,7 @@ import { existsSync, promises } from 'fs';
 import { fetchHttps } from '../util/request';
 import { RepeatingAudio } from './repeating-audio-player';
 import { FrontendSound } from './server-interfaces';
-
-const notifier = require('node-notifier');
+import notifier from 'node-notifier'
 
 
 export interface NotificationData {
@@ -53,6 +52,9 @@ export class NotificationHandler {
 
     }
 
+    /**
+     * actinos dont work with appID
+     */
     const actions = ['do1', 'do2'];
 
     if (!this.data.notification.body && this.data.notification.title) {
@@ -61,9 +63,9 @@ export class NotificationHandler {
     const timeout = 20
     notifier.notify({
       timeout: timeout,
-      appID: "smarthome",
+      // appID: "smarthome",
       //
-      actions: actions,
+      //actions: actions,
       ...this.data.notification,
       message: this.data.notification.body,
       wait: true,

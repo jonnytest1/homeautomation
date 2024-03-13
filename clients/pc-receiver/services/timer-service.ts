@@ -105,7 +105,7 @@ export class TimerService {
       }, 1000 * 60 * 2)
 
       setTimeout(async () => {
-        for (let i = 0; i < 6; i++) {
+        for (let i = 0; i < 10; i++) {
           await fetchHttps(this.fasterUrl)
           await new Promise(res => setTimeout(res, 160));
         }

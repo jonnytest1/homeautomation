@@ -28,13 +28,20 @@ export async function checkHeat() {
 }
 
 export function heaterOff() {
+  const cmndSTart = Date.now()
   return new Promise<void>(res => {
     const client = connect(environment.MQTT_SERVER)
     client.on("connect", () => {
-      client.publish(environment.HEATER_PLUG_POWER_CMD, "off", () => {
+      if (cmndSTart < (Date.now() - (1000 * 60))) {
+        client.end()
+        return
+      }
+      client.publish(environment.HEATER_PLUG_POWER_CMD, "off", async () => {
+        await new Promise(res => setTimeout(res, 1000))
         client.publish(environment.HEATER_PLUG_POWER_CMD, "on", () => {
           console.log("reset power")
           res()
+          client.end()
         })
       })
     })

@@ -21,7 +21,10 @@ export const eventHandlerMap = {
   "hibernate": () => {
     hibernatePrompted = Date.now()
     return "pending_confirmation"
-  }
+  },
+  /*"read": (data: { text: string }) => {
+    debugger
+  }*/
 } satisfies Record<string, () => ResponseType | void>
 
 export const eventConfirmHandlerMap = {
@@ -75,20 +78,20 @@ export function handleActionConfirmEvent(evt: z.infer<typeof isActionEvent>): Re
 
 export function startKeySocket() {
 
-  const keySocket = new ReconnectingKeySocket()
-  keySocket.addKey({
-    board: "bluetoothboard",
-    key: "4",
-    keydown() {
-      eventHandlerMap["volume down"]()
-    },
-  })
-  keySocket.addKey({
-    board: "bluetoothboard",
-    key: "6",
-    keydown() {
-      eventHandlerMap["volume up"]()
-    },
-  })
-  keySocket.connect()
+  /* const keySocket = new ReconnectingKeySocket()
+   keySocket.addKey({
+     board: "bluetoothboard",
+     key: "4",
+     keydown() {
+       eventHandlerMap["volume down"]()
+     },
+   })
+   keySocket.addKey({
+     board: "bluetoothboard",
+     key: "6",
+     keydown() {
+       eventHandlerMap["volume up"]()
+     },
+   })
+   keySocket.connect()*/
 }

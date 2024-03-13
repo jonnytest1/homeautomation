@@ -4,6 +4,7 @@
   "description": "node",
   "main": "index.ts",
   "dependencies": {
+    "@types/node-notifier": "^8.0.5",
     "atob": "^2.1.2",
     "clap-detector": "^0.5.3",
     "dotenv": "",
@@ -18,7 +19,7 @@
     "mqtt": "^5.3.5",
     "node-fetch": "^2.6.0",
     "node-ical": "^0.17.1",
-    "node-notifier": "^8.0.0",
+    "node-notifier": "^10",
     "nodemon": "^2.0.4",
     "say": "^0.16.0",
     "typescript": "^5.x",
