@@ -1,16 +1,16 @@
-import type { AfterViewInit, OnChanges, OnInit } from '@angular/core';
+import type { AfterViewInit, OnChanges } from '@angular/core';
 import { Component, Input, ViewChild, ElementRef } from '@angular/core';
 import { GenericNodesDataService } from '../generic-node-data-service';
 import { CommonModule } from '@angular/common';
-import type { NodeDefOptinos, NodeDefToType, NodeDefintion, NodeOptionTypes } from '../../settings/interfaces';
-import { ElementNode } from '../../settings/interfaces';
+import type { NodeDefOptinos, NodeDefToType, NodeOptionTypes } from '../../settings/interfaces';
+import type { ElementNode } from '../../settings/interfaces';
 import { GenOptionComponent } from './gen-option/gen-option.component';
 import { MatIconModule } from '@angular/material/icon';
-import { SettingsService } from '../../settings.service';
 import { Store } from '@ngrx/store';
 import { backendActions } from '../store/action';
 import { selectNode } from '../store/selectors';
-import { Observable, combineLatest, first, map } from 'rxjs';
+import type { Observable } from 'rxjs';
+import { combineLatest, first, map } from 'rxjs';
 import { StoreService } from '../store/store-service';
 
 @Component({

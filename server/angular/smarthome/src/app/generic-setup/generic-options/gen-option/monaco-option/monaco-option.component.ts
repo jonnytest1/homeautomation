@@ -1,8 +1,9 @@
 import { CommonModule } from '@angular/common';
-import { Component, Input, OnInit, type OnChanges, type SimpleChanges, type ElementRef, ViewChild } from '@angular/core';
+import type { OnInit } from '@angular/core';
+import { Component, Input, type OnChanges, type SimpleChanges, type ElementRef, ViewChild } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 import { MonacoEditorComponent } from '../../../../monaco-editor/monaco-editor.component';
-import type { ElementNode, NodeOptionTypes } from '../../../../settings/interfaces';
+import { ElementNode, NodeOptionTypes } from '../../../../settings/interfaces';
 import { FormsModule } from '@angular/forms';
 
 
@@ -28,11 +29,11 @@ export class MonacoOptionComponent implements OnInit, OnChanges {
   name: string
 
 
-  @Input()
+  @Input({ required: true })
   value
 
 
-  @Input()
+  @Input({ required: true })
   definition: NodeOptionTypes
 
 
@@ -40,7 +41,7 @@ export class MonacoOptionComponent implements OnInit, OnChanges {
   elementRef: ElementRef<HTMLTextAreaElement>
 
 
-  @Input()
+  @Input({ required: true })
   node: ElementNode
 
   typeDefinition = new BehaviorSubject<string>("")

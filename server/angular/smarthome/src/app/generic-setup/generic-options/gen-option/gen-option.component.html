@@ -9,7 +9,11 @@
 </ng-container>
 <ng-template #checkMonaco>
   <ng-container *ngIf="definition.type=='monaco';else checkFrame">
-    <app-monaco-option [name]="name"></app-monaco-option>
+    <app-monaco-option [name]="name"
+                       [value]="value"
+                       [definition]="definition"
+                       [node]="node">
+    </app-monaco-option>
   </ng-container>
 </ng-template>
 <ng-template #checkFrame>

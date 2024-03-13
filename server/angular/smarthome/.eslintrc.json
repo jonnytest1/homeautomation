@@ -58,7 +58,8 @@
         "no-undef": "off",
         "no-redeclare": "off",
         "@typescript-eslint/no-redeclare": "warn",
-        "unused-imports/no-unused-imports": "warn"
+        "unused-imports/no-unused-imports": "warn",
+        "no-debugger": "warn"
       }
     },
     {

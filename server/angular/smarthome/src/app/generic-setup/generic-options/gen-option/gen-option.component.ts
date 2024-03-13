@@ -1,12 +1,10 @@
-import type { ElementRef, OnChanges, SimpleChanges } from '@angular/core';
-import { Component, Input, ViewChild } from '@angular/core';
+import type { OnChanges, SimpleChanges } from '@angular/core';
+import { Component, Input, ViewChild, ElementRef } from '@angular/core';
 import { ElementNode, NodeOptionTypes } from '../../../settings/interfaces';
 import { CommonModule } from '@angular/common';
-import { MonacoEditorComponent } from '../../../monaco-editor/monaco-editor.component';
 import { FormsModule } from '@angular/forms';
 import { GenericNodesDataService } from '../../generic-node-data-service';
-import { BehaviorSubject } from 'rxjs';
-import { SafeHtml } from '@angular/platform-browser';
+import type { SafeHtml } from '@angular/platform-browser';
 import { FrameOptionComponent } from '../frame-option/frame-option.component';
 import { MonacoOptionComponent } from './monaco-option/monaco-option.component';
 

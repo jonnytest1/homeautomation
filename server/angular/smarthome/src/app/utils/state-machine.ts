@@ -66,13 +66,15 @@ export function createStateMachine<T extends ReadonlyArray<string>, U extends T[
   } as StateMachine<T[number]>
   for (const option of options) {
     Object.defineProperty(state, `is${option}`, {
-      get: () => current == option
+      get: () => current == option,
+      configurable: true
     })
     Object.defineProperty(state, `set${option}`, {
       value: () => {
         console.log("new state: " + option)
         return current = option;
-      }
+      },
+      configurable: true
     })
   }
   return state

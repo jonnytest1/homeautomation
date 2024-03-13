@@ -1,9 +1,10 @@
 import { CommonModule } from '@angular/common';
-import { Component, Input, OnChanges, OnInit, SimpleChanges, type ElementRef, ViewChild, type AfterViewInit } from '@angular/core';
+import type { OnChanges, OnInit, SimpleChanges } from '@angular/core';
+import { Component, Input, type ElementRef, ViewChild, type AfterViewInit } from '@angular/core';
 import { Frame } from '../../../settings/interfaces';
-import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
+import type { SafeHtml } from '@angular/platform-browser';
+import { DomSanitizer } from '@angular/platform-browser';
 import { BehaviorSubject } from 'rxjs';
-import { filter } from 'rxjs/operators';
 
 @Component({
   selector: 'app-frame-option',
