@@ -1,12 +1,18 @@
-import type { DataStore } from './data-store'
 import { distinctUntilChanged, map, type Observable } from 'rxjs'
 
 
 export type SelectorFnc<S, R> = (state: S) => R
 
 
+type SelectorParent<T, R> = {
+  get(state: T): R,
+
+  pipe(state: Observable<T>): Observable<R>
+}
+
+
 export class Selector<T, R> {
-  constructor(private mappingFunction: SelectorFnc<T, R>, private parent: Selector<any, T> | DataStore<T>) {
+  constructor(private mappingFunction: SelectorFnc<T, R>, private parent: SelectorParent<any, T>) {
 
   }
 
