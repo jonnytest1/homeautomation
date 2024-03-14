@@ -1,8 +1,9 @@
-import { ActionCreator, createAction, props } from '@ngrx/store';
-import { Connection, ElementNode, NodeData, type NodeDefintion } from '../../settings/interfaces';
+import type { ActionCreator } from '@ngrx/store';
+import { createAction, props } from '@ngrx/store';
+import type { Connection, ElementNode, NodeData, UpdateEditorSchema } from '../../settings/interfaces';
+import { type NodeDefintion } from '../../settings/interfaces';
 
 export const setNodeData = createAction("setnodes", props<{ data: NodeData }>())
-export const updateNode = createAction("update node", props<{ data: ElementNode }>())
 export const updateNodeDef = createAction("update node definitions", props<{ data: Record<string, NodeDefintion> }>())
 
 export type BackendActionType = { backendAction?: true, dispatched?: true }
@@ -31,10 +32,16 @@ export const backendActions = backendAction({
   deleteConnection: createAction("delete connection", props<{ connection: Connection }>()),
   addConnection: createAction("add connection", props<{ connection: Connection }>()),
   updateGlobals: createAction("update globals", props<{ globals: Partial<NodeData["globals"]> }>()),
-  updateParameters: createAction("update params", props<{
+  updateParameter: createAction("update param", props<{
     node: string
-    params: Partial<NodeData["nodes"][number]["parameters"]>
+    param: string
+    value: string
   }>()),
+  updateNode: createAction("update node", props<{
+    nodeUuid: string
+    newNode: ElementNode
+  }>()),
+  updateEditorSchema: createAction("update editor schema", props<Omit<UpdateEditorSchema, "type">>()),
 })
 
 

@@ -20,7 +20,14 @@ function base64safe(value: string) {
   }
 }
 
-export async function logKibana(level: 'INFO' | 'ERROR' | 'DEBUG', message, error?) {
+interface ParamLog {
+  message: string
+
+  [key: string]: string
+}
+
+
+export async function logKibana(level: 'INFO' | 'ERROR' | 'DEBUG', message: string | ParamLog, error?) {
   let logStack;
   try {
     throw new Error('origin');

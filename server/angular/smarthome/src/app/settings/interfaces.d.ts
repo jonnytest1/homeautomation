@@ -3,10 +3,12 @@ import type { Sender as NodeSender } from '../../../../../src/models/sender';
 import type { Timer } from '../../../../../src/models/timer';
 import type { Item } from '../../../../../src/models/inventory/item';
 import type { Transformation } from '../../../../../src/models/transformation';
-import type { SocketResponses as sR, GenericNodeEvents as GNE, ActionTriggersEvent as ATE } from "../../../../../src/resources/websocket-response"
+import type { SocketResponses as sR, GenericNodeEvents as GNE, ActionTriggersEvent as ATE }
+  from "../../../../../src/resources/websocket-response"
 
 export * from "../../../../../src/services/mqtt-types"
 export * from "../../../../../src/services/generic-node/typing/generic-node-type"
+export * from "../../../../../src/services/generic-node/typing/frontend-events"
 export * from "../../../../../src/services/generic-node/typing/node-options"
 export type { FrontendToBackendEvents } from "../../../../../src/resources/socket-events"
 

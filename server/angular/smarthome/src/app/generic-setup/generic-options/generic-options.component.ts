@@ -7,10 +7,9 @@ import type { ElementNode } from '../../settings/interfaces';
 import { GenOptionComponent } from './gen-option/gen-option.component';
 import { MatIconModule } from '@angular/material/icon';
 import { Store } from '@ngrx/store';
-import { backendActions } from '../store/action';
 import { selectNode } from '../store/selectors';
 import type { Observable } from 'rxjs';
-import { combineLatest, first, map } from 'rxjs';
+import { combineLatest, map } from 'rxjs';
 import { StoreService } from '../store/store-service';
 
 @Component({
@@ -58,9 +57,6 @@ export class GenericOptionsComponent implements AfterViewInit, OnChanges {
           order: 99999
         }
       }]
-      this.node$.pipe(first()).subscribe(() => {
-
-      })
       const nodeDefOpts = options.options ?? {};
       for (const option in nodeDefOpts) {
         const opt = nodeDefOpts[option]
@@ -98,22 +94,6 @@ export class GenericOptionsComponent implements AfterViewInit, OnChanges {
 
 
   ngAfterViewInit(): void {
-    this.form.nativeElement.addEventListener("change", e => {
-      const options = Object.fromEntries(new FormData(this.form.nativeElement).entries()) as {
-        [optinoskey: string]: string;
-      }
-      this.store.dispatch(backendActions.updateParameters({ params: options, node: this.nodeUuid }))
-      /* for (const key in options) {
-         const val = options[key]
-         if (typeof val == "string") {
-           this.node.parameters ??= {}
- 
-           this.node.parameters[key] = val
-         }
-       }
-       this.con.store(this.node.uuid)*/
-    })
-
     this.formGlob.nativeElement.addEventListener("change", e => {
       const options = Object.fromEntries(new FormData(this.formGlob.nativeElement).entries()) as Partial<NodeDefToType<NodeDefOptinos>>
 

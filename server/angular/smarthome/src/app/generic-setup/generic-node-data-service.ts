@@ -2,9 +2,10 @@ import { Injectable } from '@angular/core';
 
 import { BehaviorSubject } from 'rxjs';
 import { SettingsService } from '../settings.service';
-import type { ActionTriggersEvent, Connection, ConnectorDefintion, ElementNode, NodeData, NodeDefOptinos, NodeDefToType, NodeDefintion, NodeEventTimes } from '../settings/interfaces';
+import type { ActionTriggersEvent, Connection, ConnectorDefintion, NodeDefOptinos, NodeDefToType, NodeEventTimes } from '../settings/interfaces';
 import { Store } from '@ngrx/store';
-import { BackendActions, backendActions, setNodeData, updateNode, updateNodeDef } from './store/action';
+import type { BackendActions } from './store/action';
+import { backendActions, setNodeData, updateNodeDef } from './store/action';
 import { logKibana } from '../global-error-handler';
 
 
@@ -33,6 +34,8 @@ export class GenericNodesDataService {
 
   constructor(private service: SettingsService, private ngrxStore: Store) {
 
+    const keySet = new Set(Object.values(backendActions).map(a => a.type))
+
     service.genericNodeEvents.subscribe(messageEvent => {
       if (messageEvent.type == 'nodeDefinitions') {
         ngrxStore.dispatch(updateNodeDef({
@@ -45,9 +48,23 @@ export class GenericNodesDataService {
       } else if (messageEvent.type == 'lastEventTimes') {
         this.nodeEventTimes.next(messageEvent.data)
       } else if (messageEvent.type == 'nodeUpdate') {
-        ngrxStore.dispatch(updateNode({ data: messageEvent.data }))
+        const evt = backendActions.updateNode({
+          newNode: messageEvent.data,
+          nodeUuid: messageEvent.data.uuid
+
+        });
+        evt["fromSocket"] = true
+        ngrxStore.dispatch(evt)
 
       } else if (messageEvent.type == 'store-reducer') {
+        if (!keySet.has(messageEvent.data.type)) {
+          logKibana("ERROR", {
+            message: "got event type without implementation",
+            type: messageEvent.data.type
+          })
+          return
+        }
+
         messageEvent.data.fromSocket = true
         ngrxStore.dispatch(messageEvent.data)
       } else {
@@ -175,17 +192,4 @@ export class GenericNodesDataService {
  
      this.nodeData.next({ ...this.nodeData.value, globals: newglobals })*/
   }
-
-
-  storeNodes(nodes: NodeData, changedUuid?: string) {
-    this.service.genericNodeSendingEvents.next({
-      type: "generic-node-event",
-      data: {
-        type: "store-nodes",
-        data: nodes,
-        changedUuid
-      }
-    })
-  }
-
 }

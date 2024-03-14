@@ -59,7 +59,8 @@
         "no-redeclare": "off",
         "@typescript-eslint/no-redeclare": "warn",
         "unused-imports/no-unused-imports": "warn",
-        "no-debugger": "warn"
+        "no-debugger": "warn",
+        "@ngrx/on-function-explicit-return-type": "Off"
       }
     },
     {

@@ -1,6 +1,7 @@
 import { createReducer, on } from '@ngrx/store';
-import { backendActions, setNodeData, updateNode, updateNodeDef } from './action';
-import { Connection, NodeData, type ElementNode, type NodeDefintion } from '../../settings/interfaces';
+import { backendActions, setNodeData, updateNodeDef } from './action';
+import type { NodeData } from '../../settings/interfaces';
+import { type ElementNode, type NodeDefintion } from '../../settings/interfaces';
 import { isSameConnection } from '../line/line-util';
 
 
@@ -76,29 +77,38 @@ export const genericReducer = createReducer(
       ...a.globals
     }
   })),
-  on(backendActions.updateParameters, (st, a) => patchNode(st, a.node, n => ({
-    ...n, parameters: {
+  on(backendActions.updateParameter, (st, a) => patchNode(st, a.node, n => ({
+    ...n,
+    parameters: {
       ...n.parameters,
-      ...a.params
+      [a.param]: a.value
     }
   }))),
-  on(updateNode, (st, a) => {
+  on(backendActions.updateNode, (st, a) => {
     const newNodes: Array<ElementNode> = []
     let foundMAtch = false
     for (const node of st.nodes) {
-      if (node.uuid === a.data.uuid) {
-        newNodes.push(a.data)
+      if (node.uuid === a.newNode.uuid) {
+        newNodes.push(a.newNode)
         foundMAtch = true
       } else {
         newNodes.push(node)
       }
     }
     if (!foundMAtch) {
-      newNodes.push(a.data)
+      newNodes.push(a.newNode)
     }
     return ({
       ...st,
       nodes: newNodes
     });
-  })
+  }),
+  on(backendActions.updateEditorSchema, (st, a) => patchNode(st, a.nodeUuid, n => ({
+    ...n,
+    runtimeContext: {
+      ...n.runtimeContext ?? {},
+      editorSchema: a.editorSchema
+    }
+
+  }))),
 )
