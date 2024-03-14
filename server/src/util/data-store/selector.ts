@@ -11,8 +11,8 @@ export class Selector<T, R> {
   }
 
 
-  chain<S extends SelectorFnc<R, U>, U>(s: S) {
-    return new Selector(s, this)
+  chain<S extends SelectorFnc<R, unknown>>(s: S): Selector<T, ReturnType<S>> {
+    return new Selector(s, this) as unknown as Selector<T, ReturnType<S>>
   }
 
 

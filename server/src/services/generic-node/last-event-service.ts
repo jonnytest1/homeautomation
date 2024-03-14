@@ -1,7 +1,7 @@
 import { lastEventFile, lastEventTimesFile } from './generic-node-constants';
 import type { NodeEventJsonData } from './node-event';
 import type { ElementNode, NodeEventTimes } from './typing/generic-node-type';
-import { genericNodeDataStore } from './generic-node-data-store';
+import { genericNodeDataStore } from './generic-store/reference';
 import { createAction, props } from '../../util/data-store/action';
 import { BehaviorSubject } from 'rxjs';
 import { writeFileSync, readFileSync } from "fs"

@@ -4,6 +4,8 @@ import { addTypeImpl } from '../generic-node-service';
 import type { ElementNode } from '../typing/generic-node-type';
 import type { NodeDefOptinos, NodeDefToType } from '../typing/node-options';
 import { mainTypeName } from '../json-schema-type-util';
+import { genericNodeDataStore } from '../generic-store/reference';
+import { backendToFrontendStoreActions } from '../generic-store/actions';
 import * as z from "zod"
 import { Script } from 'vm';
 
@@ -100,7 +102,12 @@ addTypeImpl({
   nodeChanged(node, prev) {
     if (node.parameters) {
       if (node.parameters.additional !== undefined) {
+
+
         node.runtimeContext.inputs = +node.parameters.additional + 1
+        genericNodeDataStore.dispatch(backendToFrontendStoreActions.updateNode({
+          newNode: node
+        }))
       }
     }
 
@@ -115,9 +122,9 @@ addTypeImpl({
   },
   async connectionTypeChanged(node, connectionSchema) {
 
-
-    node.runtimeContext.editorSchema = {
-      dts: `
+    genericNodeDataStore.dispatch(backendToFrontendStoreActions.updateEditorSchema({
+      editorSchema: {
+        dts: `
 ${connectionSchema.dts}
 
 type InputType=${connectionSchema.mainTypeName ??= mainTypeName}
@@ -129,7 +136,10 @@ type InputType=${connectionSchema.mainTypeName ??= mainTypeName}
      
       var context; 
       `
-    }
+      },
+      nodeUuid: node.uuid
+    }))
+
     node.runtimeContext.outputSchema = {
       jsonSchema: connectionSchema.jsonSchema,
       dts: connectionSchema.dts,

@@ -1,6 +1,7 @@
 import type { Action, ActionCreator } from './action'
 import { Selector, type SelectorFnc } from './selector'
-import { BehaviorSubject, type Observable } from 'rxjs'
+import { logKibana } from '../log'
+import { BehaviorSubject, map, type Observable } from 'rxjs'
 
 
 
@@ -14,8 +15,11 @@ export class DataStore<T>{
 
   reducers: Record<string, Reducer<T, { type: string }>> = {}
   effects: Record<string, Effect<T, { type: string }>> = {}
+  generalEffects: Array<Effect<T, Action<string, unknown>>>
 
   lastDispatch = -1
+
+  lastActionType: string | undefined
 
   constructor(private initialState: T) {
     this.state = new BehaviorSubject(this.initialState)
@@ -41,7 +45,9 @@ export class DataStore<T>{
   select<R>(selector: Selector<T, R>) {
     return selector.pipe(this.state)
   }
-
+  selectWithAction<R>(selector: Selector<T, R>) {
+    return selector.pipe(this.state).pipe(map(st => [st, this.lastActionType] as const))
+  }
 
   addReducer<Type extends string, P>(action: ActionCreator<Type, P>, reducer: Reducer<T, Action<Type, P>>) {
     if (this.reducers[action.type]) {
@@ -55,17 +61,25 @@ export class DataStore<T>{
     }
     this.effects[action.type] = effect
   }
-
-  dispatch<A extends { type: string }>(action: A) {
+  addGeneralEffect(effect: Effect<T, Action<string, unknown>>) {
+    this.generalEffects.push(effect)
+  }
+  dispatch<A extends Action<string, unknown>>(action: A) {
     this.lastDispatch = Date.now()
     const lastDispatch = this.lastDispatch
     const reducer = this.reducers[action.type]
     if (!reducer) {
+      logKibana("ERROR", {
+        message: "no reducer for type",
+        type: action.type,
+        action: action
+      })
       return
     }
     const newState = reducer(this.state.value, action)
-
+    this.lastActionType = action.type
     this.state.next(newState)
+    this.lastActionType = undefined
     if (lastDispatch === this.lastDispatch) {
       this.effects[action.type]?.(newState, action)
     } else {

@@ -1,10 +1,4 @@
-import type { Connection, NodeData } from './generic-node-type'
-
-export type StoreNodes = {
-  type: "store-nodes",
-  data: NodeData
-  changedUuid?: string
-}
+import type { Connection, ElementNode, NodeData } from './generic-node-type'
 
 export type Load = {
   type: "load-node-data"
@@ -43,12 +37,30 @@ export type UpdateGlobals = {
 export type SubscribeGenericNode = {
   type: "subscribe generic node"
 }
-export type Updateparams = {
-  type: "update params",
+
+export type UpdateParam = {
+  type: "update param",
   node: string
-  params: Partial<NodeData["nodes"][number]["parameters"]>
+  param: string
+  value: string
 }
-export type StoreEvents = UpdatepositionEvent | DeleteNOdeEvet | AddNOdeEvet | AddConnection | DeleteConnection | Updateparams | UpdateGlobals
+
+export type UpdateNode = {
+  type: "update node",
+  newNode: ElementNode
+}
+export type UpdateEditorSchema = {
+  type: "update editor schema",
+  nodeUuid: string
+  editorSchema: {
+    dts: string
+    globals: string
+  }
+}
 
 
-export type FrontendToBackendGenericNodeEvent = StoreNodes | Load | UpdatepositionEvent | StoreEvents | LoadActionTriggers | SubscribeGenericNode
+export type StoreEvents = UpdatepositionEvent | DeleteNOdeEvet | AddNOdeEvet | AddConnection | DeleteConnection
+  | UpdateGlobals | UpdateParam | UpdateNode | UpdateEditorSchema
+
+
+export type FrontendToBackendGenericNodeEvent = Load | UpdatepositionEvent | StoreEvents | LoadActionTriggers | SubscribeGenericNode

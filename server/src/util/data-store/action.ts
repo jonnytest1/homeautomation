@@ -6,7 +6,7 @@ export type ActionCreator<T extends string, P> = ((props: P) => Action<T, P>) & 
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function createAction<T extends string, P>(type?: T, propsCreator?: () => P) {
-  if (type) {
+  if (!type) {
     type = `${Math.random()}` as T
   }
   const actionCreator: Partial<ActionCreator<T, unknown>> = (props: P) => {
