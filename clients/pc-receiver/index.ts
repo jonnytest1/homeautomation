@@ -1,4 +1,4 @@
-
+import "./util/log-intercept"
 import { NotificationData, NotificationHandler } from './services/notification-handler';
 import registration from './services/registration';
 import { config } from "dotenv"
@@ -10,16 +10,17 @@ import type { TransformationRes } from '../../server/src/models/connection-respo
 import { TimerService } from "./services/timer-service"
 import { parseArgsToEnv } from './services/args';
 import { traceTransform } from './services/log-handler';
-import { SocketService } from './services/socket-service';
 import { handleActionConfirmEvent, handleActionEvent, isActionEvent, isEvent, startKeySocket } from './services/events/event-handler';
 import { CalenderService } from './services/calendar-notify-service';
 import { uidBlackList } from './services/calendar-uid-blacklist';
+import { interceptLogs } from './util/log-intercept';
+import { logKibana } from './util/log';
 parseArgsToEnv()
 
 config({
   path: `${process.env.profile == "PROD" ? ".env.prod.env" : ".env"}`
 });
-
+interceptLogs()
 //new SocketService(19999);
 
 
@@ -114,6 +115,17 @@ registration.register(serverIp, +listenOnPort)
     app.listen(+listenOnPort, '', () => {
       console.log(`started server on localhost with port ${listenOnPort}`);
     });
-    new TimerService(serverIp);
+    new TimerService(serverIp).timer();
   });
 
+
+
+
+process.on("uncaughtException", e => {
+  // handle
+})
+
+
+process.on("unhandledRejection", e => {
+  logKibana("ERROR", "uncaughtException", e)
+})

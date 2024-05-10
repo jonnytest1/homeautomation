@@ -7,6 +7,7 @@ import { TextReader } from './read-text';
 import { getLatestPowerOnEvent } from './event-service';
 import moment from 'moment';
 import { heaterOff } from './mqtt';
+import { logKibana } from '../util/log';
 type ISODay = `${number}${number}${number}${number}-${number}${number}-${number}${number}`
 
 
@@ -14,16 +15,19 @@ type RunPrefixed = typeof TimerService.run_prefixed[number]
 type Data = {
   [K in RunPrefixed]?: ISODay
 }
+
+
+const phoneName = "Z-Fold5-von-Jonathan"
 export class TimerService {
 
 
-  static run_prefixed = ["12:", "18:", "23:3"] as const
+  static run_prefixed = ["12:", "18:", "20:", "23:3"] as const
 
 
   private readonly runUrl = "http://192.168.178.40/pwr"
   private readonly fasterUrl = "http://192.168.178.40/faster"
   constructor(private serverIp: string) {
-    this.timer();
+
   }
 
   read(): Data {
@@ -50,7 +54,8 @@ export class TimerService {
 
         if (storedTs !== today) {
           if (time.startsWith(prefix)) {
-            if (!this.phoneReachable()) {
+            const reachable = await this.phoneReachable(phoneName)
+            if (!reachable) {
               console.log("didnt reach phone")
               continue mainloop
             }
@@ -77,10 +82,32 @@ export class TimerService {
     return minutesDiff > 10
   }
 
-  phoneReachable() {
-    const logOut = execSync("ping Z-Fold5-von-Jonathan", { encoding: "utf8" })
+  async phoneReachable(target: string, attempt = 0): Promise<boolean> {
+    try {
+      if (target.includes("'")) {
+        throw new Error("invalid name")
+      }
+      const logOut = execSync(`ping ${target}`, { encoding: "utf8", })
 
-    return !logOut.includes("Zielhost nicht erreichbar")
+      const reachable = !logOut.includes("Zielhost nicht erreichbar");
+      if (!reachable && attempt < 3) {
+        await new Promise(res => setTimeout(res, 50))
+        return this.phoneReachable(target, attempt + 2)
+      }
+      return reachable
+    } catch (e: unknown) {
+      if (attempt < 3) {
+        await new Promise(res => setTimeout(res, 50))
+        return this.phoneReachable(target, attempt + 1)
+      }
+      if (typeof e === "object" && "stdout" in e && typeof e.stdout === "string" && e.stdout.includes("konnte Host") && e.stdout.includes("nicht finden")) {
+        logKibana("WARN", { message: "exception executing ping" }, e)
+        return false
+      }
+      logKibana("ERROR", { attempt: attempt, message: "exception executing ping" }, e)
+      debugger
+      return false
+    }
   }
 
 

@@ -5,9 +5,11 @@ export function btoa(str) {
 }
 
 
+type Primitive = string | number | boolean
+
 const fetch = require('node-fetch');
-export async function logKibana(level: 'INFO' | 'ERROR' | 'DEBUG' | "WARN", message, error?) {
-  let jsonData: { [key: string]: string } = {
+export async function logKibana(level: 'INFO' | 'ERROR' | 'DEBUG' | "WARN", message: string | { message: string, [key: string]: Primitive }, error?) {
+  let jsonData: { [key: string]: Primitive } = {
     Severity: level,
     application: `SmartHomePC_Receiver${process.env.DEBUG ? '_debug' : ''}`,
   };
