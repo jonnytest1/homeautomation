@@ -3,7 +3,7 @@ import { execSync } from "child_process"
 import { join } from "path"
 import { pythonExe } from '../../constant'
 import { logKibana } from '../../util/log'
-import { ReconnectingKeySocket } from './reconnecting-key-socket'
+import { setLastAbort } from '../../util/abortable'
 
 
 let hibernatePrompted = 0
@@ -13,15 +13,21 @@ export const eventHandlerMap = {
     execSync(`${pythonExe} ${join(__dirname, "play-pause.py")}`)
   },
   "volume up": () => {
+    console.trace("volume up")
     execSync(`${pythonExe} ${join(__dirname, "volume-up.py")}`)
   },
   "volume down": () => {
+    console.trace("volume down")
     execSync(`${pythonExe} ${join(__dirname, "volume-down.py")}`)
   },
   "hibernate": () => {
     hibernatePrompted = Date.now()
     return "pending_confirmation"
   },
+  "abort": () => {
+    console.log("abort action")
+    setLastAbort()
+  }
   /*"read": (data: { text: string }) => {
     debugger
   }*/
@@ -77,21 +83,4 @@ export function handleActionConfirmEvent(evt: z.infer<typeof isActionEvent>): Re
 
 
 export function startKeySocket() {
-
-  /* const keySocket = new ReconnectingKeySocket()
-   keySocket.addKey({
-     board: "bluetoothboard",
-     key: "4",
-     keydown() {
-       eventHandlerMap["volume down"]()
-     },
-   })
-   keySocket.addKey({
-     board: "bluetoothboard",
-     key: "6",
-     keydown() {
-       eventHandlerMap["volume up"]()
-     },
-   })
-   keySocket.connect()*/
 }

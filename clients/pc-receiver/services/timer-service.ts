@@ -1,13 +1,14 @@
 import { readFileSync } from "fs"
 import { writeFile } from "fs/promises"
 import { execSync } from "child_process"
-import { lastRun } from '../constant';
+import { lastRun, phoneName } from '../constant';
 import { fetchHttps } from '../util/request';
 import { TextReader } from './read-text';
 import { getLatestPowerOnEvent } from './event-service';
 import moment from 'moment';
 import { heaterOff } from './mqtt';
 import { logKibana } from '../util/log';
+import { abortable } from '../util/abortable';
 type ISODay = `${number}${number}${number}${number}-${number}${number}-${number}${number}`
 
 
@@ -16,8 +17,6 @@ type Data = {
   [K in RunPrefixed]?: ISODay
 }
 
-
-const phoneName = "Z-Fold5-von-Jonathan"
 export class TimerService {
 
 
@@ -26,6 +25,7 @@ export class TimerService {
 
   private readonly runUrl = "http://192.168.178.40/pwr"
   private readonly fasterUrl = "http://192.168.178.40/faster"
+
   constructor(private serverIp: string) {
 
   }
@@ -114,30 +114,37 @@ export class TimerService {
 
   async run() {
     try {
-      await new TextReader({ text: "get off your ass and put your shoes on" }).read();
-      await this.countdown(6)
-      await new Promise(res => setTimeout(res, 500));
-      console.log("run")
-      await new TextReader({ text: "starting treadmill" }).read();
-      await fetchHttps(this.runUrl)
-      await new Promise(res => setTimeout(res, 550));
-
-      await fetchHttps(this.runUrl)
+      const promiseList = [
+        () => new TextReader({ text: "get off your ass and put your shoes on" }).read(),
+        ...this.countdown(6),
+        () => {
+          console.log("run");
+          return new Promise(res => setTimeout(res, 500));
+        },
+        () => new TextReader({ text: "starting treadmill" }).read(),
+        () => fetchHttps(this.runUrl),
+        () => new Promise(res => setTimeout(res, 550)),
+        () => fetchHttps(this.runUrl),
+      ];
       for (let i = 0; i < 43; i++) {
-        await fetchHttps(this.fasterUrl)
-        await new Promise(res => setTimeout(res, 160));
+        promiseList.push(() => fetchHttps(this.fasterUrl))
+        promiseList.push(() => new Promise(res => setTimeout(res, 160)))
       }
-      setTimeout(() => {
+      promiseList.push(async () => {
+        console.log("reached peak")
+      })
+      promiseList.push(() => new Promise(res => setTimeout(res, 1000 * 60 * 2)))
+      promiseList.push(async () => {
         heaterOff()
-      }, 1000 * 60 * 2)
-
-      setTimeout(async () => {
+      })
+      promiseList.push(() => new Promise(res => setTimeout(res, 1000 * 60 * 3)))
+      promiseList.push(async () => {
         for (let i = 0; i < 10; i++) {
           await fetchHttps(this.fasterUrl)
           await new Promise(res => setTimeout(res, 160));
         }
-      }, 1000 * 60 * 5)
-      console.log("reached peak")
+      })
+      await abortable(promiseList)
     } catch (e) {
       console.log("error", e)
       debugger;
@@ -145,10 +152,12 @@ export class TimerService {
   }
 
 
-  async countdown(ct: number) {
+  countdown(ct: number) {
+    const countdownCallbacks: Array<() => Promise<any>> = []
     for (let i = ct; i >= 0; i -= 2) {
-      await new TextReader({ text: `${i} left` }).read();
-      await new Promise(res => setTimeout(res, 2000));
+      countdownCallbacks.push(() => new TextReader({ text: `${i} left` }).read())
+      countdownCallbacks.push(() => new Promise(res => setTimeout(res, 2000)))
     }
+    return countdownCallbacks
   }
 }

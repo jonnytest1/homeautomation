@@ -1,14 +1,11 @@
 import { Attendee, Class, DateType, DateWithTimeZone, Method, Organizer, Transparency, VEvent, VEventStatus } from 'node-ical';
 import { DAY, HOUR, MINUTE, SECOND } from '../constant';
 
-
-
 export interface AlarmProvider {
   getDateForEventInstance(start_or_rrule_date: Date): Date
   timeOffset: number
   relative: boolean
 }
-
 
 class EventAlarm implements AlarmProvider {
 
@@ -17,9 +14,7 @@ class EventAlarm implements AlarmProvider {
 
   action: "DISPLAY"
 
-
   timeOffset: number
-
 
   relative: boolean
 
@@ -65,7 +60,6 @@ class EventAlarm implements AlarmProvider {
 
 }
 
-
 export class EventWithAlarm implements VEvent {
   type: 'VEVENT';
   method: Method;
@@ -96,10 +90,8 @@ export class EventWithAlarm implements VEvent {
 
   public alarms: Array<EventAlarm> = []
 
-
   constructor(vEvent: VEvent) {
     Object.assign(this, vEvent);
-
 
     for (const key of Object.getOwnPropertyNames(this)) {
       const value = this[key]
@@ -108,8 +100,6 @@ export class EventWithAlarm implements VEvent {
         delete this[key];
       }
     }
-
-
   }
 
 }
