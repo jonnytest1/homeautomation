@@ -29,6 +29,10 @@
       //"program": "${workspaceFolder}\\index.ts",
       "autoAttachChildProcesses": true,
       "runtimeArgs": [
+        "--stack-trace-limit=2100",
+        "--stack-size=20024",
+        "-r",
+        "longjohn",
         "-r",
         "ts-node/register"
       ],

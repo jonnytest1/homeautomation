@@ -40,19 +40,21 @@ interface EvaluatedInputContext extends InputContext {
   secondsAgo: number
 }
 
+const nodeServerContext: Record<string, { [index: number]: InputContext }> = {}
+
 addTypeImpl({
-  server_context_type(s: { [index: number]: InputContext }) {
+  server_context_type(s: never) {
     return s
   },
   process(node, data, callbacks) {
 
     if (data.inputIndex !== 0) {
-      node.serverContext ??= {}
-      node.serverContext[data.inputIndex] = {
+      nodeServerContext[node.uuid] ??= {}
+      nodeServerContext[node.uuid][data.inputIndex] = {
         timestamp: Date.now(),
         evt: data.payload
       }
-      callbacks.updateNode(false)
+      return
     }
 
     let nodeScript = jsCache[node.uuid]
@@ -65,7 +67,9 @@ addTypeImpl({
     }
     const executionTime = Date.now()
 
-    const inputs: Record<number, EvaluatedInputContext> = Object.fromEntries(Object.entries(node.serverContext ?? {})
+
+    const currentNodeServerContext = nodeServerContext[node.uuid] ?? {}
+    const inputs: Record<number, EvaluatedInputContext> = Object.fromEntries(Object.entries(currentNodeServerContext)
       .map(([key, val]) => [key, {
         ...val,
         secondsAgo: Math.floor((executionTime - val.timestamp) / 1000)

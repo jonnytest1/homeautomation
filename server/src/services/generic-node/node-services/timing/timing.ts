@@ -1,6 +1,6 @@
 import { TimerFactory } from '../../../event/timer-factory';
-import { ElementNodeImpl, nodeDescriptor, updateRuntimeParameter } from '../../element-node';
-import { addTypeImpl } from '../../generic-node-service';
+import { nodeDescriptor, updateRuntimeParameter } from '../../element-node';
+import { addTypeImpl, emitFromNode } from '../../generic-node-service';
 import { generateDtsFromSchema, mainTypeName } from '../../json-schema-type-util';
 import { logKibana } from '../../../../util/log';
 import { NodeEvent } from '../../node-event';
@@ -22,9 +22,6 @@ const payloadSchema = z.object({
   payload: z.optional(z.any())
 })
 
-
-const nodeRegister: Record<string, ElementNodeImpl> = {}
-
 type EventData = {
   node: string,
   data: unknown
@@ -32,22 +29,11 @@ type EventData = {
 }
 export async function handleTimedEvent(data: EventData) {
   await initPr.prRef
-  const node = nodeRegister[data.node]
-
-  if (node) {
-    console.info("reentry at timing");
-    node.continue(new NodeEvent({
-      payload: data.data,
-      context: data.context
-    }, {}))
-  } else {
-    logKibana("ERROR", {
-      message: "node at timer handler doesnt exist",
-      node: data.node
-    })
-  }
+  emitFromNode(data.node, new NodeEvent({
+    payload: data.data,
+    context: data.context
+  }, {}))
 }
-
 
 
 addTypeImpl({
@@ -90,16 +76,16 @@ addTypeImpl({
 
       const duration = node.parameters.delayUnit as typeof delayUnits[number]
 
-      let multiplier = 1
+      let secondsMultiplier = 1
 
       let data = evt.payload
 
       if (duration === "seconds") {
-        multiplier = 1
+        secondsMultiplier = 1
       } else if (duration === "minutes") {
-        multiplier = 60
+        secondsMultiplier = 60
       } else if (duration === "hours") {
-        multiplier = 60 * 60
+        secondsMultiplier = 60 * 60
       }
 
       let durationMillis: number | null = null
@@ -116,7 +102,7 @@ addTypeImpl({
         if (delay !== undefined && typeof delay === "string") {
           const num = +delay
           if (!isNaN(num)) {
-            durationMillis = num * multiplier
+            durationMillis = (num * secondsMultiplier) * 1000
           }
         }
       }
@@ -236,14 +222,6 @@ addTypeImpl({
   },
 
   initializeServer(nodes, globals) {
-    for (const node of nodes) {
-      nodeRegister[node.uuid] = node
-    }
     initPr.resolve()
-  },
-  unload(nodeas, globals) {
-    for (const key in nodeRegister) {
-      delete nodeRegister[key]
-    }
-  },
+  }
 })

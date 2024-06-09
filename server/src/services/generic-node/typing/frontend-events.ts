@@ -30,6 +30,12 @@ export type DeleteConnection = {
   type: "delete connection",
   connection: Connection
 }
+export type SetConnectionError = {
+  type: "set con error",
+  connection: string,
+  error: string | undefined
+}
+
 export type UpdateGlobals = {
   type: "update globals",
   globals: Partial<NodeData["globals"]>
@@ -60,7 +66,17 @@ export type UpdateEditorSchema = {
 
 
 export type StoreEvents = UpdatepositionEvent | DeleteNOdeEvet | AddNOdeEvet | AddConnection | DeleteConnection
-  | UpdateGlobals | UpdateParam | UpdateNode | UpdateEditorSchema
+  | UpdateGlobals | UpdateParam | UpdateNode | UpdateEditorSchema | SetConnectionError
 
 
-export type FrontendToBackendGenericNodeEvent = Load | UpdatepositionEvent | StoreEvents | LoadActionTriggers | SubscribeGenericNode
+export type BackendPageEvent = {
+  type: "page event",
+  data: {
+    nodeType: string,
+    data: { type: string },
+    messageId: string
+  }
+}
+
+
+export type FrontendToBackendGenericNodeEvent = (Load | UpdatepositionEvent | StoreEvents | LoadActionTriggers | SubscribeGenericNode | BackendPageEvent) & { fromFrontendSocket?: boolean }

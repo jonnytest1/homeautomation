@@ -8,7 +8,7 @@ import type { BackendActions } from './store/action';
 import { backendActions, setNodeData, updateNodeDef } from './store/action';
 import { logKibana } from '../global-error-handler';
 
-
+import { v4 } from "uuid"
 
 export type PendingConnection = {
   source: ConnectorDefintion,
@@ -31,6 +31,8 @@ export class GenericNodesDataService {
   public nodeEventTimes: BehaviorSubject<NodeEventTimes | undefined> = new BehaviorSubject(undefined);
 
   public actionTriggers$ = new BehaviorSubject<ActionTriggersEvent["data"] | undefined>(undefined)
+
+  private eventRegister = {}
 
   constructor(private service: SettingsService, private ngrxStore: Store) {
 
@@ -67,6 +69,9 @@ export class GenericNodesDataService {
 
         messageEvent.data.fromSocket = true
         ngrxStore.dispatch(messageEvent.data)
+      } else if (messageEvent.type == 'reply') {
+        this.eventRegister[messageEvent.messageId]?.(messageEvent.reply)
+        delete this.eventRegister[messageEvent.messageId]
       } else {
         debugger
       }
@@ -104,7 +109,24 @@ export class GenericNodesDataService {
       data: action
     })
   }
+  public passPageAction(action: { messageId: string, type: string }, nodeType: string) {
 
+    return new Promise(res => {
+      this.eventRegister[action.messageId] = res
+      this.service.genericNodeSendingEvents.next({
+        type: "generic-node-event",
+        data: {
+          type: "page event",
+          data: {
+            nodeType,
+            data: action,
+            messageId: action.messageId
+          }
+        }
+      })
+    })
+
+  }
   registerConnection(uuid: string, type: "out" | "in", index, el: HTMLElement) {
     this.connectorMap[uuid] ??= {
       input: [], output: []
@@ -171,7 +193,8 @@ export class GenericNodesDataService {
         target: {
           uuid: targetuuid,
           index: indx
-        }
+        },
+        uuid: v4()
       }
     }))
     /*this.nodeData.next({

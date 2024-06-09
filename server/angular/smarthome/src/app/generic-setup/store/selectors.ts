@@ -1,5 +1,6 @@
 import { createFeatureSelector, createSelector } from '@ngrx/store';
-import { GenericNodeState, featureName } from './reducers';
+import type { GenericNodeState } from './reducers';
+import { featureName } from './reducers';
 import { logKibana } from '../../global-error-handler';
 import type { ElementNode } from '../../settings/interfaces';
 
@@ -19,10 +20,16 @@ export const selectNode = (uuid: string) => {
     return data[uuid]
   })
 }
-export const selectNodeDefByType = (type: string) => {
+export const selectNodesByType = (type: string) => {
+  return createSelector(selectNodes, (data) => {
+    return data?.filter(node => node.type === type)
+  })
+}
+
+export const selectNodeDefByType = (type: string, error = true) => {
   return createSelector(selectNodeData, data => {
     const nodeDef = data.nodeDefinitions[type];
-    if (!nodeDef) {
+    if (!nodeDef && error) {
       logKibana("ERROR", {
         message: "Missing node type",
         node_Type: type

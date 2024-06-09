@@ -1,14 +1,15 @@
 {
   "compileOnSave": false,
   "compilerOptions": {
-    "module": "commonjs",
+    "module": "NodeNext",
     "baseUrl": "./",
-    "moduleResolution": "node",
+    "moduleResolution": "NodeNext",
     "isolatedModules": true,
     "importsNotUsedAsValues": "error",
     "ignoreDeprecations": "5.0",
     "strictNullChecks": true,
-    "target": "es6",
+    "useDefineForClassFields": false,
+    "target": "ESNext",
     "types": [
       "node",
       "jest"

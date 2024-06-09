@@ -11,12 +11,13 @@ import { selectNode } from '../store/selectors';
 import type { Observable } from 'rxjs';
 import { combineLatest, map } from 'rxjs';
 import { StoreService } from '../store/store-service';
+import { RouterModule } from '@angular/router';
 
 @Component({
   selector: 'app-generic-options',
   templateUrl: './generic-options.component.html',
   styleUrls: ['./generic-options.component.scss'],
-  imports: [CommonModule, GenOptionComponent, MatIconModule],
+  imports: [CommonModule, GenOptionComponent, MatIconModule, RouterModule],
   standalone: true
 })
 export class GenericOptionsComponent implements AfterViewInit, OnChanges {

@@ -35,7 +35,7 @@ export async function logKibana(level: 'INFO' | 'ERROR' | 'DEBUG', message: stri
     logStack = base64safe(e.stack);
   }
 
-  const devMode = location.host === 'localhost:4200';
+  const devMode = location.host.includes("localhost");
   const jsonData: { [key: string]: string } = {
     Severity: level,
     application: `SmartHomeFe${devMode ? '_debug' : ''}`,

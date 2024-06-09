@@ -1,4 +1,4 @@
-import type { Action, ActionCreator } from './action'
+import { createAction, type Action, type ActionCreator } from './action'
 import { Selector, type SelectorFnc } from './selector'
 import { logKibana } from '../log'
 import { BehaviorSubject, map, type Observable } from 'rxjs'
@@ -8,7 +8,7 @@ import { BehaviorSubject, map, type Observable } from 'rxjs'
 type Reducer<S, A extends { type: string }> = (state: S, action: A) => S
 type Effect<S, A extends { type: string }> = (state: S, action: A) => (void | Promise<void>)
 
-export class DataStore<T>{
+export class DataStore<T> {
 
   state: BehaviorSubject<T>
 
@@ -55,6 +55,14 @@ export class DataStore<T>{
     }
     this.reducers[action.type] = reducer
   }
+
+  createReducerAction<Type extends string, P>(actionType: Type, reducer: Reducer<T, Action<Type, P>>, propsCreator?: () => P) {
+    const action = createAction(actionType, propsCreator)
+    this.addReducer(action, reducer)
+    return action
+  }
+
+
   addEffect<Type extends string, P>(action: ActionCreator<Type, P>, effect: Effect<T, Action<Type, P>>) {
     if (this.effects[action.type]) {
       throw new Error("duplciate reducer " + action.type)
@@ -83,7 +91,8 @@ export class DataStore<T>{
     if (lastDispatch === this.lastDispatch) {
       this.effects[action.type]?.(newState, action)
     } else {
-      debugger
+      console.log("skipping effect after new action dispatch")
+      // debugger
     }
   }
 

@@ -56,9 +56,9 @@ export function setLastEventInputTime(node: ElementNode, eventTime: number) {
   }))
   writeFileSync(lastEventTimesFile, JSON.stringify(genericNodeDataStore.getOnce(lastEventTimes), undefined, "   "))
 }
-export function setLastEventOutputTime(node: ElementNode, eventTime: number) {
+export function setLastEventOutputTime(nodeUuid: string, eventTime: number) {
   genericNodeDataStore.dispatch(setOutputTimeAction({
-    nodeUuid: node.uuid,
+    nodeUuid: nodeUuid,
     eventTime
   }))
   writeFileSync(lastEventTimesFile, JSON.stringify(genericNodeDataStore.getOnce(lastEventTimes), undefined, "   "))

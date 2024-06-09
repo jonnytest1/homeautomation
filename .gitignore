@@ -16,6 +16,7 @@ clients/pc-receiver/.env
 clients/pc-receiver/.env.prod.env
 clients/pc-receiver/services/sounds/
 /clients/pc-receiver/smarthomereceiver.sh
+clients/pc-receiver/smarthomereceiver.bat
 
 clients/arduino/radio-repeater/radio-repeater/personal-guide.txt
 __pycache__/
@@ -43,3 +44,5 @@ clients/watch/watch/src/lora_config.h
 server/src/services/generic-node/nodes copy.json
 server/bash.exe.stackdump
 server/buildInfoPath
+clients/pc-receiver/logs
+server/src/services/generic-node/node-data/nodes

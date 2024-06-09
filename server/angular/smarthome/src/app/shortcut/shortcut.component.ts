@@ -81,6 +81,9 @@ export class ShortcutComponent implements OnInit {
   ])
     .pipe(
       map(([rec, genData]): Array<ShortcutReceiver> => {
+        if (!genData) {
+          return Object.values(rec) as Array<ShortcutReceiver>
+        }
         return [...Object.values(rec) as Array<ShortcutReceiver>, genData];
       })
     )
@@ -225,7 +228,6 @@ export class ShortcutComponent implements OnInit {
     })
   }
   updatePosition(event: MouseEvent | TouchEvent, gridElement: HTMLDivElement) {
-    console.log("update pos")
     if (!this.tempData && !this.editingConfig) {
       return;
     }

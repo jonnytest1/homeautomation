@@ -20,12 +20,13 @@ export class TrackingEvent {
 
   @column({ size: "large" })
   context: string
-  @column({ size: "small" })
-  timestamp: string
+
+  @column({ type: "date" })
+  time_col: Date
 
   static create(evnt: NodeEvent<unknown, unknown>, node: EvalNode<NodeDefOptinos, any>) {
     const evt = new TrackingEvent()
-    evt.timestamp = new Date().toISOString()
+    evt.time_col = new Date()
     evt.nodeUuid = node.uuid
     if (evnt.payload === undefined) {
       throw new Error("payload undefined")

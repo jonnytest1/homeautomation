@@ -4,7 +4,7 @@ import { startNodeRed } from './src/node-red/server';
 import { environment } from './src/environment';
 import { updateDatabase } from 'hibernatets';
 import { HttpRequest, initialize, ResponseCodeError } from 'express-hibernate-wrapper';
-
+Error.stackTraceLimit = Infinity;
 const fetch = require('node-fetch');
 const NodeMediaServer = require('node-media-server');
 const https = require('https');

@@ -1,4 +1,4 @@
-import type { AfterViewChecked, AfterViewInit, OnChanges, OnInit, SimpleChanges } from '@angular/core';
+import type { AfterViewChecked, AfterViewInit, OnChanges, OnDestroy, OnInit, SimpleChanges } from '@angular/core';
 import { Component, Input, ViewChild, ElementRef, Output, EventEmitter } from '@angular/core';
 import { BoundingBox } from '../../wiring/util/bounding-box';
 import { GenericNodesDataService } from '../generic-node-data-service';
@@ -18,7 +18,7 @@ import { logKibana } from '../../global-error-handler';
   styleUrls: ['./line.component.scss'],
   standalone: true
 })
-export class LineComponent implements OnChanges, AfterViewChecked, AfterViewInit {
+export class LineComponent implements OnChanges, AfterViewChecked, AfterViewInit, OnDestroy {
 
   static curveOffset = 40;
   @Input()
@@ -40,8 +40,26 @@ export class LineComponent implements OnChanges, AfterViewChecked, AfterViewInit
   vectorCanvas: ReturnType<typeof extendCanvasContext>
   isHovering: boolean;
 
+
+  callback = {
+    mousemove: (e: MouseEvent) => {
+      this.mousePos = new Vector2(e)
+    },
+    click: (e: MouseEvent) => {
+      if (this.isHovering) {
+        this.clicked.emit(e)
+        e.stopPropagation()
+      }
+    }
+  }
+
   constructor(private con: GenericNodesDataService) {
 
+  }
+  ngOnDestroy(): void {
+
+    window.removeEventListener("mousemove", this.callback.mousemove)
+    window.removeEventListener("click", this.callback.click, true)
   }
   mousePos: Vector2
 
@@ -54,17 +72,10 @@ export class LineComponent implements OnChanges, AfterViewChecked, AfterViewInit
     this.canvas.nativeElement.height = Math.floor(window.innerHeight);
     this.vectorCanvas = extendCanvasContext(this.canvas.nativeElement)
 
-    window.addEventListener("mousemove", e => {
-      // debugger
-      this.mousePos = new Vector2(e)
-    })
-    window.addEventListener("click", e => {
-      // debugger
-      if (this.isHovering) {
-        this.clicked.emit(e)
-        e.stopPropagation()
-      }
-    }, true)
+
+
+    window.addEventListener("mousemove", this.callback.mousemove)
+    window.addEventListener("click", this.callback.click, true)
   }
 
   lineCache: string

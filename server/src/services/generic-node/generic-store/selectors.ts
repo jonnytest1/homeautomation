@@ -1,12 +1,13 @@
 import { genericNodeDataStore } from './reference';
 import type { NodeData } from '../typing/generic-node-type';
+import { currentVersion } from '../data-versioning';
 
 export const nodeDataSelector = genericNodeDataStore.createSelector(s => s.nodeData)
 
 export const selectConnectorMap = genericNodeDataStore.createSelector(nodeData => {
   return nodeData.connectorMap
 })
-export const selectConnectorForNodeUuid = (uuid: string) => selectConnectorMap.chain(conMap => {
+export const selectConnectionsFromNodeUuid = (uuid: string) => selectConnectorMap.chain(conMap => {
   return conMap[uuid]
 })
 
@@ -14,13 +15,27 @@ export const selectConnectorForNodeUuid = (uuid: string) => selectConnectorMap.c
 export const selectTargetConnectorMap = genericNodeDataStore.createSelector(nodeData => {
   return nodeData.targetConnectorMap
 })
+
+
+export const selectTargetConnectorForNodeUuid = (uuid: string) => genericNodeDataStore.createSelector(nodeData => {
+  return nodeData.targetConnectorMap[uuid]
+})
+
 export const nodeDataWithNodesArray = nodeDataSelector.chain(nodeData => {
   const data: NodeData = {
-    connections: nodeData.connections,
+    connections: Object.values(nodeData.connections),
     globals: nodeData.globals,
-    nodes: Object.values(nodeData.nodes)
+    nodes: Object.values(nodeData.nodes),
+    version: currentVersion
   }
   return data
+})
+export const nodeglobalsSelector = nodeDataSelector.chain(nodeData => {
+  return {
+    connections: Object.values(nodeData.connections),
+    globals: nodeData.globals,
+    version: currentVersion
+  }
 })
 
 

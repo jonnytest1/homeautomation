@@ -15,15 +15,15 @@ import { ActivatedRoute, Router } from '@angular/router';
 import type { Connection, ElementNode, NodeData, NodeDefintion } from '../settings/interfaces';
 import { logKibana } from '../global-error-handler';
 import { filter, map, combineLatestWith, first } from 'rxjs/operators';
-import { BehaviorSubject, Observable, combineLatest } from 'rxjs';
+import type { Observable } from 'rxjs';
+import { BehaviorSubject, combineLatest } from 'rxjs';
 import { Store } from '@ngrx/store';
 import { backendActions } from './store/action';
 import { selectNodeDefs, selectNodeData, selectNode } from './store/selectors';
 import { LetModule } from '@ngrx/component';
 import { isSameConnection } from './line/line-util';
-import { jsonClone } from '../utils/clone';
 import { ClipboardService } from './clipboard-service';
-import { ActiveElement } from './generic-setup-types';
+import type { ActiveElement } from './generic-setup-types';
 
 
 
@@ -317,7 +317,8 @@ export class GenericSetupComponent implements OnInit {
                     target: {
                       index: activeItem.con.target.index,
                       uuid: oldToNewNodeMap[activeItem.con.target.uuid]
-                    }
+                    },
+                    uuid: v4()
                   };
                   this.store.dispatch(backendActions.addConnection({ connection: newNode }))
                 }
@@ -357,13 +358,13 @@ export class GenericSetupComponent implements OnInit {
   }
 
 
-  isInElements(elements: Array<ActiveElement>, node: ElementNode | Connection, typeMatch = false) {
+  isInElements(elements: Array<ActiveElement> | null | undefined, node: ElementNode | Connection, typeMatch = false) {
     if (!elements) {
       return false
     }
 
     return elements.some(el => {
-      if ("uuid" in node) {
+      if ("type" in node) {
         if (el.type == "node") {
           if (typeMatch) {
             return el.node.type === node.type
@@ -412,7 +413,7 @@ export class GenericSetupComponent implements OnInit {
     let queryParam: string | null = null
     if (element !== undefined) {
       let container: ActiveElement
-      if ("uuid" in element) {
+      if ("type" in element) {
         container = { type: "node", node: element }
         queryParam = element.uuid
       } else {

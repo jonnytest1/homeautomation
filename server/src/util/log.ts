@@ -72,6 +72,16 @@ export async function logKibana(level: 'INFO' | 'ERROR' | 'DEBUG' | "WARN", mess
     Severity: level,
     application: `SmartHome${environment.DEBUG ? '_debug' : ''}${environment.LOG_SUFFIX ?? ''}`,
   };
+
+  if (level === "ERROR" || level === "WARN") {
+    try {
+      throw new Error("error")
+    } catch (e) {
+      jsonData.logStack = e.stack
+    }
+  }
+
+
   if (!message && error) {
     jsonData.message = error.message;
   } else if (typeof message === "object") {

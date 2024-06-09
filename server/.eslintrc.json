@@ -19,6 +19,18 @@
           }
         ]
       }
+    },
+    {
+      "files": [
+        "**/*.js"
+      ],
+      "env": {
+        "browser": true
+      },
+      "rules": {
+        "@typescript-eslint/triple-slash-reference": "off",
+        "no-undef": "off"
+      }
     }
   ],
   "rules": {

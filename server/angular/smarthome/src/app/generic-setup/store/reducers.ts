@@ -14,7 +14,8 @@ const initialState: GenericNodeState = {
   connections: [],
   nodes: [],
   globals: {},
-  nodeDefinitions: {}
+  nodeDefinitions: {},
+  version: 0
 }
 
 
@@ -65,6 +66,21 @@ export const genericReducer = createReducer(
   on(backendActions.addConnection, (st, a) => ({
     ...st,
     connections: [...st.connections, a.connection]
+  })),
+  on(backendActions.setConError, (st, a) => ({
+    ...st,
+    connections: st.connections.map(con => {
+      if (con.uuid === a.connection) {
+        return {
+          ...con,
+          source: {
+            ...con.source,
+            error: a.error
+          }
+        }
+      }
+      return con
+    })
   })),
   on(backendActions.addNode, (st, a) => ({
     ...st,

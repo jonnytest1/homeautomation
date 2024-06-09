@@ -1,4 +1,5 @@
 import { ChangeDetectorRef, Component } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
 import { BehaviorSubject, fromEvent } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
 @Component({
@@ -7,9 +8,14 @@ import { map, startWith } from 'rxjs/operators';
   styleUrls: ['./app.component.less']
 })
 export class AppComponent {
-  constructor(private cdr: ChangeDetectorRef) {
+  constructor(private cdr: ChangeDetectorRef, activeRoute: ActivatedRoute) {
     window["defaultLog"] = true
     //
+
+
+    if (new URL(location.href).searchParams.get("kiosk")) {
+      document.body.parentElement.classList.add("kiosk")
+    }
   }
   title = 'smarthome';
 

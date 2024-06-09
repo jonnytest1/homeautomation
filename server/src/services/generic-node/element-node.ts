@@ -3,7 +3,7 @@ import type { Callbacks, ElementNode as ELN, ElementNode, TypeImplementaiton } f
 import type { NodeEvent } from './node-event';
 export class ElementNodeImpl<T = { [optinoskey: string]: string }, P = Partial<NodeDefOptinos>> implements ELN<T, P>, Callbacks {
 
-  parameters?: Partial<T> | undefined;
+  parameters?: Partial<T & { name?: string }> | undefined;
   position: { x: number; y: number; };
   type: string;
   uuid: string;
@@ -82,7 +82,7 @@ export function updateRuntimeParameter<T, P, K extends (keyof P & keyof T & stri
       }
     }
 
-    node.parameters[key] = value
+    node.parameters[key] = value as never
   }
 }
 

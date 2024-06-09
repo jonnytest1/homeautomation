@@ -83,6 +83,9 @@ addTypeImpl({
         message: "error for action request",
         actionType: actionEndpoint,
         url: url,
+        action: node.parameters?.action ?? '',
+        name: node.parameters?.name ?? '',
+        receiver: node.parameters?.receiver ?? '',
         node: node.uuid
       }, e)
     }

@@ -4,6 +4,7 @@ import { addTypeImpl } from '../generic-node-service'
 import type { ExtendedJsonSchema } from '../typing/generic-node-type'
 import { generateDtsFromSchema, generateZodTypeFromSchema, mainTypeName } from '../json-schema-type-util'
 import type { Select } from '../typing/node-options'
+import { updateRuntimeParameter } from '../element-node'
 import { connect } from 'mqtt'
 import type { ZodType } from 'zod'
 
@@ -46,14 +47,15 @@ addTypeImpl({
       console.log(`sending ${argStr} to ${finalTopic}`)
       client.publish(finalTopic, argStr, async () => {
         await new Promise(res => setTimeout(res, 1000))
+        callbacks.continue(evt)
         client.endAsync()
       })
     })
     console.log("sending mqtt event", evt.payload)
-    callbacks.continue(evt)
   },
   nodeDefinition: () => ({
     inputs: 1,
+    outputs: 1,
     type: "mqtt publish",
     options: {
       topic: {
@@ -72,19 +74,18 @@ addTypeImpl({
     globalConfig: globalMqttConfig
   }),
   async nodeChanged(node, prev) {
-    node.runtimeContext ??= {}
-    node.runtimeContext.parameters ??= {}
     const publishable = mqttConnection.getPublishable()
-    node.runtimeContext.parameters.topic = {
+
+    updateRuntimeParameter(node, "topic", {
       type: "select",
       options: publishable.map(d => `${d.getCommandTopic()}`),
       optionDisplayNames: publishable.map(d => d.friendlyName),
       order: 2
-    }
+    })
 
-    if (node.parameters?.topic) {
+    if (node.parameters.topic) {
 
-      if (prev?.parameters?.topic && node.parameters?.topic !== prev?.parameters?.topic) {
+      if (prev?.parameters?.topic && node.parameters.topic !== prev?.parameters?.topic) {
         delete node.parameters.command
         delete node.parameters.argument
         delete node.runtimeContext.parameters?.argument
@@ -95,8 +96,6 @@ addTypeImpl({
 
       node.runtimeContext.info = device.friendlyName
       if (device.commands) {
-        node.runtimeContext.parameters ??= {}
-
         const commandOtpinos = device.commands.map(c => c.name)
         node.runtimeContext.parameters["command"] = { type: "select", options: commandOtpinos }
 

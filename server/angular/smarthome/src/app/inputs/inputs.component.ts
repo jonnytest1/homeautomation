@@ -44,10 +44,8 @@ export class InputsComponent implements OnInit, OnDestroy {
     delayAtLeast(100)
   )
 
-  constructor(activeRoute: ActivatedRoute) {
-    if (activeRoute.snapshot.queryParams.kiosk) {
-      document.body.parentElement.classList.add("kiosk")
-    }
+  constructor() {
+
 
   }
 

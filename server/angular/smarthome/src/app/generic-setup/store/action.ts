@@ -1,6 +1,6 @@
 import type { ActionCreator } from '@ngrx/store';
 import { createAction, props } from '@ngrx/store';
-import type { Connection, ElementNode, NodeData, UpdateEditorSchema } from '../../settings/interfaces';
+import type { Connection, ElementNode, NodeData, SetConnectionError, UpdateEditorSchema } from '../../settings/interfaces';
 import { type NodeDefintion } from '../../settings/interfaces';
 
 export const setNodeData = createAction("setnodes", props<{ data: NodeData }>())
@@ -31,6 +31,7 @@ export const backendActions = backendAction({
   addNode: createAction("add node", props<{ node: ElementNode }>()),
   deleteConnection: createAction("delete connection", props<{ connection: Connection }>()),
   addConnection: createAction("add connection", props<{ connection: Connection }>()),
+  setConError: createAction("set con error", props<Omit<SetConnectionError, "type">>()),
   updateGlobals: createAction("update globals", props<{ globals: Partial<NodeData["globals"]> }>()),
   updateParameter: createAction("update param", props<{
     node: string

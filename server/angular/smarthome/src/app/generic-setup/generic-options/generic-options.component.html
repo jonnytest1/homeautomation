@@ -22,11 +22,19 @@
       </form>
 
     </div>
-    <button class="globalbtn"
-            popovertarget="overlay"
-            *ngIf="options.globalConfig">
-      <mat-icon>settings</mat-icon>
-    </button>
+
+    <div class="icons">
+      <button class="icon"
+              popovertarget="overlay"
+              *ngIf="options.globalConfig">
+        <mat-icon>settings</mat-icon>
+      </button>
+      <button class="icon"
+              *ngIf="options.page">
+        <mat-icon routerLink="type/{{options.type}}">launch</mat-icon>
+      </button>
+    </div>
+
 
 
     <h2>{{node.type}}</h2>

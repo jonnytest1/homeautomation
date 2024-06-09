@@ -1,8 +1,8 @@
-import { Inject, Injectable } from '@angular/core';
+import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { backendActions } from './store/action';
-import { ActiveElement } from './generic-setup-types';
-import { Connection, ElementNode } from '../settings/interfaces';
+import type { ActiveElement } from './generic-setup-types';
+import type { Connection, ElementNode } from '../settings/interfaces';
 import { Vector2 } from '../wiring/util/vector';
 import { jsonClone } from '../utils/clone';
 import { v4 } from "uuid"
@@ -48,7 +48,8 @@ export class ClipboardService {
             target: {
               index: activeItem.con.target.index,
               uuid: oldToNewNodeMap[activeItem.con.target.uuid]
-            }
+            },
+            uuid: v4()
           };
           copyList.push({ type: "connection", con: newConnection })
         }

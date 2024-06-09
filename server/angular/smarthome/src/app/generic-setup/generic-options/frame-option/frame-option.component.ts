@@ -1,10 +1,10 @@
 import { CommonModule } from '@angular/common';
 import type { OnChanges, OnInit, SimpleChanges } from '@angular/core';
-import { Component, Input, type ElementRef, ViewChild, type AfterViewInit } from '@angular/core';
-import { Frame } from '../../../settings/interfaces';
+import { Component, Input, ViewChild, type AfterViewInit, type ElementRef } from '@angular/core';
 import type { SafeHtml } from '@angular/platform-browser';
 import { DomSanitizer } from '@angular/platform-browser';
 import { BehaviorSubject } from 'rxjs';
+import { Frame } from '../../../settings/interfaces';
 
 @Component({
   selector: 'app-frame-option',
@@ -17,13 +17,13 @@ export class FrameOptionComponent implements OnInit, OnChanges, AfterViewInit {
 
 
   @Input()
-  definition: Frame
+    definition: Frame
 
   @Input()
-  name: string
+    name: string
 
   @Input()
-  currentValue: string
+    currentValue: string
 
   trustedDocuemnt: SafeHtml;
   gotsize = new BehaviorSubject(false)
@@ -33,10 +33,10 @@ export class FrameOptionComponent implements OnInit, OnChanges, AfterViewInit {
 
 
   @ViewChild("frameRef")
-  frame: ElementRef<HTMLIFrameElement>
+    frame: ElementRef<HTMLIFrameElement>
 
   @ViewChild("hiddenValue")
-  hiddenValue: ElementRef<HTMLTextAreaElement>
+    hiddenValue: ElementRef<HTMLTextAreaElement>
 
   constructor(private sanitizer: DomSanitizer) {
 
@@ -119,10 +119,5 @@ export class FrameOptionComponent implements OnInit, OnChanges, AfterViewInit {
 
     }
 
-  }
-  frameMessage(event) {
-    debugger
-    //this.elementRef.nativeElement.value = JSON.stringify(this.monacoData)
-    //this.elementRef.nativeElement.dispatchEvent(new Event('change', { 'bubbles': true }))
   }
 }

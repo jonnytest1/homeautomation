@@ -10,12 +10,17 @@
     border: 2px solid black
   }
 
-  .globalbtn {
+  .icons {
     position: absolute;
     right: 8px;
-    border: 0;
+    display: flex;
+    gap: 4px;
 
-    cursor: pointer //top: 8px;
+    .icon {
+      border: 0;
+
+      cursor: pointer //top: 8px;
+    }
   }
 
   form {

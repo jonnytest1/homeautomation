@@ -16,6 +16,17 @@
   "overrides": [
     {
       "files": [
+        "*.ts"
+      ],
+      "extends": [
+        "plugin:@ngrx/recommended-requiring-type-checking"
+      ],
+      "rules": {
+        "@ngrx/avoid-mapping-selectors": "Off"
+      }
+    },
+    {
+      "files": [
         "*.ts",
         "*.js"
       ],
@@ -60,16 +71,8 @@
         "@typescript-eslint/no-redeclare": "warn",
         "unused-imports/no-unused-imports": "warn",
         "no-debugger": "warn",
-        "@ngrx/on-function-explicit-return-type": "Off"
+        "@ngrx/on-function-explicit-return-type": "Off",
       }
     },
-    {
-      "files": [
-        "*.ts"
-      ],
-      "extends": [
-        "plugin:@ngrx/recommended-requiring-type-checking"
-      ]
-    }
   ]
 }

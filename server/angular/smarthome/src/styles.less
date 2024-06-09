@@ -18,22 +18,30 @@
   color: black
 }
 
+html {
+  --vwidth: 100vw;
+  --vheight: 100vh;
 
+  &.kiosk {
+    transform: rotate(90deg);
+    transform-origin: bottom left;
+    width: 100vh;
+    height: 100vw;
+    position: absolute;
+    top: -100vw;
+    left: -22px;
+    cursor: none;
+    background-color: #000000d9;
+    font-size: 30px;
+    filter: brightness(0.5);
 
-html.kiosk {
-  transform: rotate(90deg);
-  transform-origin: bottom left;
-  width: 100vh;
-  height: 100vw;
-  position: absolute;
-  top: -100vw;
-  left: -22px;
-  cursor: none;
-  background-color: #000000d9;
-  font-size: 30px;
+    --vwidth: 100vh;
+    --vheight: 100vw;
 
-  mat-sidenav-container.sidenav-container {
-    background: #ffffff00;
+    mat-sidenav-container.sidenav-container {
+      background: #ffffff00;
+
+    }
 
   }
 }

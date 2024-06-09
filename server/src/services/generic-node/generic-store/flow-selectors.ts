@@ -1,10 +1,10 @@
-import { selectConnectorForNodeUuid, selectNodeMap } from './selectors';
+import { selectConnectionsFromNodeUuid, selectNodeMap } from './selectors';
 import { genericNodeDataStore } from './reference';
 import type { ConnectorDefintion, ElementNode } from '../typing/generic-node-type';
 
 
 
-export const selectConnectionsFromContinue = (ev: { fromNode: string, fromIndex: number | undefined }) => selectConnectorForNodeUuid(ev.fromNode)
+export const selectConnectionsFromContinue = (ev: { fromNode: string, fromIndex: number | undefined, throwIfMissing?: boolean }) => selectConnectionsFromNodeUuid(ev.fromNode)
   .chain(connectors => {
     if (!connectors) {
       return []
@@ -38,6 +38,7 @@ export function forNodes(callbacks: { removed: ((node: string) => void), added: 
 
     for (const node of setCopy) {
       callbacks.removed(node)
+      nodeCache.delete(node)
     }
   })
 }

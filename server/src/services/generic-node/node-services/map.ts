@@ -286,20 +286,25 @@ function setNewCode(node: ElementNode, code: Omit<CodeData, "timestamp" | "node"
 
 function cacheNodeScript(node: ElementNode<NodeDefToType<{ code: { type: "monaco"; default: string; }; }>, unknown, unknown>) {
   if (node.parameters) {
-    const codePAram = JSON.parse(node.parameters.code || '{}');
-    const parsedCodeAData = codeSchema.parse(codePAram)
-    if (parsedCodeAData) {
-      let code = parsedCodeAData.jsCode
-      if (code.startsWith("function map(input)")) {
-        code = `(${code})(payload)`
-      }
+    try {
+      const codePAram = JSON.parse(node.parameters.code || '{}');
+      const parsedCodeAData = codeSchema.parse(codePAram)
+      if (parsedCodeAData) {
+        let code = parsedCodeAData.jsCode
+        if (code.startsWith("function map(input)")) {
+          code = `(${code})(payload)`
+        }
 
-      const finalCode = code
-      jsCache[node.uuid] = {
-        finalCode,
-        script: new Script(finalCode),
-        ...parsedCodeAData
-      };
+        const finalCode = code
+        jsCache[node.uuid] = {
+          finalCode,
+          script: new Script(finalCode),
+          ...parsedCodeAData
+        };
+      }
+    } catch (e) {
+      debugger
+      throw e
     }
   }
 

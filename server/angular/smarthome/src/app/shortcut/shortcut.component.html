@@ -42,31 +42,34 @@
   <div class="actions"
        *ngIf="(receivers$|async);let receivers">
     <ng-container *ngFor="let receiver of receivers">
-      <ng-container *ngFor="let action of receiver.actions">
+      <ng-container *ngIf="receiver">
+        <ng-container *ngFor="let action of receiver.actions">
 
-        <div class="actionchoice"
-             *ngIf="!state.isaddbackground"
-             (mousedown)="dragNewActionStart($event,receiver,action)"
-             (touchstart)="dragNewActionStart($event,receiver,action)"
-             (touchmove)="updatePosition($event,gridwrapper)"
-             (touchend)="drop()">
-          <app-action-template [action]="action"
-                               [receiver]="receiver"></app-action-template>
-        </div>
+          <div class="actionchoice"
+               *ngIf="!state.isaddbackground"
+               (mousedown)="dragNewActionStart($event,receiver,action)"
+               (touchstart)="dragNewActionStart($event,receiver,action)"
+               (touchmove)="updatePosition($event,gridwrapper)"
+               (touchend)="drop()">
+            <app-action-template [action]="action"
+                                 [receiver]="receiver"></app-action-template>
+          </div>
 
+        </ng-container>
+
+        <ng-container *ngIf="receiver.events">
+          <div *ngIf="{name:'events',type:'diagram'} let action"
+               class="actionchoice"
+               (mousedown)="dragNewActionStart($event,receiver,action)"
+               (touchstart)="dragNewActionStart($event,receiver,action)"
+               (touchmove)="updatePosition($event,gridwrapper)"
+               (touchend)="drop()">
+            <app-action-template [action]="action"
+                                 [receiver]="receiver"></app-action-template>
+          </div>
+        </ng-container>
       </ng-container>
 
-      <ng-container *ngIf="receiver.events">
-        <div *ngIf="{name:'events',type:'diagram'} let action"
-             class="actionchoice"
-             (mousedown)="dragNewActionStart($event,receiver,action)"
-             (touchstart)="dragNewActionStart($event,receiver,action)"
-             (touchmove)="updatePosition($event,gridwrapper)"
-             (touchend)="drop()">
-          <app-action-template [action]="action"
-                               [receiver]="receiver"></app-action-template>
-        </div>
-      </ng-container>
     </ng-container>
 
   </div>

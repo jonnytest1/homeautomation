@@ -5,6 +5,9 @@ import { getTypes, validate } from './validation/watcher';
 import { nodeDescriptor, nodeTypeName } from './element-node';
 import { typeData } from './generic-node-constants';
 import { SchemaMatchingError, validateJsonSchema } from './validation/json-schema-type.validator';
+import { genericNodeDataStore } from './generic-store/reference';
+import { backendToFrontendStoreActions } from './generic-store/actions';
+import { selectConnectionsFromNodeUuid, selectNodeByUuid, selectTargetConnectorForNodeUuid } from './generic-store/selectors';
 import { logKibana } from '../../util/log';
 import { generateSchema } from 'typescript-json-schema';
 import type { Diagnostic, DiagnosticMessageChain, DiagnosticRelatedInformation } from 'typescript';
@@ -55,11 +58,12 @@ async function getComputeSchema(node: ElementNode<unknown>) {
 
 export async function updateTypeSchema(node: ElementNode, nodeData: PreparedNodeData) {
   let schema: Schemata | null = null
-  const connectionsTargetingCurrentNode = nodeData.targetConnectorMap[node.uuid];
+
+  const connectionsTargetingCurrentNode = genericNodeDataStore.getOnce(selectTargetConnectorForNodeUuid(node.uuid))
   if (connectionsTargetingCurrentNode) {
     const allConnectorsToConnection0 = connectionsTargetingCurrentNode[0]
     const schemata = await Promise.all(allConnectorsToConnection0.map(async con => {
-      const connectionNode = nodeData.nodeMap[con.uuid]
+      const connectionNode = genericNodeDataStore.getOnce(selectNodeByUuid(con.source.uuid))
       const compSchema = connectionNode.runtimeContext.outputSchema
       if (compSchema?.dts && node.runtimeContext.inputSchema) {
         try {
@@ -99,11 +103,18 @@ export async function updateTypeSchema(node: ElementNode, nodeData: PreparedNode
 `;
           // writeFile(join(typeData, `${node.uuid}__${connectionNode.uuid}.ts`), str)
           await validate(`connections_to_${node.uuid}`, str, `${node.type}-${node.uuid}-con input check`)
-          delete con.error
+
+          genericNodeDataStore.dispatch(backendToFrontendStoreActions.setConnectionError({
+            connection: con.uuid,
+            error: undefined
+          }))
         } catch (e) {
 
           if (e instanceof SchemaMatchingError) {
-            con.error = e.toMessageString()
+            genericNodeDataStore.dispatch(backendToFrontendStoreActions.setConnectionError({
+              connection: con.uuid,
+              error: e.toMessageString()
+            }))
 
           } else {
             let firstError = e as DiagnosticRelatedInformation | DiagnosticMessageChain
@@ -126,8 +137,10 @@ export async function updateTypeSchema(node: ElementNode, nodeData: PreparedNode
                     messageText = messageText.replace(subType, dtsrelace)
                   }
                 }
-
-              con.error = messageText
+              genericNodeDataStore.dispatch(backendToFrontendStoreActions.setConnectionError({
+                connection: con.uuid,
+                error: messageText
+              }))
             } else {
               debugger;
             }
@@ -197,13 +210,14 @@ export async function updateTypeSchema(node: ElementNode, nodeData: PreparedNode
     writeFile(join(typeData, `editorschema_${node.uuid}.ts`), node.runtimeContext?.editorSchema.dts)
   }
 
-  const outConnections = nodeData.connectorMap[node.uuid]
+  const outConnections = genericNodeDataStore.getOnce(selectConnectionsFromNodeUuid(node.uuid))
 
   if (outConnections) {
     for (const connectorIndex in outConnections) {
       for (const connector of outConnections[connectorIndex]) {
         try {
-          await updateTypeSchema(nodeData.nodeMap[connector.uuid], nodeData)
+          const nextNode = genericNodeDataStore.getOnce(selectNodeByUuid(connector.uuid))
+          await updateTypeSchema(nextNode, nodeData)
         } catch (e) {
           throw new Error("error validating node " + connector.uuid, {
             cause: e
