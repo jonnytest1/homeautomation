@@ -1,5 +1,8 @@
+import type { DateWithTimeZone, VEvent } from 'node-ical'
+import { EventWithAlarm } from './calendar-event-with-alarm'
 import { CalenderService, getNextRRule } from './calendar-notify-service'
 import { uidBlackList } from './calendar-uid-blacklist'
+import { MINUTE } from '../constant'
 
 
 
@@ -14,7 +17,27 @@ describe("calender", () => {
   }, 99999999)
 
 
+  it("alerts 2", async () => {
 
+    const service = new CalenderService()
+
+    const now = Date.now()
+    const evt = new Date(now + (5 * MINUTE) + 3000) as DateWithTimeZone
+    evt.tz = "Europe/Berlin"
+    service.addNextForEvent(new EventWithAlarm({
+      type: "VEVENT",
+      start: evt,
+      summary: "test event",
+      [`${Math.random()}`]: {
+        type: "VALARM",
+        trigger: `-P0DT0H5M`
+      }
+
+    } as Partial<VEvent> as VEvent))
+    expect(service["reminderList"].next?.value).toBeTruthy()
+    service.timer()
+    await new Promise(res => { })
+  }, 99999999)
 
 
   it("get next rrule", () => {

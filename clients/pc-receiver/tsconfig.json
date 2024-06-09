@@ -1,12 +1,13 @@
 {
-    "compilerOptions": {
-        "esModuleInterop": true,
-        "lib": [
-            "ESNext",
-            "DOM"
-        ],
-        "types": [
-            "jest"
-        ]
-    }
+  "compilerOptions": {
+    "esModuleInterop": true,
+    "lib": [
+      "ESNext",
+      "DOM"
+    ],
+    "types": [
+      "jest",
+      "node"
+    ]
+  }
 }

@@ -7,6 +7,7 @@ export const lastRun = join(dataDir, "last.json")
 
 
 
+export const phoneName = "Z-Fold5-von-Jonathan"
 export const SECOND = 1000
 export const MINUTE = SECOND * 60
 

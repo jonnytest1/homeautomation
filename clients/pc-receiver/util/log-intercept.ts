@@ -11,8 +11,9 @@ export function interceptLogs() {
   var log_file = createWriteStream(file, { flags: 'w' });
   var log_stdout = process.stdout;
 
-  console.log = function (d) { //
-    log_file.write(format(d) + '\n');
-    log_stdout.write(format(d) + '\n');
+  console.log = function (...args) { //
+    const str = args.map(a => format(a)).join(", ")
+    log_file.write(str + '\n');
+    log_stdout.write(str + '\n');
   };
 }

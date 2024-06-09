@@ -15,6 +15,7 @@ import { CalenderService } from './services/calendar-notify-service';
 import { uidBlackList } from './services/calendar-uid-blacklist';
 import { interceptLogs } from './util/log-intercept';
 import { logKibana } from './util/log';
+import { FritzBoxClient } from './services/virtual-clients/fritz-box-client';
 parseArgsToEnv()
 
 config({
@@ -40,6 +41,9 @@ RepeatingAudio.check()
 startKeySocket()
 registration.register(serverIp, +listenOnPort)
   .then(() => {
+    const fritzBoxClient = new FritzBoxClient()
+    fritzBoxClient.start()
+
     const app: ExpressWs = express();
     var expressWs = require('express-ws')(app);
 

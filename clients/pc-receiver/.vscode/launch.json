@@ -50,5 +50,17 @@
       "address": "127.0.0.1",
       "port": 29220
     },
+    {
+      "type": "debugpy",
+      "request": "launch",
+      "console": "integratedTerminal",
+      "name": "get fritz box sid",
+      "program": "${workspaceFolder}\\services\\virtual-clients\\fritz-session.py",
+      "args": [
+        "http://fritz.box/",
+        "u",
+        "p"
+      ]
+    }
   ]
 }

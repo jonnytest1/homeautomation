@@ -7,7 +7,6 @@ import { AlarmProvider, EventWithAlarm } from './calendar-event-with-alarm';
 import { pick } from '../util/pick';
 import { spawnSync } from "child_process"
 import { join } from "path"
-import { HOUR } from '../constant';
 import { shouldIgnoreEvent } from './calendar-event-check';
 
 type AlarmContainer = {
@@ -122,7 +121,7 @@ export class CalenderService {
     const nextEvt = this.reminderList.next.value
     const timeDiff = +nextEvt.timestamp - +new Date()
     console.log(`${new Date().toLocaleTimeString()} starting timer for ${nextEvt.data.event.summary} at ${nextEvt.timestamp.toLocaleString()}`)
-    console.log(nextEvt.data.event.uid)
+    console.log(`${new Date().toLocaleTimeString()} id : ${nextEvt.data.event.uid}`)
 
 
     setTimeout(async () => {
@@ -138,7 +137,7 @@ export class CalenderService {
 
 
   private doAlarm(nextEvt: { timestamp?: Date; data: AlarmContainer; }) {
-    console.log(`${new Date().toLocaleTimeString()} trigger alarm`)
+    console.log(`${new Date().toLocaleTimeString()} trigger alarm  ${nextEvt.data.event.summary}`)
     const data = nextEvt.data;
     this.reminderList.shift();
     new NotificationHandler({

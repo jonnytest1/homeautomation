@@ -82,7 +82,8 @@ export class NotificationHandler {
         }
       }
       if (response === "dismissed") {
-        await new Promise(res => setTimeout(res, 2000))
+
+        //await new Promise(res => setTimeout(res, 2000))
       }
       audioHandler?.stop()
     }).bind(this));

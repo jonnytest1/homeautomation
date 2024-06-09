@@ -1,6 +1,12 @@
 import { config } from "dotenv"
+
+
+
+
+const envFile = `${process.env.profile == "PROD" ? ".env.prod.env" : ".env"}`;
+console.log("loading " + envFile)
 config({
-  path: `${process.env.profile == "PROD" ? ".env.prod.env" : ".env"}`
+  path: envFile
 });
 
 export const environment = process.env as {
@@ -10,6 +16,8 @@ export const environment = process.env as {
   MQTT_SERVER: string
   HEATER_PLUG_POWER_CMD: string
   logfileprefix: string
+  FRITZ_USER: string
+  FRITZ_PWD: string
 }
 
 environment.serverip ??= '192.168.178.54'
