@@ -34,6 +34,10 @@ export type GenericNodeEvents = {
 } | {
   type: "store-reducer",
   data: StoreEvents & { fromSocket?: true }
+} | {
+  type: "reply",
+  messageId: string,
+  reply
 }
 
 

@@ -10,7 +10,13 @@ export type GenericNodeEvent = {
   data: FrontendToBackendGenericNodeEvent
 }
 
+export type GenericPageEvent = {
+  type: "generic-node-page-event",
+  data: unknown,
+  nodeType: string
+}
 
 
 
-export type FrontendToBackendEvents = GenericNodeEvent | Ping
+
+export type FrontendToBackendEvents = GenericNodeEvent | Ping | GenericPageEvent
