@@ -12,6 +12,7 @@
 #include "lib/smarthome.h"
 #include "lib/restart.h"
 #include "ArduinoOTA.h"
+#include "lib/jsonnode.h"
 
 int valvePin = 16;
 int fillDuration = 7;
@@ -97,12 +98,15 @@ JsonNode getReceiver()
 
 void setup()
 {
+  wifi_cb_ref().wifi_timeout = []()
+  { digitalWrite(valvePin, LOW); };
+
   Serial.begin(115200);
   Serial.println("start");
 
   pinMode(valvePin, OUTPUT);
   digitalWrite(valvePin, LOW);
-  std::string otaPassword = "7kg8s02n-ixy07d7k-sww9za8x-pdv36fj7"; // generateUuid();
+  std::string otaPassword = generateUuid();
 
   Serial.println(("ota password: " + otaPassword).c_str());
 
