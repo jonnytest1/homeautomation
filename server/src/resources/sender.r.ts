@@ -33,7 +33,8 @@ export class SenderResource {
 
 
     const sender = await loadOne(Sender, s => s.deviceKey = req.body.deviceKey, [], {
-      deep: ['connections', 'receiver', "transformer", "transformation"]
+      deep: ['connections', 'receiver', "transformer", "transformation"],
+      interceptArrayFunctions: true
     });
     try {
       const responses = await new SenderTriggerService(sender).trigger(req.body);
