@@ -40,6 +40,9 @@ export class OptionsComponent implements OnInit {
   }
 
   addFile() {
+    if (this.addingSound.key) {
+      this.addingSound.key = this.addingSound.key.replace(/[^a-zA-Z0-9_-]/g, "")
+    }
     if (!this.addingSound.key || this.sounds.some(sound => sound.key === this.addingSound.key)) {
       this.error = 'needs unique key';
       return;
