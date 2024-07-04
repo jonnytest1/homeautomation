@@ -144,7 +144,7 @@ export class TimerService {
           await new Promise(res => setTimeout(res, 160));
         }
       })
-      await abortable(promiseList)
+      await abortable(promiseList, { onAbort: () => new TextReader({ text: "aborted" }).read() })
     } catch (e) {
       console.log("error", e)
       debugger;

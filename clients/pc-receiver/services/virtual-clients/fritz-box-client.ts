@@ -62,7 +62,6 @@ export class FritzBoxClient {
       }
       return responseData.data.wlanSettings.knownWlanDevices
     } catch (e) {
-      debugger
       this.sid = undefined
       throw new Error("got not ok response " + e.status)
     }
@@ -119,7 +118,7 @@ export class FritzBoxClient {
       } catch (e) {
         console.log("error checking rssi");
       }
-      await new Promise(res => setTimeout(res, 200))
+      await new Promise(res => setTimeout(res, 500))
 
     }
   }

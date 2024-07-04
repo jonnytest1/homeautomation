@@ -25,7 +25,6 @@ export const eventHandlerMap = {
     return "pending_confirmation"
   },
   "abort": () => {
-    console.log("abort action")
     setLastAbort()
   }
   /*"read": (data: { text: string }) => {
@@ -81,6 +80,3 @@ export function handleActionConfirmEvent(evt: z.infer<typeof isActionEvent>): Re
   }
 }
 
-
-export function startKeySocket() {
-}

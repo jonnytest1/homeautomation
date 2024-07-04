@@ -10,7 +10,7 @@ import type { TransformationRes } from '../../server/src/models/connection-respo
 import { TimerService } from "./services/timer-service"
 import { parseArgsToEnv } from './services/args';
 import { traceTransform } from './services/log-handler';
-import { handleActionConfirmEvent, handleActionEvent, isActionEvent, isEvent, startKeySocket } from './services/events/event-handler';
+import { handleActionConfirmEvent, handleActionEvent, isActionEvent, isEvent } from './services/events/event-handler';
 import { CalenderService } from './services/calendar-notify-service';
 import { uidBlackList } from './services/calendar-uid-blacklist';
 import { interceptLogs } from './util/log-intercept';
@@ -38,11 +38,10 @@ service.load(uidBlackList).then(() => {
 })
 
 RepeatingAudio.check()
-startKeySocket()
 registration.register(serverIp, +listenOnPort)
   .then(() => {
     const fritzBoxClient = new FritzBoxClient()
-    fritzBoxClient.start()
+    //fritzBoxClient.start()
 
     const app: ExpressWs = express();
     var expressWs = require('express-ws')(app);

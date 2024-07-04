@@ -5,6 +5,7 @@ import { fetchHttps } from '../util/request';
 import { RepeatingAudio } from './repeating-audio-player';
 import { FrontendSound } from './server-interfaces';
 import notifier from 'node-notifier'
+import { logKibana } from '../util/log';
 
 
 export interface NotificationData {
@@ -29,8 +30,12 @@ export class NotificationHandler {
     console.log(new Date().toLocaleString(), this.data.notification.title)
     let audioHandler: RepeatingAudio | undefined = undefined;
     if (this.data.notification.sound && typeof this.data.notification.sound === 'string') {
-      if (this.data.notification.sound.match(/[^a-zA-Z0-9]/g)) {
-        console.error("invalid sound string");
+      if (this.data.notification.sound.match(/[^a-zA-Z0-9_-]/g)) {
+        logKibana("ERROR", {
+          message: "invalid sound string",
+          sound: this.data.notification.sound
+        })
+        console.error("invalid sound string", this.data.notification.sound);
         return;
       }
 
