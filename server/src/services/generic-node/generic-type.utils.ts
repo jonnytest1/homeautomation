@@ -161,7 +161,7 @@ export async function updateTypeSchema(node: ElementNode, nodeData: PreparedNode
       if (filteredSchemas.length > 1) {
         const schemaDtss = filteredSchemas.map(schema => `
             namespace ${schema.nodeUuidType} {
-                 ${schema.schema?.dts}
+                ${schema.schema?.dts}
             }
           `)
         const mergingDts = `

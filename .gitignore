@@ -46,3 +46,4 @@ server/bash.exe.stackdump
 server/buildInfoPath
 clients/pc-receiver/logs
 server/src/services/generic-node/node-data/nodes
+server/src/services/generic-node/node-data/deleted-node-data

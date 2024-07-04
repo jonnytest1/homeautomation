@@ -204,6 +204,7 @@ type InputType=${connectionSchema.mainTypeName ??= mainTypeName}
       `, globals: `
             type TransformationResponse = EditorSchema.TransformationRes;
             function delay<T extends EditorSchema.SenderResponse>(time: number, res: T): EditorSchema.Delayed<T>
+            type ObjectType = TransformationResponse
       `
       }
     }

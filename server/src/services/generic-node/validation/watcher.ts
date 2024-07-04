@@ -104,7 +104,8 @@ export async function getTypes(dts: string, mainType_else_laststatement: string 
   if (mainType_else_laststatement !== false) {
     const decl = tsSourceFile.getNamedDeclarations().get(mainType_else_laststatement);
     if (decl) {
-      statement = decl[0]
+      statement = decl[decl.length - 1]
+
     }
 
   }
