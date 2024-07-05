@@ -8,6 +8,7 @@ import { pick } from '../util/pick';
 import { spawnSync } from "child_process"
 import { join } from "path"
 import { shouldIgnoreEvent } from './calendar-event-check';
+import { logKibana } from '../util/log';
 
 type AlarmContainer = {
   event: EventWithAlarm,
@@ -20,8 +21,17 @@ export function getNextRRule(event_start: Date, after: Date, rule: string) {
   const isoOffsetString = +event_start
   const response = spawnSync(`python`, [
     join(__dirname, "rrule.py"), `${isoOffsetString}`, `${+after}`, rule], { encoding: "utf8" })
+  try {
+    const data = JSON.parse(response.stdout.trim())
 
-  return new Date(response.stdout.trim())
+    if (data === null) {
+      return null
+    }
+
+    return new Date(data)
+  } catch (e) {
+    debugger
+  }
 }
 
 
@@ -114,6 +124,14 @@ export class CalenderService {
       evtDate = evt.start;
       //this.eventList.add({ timestamp: evt.start, data: evt })
     }
+    if (evtDate && isNaN(+evtDate)) {
+      logKibana("ERROR", {
+        message: "NaN for Date",
+        afterDate: after.toISOString(),
+        evt: JSON.stringify(evt)
+
+      })
+    }
     return evtDate;
   }
 
@@ -154,8 +172,12 @@ export class CalenderService {
     const nextDateMin = new Date(Math.max(Date.now() + (1000), evtTime));
 
     let evtDate: Date | undefined = this.getNextEventDate(data.event, nextDateMin);
-    console.log(`${new Date().toLocaleTimeString()} adding for ${evtDate.toISOString()}`)
-    this.addReminder(data.alarm, evtDate, data.event);
+    if (evtDate) {
+      console.log(`${new Date().toLocaleTimeString()} adding for ${evtDate.toISOString()}`)
+      this.addReminder(data.alarm, evtDate, data.event);
+    } else {
+      console.log("no future recurrence from this event")
+    }
     this.timer();
   }
 }

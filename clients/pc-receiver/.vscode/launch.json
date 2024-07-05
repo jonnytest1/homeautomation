@@ -61,6 +61,18 @@
         "u",
         "p"
       ]
+    },
+    {
+      "type": "debugpy",
+      "request": "launch",
+      "console": "integratedTerminal",
+      "name": "python rrule",
+      "program": "${workspaceFolder}\\services\\rrule.py",
+      "args": [
+        "1",
+        "2",
+        "RRULE:FREQ=DAILY;WKST=SU;UNTIL=1;INTERVAL=1"
+      ]
     }
   ]
 }
