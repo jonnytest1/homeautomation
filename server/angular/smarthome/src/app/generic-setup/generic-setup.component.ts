@@ -24,6 +24,7 @@ import { LetModule } from '@ngrx/component';
 import { isSameConnection } from './line/line-util';
 import { ClipboardService } from './clipboard-service';
 import type { ActiveElement } from './generic-setup-types';
+import { BoundingBox } from '../wiring/util/bounding-box';
 
 
 
@@ -380,20 +381,40 @@ export class GenericSetupComponent implements OnInit {
     })
   }
 
-  mouseDragSTart(mousevent: MouseEvent, el: HTMLElement) {
+  mouseDragSTart(mousevent: MouseEvent | TouchEvent, el: HTMLElement) {
 
     this.state.setmousedragview({
       mouseStart: new Vector2(mousevent),
       startOffset: new Vector2(el.scrollLeft, el.scrollTop)
     })
   }
-  mouseDragMove(mousevent: MouseEvent, el: HTMLElement) {
+  mouseDragMove(mousevent: MouseEvent | TouchEvent, el: HTMLElement) {
     if (this.state.ismousedragview) {
-      this.state.getmousedragview
       const movementDiff = new Vector2(mousevent).subtract(this.state.getmousedragview.mouseStart)
       const newSCroll = this.state.getmousedragview.startOffset.subtract(movementDiff)
 
+      const backgroundEl = el.querySelector<HTMLElement>("#background-drop")
+      if (!backgroundEl) {
+        return
+      }
+      const contentDimensions = new BoundingBox(backgroundEl)
+      const parentDimensions = new BoundingBox(el)
 
+      if (newSCroll.y < 0) {
+        //backgroundEl.style.minHeight = contentDimensions.getHeight() - newSCroll.y + "px"
+      }
+      if (newSCroll.x < 0) {
+        //backgroundEl.style.minWidth = contentDimensions.getWidth() - newSCroll.x + "px"
+      }
+      const neededHeight = newSCroll.y + parentDimensions.getHeight();
+      if (neededHeight > contentDimensions.getHeight()) {
+        backgroundEl.style.minHeight = neededHeight - 12 + "px"
+      }
+
+      const neededWith = newSCroll.x + parentDimensions.getWidth();
+      if (neededWith > contentDimensions.getWidth()) {
+        backgroundEl.style.minWidth = neededWith - 12 + "px"
+      }
       el.scrollTo({
         //behavior: "instant",
         left: newSCroll.x,

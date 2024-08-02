@@ -9,6 +9,8 @@
          (mousedown)="mouseDragSTart($event,wrapperElement)"
          (mousemove)="mouseDragMove($event,wrapperElement)"
          (mouseup)="mouseDragEnd($event,wrapperElement)"
+         (touchstart)="mouseDragSTart($event,wrapperElement)"
+         (touchmove)="mouseDragMove($event,wrapperElement)"
          (wheel)="onscroll($event);$event.preventDefault()">
 
       <div *ngrxLet="activeElements$|async ;let activeElements"
