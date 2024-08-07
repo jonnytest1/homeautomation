@@ -39,7 +39,8 @@ export async function logKibana(level: 'INFO' | 'ERROR' | 'DEBUG', message: stri
   const jsonData: { [key: string]: string } = {
     Severity: level,
     application: `SmartHomeFe${devMode ? '_debug' : ''}`,
-    log_stack: logStack
+    log_stack: logStack,
+    device: navigator.userAgent
   };
   if (!message && error) {
     jsonData.message = base64safe(error.message);

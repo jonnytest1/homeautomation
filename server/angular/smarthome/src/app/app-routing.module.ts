@@ -61,3 +61,11 @@ const routes: Routes = [
   exports: [RouterModule]
 })
 export class AppRoutingModule {}
+
+
+
+setTimeout(() => {
+
+  import("./generic-setup/generic-setup-module")
+
+}, 1000)

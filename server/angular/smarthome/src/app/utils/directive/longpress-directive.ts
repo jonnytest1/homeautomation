@@ -19,6 +19,7 @@ export class LongPressDirective {
   longPressTimeout: NodeJS.Timeout | undefined = undefined
 
   @HostListener("mousedown", ["$event"])
+  @HostListener("touchstart", ["$event"])
   mouseDown(ev: MouseEvent) {
     this.startTime = Date.now()
 
@@ -31,6 +32,7 @@ export class LongPressDirective {
 
   }
   @HostListener("mouseup")
+  @HostListener("touchend")
   mouseUp() {
     this.startTime = -1
     if (this.longPressTimeout) {

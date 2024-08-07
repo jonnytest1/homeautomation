@@ -8,7 +8,7 @@ import type { OnInit } from '@angular/core';
 import { ChangeDetectorRef, Component, Inject } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { MAT_SNACK_BAR_DATA, MatSnackBarRef } from '@angular/material/snack-bar';
-import type { Observable } from 'rxjs';
+import { BehaviorSubject, Subject, type Observable } from 'rxjs';
 
 @Component({
   selector: 'app-sender-bottom-sheet',
@@ -20,6 +20,9 @@ export class SenderBottomSheetComponent implements OnInit {
 
   public transformer: TransformFe = {};
   title$: Observable<string>;
+
+  sendState = new BehaviorSubject<"pendingrequest" | "default">("default")
+
   constructor(@Inject(MAT_SNACK_BAR_DATA) public data: SenderFe,
     private service: SettingsService,
     private snackbarRef: MatSnackBarRef<unknown>, private dialog: MatDialog,
@@ -74,11 +77,15 @@ export class SenderBottomSheetComponent implements OnInit {
     if (this.data.transformationAttribute && this.transformer) {
       dataObj[this.data.transformationAttribute] = this.transformer.transformationKey;
     }
-
-    await this.service.send(dataObj).toPromise();
-    if (this.transformer && this.transformer.tsTransformation?.includes('delay')
-      && this.transformer.tsTransformation.includes('promise')) {
-      this.displayTimers();
+    this.sendState.next("pendingrequest")
+    try {
+      await this.service.send(dataObj).toPromise();
+      if (this.transformer && this.transformer.tsTransformation?.includes('delay')
+        && this.transformer.tsTransformation.includes('promise')) {
+        this.displayTimers();
+      }
+    } finally {
+      this.sendState.next("default")
     }
   }
 }

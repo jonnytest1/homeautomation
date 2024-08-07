@@ -1,8 +1,9 @@
 import { createReducer, on } from '@ngrx/store';
-import { backendActions, setNodeData, updateNodeDef } from './action';
+import { backendActions, reducerMap, setNodeData, updateNodeDef } from './action';
 import type { NodeData } from '../../settings/interfaces';
 import { type ElementNode, type NodeDefintion } from '../../settings/interfaces';
 import { isSameConnection } from '../line/line-util';
+import { patchNode } from './reducer-util';
 
 
 export interface GenericNodeState extends NodeData {
@@ -16,20 +17,6 @@ const initialState: GenericNodeState = {
   globals: {},
   nodeDefinitions: {},
   version: 0
-}
-
-
-function patchNode(st: GenericNodeState, node: string, callback: (n: NodeData["nodes"][number]) => NodeData["nodes"][number]): GenericNodeState {
-  return {
-    ...st,
-    nodes: (st.nodes ?? []).map(stNode => {
-      if (stNode.uuid === node) {
-        return callback(stNode)
-      }
-      return stNode
-    })
-
-  }
 }
 
 
@@ -119,12 +106,17 @@ export const genericReducer = createReducer(
       nodes: newNodes
     });
   }),
+
   on(backendActions.updateEditorSchema, (st, a) => patchNode(st, a.nodeUuid, n => ({
     ...n,
     runtimeContext: {
       ...n.runtimeContext ?? {},
       editorSchema: a.editorSchema
     }
-
-  }))),
+  }),
+  )),
+  ...[...reducerMap.entries()].map(([action, value]) => {
+    return on(action, value)
+  }),
 )
+

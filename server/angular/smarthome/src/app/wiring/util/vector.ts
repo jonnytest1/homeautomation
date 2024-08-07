@@ -25,13 +25,16 @@ export class Vector2 {
       return new Vector2(rect)
     }
   }
-  static fromStyles(el: HTMLElement, mode: "center") {
+  static fromStyles(el: HTMLElement, mode: "center" | "scroll") {
     if (mode == "center") {
       const st = getComputedStyle(el)
       const dimensions = new Vector2(+st.width.replace("px", ""), +st.height.replace("px", ""))
       return new Vector2(+st.left.replace("px", ""), +st.top.replace("px", "")).added(dimensions.dividedBy(2))
+    } else if (mode === "scroll") {
+      return new Vector2(el.scrollLeft, el.scrollTop)
     }
     debugger
+    throw new Error("not implemented")
   }
 
   static center(from: Vector2, to: Vector2) {

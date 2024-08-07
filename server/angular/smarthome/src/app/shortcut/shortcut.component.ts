@@ -10,7 +10,6 @@ import { MatBottomSheet } from '@angular/material/bottom-sheet';
 import { MatButtonModule } from '@angular/material/button';
 import { map } from 'rxjs/operators';
 import { jsonClone, jsonEquals } from '../utils/clone';
-import type { ReceiverFe } from '../settings/interfaces';
 import { BoundingBox } from '../wiring/util/bounding-box';
 import { Vector2 } from '../wiring/util/vector';
 import { createStateMachine } from '../utils/state-machine';
@@ -187,6 +186,7 @@ export class ShortcutComponent implements OnInit {
   }
 
   @HostListener("mouseup")
+  @HostListener("touchend")
   drop() {
     if (this.state.isredrag) {
       this.redragDrop()
@@ -307,6 +307,10 @@ export class ShortcutComponent implements OnInit {
       event.preventDefault()
       event.stopPropagation()
     }
+  }
+
+  track(i, el: Configs) {
+    return el.uuid
   }
 
   redragDrop() {

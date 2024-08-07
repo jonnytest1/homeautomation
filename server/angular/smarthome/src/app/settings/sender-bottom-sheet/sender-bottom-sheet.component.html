@@ -31,6 +31,7 @@
           <button class="right test-button"
                   color="primary"
                   (debouncedClick)="send()"
+                  [disabled]="(sendState|async)==='pendingrequest'"
                   mat-flat-button>
             {{ isManual() ? 'Trigger' : 'Test'}}
           </button>

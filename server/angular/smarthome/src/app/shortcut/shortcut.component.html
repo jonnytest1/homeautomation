@@ -8,7 +8,7 @@
        #gridwrapper>
 
     <div class="griditem"
-         *ngFor="let config of (tempNodes??nodes)">
+         *ngFor="let config of (tempNodes??nodes);trackBy:track">
       <mat-icon *ngIf="state.isedit"
                 class="delete"
                 (clickcpt)="removeCfg(config,$event);">delete</mat-icon>
@@ -16,6 +16,7 @@
                 class="background"
                 (clickcpt)="addBackground(config)">add</mat-icon>
       <div (longpress)="configPressed(config,$event)"
+           longpress
            (mousedown)="redrag(config,$event)"
            (touchstart)="redrag(config,$event)">
         <app-button *ngIf="config.type=='button'"
@@ -83,7 +84,11 @@
                        [receiver]="tempData.receiver"></app-action-template>
 </div>
 
-
+<!-- <button mat-fab
+        (click)="configPressed(null,$event)"
+        class="edit-button">
+  <mat-icon>edit</mat-icon>
+</button> -->
 <button mat-fab
         (click)="configSwipe()"
         class="add-button">

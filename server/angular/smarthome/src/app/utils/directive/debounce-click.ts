@@ -1,46 +1,46 @@
 import {
-    Directive,
-    EventEmitter,
-    HostListener,
-    Input,
-    OnDestroy,
-    OnInit,
-    Output
+  Directive,
+  EventEmitter,
+  HostListener,
+  Input,
+  OnDestroy,
+  OnInit,
+  Output
 } from '@angular/core';
 import { Subject, Subscription } from 'rxjs';
 import { debounceTime, throttleTime } from 'rxjs/operators';
 
 @Directive({
-    selector: '[debouncedClick]'
+  selector: '[debouncedClick]'
 })
 export class DebounceClickDirective implements OnInit, OnDestroy {
-    @Input()
-    throttleTime = 500;
+  @Input()
+  throttleTime = 1000;
 
-    @Output()
-    debouncedClick = new EventEmitter();
+  @Output()
+  debouncedClick = new EventEmitter();
 
-    private clicks = new Subject();
-    private subscription: Subscription;
+  private clicks = new Subject();
+  private subscription: Subscription;
 
-    constructor() { }
+  constructor() {}
 
-    ngOnInit() {
-        this.subscription = this.clicks.pipe(
-            throttleTime(this.throttleTime)
-        ).subscribe(e => {
-            return this.debouncedClick.emit(e);
-        });
-    }
+  ngOnInit() {
+    this.subscription = this.clicks.pipe(
+      throttleTime(this.throttleTime)
+    ).subscribe(e => {
+      return this.debouncedClick.emit(e);
+    });
+  }
 
-    ngOnDestroy() {
-        this.subscription.unsubscribe();
-    }
+  ngOnDestroy() {
+    this.subscription.unsubscribe();
+  }
 
-    @HostListener('click', ['$event'])
-    clickEvent(event) {
-        event.preventDefault();
-        event.stopPropagation();
-        this.clicks.next(event);
-    }
+  @HostListener('click', ['$event'])
+  clickEvent(event) {
+    event.preventDefault();
+    event.stopPropagation();
+    this.clicks.next(event);
+  }
 }

@@ -2,12 +2,12 @@
 
 export interface BaseConfig {
   receiver: string
+  uuid: string
 }
 
 
 export interface ActiopnConfig extends BaseConfig {
   actionName: string,
-  uuid: string
 }
 
 export interface ProgressConfig extends BaseConfig {

@@ -1,8 +1,9 @@
-import type { ActionCreator } from '@ngrx/store';
+import type { Action, ActionCreator, ActionCreatorProps, ActionReducer, NotAllowedCheck } from '@ngrx/store';
 import { createAction, props } from '@ngrx/store';
-import type { Connection, ElementNode, NodeData, SetConnectionError, UpdateEditorSchema } from '../../settings/interfaces';
+import type { Connection, ElementNode, NodeData, SetConnectionError, UpdateEditorSchema, UpdateOutputSchema } from '../../settings/interfaces';
 import { type NodeDefintion } from '../../settings/interfaces';
-
+import type { GenericNodeState } from './reducers';
+import { patchNode } from './reducer-util';
 export const setNodeData = createAction("setnodes", props<{ data: NodeData }>())
 export const updateNodeDef = createAction("update node definitions", props<{ data: Record<string, NodeDefintion> }>())
 
@@ -24,6 +25,18 @@ function backendAction<T extends Record<string, ActionCreator>>(actions: T) {
   return actions
 }
 
+type Reducer<St, A> = (state: St, action: A) => St
+export const reducerMap = new Map<ActionCreator<string, any>, Reducer<GenericNodeState, Action>>();
+
+function createActionWithReducer<T extends string, PropsT extends object>(type: T, config: ActionCreatorProps<PropsT> & NotAllowedCheck<PropsT>,
+  reducer: Reducer<GenericNodeState, PropsT & { type: T }>) {
+  const actionCreator = createAction(type, config)
+
+  reducerMap.set(actionCreator, reducer);
+  return actionCreator;
+}
+
+
 
 export const backendActions = backendAction({
   updatePosition: createAction("update position", props<{ node: string, position: NodeData["nodes"][number]["position"] }>()),
@@ -43,7 +56,18 @@ export const backendActions = backendAction({
     newNode: ElementNode
   }>()),
   updateEditorSchema: createAction("update editor schema", props<Omit<UpdateEditorSchema, "type">>()),
+
+  updateOutputSchema: createActionWithReducer("update output schema", props<Omit<UpdateOutputSchema, "type">>(), (st, a) => {
+    return patchNode(st, a.nodeUuid, n => ({
+      ...n,
+      runtimeContext: {
+        ...n.runtimeContext,
+        editorSchema: a.schema
+      }
+    }))
+  })
 })
+
 
 
 export type BackendActionsMap = typeof backendActions
