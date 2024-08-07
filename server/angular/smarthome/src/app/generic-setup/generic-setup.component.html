@@ -5,7 +5,7 @@
          #wrapperElement
          id="wrapper-drop"
          (dragover)="dropAllowed($event)"
-         (drop)="onDrop($event)"
+         (drop)="onDrop($event,wrapperElement)"
          (mousedown)="mouseDragSTart($event,wrapperElement)"
          (mousemove)="mouseDragMove($event,wrapperElement)"
          (mouseup)="mouseDragEnd($event,wrapperElement)"

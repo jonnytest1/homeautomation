@@ -190,7 +190,7 @@ export class GenericSetupComponent implements OnInit {
 
   convertVectorZoom(position: Vector2) {
 
-    const zoomRounded = Math.round(this.zoom)
+    const zoomRounded = this.zoom
 
     return position.dividedBy(zoomRounded)
   }
@@ -462,14 +462,15 @@ export class GenericSetupComponent implements OnInit {
     })
   }
 
-  onDrop(evt: DragEvent) {
+  onDrop(evt: DragEvent, scrollElement: HTMLElement) {
     if (this.state.ismove) {
       const dragOffset = dataHandler.getDropData(evt, "dragOffset");
       if (!dragOffset) {
         return
       }
       const newPosition = this.convertVectorZoom(new Vector2(evt).subtract(GenericSetupComponent.pageInset)
-        .subtract(new Vector2(dragOffset))
+        .subtract(new Vector2(dragOffset)).added(Vector2.fromStyles(scrollElement, "scroll")
+        )
       );
       this.store.dispatch(backendActions.updatePosition({
         node: this.state.getmove.uuid,

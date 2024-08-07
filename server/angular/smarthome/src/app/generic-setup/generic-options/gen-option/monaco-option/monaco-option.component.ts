@@ -101,7 +101,11 @@ export class MonacoOptionComponent implements OnInit, OnChanges {
       debugger
     }
 
-
+    /**
+     * previous 
+     * type InputType = EditorSchema.InputType;
+     * broke in filter because type came as Main  
+     */
     const typeDefinition = `
           
 
@@ -114,7 +118,7 @@ export class MonacoOptionComponent implements OnInit, OnChanges {
           declare global {
             ${this.node.runtimeContext?.editorSchema?.globals ?? ''}
 
-            type InputType = EditorSchema.InputType;  
+            type InputType = EditorSchema.Main;  
           }
 
       \n;
