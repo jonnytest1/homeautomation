@@ -27,10 +27,10 @@ export class NotificationHandler {
   }
 
   async show(ws: Websocket) {
-    console.log(new Date().toLocaleString(), this.data.notification.title)
+    console.log(new Date().toLocaleString(), this.data.notification.title, this.data.notification.sound)
     let audioHandler: RepeatingAudio | undefined = undefined;
     if (this.data.notification.sound && typeof this.data.notification.sound === 'string') {
-      if (this.data.notification.sound.match(/[^a-zA-Z0-9_-]/g)) {
+      if (this.data.notification.sound.match(RepeatingAudio.invalidSoundStringREgex)) {
         logKibana("ERROR", {
           message: "invalid sound string",
           sound: this.data.notification.sound
