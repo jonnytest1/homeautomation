@@ -1,7 +1,7 @@
 import { readFileSync } from "fs"
 import { writeFile } from "fs/promises"
 import { execSync } from "child_process"
-import { lastRun, phoneName } from '../constant';
+import { DAY, lastRun, phoneName } from '../constant';
 import { fetchHttps } from '../util/request';
 import { TextReader } from './read-text';
 import { getLatestPowerOnEvent } from './event-service';
@@ -15,7 +15,7 @@ type ISODay = `${number}${number}${number}${number}-${number}${number}-${number}
 type RunPrefixed = typeof TimerService.run_prefixed[number]
 type Data = {
   [K in RunPrefixed]?: ISODay
-}
+} & { lastSuccessFullRun?: string }
 
 export class TimerService {
 
@@ -65,7 +65,7 @@ export class TimerService {
             }
             data[prefix] = today
             console.log("running")
-            await this.run()
+            await this.run(data)
             await this.write(data);
           }
         }
@@ -112,7 +112,7 @@ export class TimerService {
 
 
 
-  async run() {
+  async run(data: Data) {
     try {
       const promiseList = [
         () => new TextReader({ text: "get off your ass and put your shoes on" }).read(),
@@ -125,6 +125,10 @@ export class TimerService {
         () => fetchHttps(this.runUrl),
         () => new Promise(res => setTimeout(res, 550)),
         () => fetchHttps(this.runUrl),
+        () => {
+          data.lastSuccessFullRun = new Date().toISOString()
+          return Promise.resolve()
+        },
       ];
       for (let i = 0; i < 43; i++) {
         promiseList.push(() => fetchHttps(this.fasterUrl))
@@ -144,7 +148,18 @@ export class TimerService {
           await new Promise(res => setTimeout(res, 160));
         }
       })
-      await abortable(promiseList, { onAbort: () => new TextReader({ text: "aborted" }).read() })
+
+      let abortDisabled = false;
+      if (data.lastSuccessFullRun) {
+        const lastRun = new Date(data.lastSuccessFullRun)
+        const minLAstRun = Date.now() - (DAY * 3)
+        abortDisabled = +lastRun < minLAstRun
+      }
+
+      await abortable(promiseList, {
+        onAbort: () => new TextReader({ text: "aborted" }).read(),
+        abortDisabled: abortDisabled
+      })
     } catch (e) {
       console.log("error", e)
       debugger;
