@@ -55,8 +55,8 @@ export class DataStore<T> {
     }
     this.reducers[action.type] = reducer
   }
-
-  createReducerAction<Type extends string, P>(actionType: Type, reducer: Reducer<T, Action<Type, P>>, propsCreator?: () => P) {
+  // 
+  createReducerAction<Type extends string, P>(actionType: Type, reducer: Reducer<T, Action<Type, P>>, propsCreator?: () => P): ActionCreator<Type, Omit<P, "type">> {
     const action = createAction(actionType, propsCreator)
     this.addReducer(action, reducer)
     return action

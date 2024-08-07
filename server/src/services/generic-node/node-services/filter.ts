@@ -142,13 +142,16 @@ type InputType=${connectionSchema.mainTypeName ??= mainTypeName}
       `
       },
       nodeUuid: node.uuid
-    }))
+    }));
 
-    node.runtimeContext.outputSchema = {
-      jsonSchema: connectionSchema.jsonSchema,
-      dts: connectionSchema.dts,
-      mainTypeName: connectionSchema.mainTypeName
-    }
+    genericNodeDataStore.dispatch(backendToFrontendStoreActions.updateOutputSchema({
+      schema: {
+        jsonSchema: connectionSchema.jsonSchema,
+        dts: connectionSchema.dts,
+        mainTypeName: connectionSchema.mainTypeName
+      },
+      nodeUuid: node.uuid
+    }))
   }
 })
 function cacheNodeScript(node: ElementNode<NodeDefToType<{ code: { type: "monaco"; default: string; }; }>, NodeDefOptinos, unknown>) {

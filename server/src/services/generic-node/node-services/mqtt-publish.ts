@@ -5,6 +5,7 @@ import type { ExtendedJsonSchema } from '../typing/generic-node-type'
 import { generateDtsFromSchema, generateZodTypeFromSchema, mainTypeName } from '../json-schema-type-util'
 import type { Select } from '../typing/node-options'
 import { updateRuntimeParameter } from '../element-node'
+import { logKibana } from '../../../util/log'
 import { connect } from 'mqtt'
 import type { ZodType } from 'zod'
 
@@ -39,16 +40,48 @@ addTypeImpl({
     if (argument === undefined) {
       return
     }
-    const argStr = argument
+    let argStr = argument
+    const config = mqttConnection.getDevice(topic)
+    if (config?.sendsResponse()) {
+      const mqttEvt: { timestamp: number, argument?: string } = { timestamp: Date.now() }
+      if (typeof argument === "string") {
+        mqttEvt.argument = argument
+      } else if (typeof argument === "object") {
+        Object.assign(mqttEvt, argument)
+      } else {
+        logKibana("ERROR", { message: "invalid argument for response", argument })
+      }
+      argStr = JSON.stringify(mqttEvt)
+
+      const responseTopic = `response/${config.mqttDeviceName}/${command}/${mqttEvt.timestamp}`
+      client.subscribe(responseTopic)
+
+      client.on("message", (topic, msg) => {
+        if (topic === responseTopic) {
+          evt.updatePayload({
+            response: `${msg.toString()}`
+          })
+          callbacks.continue(evt)
+          client.unsubscribe(responseTopic)
+          client.endAsync()
+        }
+      })
+    }
+
+
 
     const finalTopic = `${topic}${command}`
 
     client.on("connect", () => {
       console.log(`sending ${argStr} to ${finalTopic}`)
-      client.publish(finalTopic, argStr, async () => {
+
+
+      client.publish(finalTopic, argStr, async (err, msg) => {
         await new Promise(res => setTimeout(res, 1000))
-        callbacks.continue(evt)
-        client.endAsync()
+        if (!config?.sendsResponse()) {
+          callbacks.continue(evt)
+          client.endAsync()
+        }
       })
     })
     console.log("sending mqtt event", evt.payload)
@@ -149,6 +182,30 @@ addTypeImpl({
 
       }
 
+
+      if (device.sendsResponse()) {
+        const responseType: ExtendedJsonSchema = {
+          type: "string"
+        }
+        if (node.parameters.command) {
+          const command = device.commands.find(c => c.name == node.parameters?.command)
+          if (command?.responses) {
+            responseType.enum = command.responses
+          }
+        }
+        const jsonSchema: ExtendedJsonSchema = {
+          type: "object",
+          properties: {
+            response: responseType
+          },
+          required: ["response"]
+        }
+        node.runtimeContext.outputSchema = {
+          jsonSchema: jsonSchema,
+          mainTypeName: "Main",
+          dts: await generateDtsFromSchema(jsonSchema, `${node.type}-${node.uuid}-node response`)
+        }
+      }
     }
   }
 })

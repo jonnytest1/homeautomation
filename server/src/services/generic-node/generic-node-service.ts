@@ -13,13 +13,13 @@ import { deletedNodesDataFolder, nodesDataFolder, nodesFile, serviceFolder } fro
 import { init } from './validation/watcher';
 import { genericNodeDataStore } from './generic-store/reference';
 import { backendToFrontendStoreActions, initializeStore } from './generic-store/actions';
-import { nodeglobalsSelector, selectGlobals, selectNodeByUuid, selectNodesOfType } from './generic-store/selectors';
+import { nodeglobalsSelector, selectGlobals, selectNodeByUuid, selectNodesOfType, selectTargetConnectorForNodeUuid } from './generic-store/selectors';
 import { forNodes, selectConnectionsFromContinue } from './generic-store/flow-selectors';
 import { loadNodeData } from './generic-node-data-loader';
 import { logKibana } from '../../util/log';
 import { environment } from '../../environment';
 import { jsonClone } from '../../util/json-clone';
-import { BehaviorSubject, Subject, type Subscription } from "rxjs"
+import { BehaviorSubject, combineLatest, Subject, type Subscription } from "rxjs"
 import { watch } from "chokidar"
 import { filter, skip } from "rxjs/operators"
 import { writeFileSync } from "fs"
@@ -126,12 +126,19 @@ forNodes({
     let pendingCheck = false
     let lastNodeStore = -1;
     let lastNodeStoreTimeout: NodeJS.Timeout | undefined;
-    subscriptionMap[node.uuid] = genericNodeDataStore.select(selectNodeByUuid(node.uuid))
+
+    let lastEmit = -1;
+
+    subscriptionMap[node.uuid] = combineLatest([
+      genericNodeDataStore.select(selectNodeByUuid(node.uuid)),
+      genericNodeDataStore.select(selectTargetConnectorForNodeUuid(node.uuid))
+    ])
       .pipe(
         skip(action === "initialize node store" ? 1 : 0),
       )
-      .subscribe(async (node) => {
+      .subscribe(async ([node, connwctions]) => {
         if (node) {
+          lastEmit = Date.now()
           if (lastNodeStore && lastNodeStore > (Date.now() - (1000 * 60))) {
             clearTimeout(lastNodeStoreTimeout)
           }
@@ -159,20 +166,27 @@ forNodes({
               genericNodeDataStore.dispatch(backendToFrontendStoreActions.updateNode({
                 newNode: node
               }))
+              const preTypeEmmit = lastEmit;
               updateTypeSchema(node, {
                 typeImpls: typeImplementations.value
               })
                 .then(() => {
-                  genericNodeDataStore.dispatch(backendToFrontendStoreActions.updateNode({
-                    newNode: node
-                  }))
-                  pendingCheck = false
+                  if (preTypeEmmit === lastEmit) {
+                    // if there was an update from the node in the store we assume the node doesnt need manual update
+                    genericNodeDataStore.dispatch(backendToFrontendStoreActions.updateNode({
+                      newNode: node
+                    }))
+                  }
+
                 })
                 .catch(e => {
                   logKibana("ERROR", {
                     message: "error updating type schema",
                     nodeUuid: node.uuid
                   }, e)
+                })
+                .finally(() => {
+                  pendingCheck = false
                 });
             } catch (e) {
               logKibana("ERROR", {

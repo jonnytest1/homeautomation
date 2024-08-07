@@ -54,7 +54,7 @@ describe("type operations", () => {
 
 
 
-  it("convert d.ts to json schema", async () => {
+  it("convert d.ts to json schema 1", async () => {
 
 
     const schema = generateJsonSchemaFromDts(`
@@ -66,11 +66,11 @@ describe("type operations", () => {
     key: Test
   }
 
-    `, "Data")
+    `, "Data", "convert d.ts to json schema test")
     debugger
   })
 
-  it("convert d.ts to json schema", async () => {
+  it("convert d.ts to json schema 2", async () => {
     const source = createSourceFile("test.ts", `
            type Test = {
     abc: Data
@@ -186,7 +186,7 @@ describe("type operations", () => {
       "$schema": "http://json-schema.org/draft-07/schema#"
     }
 
-    const dts = await generateDtsFromSchema(schema)
+    const dts = await generateDtsFromSchema(schema, "quicktype test")
     debugger
   })
 
@@ -195,19 +195,19 @@ describe("type operations", () => {
     const schemaCnst = await generateDtsFromSchema({
       "type": "string",
       const: "on"
-    })
+    }, "schema to dts test")
     expect(schemaCnst).toBe("export type Main = 'on';")
 
 
     const schema = await generateDtsFromSchema({
       "type": "string"
-    })
+    }, "schema to dts test 2")
     expect(schema).toBe("export type Main = string;")
 
     expect(await generateDtsFromSchema({
       "type": "string",
       enum: ["on", "off"]
-    }))
+    }, "schema to dts test 3"))
       .toBe(`export type Main = "on" | "off";`)
 
     debugger

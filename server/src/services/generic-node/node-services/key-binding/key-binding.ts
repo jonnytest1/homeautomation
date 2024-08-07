@@ -59,7 +59,7 @@ addTypeImpl({
     let prevBoardData: Array<string> = []
     const lastEvent = getLastEvent<{ data: { [board: string]: Array<string> } }>(node)
     if (lastEvent) {
-      prevBoardData = lastEvent.payload.data[node?.parameters?.board]
+      prevBoardData = lastEvent.payload.data[node?.parameters?.board] ?? []
     }
     const newEvt = evt.payload as { data: { [board: string]: Array<string> } }
     const newBoardData = newEvt.data[node?.parameters?.board]
@@ -75,7 +75,7 @@ addTypeImpl({
           callbacks.continue(evt)
         }
 
-      } else if (!prevBoardData.includes(node.parameters.key) && newBoardData.includes(node.parameters.key)) {
+      } else if (!prevBoardData.includes(node.parameters.key) && newBoardData?.includes(node.parameters.key)) {
         if (node.parameters.mode !== "release") {
           evt.updatePayload({
             type: "press",
@@ -102,7 +102,7 @@ addTypeImpl({
       },
       mode: {
         type: "select",
-        options: ["press", "release"] as const,
+        options: ["press", "release", "both"] as const,
       }
     },
     globalConfig: globalMqttConfig,
@@ -128,6 +128,7 @@ addTypeImpl({
       }
       let jsonSchema: ExtendedJsonSchema
       if (!node.parameters?.mode) {
+        node.parameters.mode = "press"
         jsonSchema = {
           "anyOf": [
             {

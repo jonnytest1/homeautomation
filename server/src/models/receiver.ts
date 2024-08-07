@@ -142,26 +142,26 @@ export class Receiver {
 
     console.log(`sending push notification for ${this.name}`);
     const response = await firebasemessageing.sendNotification(this.firebaseToken, firebaseData);
-    if (response.failureCount > 0) {
+    /*if (!response) {
       logKibana('ERROR', {
         token: this.firebaseToken,
         name: this.name,
         message: 'error sending firebase to receiver',
         reason: JSON.stringify(response.results)
       });
-    }
+    }*/
 
-    if (response.results[0]) {
-      if (response.results[0].canonicalRegistrationToken) {
-        logKibana("ERROR", {
-          message: "this time there was a token in the response",
-          token: response.results[0].canonicalRegistrationToken
-        });
-      }
-      if (response.results[0].messageId) {
-        evaluatedData.attributes = { ...evaluatedData.attributes, messageId: response.results[0].messageId };
-      }
+    //if (response.results[0]) {
+    /* if (response.results[0].canonicalRegistrationToken) {
+       logKibana("ERROR", {
+         message: "this time there was a token in the response",
+         token: response.results[0].canonicalRegistrationToken
+       });
+     }*/
+    if (response) {
+      evaluatedData.attributes = { ...evaluatedData.attributes, messageId: response };
     }
-    return response.failureCount;
+    //}
+    return response ? 0 : 1;
   }
 }

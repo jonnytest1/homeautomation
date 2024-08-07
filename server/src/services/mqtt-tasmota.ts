@@ -19,7 +19,7 @@ export class DeviceConfig {
   public topicPrefixes: Array<string>
   public friendlyName: string
 
-  commands: Array<{ name: string, argument?: NodeOptionTypes }> = []
+  commands: Array<{ name: string, argument?: NodeOptionTypes, responses?: Array<string> }> = []
 
   iscommandsSet = false
   constructor(public discoveryid: string, evt: DiscoveryConfigEvent, commandprops?: CommandsEvent) {
@@ -53,6 +53,10 @@ export class DeviceConfig {
     }
     console.error("unknown command syntax", this.friendlyName, this.mqttDeviceName)
     return false
+  }
+
+  sendsResponse() {
+    return this.topicPrefixes.includes("response")
   }
 }
 

@@ -1,4 +1,4 @@
-import type { Connection, ElementNode, NodeData } from './generic-node-type'
+import type { Connection, ElementNode, NodeData, Schemata } from './generic-node-type'
 
 export type Load = {
   type: "load-node-data"
@@ -63,10 +63,14 @@ export type UpdateEditorSchema = {
     globals: string
   }
 }
-
+export type UpdateOutputSchema = {
+  type: "update output schema",
+  nodeUuid: string
+  schema: Schemata
+}
 
 export type StoreEvents = UpdatepositionEvent | DeleteNOdeEvet | AddNOdeEvet | AddConnection | DeleteConnection
-  | UpdateGlobals | UpdateParam | UpdateNode | UpdateEditorSchema | SetConnectionError
+  | UpdateGlobals | UpdateParam | UpdateNode | UpdateEditorSchema | UpdateOutputSchema | SetConnectionError
 
 
 export type BackendPageEvent = {
