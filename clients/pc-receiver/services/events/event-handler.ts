@@ -4,6 +4,7 @@ import { join } from "path"
 import { pythonExe } from '../../constant'
 import { logKibana } from '../../util/log'
 import { setLastAbort } from '../../util/abortable'
+import { TimerService } from '../timer-service'
 
 
 let hibernatePrompted = 0
@@ -26,6 +27,9 @@ export const eventHandlerMap = {
   },
   "abort": () => {
     setLastAbort()
+  },
+  "treadmill": () => {
+    new TimerService(null).run({})
   }
   /*"read": (data: { text: string }) => {
     debugger

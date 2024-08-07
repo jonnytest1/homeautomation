@@ -38,6 +38,7 @@ service.load(uidBlackList).then(() => {
 })
 
 RepeatingAudio.check()
+const timerService = new TimerService(serverIp);
 registration.register(serverIp, +listenOnPort)
   .then(() => {
     const fritzBoxClient = new FritzBoxClient()
@@ -118,7 +119,7 @@ registration.register(serverIp, +listenOnPort)
     app.listen(+listenOnPort, '', () => {
       console.log(`started server on localhost with port ${listenOnPort}`);
     });
-    new TimerService(serverIp).timer();
+    timerService.timer();
   });
 
 
