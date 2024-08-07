@@ -31,6 +31,7 @@ export function getNextRRule(event_start: Date, after: Date, rule: string) {
     return new Date(data)
   } catch (e) {
     debugger
+    throw new Error("failed parsing rrule.py response: " + response.stdout, { cause: e });
   }
 }
 
