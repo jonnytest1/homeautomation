@@ -1,5 +1,6 @@
 
 
+import type { UINode } from '../wiring-ui/ui-node';
 import type { Connection } from './connection';
 import type { RegisterOptions } from './interfaces/registration';
 import type { CurrentCurrent, CurrentOption, GetResistanceOptions, ResistanceReturn } from './wiring.a';
@@ -43,9 +44,7 @@ export class Collection extends Wiring {
     throw new Error('Method not implemented.');
   }
 
-  mockUiNode() {
-    import('../wiring-ui/mock-ui').then((mui) => {
-      this.uiNode = new mui.MockUiNode(this, null as any);
-    });
+  mockSetUiNode(node: Wiring["uiNode"]) {
+    this.uiNode = node
   }
 }

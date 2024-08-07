@@ -4,6 +4,7 @@ import type { ParrallelWire } from '../../wirings/parrallel-wire';
 import { Transformator } from '../../wirings/transformator';
 import type { Wire } from '../../wirings/wire';
 import { UINode } from '../ui-node';
+import { MockUiNode } from '../mock-ui';
 
 @Component({
   selector: 'app-transformator-ui',
@@ -17,7 +18,7 @@ export class TransformatorUiComponent extends UINode<Transformator> implements O
   }
   public static templateIcon = 'asset:/assets/icons/Transformer.svg';
   initNodes(): void {
-    this.node.providingBattery.mockUiNode();
+    this.node.providingBattery.mockSetUiNode(new MockUiNode(this.node.providingBattery, null as any));
   }
 
   getIcon(): string {
