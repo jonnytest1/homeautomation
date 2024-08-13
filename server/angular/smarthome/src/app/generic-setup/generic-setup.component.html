@@ -1,5 +1,9 @@
 <div class="page"
      *ngIf="hasNodeDefs$|async;let nodeDefs;else nodata">
+
+
+
+
   <ng-container *ngIf="nodeData$|async;let nodeData">
     <div class="wrapper"
          #wrapperElement
@@ -9,8 +13,11 @@
          (mousemove)="mouseDragMove($event,wrapperElement)"
          (touchmove)="mouseDragMove($event,wrapperElement)"
          (mouseup)="mouseDragEnd($event,wrapperElement)"
+         [disableDragPreview]="true"
          (mb-dragstart)="mouseDragSTart($event,wrapperElement)"
          (wheel)="onscroll($event);$event.preventDefault()">
+
+
 
       <div *ngrxLet="activeElements$|async ;let activeElements"
            class="background"
@@ -22,7 +29,11 @@
         <!-- (dragleave)="state.setdragging()" -->
 
 
-
+        <button (click)="viewUp()"
+                class="arrow_up"
+                *ngIf="(touchMode$|async)===true && (activeView$ |async)">
+          <mat-icon>arrow_upward</mat-icon>
+        </button>
 
         <div *ngFor="let node of nodeData.nodes.nodes;trackBy:nodeByUuid"
              draggable="true"

@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import type { OnInit } from '@angular/core';
-import { Component, HostListener } from '@angular/core';
+import { Component, HostListener, inject } from '@angular/core';
 import { createStateMachine } from '../utils/state-machine';
 import { Vector2 } from '../wiring/util/vector';
 import { PositionDirective } from './position.directive';
@@ -14,12 +14,12 @@ import { GenericOptionsComponent } from './generic-options/generic-options.compo
 import { ActivatedRoute, Router } from '@angular/router';
 import type { Connection, ElementNode, NodeData, NodeDefintion } from '../settings/interfaces';
 import { logKibana } from '../global-error-handler';
-import { filter, map, combineLatestWith, first } from 'rxjs/operators';
+import { filter, map, combineLatestWith, first, tap } from 'rxjs/operators';
 import type { Observable } from 'rxjs';
 import { BehaviorSubject, combineLatest } from 'rxjs';
 import { Store } from '@ngrx/store';
 import { backendActions } from './store/action';
-import { selectNodeDefs, selectNodeData, selectNode } from './store/selectors';
+import { selectNodeDefs, selectNodeData, selectNode, selectTouchMode } from './store/selectors';
 import { LetModule } from '@ngrx/component';
 import { isSameConnection } from './line/line-util';
 import { ClipboardService } from './clipboard-service';
@@ -28,6 +28,8 @@ import { BoundingBox } from '../wiring/util/bounding-box';
 
 import { DblClickDirective } from "../utils/directive/dbl-click.directive"
 import { MBDagOverDirective, MBDragStartDirective, MBDropDirective, type MBDragEvent } from "../utils/directive/drag-start.directive"
+import { MatIconModule } from '@angular/material/icon';
+import { TouchModeService } from './touchmode-service';
 
 
 const dataHandler = new DropDataHandler<DropData>()
@@ -37,10 +39,10 @@ const dataHandler = new DropDataHandler<DropData>()
   selector: 'app-generic-setup',
   templateUrl: './generic-setup.component.html',
   styleUrls: ['./generic-setup.component.scss'],
-  providers: [ClipboardService],
+  providers: [ClipboardService, TouchModeService],
   imports: [
     CommonModule, PositionDirective, LineComponent, GenericNodeComponent, GenericOptionsComponent, LetModule,
-    DblClickDirective, MBDragStartDirective, MBDropDirective, MBDagOverDirective
+    DblClickDirective, MBDragStartDirective, MBDropDirective, MBDagOverDirective, MatIconModule
   ],
   standalone: true
 })
@@ -66,6 +68,8 @@ export class GenericSetupComponent implements OnInit {
     map(elements => elements?.[0])
 
   )
+
+  touchMode$ = this.store.select(selectTouchMode)
 
   private readonly storeNodeData$ = this.store.select(selectNodeData);
   private storeNodeDataBeh$ = new BehaviorSubject<NodeData | undefined>(undefined)
@@ -126,6 +130,7 @@ export class GenericSetupComponent implements OnInit {
   )
 
   constructor(public connections: GenericNodesDataService, private router: Router, active: ActivatedRoute, private store: Store, private clipboardService: ClipboardService) {
+    inject(TouchModeService)
     connections.loadGenericData();
     this.storeNodeData$.subscribe(this.storeNodeDataBeh$)
     combineLatest([
@@ -172,6 +177,8 @@ export class GenericSetupComponent implements OnInit {
 
     this.state.setmove(dragNode)
 
+
+    evt.stopPropagation()
   }
   dropAllowed(evt: MBDragEvent) {
     let isAllowed = true;
@@ -229,27 +236,7 @@ export class GenericSetupComponent implements OnInit {
   onKeyPress(ev: KeyboardEvent) {
     if (this.activeView$.value) {
       if (ev.key == "Escape") {
-        this.store.select(selectNode(this.activeView$.value)).pipe(
-          first()
-        ).subscribe(currentView => {
-          if (currentView) {
-            this.router.navigate([], {
-              queryParams: {
-                view: currentView.view
-              },
-              queryParamsHandling: "merge"
-            })
-            this.activeView$.next(currentView.view)
-          } else {
-            this.router.navigate([], {
-              queryParams: {
-                view: null
-              },
-              queryParamsHandling: "merge"
-            })
-            this.activeView$.next(undefined)
-          }
-        })
+        this.viewUp();
 
       }
     }
@@ -362,6 +349,32 @@ export class GenericSetupComponent implements OnInit {
   }
 
 
+  viewUp() {
+    if (this.activeView$.value) {
+      this.store.select(selectNode(this.activeView$.value)).pipe(
+        first()
+      ).subscribe(currentView => {
+        if (currentView) {
+          this.router.navigate([], {
+            queryParams: {
+              view: currentView.view
+            },
+            queryParamsHandling: "merge"
+          });
+          this.activeView$.next(currentView.view);
+        } else {
+          this.router.navigate([], {
+            queryParams: {
+              view: null
+            },
+            queryParamsHandling: "merge"
+          });
+          this.activeView$.next(undefined);
+        }
+      });
+    }
+  }
+
   isInElements(elements: Array<ActiveElement> | null | undefined, node: ElementNode | Connection, typeMatch = false) {
     if (!elements) {
       return false
@@ -390,8 +403,12 @@ export class GenericSetupComponent implements OnInit {
       mouseStart: mousevent.position,
       startOffset: new Vector2(el.scrollLeft, el.scrollTop)
     })
+
   }
   mouseDragMove(mousevent: MouseEvent | TouchEvent, el: HTMLElement) {
+    if (mousevent instanceof TouchEvent) {
+      mousevent.preventDefault()
+    }
     if (this.state.ismousedragview) {
       const movementDiff = new Vector2(mousevent).subtract(this.state.getmousedragview.mouseStart)
       const newSCroll = this.state.getmousedragview.startOffset.subtract(movementDiff)

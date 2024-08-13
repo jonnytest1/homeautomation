@@ -40,3 +40,6 @@ export const selectNodeDefByType = (type: string, error = true) => {
 }
 
 export const selectNodeDefs = createSelector(selectNodeData, n => n.nodeDefinitions)
+
+
+export const selectTouchMode = createSelector(genericNodeDAtaFeature, st => st.touchmode)

@@ -8,6 +8,8 @@ import { patchNode } from './reducer-util';
 
 export interface GenericNodeState extends NodeData {
   nodeDefinitions: Record<string, NodeDefintion>
+
+  touchmode: boolean
 }
 
 
@@ -16,7 +18,9 @@ const initialState: GenericNodeState = {
   nodes: [],
   globals: {},
   nodeDefinitions: {},
-  version: 0
+  version: 0,
+  touchmode: false
+
 }
 
 

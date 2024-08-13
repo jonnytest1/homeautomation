@@ -74,9 +74,20 @@ export const backendActions = backendAction({
         inputSchema: a.schema
       }
     }))
-  })
+  }),
+
 })
 
+
+export const frontendActions = {
+  updateTouchMode: createActionWithReducer("update touchmode", props<{ touchmode: boolean }>(), (st, a) => {
+    return {
+      ...st,
+      touchmode: a.touchmode
+    }
+  })
+
+}
 
 
 export type BackendActionsMap = typeof backendActions

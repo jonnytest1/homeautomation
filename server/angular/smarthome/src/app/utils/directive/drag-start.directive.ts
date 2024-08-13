@@ -1,7 +1,6 @@
-import { Directive, EventEmitter, HostListener, Output, VERSION, ElementRef, type OnInit, type OnDestroy } from '@angular/core';
+import { Directive, EventEmitter, HostListener, Output, ElementRef, type OnInit, type OnDestroy, Input } from '@angular/core';
 import { Vector2 } from '../../wiring/util/vector';
 import { VectorDomUtils } from '../../wiring/util/vector-dom-utils';
-import { off } from 'process';
 import { BoundingBox } from '../../wiring/util/bounding-box';
 
 
@@ -68,6 +67,7 @@ let dragCpy: HTMLElement
 
 
 window.addEventListener("touchmove", e => {
+  e.preventDefault()
   if (dragCpy) {
     const touch = e.changedTouches[0] || e.targetTouches[0];
     let position = new Vector2(touch.clientX, touch.clientY)
@@ -77,7 +77,10 @@ window.addEventListener("touchmove", e => {
       position = position.subtract(offset)
     }
     VectorDomUtils.applyPosition(dragCpy, position)
+
+
   }
+
 })
 
 
@@ -85,11 +88,19 @@ window.addEventListener("touchmove", e => {
   selector: '[mb-dragstart]',
   standalone: true
 })
-export class MBDragStartDirective {
+export class MBDragStartDirective implements OnDestroy {
 
   @Output("mb-dragstart")
   dragStart = new EventEmitter<MBDragEvent>();
+
+  @Input()
+  disableDragPreview = false
+
   constructor(private elementRef: ElementRef) {}
+  ngOnDestroy(): void {
+    dragCpy?.remove()
+  }
+
 
   @HostListener("touchstart", ['$event'])
   @HostListener("dragstart", ['$event'])
@@ -102,29 +113,34 @@ export class MBDragStartDirective {
     this.dragStart.emit(eventRef)
 
     event.stopPropagation()
+    dragCpy?.remove()
     startEvent = eventRef
 
     if (event instanceof TouchEvent) {
 
-      const target = this.elementRef.nativeElement as HTMLElement;
+
+      if (!this.disableDragPreview) {
+        const target = this.elementRef.nativeElement as HTMLElement;
 
 
-      eventRef.offsetPosition = eventRef.position.subtract(new Vector2(target.getBoundingClientRect()))
+        eventRef.offsetPosition = eventRef.position.subtract(new Vector2(target.getBoundingClientRect()))
 
-      dragCpy = target.cloneNode(true) as HTMLElement
-      dragCpy.style.opacity = "0.5"
-      dragCpy.style.position = "fixed"
-      dragCpy.style.zIndex = "999999"
-      dragCpy.style.pointerEvents = "none";
 
-      [...document.querySelectorAll(".dragelementcpy")].forEach(n => n.remove());
+        dragCpy = target.cloneNode(true) as HTMLElement
+        dragCpy.style.opacity = "0.5"
+        dragCpy.style.position = "fixed"
+        dragCpy.style.zIndex = "999999"
+        dragCpy.style.pointerEvents = "none";
 
-      dragCpy.classList.add("dragelementcpy")
-      dragCpy.addEventListener('touchstart touchmove touchend', function (e) {
-        e.preventDefault();
-      });
+        [...document.querySelectorAll(".dragelementcpy")].forEach(n => n.remove());
 
-      target.parentElement.appendChild(dragCpy)
+        dragCpy.classList.add("dragelementcpy")
+        dragCpy.addEventListener('touchstart touchmove touchend', function (e) {
+          e.preventDefault();
+        });
+
+        target.parentElement.appendChild(dragCpy)
+      }
     } else {
       dragCpy = undefined
     }
@@ -156,16 +172,20 @@ export class MBDagOverDirective {
 
   @HostListener("window:touchmove", ["$event"])
   touchover(evt: TouchEvent) {
+    evt.preventDefault()
     const movePos = new Vector2(evt)
 
     const box = new BoundingBox(this.elementRef)
+    if (!startEvent) {
+      return
+    }
 
     //.withMargin(new Vector2(10, 10))
     if (box.includes(movePos)) {
       const eventRef = prepareEvent(evt)
 
-      eventRef.preventDefault = () => {
-        console.log("prevented")
+      eventRef.preventDefault ??= () => {
+        //console.log("prevented")
       }
 
       eventRef.dataTransferHandler = dragDataHandler
@@ -229,7 +249,7 @@ export class MBDropDirective implements OnInit, OnDestroy {
 
   @Output("mb-drop")
   drop = new EventEmitter<MBDragEvent>();
-  isInside: boolean;
+  lastPos: Vector2;
   constructor(private elementRef: ElementRef<HTMLElement>) {}
 
   ngOnDestroy(): void {
@@ -239,7 +259,7 @@ export class MBDropDirective implements OnInit, OnDestroy {
     dropDirectives.add(this)
   }
 
-  @HostListener("touchend", ['$event'])
+  @HostListener("window:touchend", ['$event'])
   @HostListener("drop", ['$event'])
   tap(event: Event) {
 
@@ -253,8 +273,12 @@ export class MBDropDirective implements OnInit, OnDestroy {
     //event.preventDefault()
     document.body.style.cursor = "default"
 
-    startEvent = undefined
     dragCpy?.remove()
+    if (!startEvent) {
+      return
+    }
+
+    startEvent = undefined
 
 
     for (const drop of dropDirectives) {
@@ -262,14 +286,18 @@ export class MBDropDirective implements OnInit, OnDestroy {
     }
   }
   emitDrop(eventRef: MBDragEvent) {
-    if (this.isInside) {
+    if (!this.lastPos) {
+      this.lastPos = eventRef.position
+    }
+
+    if (new BoundingBox(this.elementRef).includes(this.lastPos)) {
       this.drop.emit(eventRef)
     }
   }
 
 
   update(position: Vector2) {
-    this.isInside = new BoundingBox(this.elementRef).includes(position)
+    this.lastPos = position
   }
 }
 
