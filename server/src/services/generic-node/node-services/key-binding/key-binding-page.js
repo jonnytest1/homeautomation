@@ -1,13 +1,20 @@
 /// <reference path="./page-events.ts" />
+
+
+/**
+ * @type {import('../../frame-types').SendToNodeImplFnc<import('./page-events').SocketMap>}
+ */
+const sendToNodeImpl = sendToNodeImplementation
+
 /*
 .then(nodes => {
   debugger
 })*/
 Promise.all([
-  sendToNodeImplementation({
+  sendToNodeImpl({
     type: "layouts"
   }),
-  sendToNodeImplementation({
+  sendToNodeImpl({
     type: "get-nodes"
   })
 ]).then(([layouts, nodes]) => {

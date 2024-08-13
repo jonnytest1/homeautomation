@@ -1,5 +1,4 @@
 import type { ElementNode } from '../../typing/generic-node-type'
-
 export type SocketMap = {
   type: "layouts"
   param: object
@@ -17,7 +16,6 @@ export type SocketMap = {
   response: void
 }
 
-
 export type SocketEvents = {
   type: keyof SocketMap
 }
@@ -32,7 +30,3 @@ export type SubjectEvent = {
 }
 
 
-declare global {
-  function sendToNodeImplementation<T extends SocketMap["type"]>(evt: (SocketMap & { type: T })["param"] & { type: T })
-    : Promise<(SocketMap & { type: T })["response"]>
-}

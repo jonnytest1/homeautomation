@@ -5,7 +5,6 @@ import type { SafeHtml } from '@angular/platform-browser';
 import { DomSanitizer } from '@angular/platform-browser';
 import { BehaviorSubject } from 'rxjs';
 import { Frame } from '../../../settings/interfaces';
-import { parse } from 'path';
 import { environment } from '../../../../environments/environment';
 
 @Component({
