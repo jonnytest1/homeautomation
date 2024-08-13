@@ -58,7 +58,7 @@
     "@types/jasmine": "~2.8.8",
     "@types/jasminewd2": "~2.0.3",
     "@types/jest": "^29",
-    "@types/node": "^12.12.41",
+    "@types/node": "^20",
     "babel-jest": "^29",
     "codelyzer": "^6.0.2",
     "css-loader": "^6.7.3",

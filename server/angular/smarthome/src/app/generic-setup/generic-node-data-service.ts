@@ -9,10 +9,11 @@ import { backendActions, setNodeData, updateNodeDef } from './store/action';
 import { logKibana } from '../global-error-handler';
 
 import { v4 } from "uuid"
+import type { MBDragEvent } from '../utils/directive/drag-start.directive';
 
 export type PendingConnection = {
   source: ConnectorDefintion,
-  target?: DragEvent
+  target?: MBDragEvent
 }
 
 
@@ -177,7 +178,7 @@ export class GenericNodesDataService {
       }
     })
   }
-  setTarget(target: DragEvent) {
+  setTarget(target: MBDragEvent) {
     if (this.pendingConnection.value) {
       this.pendingConnection.next({ ...this.pendingConnection.value, target: target })
     }

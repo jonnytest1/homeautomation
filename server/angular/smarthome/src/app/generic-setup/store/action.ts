@@ -1,6 +1,6 @@
 import type { Action, ActionCreator, ActionCreatorProps, ActionReducer, NotAllowedCheck } from '@ngrx/store';
 import { createAction, props } from '@ngrx/store';
-import type { Connection, ElementNode, NodeData, SetConnectionError, UpdateEditorSchema, UpdateOutputSchema } from '../../settings/interfaces';
+import type { Connection, ElementNode, NodeData, SetConnectionError, UpdateEditorSchema, UpdateInputSchema, UpdateOutputSchema } from '../../settings/interfaces';
 import { type NodeDefintion } from '../../settings/interfaces';
 import type { GenericNodeState } from './reducers';
 import { patchNode } from './reducer-util';
@@ -62,7 +62,16 @@ export const backendActions = backendAction({
       ...n,
       runtimeContext: {
         ...n.runtimeContext,
-        editorSchema: a.schema
+        outputSchema: a.schema
+      }
+    }))
+  }),
+  updateInputSchema: createActionWithReducer("update input schema", props<Omit<UpdateInputSchema, "type">>(), (st, a) => {
+    return patchNode(st, a.nodeUuid, n => ({
+      ...n,
+      runtimeContext: {
+        ...n.runtimeContext,
+        inputSchema: a.schema
       }
     }))
   })

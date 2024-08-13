@@ -8,7 +8,7 @@ import type { Connection } from '../../settings/interfaces';
 import { extendCanvasContext } from '../../wiring/util/canvas-vector';
 import { pointIsInPoly } from '../../wiring/util/point-in-polygon';
 import { logKibana } from '../../global-error-handler';
-
+import { MBDragEvent } from "../../utils/directive/drag-start.directive"
 
 
 
@@ -44,12 +44,18 @@ export class LineComponent implements OnChanges, AfterViewChecked, AfterViewInit
   callback = {
     mousemove: (e: MouseEvent) => {
       this.mousePos = new Vector2(e)
+
+
     },
     click: (e: MouseEvent) => {
       if (this.isHovering) {
         this.clicked.emit(e)
         e.stopPropagation()
       }
+    },
+    resize: () => {
+      this.canvas.nativeElement.width = Math.floor(window.innerWidth);
+      this.canvas.nativeElement.height = Math.floor(window.innerHeight);
     }
   }
 
@@ -58,8 +64,10 @@ export class LineComponent implements OnChanges, AfterViewChecked, AfterViewInit
   }
   ngOnDestroy(): void {
 
+    window.removeEventListener("touchmove", this.callback.mousemove)
     window.removeEventListener("mousemove", this.callback.mousemove)
     window.removeEventListener("click", this.callback.click, true)
+    window.removeEventListener("resize", this.callback.resize)
   }
   mousePos: Vector2
 
@@ -74,7 +82,9 @@ export class LineComponent implements OnChanges, AfterViewChecked, AfterViewInit
 
 
 
+    window.addEventListener("touchmove", this.callback.mousemove)
     window.addEventListener("mousemove", this.callback.mousemove)
+    window.addEventListener("resize", this.callback.resize)
     window.addEventListener("click", this.callback.click, true)
   }
 
@@ -88,8 +98,8 @@ export class LineComponent implements OnChanges, AfterViewChecked, AfterViewInit
   ngAfterViewChecked(): void {
     if (this.line.target && this.canvas?.nativeElement) {
       let target: Vector2
-      if (this.line.target instanceof DragEvent) {
-        target = new Vector2(this.line.target)
+      if ("position" in this.line.target) {
+        target = this.line.target.position
       } else {
         const targetEl = this.con.getConnectionElement(this.line.target, "in")
         if (!targetEl) {
@@ -102,7 +112,6 @@ export class LineComponent implements OnChanges, AfterViewChecked, AfterViewInit
 
       const sourceEl = this.con.getConnectionElement(this.line.source, "out")
       if (!sourceEl) {
-        debugger
         return
       }
       const source = Vector2.fromBoundingClientRect(sourceEl.getBoundingClientRect(), "center")

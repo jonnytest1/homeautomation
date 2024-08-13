@@ -20,8 +20,9 @@
          [class.selected]="selected"
          [style.top]="(indx*20+10+6+2)+'px'"
          id="droptarget{{indx}}_{{prefix}}"
-         (dragover)="dropAllowed($event)"
-         (drop)="onDrop($event,indx)">
+         (mb-dragleave)="dragLeave(input)"
+         (mb-dragover)="dropAllowed($event,input)"
+         (mb-drop)="onDrop($event,indx)">
     </div>
     <span class="type"
           [class.highlighted]="highlightText">
@@ -44,7 +45,7 @@
          [style.top]="(indx*20+10+6+2)+'px'"
          (mousedown)="$event.stopPropagation()"
          draggable="true"
-         (dragstart)="startConnection($event,indx)">
+         (mb-dragstart)="startConnection($event,indx)">
     </div>
   </div>
 

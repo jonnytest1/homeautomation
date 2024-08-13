@@ -26,7 +26,8 @@ import { ClipboardService } from './clipboard-service';
 import type { ActiveElement } from './generic-setup-types';
 import { BoundingBox } from '../wiring/util/bounding-box';
 
-
+import { DblClickDirective } from "../utils/directive/dbl-click.directive"
+import { MBDagOverDirective, MBDragStartDirective, MBDropDirective, type MBDragEvent } from "../utils/directive/drag-start.directive"
 
 
 const dataHandler = new DropDataHandler<DropData>()
@@ -37,7 +38,9 @@ const dataHandler = new DropDataHandler<DropData>()
   templateUrl: './generic-setup.component.html',
   styleUrls: ['./generic-setup.component.scss'],
   providers: [ClipboardService],
-  imports: [CommonModule, PositionDirective, LineComponent, GenericNodeComponent, GenericOptionsComponent, LetModule
+  imports: [
+    CommonModule, PositionDirective, LineComponent, GenericNodeComponent, GenericOptionsComponent, LetModule,
+    DblClickDirective, MBDragStartDirective, MBDropDirective, MBDagOverDirective
   ],
   standalone: true
 })
@@ -158,22 +161,22 @@ export class GenericSetupComponent implements OnInit {
   getDimensions() {
     return Math.floor(100 / this.zoom) + "%"
   }
-  startDrag(evt: DragEvent, nodeDefinition: NodeDefintion) {
+  startDrag(evt: MBDragEvent, nodeDefinition: NodeDefintion) {
     dataHandler.setDropData(evt, "nodeDrag", true)
     dataHandler.setDropData(evt, "nodeDefinition", nodeDefinition)
-    dataHandler.setDropData(evt, "dragOffset", { x: evt.offsetX, y: evt.offsetY })
+    dataHandler.setDropData(evt, "dragOffset", evt.offsetPosition)
   }
-  startDragUpdate(evt: DragEvent, dragNode: ElementNode) {
+  startDragUpdate(evt: MBDragEvent, dragNode: ElementNode) {
     //dataHandler.setDropData(evt, "node", dragNode)
-    dataHandler.setDropData(evt, "dragOffset", { x: evt.offsetX, y: evt.offsetY })
+    dataHandler.setDropData(evt, "dragOffset", evt.offsetPosition)
 
     this.state.setmove(dragNode)
 
   }
-  dropAllowed(evt: DragEvent) {
+  dropAllowed(evt: MBDragEvent) {
     let isAllowed = true;
 
-    if (![...evt.dataTransfer?.items ?? []].find(i => i.type === "dragoffset")) {
+    if (!dataHandler.hasKey(evt, "dragOffset")) {
       if (this.connections.pendingConnection) {
         this.connections.setTarget(evt)
       }
@@ -381,10 +384,10 @@ export class GenericSetupComponent implements OnInit {
     })
   }
 
-  mouseDragSTart(mousevent: MouseEvent | TouchEvent, el: HTMLElement) {
+  mouseDragSTart(mousevent: MBDragEvent, el: HTMLElement) {
 
     this.state.setmousedragview({
-      mouseStart: new Vector2(mousevent),
+      mouseStart: mousevent.position,
       startOffset: new Vector2(el.scrollLeft, el.scrollTop)
     })
   }
@@ -462,13 +465,13 @@ export class GenericSetupComponent implements OnInit {
     })
   }
 
-  onDrop(evt: DragEvent, scrollElement: HTMLElement) {
+  onDrop(evt: MBDragEvent, scrollElement: HTMLElement) {
     if (this.state.ismove) {
       const dragOffset = dataHandler.getDropData(evt, "dragOffset");
       if (!dragOffset) {
         return
       }
-      const newPosition = this.convertVectorZoom(new Vector2(evt).subtract(GenericSetupComponent.pageInset)
+      const newPosition = this.convertVectorZoom(evt.position.subtract(GenericSetupComponent.pageInset)
         .subtract(new Vector2(dragOffset)).added(Vector2.fromStyles(scrollElement, "scroll")
         )
       );
@@ -498,7 +501,7 @@ export class GenericSetupComponent implements OnInit {
       return
     }
     const newNode: ElementNode = {
-      position: new Vector2(evt)
+      position: evt.position
         .subtract(new Vector2(dragOffset))
         .subtract(GenericSetupComponent.pageInset),
       type: def.type,

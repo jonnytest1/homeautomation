@@ -101,6 +101,16 @@ export class MonacoOptionComponent implements OnInit, OnChanges {
       debugger
     }
 
+
+    let outputtype = ""
+
+
+    if (this.node.runtimeContext.editorSchema?.dts?.includes("MapFncOutputType")) {
+      outputtype = `type OutputType=EditorSchema.MapFncOutputType`
+    } else {
+      outputtype = `type OutputType=any`
+    }
+
     /**
      * previous 
      * type InputType = EditorSchema.InputType;
@@ -118,7 +128,10 @@ export class MonacoOptionComponent implements OnInit, OnChanges {
           declare global {
             ${this.node.runtimeContext?.editorSchema?.globals ?? ''}
 
-            type InputType = EditorSchema.Main;  
+            type InputType = EditorSchema.Main; 
+
+
+            ${outputtype}
           }
 
       \n;

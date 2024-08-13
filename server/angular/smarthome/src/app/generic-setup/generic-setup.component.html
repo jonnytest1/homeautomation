@@ -4,13 +4,12 @@
     <div class="wrapper"
          #wrapperElement
          id="wrapper-drop"
-         (dragover)="dropAllowed($event)"
-         (drop)="onDrop($event,wrapperElement)"
-         (mousedown)="mouseDragSTart($event,wrapperElement)"
+         (mb-dragover)="dropAllowed($event)"
+         (mb-drop)="onDrop($event,wrapperElement)"
          (mousemove)="mouseDragMove($event,wrapperElement)"
-         (mouseup)="mouseDragEnd($event,wrapperElement)"
-         (touchstart)="mouseDragSTart($event,wrapperElement)"
          (touchmove)="mouseDragMove($event,wrapperElement)"
+         (mouseup)="mouseDragEnd($event,wrapperElement)"
+         (mb-dragstart)="mouseDragSTart($event,wrapperElement)"
          (wheel)="onscroll($event);$event.preventDefault()">
 
       <div *ngrxLet="activeElements$|async ;let activeElements"
@@ -19,7 +18,7 @@
            [style.transformOrigin]="'0px 0px'"
            id="background-drop"
            (click)="setActiveNode(undefined)"
-           (dragover)="dropAllowed($event)">
+           (mb-dragover)="dropAllowed($event)">
         <!-- (dragleave)="state.setdragging()" -->
 
 
@@ -27,10 +26,10 @@
 
         <div *ngFor="let node of nodeData.nodes.nodes;trackBy:nodeByUuid"
              draggable="true"
-             (dragstart)="startDragUpdate($event,node)"
+             (mb-dragstart)="startDragUpdate($event,node)"
              (mousedown)="$event.stopPropagation()"
              (click)="setActiveNode(node,$event)"
-             (dblclick)="doubleClick(node);"
+             (dbltap)="doubleClick(node);"
              class="node"
              [position]="node.position">
           <app-generic-node [prefix]="node.type"
@@ -80,7 +79,7 @@
     <div *ngFor="let n of nodeDefs|keyvalue"
          class="dragelement"
          draggable="true"
-         (dragstart)="startDrag($event,n.value)">
+         (mb-dragstart)="startDrag($event,n.value)">
 
       <app-generic-node [prefix]="n.value.type">
         {{n.value.type}}

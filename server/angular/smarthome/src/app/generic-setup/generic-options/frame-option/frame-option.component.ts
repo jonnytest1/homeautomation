@@ -5,6 +5,8 @@ import type { SafeHtml } from '@angular/platform-browser';
 import { DomSanitizer } from '@angular/platform-browser';
 import { BehaviorSubject } from 'rxjs';
 import { Frame } from '../../../settings/interfaces';
+import { parse } from 'path';
+import { environment } from '../../../../environments/environment';
 
 @Component({
   selector: 'app-frame-option',
@@ -17,13 +19,13 @@ export class FrameOptionComponent implements OnInit, OnChanges, AfterViewInit {
 
 
   @Input()
-    definition: Frame
+  definition: Frame
 
   @Input()
-    name: string
+  name: string
 
   @Input()
-    currentValue: string
+  currentValue: string
 
   trustedDocuemnt: SafeHtml;
   gotsize = new BehaviorSubject(false)
@@ -33,10 +35,10 @@ export class FrameOptionComponent implements OnInit, OnChanges, AfterViewInit {
 
 
   @ViewChild("frameRef")
-    frame: ElementRef<HTMLIFrameElement>
+  frame: ElementRef<HTMLIFrameElement>
 
   @ViewChild("hiddenValue")
-    hiddenValue: ElementRef<HTMLTextAreaElement>
+  hiddenValue: ElementRef<HTMLTextAreaElement>
 
   constructor(private sanitizer: DomSanitizer) {
 
@@ -82,6 +84,15 @@ export class FrameOptionComponent implements OnInit, OnChanges, AfterViewInit {
           scr.textContent += `\n\n//# sourceURL=content.${this.name}.${i}.js`
         })
 
+        if (!parsed.body.querySelector("#content")) {
+          const contentWrapper = document.createElement("div")
+          contentWrapper.id = "content"
+          contentWrapper.style.width = "min-content"
+          contentWrapper.append(...parsed.body.childNodes)
+
+          parsed.body.appendChild(contentWrapper)
+        }
+
         const dataScript = document.createElement("script")
         dataScript.type = "application/json"
         dataScript.id = "data"
@@ -95,6 +106,7 @@ export class FrameOptionComponent implements OnInit, OnChanges, AfterViewInit {
         const sizeScript = document.createElement("script")
         sizeScript.textContent = `
         const contentElement = document.querySelector("#content")
+
         new ResizeObserver((observeEntries)=>{
           const entry=observeEntries[0]
           if(entry.contentRect.width&&entry.contentRect.height){
@@ -105,9 +117,14 @@ export class FrameOptionComponent implements OnInit, OnChanges, AfterViewInit {
           }
          
         }).observe(contentElement)
+        //# sourceURL=content.${this.name}_resize_observer.js
       `
         parsed.body.appendChild(sizeScript)
 
+
+        const baseHref = document.createElement("base")
+        baseHref.href = `${environment.prefixPath}rest/generic-node/frame/${this.name}/`
+        parsed.head.appendChild(baseHref)
 
 
 

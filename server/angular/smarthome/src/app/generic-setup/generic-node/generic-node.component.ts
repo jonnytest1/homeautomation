@@ -13,15 +13,17 @@ import { selectNode } from '../store/selectors';
 import { LetModule } from '@ngrx/component';
 import { StoreService } from '../store/store-service';
 import { logKibana } from '../../global-error-handler';
+import { MBDagOverDirective, MBDragLeaveDirective, MBDragStartDirective, MBDropDirective, type MBDragEvent } from '../../utils/directive/drag-start.directive';
 const dataHandler = new DropDataHandler<DropData>()
 @Component({
   selector: 'app-generic-node',
   templateUrl: './generic-node.component.html',
   styleUrls: ['./generic-node.component.scss'],
-  imports: [CommonModule, MatIconModule, LetModule],
+  imports: [CommonModule, MatIconModule, LetModule, MBDropDirective, MBDragStartDirective, MBDagOverDirective, MBDragLeaveDirective],
   standalone: true
 })
 export class GenericNodeComponent implements OnChanges, AfterViewInit, OnDestroy {
+
 
   @Input()
   nodeUuid: string | undefined
@@ -132,20 +134,31 @@ export class GenericNodeComponent implements OnChanges, AfterViewInit, OnDestroy
 
 
 
-  startConnection(evt: DragEvent, indx) {
+  startConnection(evt: MBDragEvent, indx) {
     if (this.editable && this.nodeUuid) {
       this.con.addConnection(this.nodeUuid, indx)
       dataHandler.setDropData(evt, "connectionDrag", true)
       evt.stopPropagation()
     }
   }
-  dropAllowed(evt: DragEvent) {
+  dropAllowed(evt: MBDragEvent, inpt: HTMLElement) {
     const isAllowed = dataHandler.hasKey(evt, "connectionDrag");
     if (isAllowed) {
       evt.preventDefault()
     }
+
+
+    if (evt instanceof TouchEvent) {
+      inpt.style.backgroundColor = "red"
+    }
   }
-  onDrop(evt: DragEvent, indx: number) {
+
+  dragLeave(inpt: HTMLDivElement) {
+    inpt.style.backgroundColor = "unset";
+  }
+
+
+  onDrop(evt: MBDragEvent, indx: number) {
     if (dataHandler.hasKey(evt, "connectionDrag") && this.nodeUuid) {
       this.con.finalize(this.nodeUuid, indx)
       evt.stopPropagation()
