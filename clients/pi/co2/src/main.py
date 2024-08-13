@@ -1,6 +1,4 @@
-import RPi.GPIO as GPIO
 import time
-from dataclasses import dataclass
 import debugpy
 import paho.mqtt.client as mqtt
 from env import mqtt_server
