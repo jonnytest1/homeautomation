@@ -14,7 +14,7 @@ export class DataStore<T> {
 
 
   reducers: Record<string, Reducer<T, { type: string }>> = {}
-  effects: Record<string, Effect<T, { type: string }>> = {}
+  effects: Record<string, Array<Effect<T, { type: string }>>> = {}
   generalEffects: Array<Effect<T, Action<string, unknown>>>
 
   lastDispatch = -1
@@ -64,10 +64,9 @@ export class DataStore<T> {
 
 
   addEffect<Type extends string, P>(action: ActionCreator<Type, P>, effect: Effect<T, Action<Type, P>>) {
-    if (this.effects[action.type]) {
-      throw new Error("duplciate reducer " + action.type)
-    }
-    this.effects[action.type] = effect
+
+    this.effects[action.type] ??= []
+    this.effects[action.type].push(effect)
   }
   addGeneralEffect(effect: Effect<T, Action<string, unknown>>) {
     this.generalEffects.push(effect)
@@ -89,7 +88,10 @@ export class DataStore<T> {
     this.state.next(newState)
     this.lastActionType = undefined
     if (lastDispatch === this.lastDispatch) {
-      this.effects[action.type]?.(newState, action)
+
+      this.effects[action.type]?.forEach(effect => {
+        effect(newState, action)
+      })
     } else {
       console.log("skipping effect after new action dispatch")
       // debugger

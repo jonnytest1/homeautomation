@@ -28,7 +28,7 @@ export type PlaceHolder = {
 export type Frame = {
   type: "iframe"
   document: string,
-  data: unknown
+  data?: unknown
 }
 
 

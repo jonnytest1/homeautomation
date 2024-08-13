@@ -58,7 +58,7 @@ export class GenericNodeResources {
       content = dom.serialize()
 
     } else if (req.params.page.endsWith(".js")) {
-      contentType = "applicaiton/javascript"
+      contentType = "application/javascript"
     }
     res.header("Content-Type", contentType).send(content)
   }

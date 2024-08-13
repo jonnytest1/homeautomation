@@ -54,6 +54,7 @@ export type TypeImplementaiton<Context = unknown, Globals extends NodeDefOptinos
   nodeDefinition: () => NodeDefintion<Globals, Opts>
   nodeChanged?: (this: TypeImplementaiton, node: ElementNodeImpl<NodeDefToType<Opts>, NodeDefToRUntime<Opts>>, prevNode: ElementNode<NodeDefToType<Opts>> | null) => void | Promise<void>
   connectionTypeChanged?(node: EvalNode<Opts, S>, schema: Schemata): void | Promise<void>
+  targetConnectionTypeChanged?(node: EvalNode<Opts, S>, schema?: Schemata): void | Promise<void>
   initializeServer?(nodes: Array<ElementNodeImpl<NodeDefToType<Opts>>>, globals: NodeDefToType<Globals>): void | Promise<void>
   unload?(nodeas: Array<EvalNode<Opts, S>>, globals: NodeDefToType<Globals>): void | Promise<void>
   _file?: string

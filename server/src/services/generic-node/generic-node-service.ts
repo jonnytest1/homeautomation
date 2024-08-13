@@ -110,12 +110,63 @@ if (environment.WATCH_SERVICES) {
         console.log("successfully loaded " + e)
       }
     }).on("ready", () => {
-      hasLoaded$.next(true)
+      setTimeout(() => {
+        hasLoaded$.next(true)
+      })
+
     })
 
 }
 
 const subscriptionMap: Record<string, Subscription> = {}
+
+
+genericNodeDataStore.addEffect(backendToFrontendStoreActions.updateInputSchema, (st, a) => {
+  const connections = genericNodeDataStore.getOnce(selectTargetConnectorForNodeUuid(a.nodeUuid))
+
+  if (connections) {
+    connections[0].forEach(con => {
+      const connectionNode = genericNodeDataStore.getOnce(selectNodeByUuid(con.source.uuid))
+
+      const nodeTypeImpl = typeImplementations.value[connectionNode.type];
+
+      if (!nodeTypeImpl) {
+        logKibana("ERROR", "missing impl for type " + connectionNode.type)
+      } else {
+        nodeTypeImpl.targetConnectionTypeChanged?.(connectionNode, a.schema)
+      }
+    })
+  }
+})
+
+genericNodeDataStore.addEffect(backendToFrontendStoreActions.addConnnection, (st, a) => {
+
+  const target = genericNodeDataStore.getOnce(selectNodeByUuid(a.connection.target.uuid))
+  const source = genericNodeDataStore.getOnce(selectNodeByUuid(a.connection.source.uuid))
+
+  const nodeTypeImpl = typeImplementations.value[source.type];
+
+  if (!nodeTypeImpl) {
+    logKibana("ERROR", "missing impl for type " + source.type)
+  } else {
+    // need to merge other connections !!
+    nodeTypeImpl.targetConnectionTypeChanged?.(source, target.runtimeContext.inputSchema)
+  }
+})
+
+genericNodeDataStore.addEffect(backendToFrontendStoreActions.removeConnnection, (st, a) => {
+  const source = genericNodeDataStore.getOnce(selectNodeByUuid(a.connection.source.uuid))
+
+  const nodeTypeImpl = typeImplementations.value[source.type];
+
+  if (!nodeTypeImpl) {
+    logKibana("ERROR", "missing impl for type " + source.type)
+  } else {
+    nodeTypeImpl.targetConnectionTypeChanged?.(source, undefined)
+  }
+})
+
+
 
 forNodes({
   added(node, action) {
@@ -157,7 +208,9 @@ forNodes({
           }
           const typeImpl = typeImplementations.value[node.type];
           if (typeImpl) {
+
             Object.setPrototypeOf(node, ElementNodeImpl.prototype);
+            Object.assign(node, createCallbacks(node))
             pendingCheck = true
             try {
               checkInvalidations(typeImpl, node, last);
@@ -263,6 +316,11 @@ export function addTypeImpl<C, G extends NodeDefOptinos, O extends NodeDefOptino
 
   }
 
+
+  return {} as {
+    server_context: S,
+    opts: O
+  }
 }
 function getElementNodes(implementationType: string): ElementNodeImpl<never>[] {
   return genericNodeDataStore.getOnce(selectNodesOfType(implementationType)).map(node => {

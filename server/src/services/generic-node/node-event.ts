@@ -1,4 +1,6 @@
 
+import { genericNodeDataStore } from './generic-store/reference';
+import { selectGlobals } from './generic-store/selectors';
 import type { NodeEventData } from './typing/node-event-data';
 import type { NodeDefOptinos, NodeDefToType } from './typing/node-options';
 
@@ -19,7 +21,8 @@ export class NodeEvent<C = unknown, P = unknown, G extends NodeDefOptinos = Node
 
   inputIndex: number
 
-  constructor(data: NodeEventData, globals: NodeDefToType<G>) {
+  constructor(data: NodeEventData, globals: NodeDefToType<G> = genericNodeDataStore.getOnce(selectGlobals) as NodeDefToType<G>) {
+
     Object.defineProperty(this, 'payload', {
       enumerable: true,
       configurable: true,

@@ -34,16 +34,21 @@ addTypeImpl({
     }
   }),
   nodeChanged(node) {
-
+    const subscribableDevices = mqttConnection.getSubscribable()
     updateRuntimeParameter(node, "topic", {
       type: "select",
-      options: mqttConnection.getSubscribable()
+      options: subscribableDevices.map(dev => dev.getTelemetry()),
+      optionDisplayNames: subscribableDevices.map(dev => `${dev.friendlyName}`)
     })
 
-    if (node.parameters?.topic) {
-      const device = mqttConnection.getDevice(node.parameters?.topic)
 
-      node.runtimeContext.info = device.friendlyName
+    if (node.parameters?.topic) {
+      const device = subscribableDevices.find(dev => dev.getTelemetry() === node.parameters.topic)
+
+      if (device) {
+
+        node.runtimeContext.info = device.friendlyName
+      }
     }
   },
 })

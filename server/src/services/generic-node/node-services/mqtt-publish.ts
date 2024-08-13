@@ -6,6 +6,8 @@ import { generateDtsFromSchema, generateZodTypeFromSchema, mainTypeName } from '
 import type { Select } from '../typing/node-options'
 import { updateRuntimeParameter } from '../element-node'
 import { logKibana } from '../../../util/log'
+import { genericNodeDataStore } from '../generic-store/reference'
+import { backendToFrontendStoreActions } from '../generic-store/actions'
 import { connect } from 'mqtt'
 import type { ZodType } from 'zod'
 
@@ -158,11 +160,16 @@ addTypeImpl({
                     type: "string",
                     enum: [...cmdArg.options]
                   }
-                  node.runtimeContext.inputSchema = {
-                    jsonSchema: jsonSchema,
-                    mainTypeName: mainTypeName,
-                    dts: await generateDtsFromSchema(jsonSchema, `${node.type}-${node.uuid}-node change`)
-                  }
+
+
+                  genericNodeDataStore.dispatch(backendToFrontendStoreActions.updateInputSchema({
+                    nodeUuid: node.uuid,
+                    schema: {
+                      jsonSchema: jsonSchema,
+                      mainTypeName: mainTypeName,
+                      dts: await generateDtsFromSchema(jsonSchema, `${node.type}-${node.uuid}-node change`)
+                    }
+                  }))
                   zodValidators[node.uuid] = generateZodTypeFromSchema(jsonSchema)
                 } else {
                   delete node.runtimeContext.inputSchema

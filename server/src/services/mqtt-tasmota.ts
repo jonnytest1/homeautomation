@@ -101,6 +101,13 @@ export function defaultCommandConfig() {
             "1"
           ]
         }
+      },
+      {
+        "name": "Hostname",
+        "argument": {
+          "type": "text"
+
+        }
       }
     ] satisfies Array<{ name: string, argument: NodeOptionTypes, flags?: Record<string, boolean> }>
   }

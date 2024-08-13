@@ -1,6 +1,8 @@
 import type { MapTypeToParam, NodeDefOptinos, NodeOptionTypes } from './typing/node-options';
-import type { Callbacks, ElementNode as ELN, ElementNode, TypeImplementaiton } from './typing/generic-node-type';
+import type { Callbacks, ElementNode as ELN, ElementNode, EvalNode, TypeImplementaiton } from './typing/generic-node-type';
 import type { NodeEvent } from './node-event';
+import { genericNodeDataStore } from './generic-store/reference';
+import { setServerContext } from './generic-store/actions';
 export class ElementNodeImpl<T = { [optinoskey: string]: string }, P = Partial<NodeDefOptinos>> implements ELN<T, P>, Callbacks {
 
   parameters?: Partial<T & { name?: string }> | undefined;
@@ -89,4 +91,17 @@ export function updateRuntimeParameter<T, P, K extends (keyof P & keyof T & stri
 
 export function nodeTypeName(node: ELN) {
   return "_" + node.uuid.replace(/-/g, "_")
+}
+
+
+
+export function updateServerContext<T, O extends NodeDefOptinos, K extends (keyof T & string)>(node: EvalNode<O, T>, opts: Partial<T>) {
+
+  const k = Object.keys(opts)[0]
+
+  genericNodeDataStore.dispatch(setServerContext({
+    key: k,
+    value: opts[k],
+    nodeUuid: node.uuid
+  }));
 }

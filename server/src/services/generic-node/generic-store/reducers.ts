@@ -1,4 +1,4 @@
-import { backendToFrontendStoreActions, initializeStore } from './actions'
+import { backendToFrontendStoreActions, initializeStore, setServerContext } from './actions'
 import { genericNodeDataStore, type DataState } from './reference'
 import type { Connection, ElementNode } from '../typing/generic-node-type'
 import { jsonClone } from '../../../util/json-clone'
@@ -266,3 +266,12 @@ genericNodeDataStore.addReducer(backendToFrontendStoreActions.updateEditorSchema
   }))
 })
 
+genericNodeDataStore.addReducer(setServerContext, (st, a) => {
+  return patchNode(st, a.nodeUuid, n => ({
+    ...n,
+    serverContext: {
+      ...n.serverContext,
+      [a.key]: a.value
+    }
+  }))
+})

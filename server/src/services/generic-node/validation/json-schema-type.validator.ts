@@ -33,8 +33,31 @@ export function validateJsonSchema(context: ValidationContext) {
   if (!context.initialTarget) {
     context.initialTarget = context.target
   }
-  const target = context.target
-  const assigning = context.assigning
+  let target = context.target
+  let assigning = context.assigning
+
+  if (target.$ref) {
+    const ref = target.$ref.split("#/definitions/")[1]
+
+    const definitionTarget = context.initialTarget.definitions?.[ref]
+
+    if (!definitionTarget) {
+      debugger;
+      throw new Error("definition doesnt exist " + ref)
+    }
+    target = definitionTarget as ExtendedJsonSchema
+  }
+  if (assigning.$ref) {
+    const ref = assigning.$ref.split("#/definitions/")[1]
+
+    const definitionTarget = context.initialAssigning.definitions?.[ref]
+
+    if (!definitionTarget) {
+      debugger;
+      throw new Error("definition doesnt exist " + ref)
+    }
+    assigning = definitionTarget as ExtendedJsonSchema
+  }
 
   if (target.$ref || assigning.$ref) {
     debugger
@@ -59,6 +82,7 @@ export function validateJsonSchema(context: ValidationContext) {
         }
       } else {
         validateJsonSchema({
+          ...context,
           target: targetProps[property] as ExtendedJsonSchema,
           assigning: assigningProps[property] as ExtendedJsonSchema,
           path: [...context.path, property]
@@ -85,7 +109,14 @@ export function validateJsonSchema(context: ValidationContext) {
       debugger
     }
     if (target.enum) {
-      debugger
+      if (assigning.const) {
+        if (!target.enum.includes(assigning.const)) {
+          throw new SchemaMatchingError(context, `constant ${assigning.const} is not part of the target enum ${target.enum.join(",")}`)
+        }
+      } else {
+
+        debugger
+      }
     }
     if (target.format) {
       debugger

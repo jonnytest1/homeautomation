@@ -67,7 +67,9 @@ export class MQTTIntegration {
               setTimeout(() => {
                 //if (!evtData.iscommandsSet) {
                 const commandConfig = defaultCommandConfig()
-                this.connection.publish(`tasmota/discovery/${configDiscovery.groups?.deviceid}/commands`, JSON.stringify(commandConfig))
+                this.connection.publish(`tasmota/discovery/${configDiscovery.groups?.deviceid}/commands`, JSON.stringify(commandConfig), {
+                  retain: true
+                })
                 //}
               }, 10000)
             }
@@ -125,7 +127,8 @@ export class MQTTIntegration {
 
 
   public getSubscribable() {
-    return Object.values(this.deviceMap).map(device => device.getTelemetry())
+    return Object.values(this.deviceMap)
+      .filter(dev => dev.topicPrefixes.includes("tele"))
   }
 
   public getPublishable() {

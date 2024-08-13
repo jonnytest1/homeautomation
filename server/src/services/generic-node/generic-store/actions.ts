@@ -1,6 +1,6 @@
 import { genericNodeDataStore, type DataState } from './reference'
 import { createAction, props, type ActionCreator } from '../../../util/data-store/action'
-import type { AddConnection, DeleteConnection, DeleteNOdeEvet, SetConnectionError, StoreEvents, UpdateEditorSchema, UpdateGlobals, UpdateOutputSchema, UpdateParam, UpdatepositionEvent } from '../typing/frontend-events'
+import type { AddConnection, DeleteConnection, DeleteNOdeEvet, SetConnectionError, StoreEvents, UpdateEditorSchema, UpdateGlobals, UpdateInputSchema, UpdateOutputSchema, UpdateParam, UpdatepositionEvent } from '../typing/frontend-events'
 import type { ElementNode, NodeData } from '../typing/generic-node-type'
 
 function createReducerAction<T extends (StoreEvents["type"] & string)>(type: T, props: () => Omit<(StoreEvents & { type: T }), "type">) {
@@ -37,6 +37,16 @@ export const backendToFrontendStoreActions = {
       }
     }))
   }, props<UpdateOutputSchema>()),
+
+  updateInputSchema: genericNodeDataStore.createReducerAction("update input schema", (st, a) => {
+    return patchNode(st, a.nodeUuid, n => ({
+      ...n,
+      runtimeContext: {
+        ...n.runtimeContext,
+        inputSchema: a.schema
+      }
+    }))
+  }, props<UpdateInputSchema>()),
   // createReducerAction("update output schema", props<UpdateOutputSchema>()),
   updateGlobals: createReducerAction("update globals", props<UpdateGlobals>()),
   updateParam: createReducerAction("update param", props<UpdateParam>()),
@@ -54,4 +64,10 @@ export const initializeStore = createAction("initialize node store", props<{
   data: NodeData
 }>())
 
+
+export const setServerContext = createAction("update server context", props<{
+  nodeUuid: string,
+  key: string
+  value: unknown
+}>())
 

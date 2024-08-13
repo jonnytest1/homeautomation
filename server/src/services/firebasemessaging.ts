@@ -28,7 +28,11 @@ class FireBAseMessaging {
         data: {
           data: JSON.stringify(payload)
         },
-        notification: payload.notification
+        notification: {
+          body: payload.notification?.body,
+          title: payload.notification?.title,
+          imageUrl: payload.notification?.icon
+        }
       });
   }
 

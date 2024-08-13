@@ -5,6 +5,8 @@ import { TscCompiler, tscConnectionInterfaceAndGlobals } from '../../../util/tsc
 import { ReceiverData } from '../../../models/receiver-data'
 import type { ConnectionResponse } from '../../../models/connection-response'
 import { ElementNodeImpl, updateRuntimeParameter } from '../element-node'
+import { genericNodeDataStore } from '../generic-store/reference'
+import { backendToFrontendStoreActions } from '../generic-store/actions'
 import { SqlCondition, load } from 'hibernatets'
 import type { ZodType } from 'zod'
 import * as z from "zod";
@@ -122,15 +124,19 @@ export {};
 `, "ConnectionResponse", `${node.type}-${node.uuid}-input gen for receiver`)
 
   const conI = tscConnectionInterfaceAndGlobals()
-  node.runtimeContext.inputSchema = {
-    dts: `
+
+  genericNodeDataStore.dispatch(backendToFrontendStoreActions.updateInputSchema({
+    nodeUuid: node.uuid,
+    schema: {
+      dts: `
       namespace ConnectionType {  
         ${conI.interfaces}
       }
       export type Main=ConnectionType.ConnectionResponse`,
-    jsonSchema: schema,
-    mainTypeName: "Main",
-    globalModDts: conI.globals
-  }
+      jsonSchema: schema,
+      mainTypeName: "Main",
+      globalModDts: conI.globals
+    }
+  }))
 
 }

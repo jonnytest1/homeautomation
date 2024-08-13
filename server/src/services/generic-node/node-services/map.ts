@@ -2,12 +2,14 @@
 
 import { CompilerError, allRequired, generateDtsFromSchema, mainTypeName } from '../json-schema-type-util';
 import { addTypeImpl } from '../generic-node-service';
-import type { ElementNode, ExtendedJsonSchema } from '../typing/generic-node-type';
+import type { ElementNode, EvalNode, ExtendedJsonSchema, Schemata } from '../typing/generic-node-type';
 import type { NodeDefToType } from '../typing/node-options';
 import { tscConnectionInterfaceAndGlobals } from '../../../util/tsc-compiler';
 import type { Delayed } from '../../../models/connection-response';
-import { nodeTypeName, updateRuntimeParameter } from '../element-node';
+import { nodeTypeName, updateRuntimeParameter, updateServerContext } from '../element-node';
 import { getTypes } from '../validation/watcher';
+import { genericNodeDataStore } from '../generic-store/reference';
+import { backendToFrontendStoreActions } from '../generic-store/actions';
 import { Json2dts } from "json2dts"
 import * as z from "zod"
 import { createCompilerHost } from 'typescript';
@@ -67,9 +69,9 @@ function getContext(sendData) {
 }
 
 
-addTypeImpl({
+const genericTypes = addTypeImpl({
 
-  server_context_type: (s: { keys?: Array<string> }) => s,
+  server_context_type: (s: { keys?: Array<string>, outputSchema?: Schemata, connectionSchema?: Schemata }) => s,
   process(node, data, callbacks) {
     let nodeScript = jsCache[node.uuid]
     if (!nodeScript) {
@@ -119,7 +121,7 @@ addTypeImpl({
       if (node.parameters?.mode == "map") {
         updateRuntimeParameter(node, "code", {
           type: "monaco",
-          default: `function map(input:InputType){\n\n}`
+          default: `function map(input:InputType){\n\n\treturn null satisfies OutputType\n}`
         })
         setNewCode(node, {
           jsCode: "function map(input){\n\n}",
@@ -181,16 +183,10 @@ addTypeImpl({
       }
 
     } else if (node.parameters?.mode == "map") {
-      node.runtimeContext.editorSchema = {
-        dts: `
-${connectionSchema.dts}
 
-type InputType=${connectionSchema.mainTypeName ??= mainTypeName}
-      `, globals: `
-     // type InputType = EditorSchema.InputType;    
-      var context;
-      `
-      }
+
+
+      updateEditorTypeSchema(node, connectionSchema)
     } else {
 
       const tscData = tscConnectionInterfaceAndGlobals()
@@ -221,11 +217,19 @@ type InputType=${connectionSchema.mainTypeName ??= mainTypeName}
       const nodePref = nodeTypeName(node)
 
       let typeName: string | false = `${nodePref}OutputType`
+
+      const outputType = "any"
+
+
       let code = `
         namespace ${nodePref}{
           ${connectionSchema.dts}
 
           type InputType=${connectionSchema.mainTypeName}
+
+
+          // output type shouzld only be used as "satisfies OutputType" so its not relevant here
+          type OutputType=${outputType}
           declare var context:any
 
           export ${jsCache[node.uuid].tsCode}\n
@@ -271,8 +275,57 @@ type InputType=${connectionSchema.mainTypeName ??= mainTypeName}
         throw e;
       }
     }
-  }
+  },
+  targetConnectionTypeChanged(node, schema) {
+    updateServerContext(node, {
+      outputSchema: schema
+    })
+    //if (node.serverContext.connectionSchema) {
+
+
+    // updateEditorTypeSchema(node, node.serverContext.connectionSchema)
+    //}
+  },
+
 })
+
+
+function updateEditorTypeSchema(node: EvalNode<typeof genericTypes["opts"], typeof genericTypes["server_context"]>, connectionSchema: Schemata) {
+
+  let outputSchemaStr = ""
+  if (node.serverContext?.outputSchema) {
+
+    outputSchemaStr = `
+
+    namespace MapFncOutputTypeNS{
+        ${node.serverContext?.outputSchema.dts}
+    }
+
+    
+    type MapFncOutputType=MapFncOutputTypeNS.${node.serverContext?.outputSchema.mainTypeName}
+    `
+
+  }
+
+
+  genericNodeDataStore.dispatch(backendToFrontendStoreActions.updateEditorSchema({
+    nodeUuid: node.uuid,
+    editorSchema: {
+      dts: `
+${connectionSchema.dts}
+
+type InputType=${connectionSchema.mainTypeName ??= mainTypeName}
+
+${outputSchemaStr}
+      `, globals: `
+     // type InputType = EditorSchema.InputType;    
+      var context;
+      `
+    }
+  }))
+}
+
+
 
 function setNewCode(node: ElementNode, code: Omit<CodeData, "timestamp" | "node">) {
   node.parameters ??= {}

@@ -68,9 +68,14 @@ export type UpdateOutputSchema = {
   nodeUuid: string
   schema: Schemata
 }
+export type UpdateInputSchema = {
+  type: "update input schema",
+  nodeUuid: string
+  schema: Schemata
+}
 
 export type StoreEvents = UpdatepositionEvent | DeleteNOdeEvet | AddNOdeEvet | AddConnection | DeleteConnection
-  | UpdateGlobals | UpdateParam | UpdateNode | UpdateEditorSchema | UpdateOutputSchema | SetConnectionError
+  | UpdateGlobals | UpdateParam | UpdateNode | UpdateEditorSchema | UpdateOutputSchema | UpdateInputSchema | SetConnectionError
 
 
 export type BackendPageEvent = {
