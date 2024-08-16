@@ -64,7 +64,7 @@ export class TimerService {
               continue mainloop
             }
             data[prefix] = today
-            console.log("running")
+            console.log(`running`)
             await this.run(data)
             await this.write(data);
           }
@@ -114,17 +114,30 @@ export class TimerService {
 
   async run(data: Data) {
     try {
+      let abortDisabled = false;
+      if (data.lastSuccessFullRun) {
+        const lastRun = new Date(data.lastSuccessFullRun)
+        const minLAstRun = Date.now() - (DAY * 3)
+        abortDisabled = +lastRun < minLAstRun
+      }
+
       const promiseList = [
-        () => new TextReader({ text: "get off your ass and put your shoes on" }).read(),
+        () => new TextReader({ text: `${abortDisabled ? "really" : ""} get off your ass and put your shoes on` }).read(),
         ...this.countdown(6),
         () => {
           console.log("run");
           return new Promise(res => setTimeout(res, 500));
         },
         () => new TextReader({ text: "starting treadmill" }).read(),
-        () => fetchHttps(this.runUrl),
+        () => {
+          console.log("run request")
+          return fetchHttps(this.runUrl);
+        },
         () => new Promise(res => setTimeout(res, 550)),
-        () => fetchHttps(this.runUrl),
+        () => {
+          console.log("run request")
+          return fetchHttps(this.runUrl);
+        },
         () => {
           data.lastSuccessFullRun = new Date().toISOString()
           return Promise.resolve()
@@ -149,18 +162,13 @@ export class TimerService {
         }
       })
 
-      let abortDisabled = false;
-      if (data.lastSuccessFullRun) {
-        const lastRun = new Date(data.lastSuccessFullRun)
-        const minLAstRun = Date.now() - (DAY * 3)
-        abortDisabled = +lastRun < minLAstRun
-      }
 
       await abortable(promiseList, {
         onAbort: () => new TextReader({ text: "aborted" }).read(),
         abortDisabled: abortDisabled
       })
     } catch (e) {
+      logKibana("ERROR", "error during run", e)
       console.log("error", e)
       debugger;
     }

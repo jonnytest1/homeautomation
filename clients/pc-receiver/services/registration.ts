@@ -59,7 +59,7 @@ class Registration {
           const commandKey = command?.groups.command as keyof typeof eventHandlerMap
           const eventHandler = eventHandlerMap[commandKey]
           if (eventHandler) {
-            console.log("running for " + commandKey)
+            console.log(`running for ${commandKey}`)
             eventHandler();
           }
         }

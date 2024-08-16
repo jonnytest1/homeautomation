@@ -12,7 +12,7 @@ export function interceptLogs() {
   var log_stdout = process.stdout;
 
   console.log = function (...args) { //
-    const str = args.map(a => format(a)).join(", ")
+    const str = `${new Date().toLocaleTimeString()} ` + args.map(a => format(a)).join(", ")
     log_file.write(str + '\n');
     log_stdout.write(str + '\n');
   };

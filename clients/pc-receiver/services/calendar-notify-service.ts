@@ -139,8 +139,8 @@ export class CalenderService {
   timer() {
     const nextEvt = this.reminderList.next.value
     const timeDiff = +nextEvt.timestamp - +new Date()
-    console.log(`${new Date().toLocaleTimeString()} starting timer for ${nextEvt.data.event.summary} at ${nextEvt.timestamp.toLocaleString()}`)
-    console.log(`${new Date().toLocaleTimeString()} id : ${nextEvt.data.event.uid}`)
+    console.log(`starting timer for ${nextEvt.data.event.summary} at ${nextEvt.timestamp.toLocaleString()}`)
+    console.log(`id : ${nextEvt.data.event.uid}`)
 
 
     setTimeout(async () => {
@@ -156,7 +156,7 @@ export class CalenderService {
 
 
   private doAlarm(nextEvt: { timestamp?: Date; data: AlarmContainer; }) {
-    console.log(`${new Date().toLocaleTimeString()} trigger alarm  ${nextEvt.data.event.summary}`)
+    console.log(`trigger alarm  ${nextEvt.data.event.summary}`)
     const data = nextEvt.data;
     this.reminderList.shift();
     new NotificationHandler({
@@ -174,7 +174,7 @@ export class CalenderService {
 
     let evtDate: Date | undefined = this.getNextEventDate(data.event, nextDateMin);
     if (evtDate) {
-      console.log(`${new Date().toLocaleTimeString()} adding for ${evtDate.toISOString()}`)
+      console.log(`adding for ${evtDate.toISOString()}`)
       this.addReminder(data.alarm, evtDate, data.event);
     } else {
       console.log("no future recurrence from this event")

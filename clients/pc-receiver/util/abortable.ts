@@ -20,6 +20,7 @@ export async function abortable(calls: Array<() => Promise<unknown>>, opts: Abor
   for (const call of calls) {
     await call();
     if (abortTs > start && !opts.abortDisabled) {
+      console.log(`calling abort`)
       await opts.onAbort?.()
       return
     }
