@@ -1,0 +1,21 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "run watcher",
+      "type": "shell",
+      "command": "exit 1",
+      "windows": {
+        "command": "C:\\\\\\\\Python39\\\\\\\\python.exe ./filewatcher/watchchanges.py"
+      },
+      "group": "none",
+      "presentation": {
+        "reveal": "always",
+        "panel": "new"
+      },
+      "runOptions": {
+        "runOn": "folderOpen",
+      }
+    },
+  ]
+}
