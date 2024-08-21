@@ -1,1 +1,1 @@
-from smarthome import *
+from .smarthome import *

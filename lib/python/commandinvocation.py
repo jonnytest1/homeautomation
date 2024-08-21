@@ -3,12 +3,13 @@ from dataclasses import dataclass
 from enum import Enum
 import json
 import paho.mqtt.client as mqtt
+from typing import TYPE_CHECKING
+from .response import SmarthomeResponse
 
-from response import SmarthomeResponse
-from smarthome import SmartHome
-
-from featuretopic import FeatureTopics
-from util.json import json_print
+from .featuretopic import FeatureTopics
+from .util.json import json_print
+if TYPE_CHECKING:
+    from .smarthome import SmartHome
 
 
 @dataclass()

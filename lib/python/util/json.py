@@ -1,3 +1,4 @@
+from datetime import datetime, timezone
 from enum import Enum
 import json
 
@@ -10,6 +11,8 @@ class SetEncoder(json.JSONEncoder):
             return o.value
         if isinstance(o, set):
             return list(o)
+        if isinstance(o, datetime):
+            return o.astimezone(timezone.utc).isoformat()
         return json.JSONEncoder.default(self, o)
 
 

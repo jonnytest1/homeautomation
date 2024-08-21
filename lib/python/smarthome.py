@@ -1,19 +1,19 @@
 
 
 from dataclasses import dataclass
+from datetime import datetime
 import paho.mqtt.client as mqtt
 from paho.mqtt.enums import CallbackAPIVersion
 
-from command_invocation import CommandInvocation
+from .commandinvocation import CommandInvocation
 
-from featuretopic import FeatureTopics
+from .featuretopic import FeatureTopics
 
-from deviceconfigcmd import DeviceConfigCommand
+from .deviceconfigcmd import DeviceConfigCommand
 
-from deviceconfig import DeviceConfig
-from util.json import json_print
-import json
-from typing import TypeVar, Generic
+from .deviceconfig import DeviceConfig
+from .util.json import json_print
+from .devgpios import mqtt_led
 
 
 @dataclass()
@@ -24,6 +24,9 @@ class MqttConfig:
 
 
 class SmartHome:
+
+    setup_done = False
+
     def __init__(self, mqtt_config: MqttConfig, device_config: DeviceConfig):
         self.mqtt = mqtt_config
         self.config = device_config
@@ -32,11 +35,18 @@ class SmartHome:
         for command in self.config.commands:
             self.command_dict[command.name] = command
 
+    def update_telemetry(self, data: dict):
+        data["timestamp"] = datetime.now()
+
+        self.mqttclient.publish(
+            f"tele/{self.config.name}/SENSOR", json_print(data), retain=True)
+
     def setup(self):
         self.mqttclient = mqtt.Client(CallbackAPIVersion.VERSION2)
         self.mqttclient.username_pw_set(self.mqtt.user, self.mqtt.password)
 
         def on_connect(client, userdata, flags, rc, prop):
+            mqtt_led.on()
             print("MQtt Connected: ", rc)
 
             if FeatureTopics.COMMAND in self.config.topic_prefixes:
@@ -54,7 +64,12 @@ class SmartHome:
 
         self.mqttclient.on_connect = on_connect
 
+        self.setup_done = True
+
     def serve_forever(self):
+
+        if not self.setup_done:
+            self.setup()
 
         errored = True
         while errored:

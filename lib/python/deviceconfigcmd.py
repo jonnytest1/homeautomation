@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from enum import Enum
 from typing import Callable, Generic, TypeVar, Union
 
-from command_invocation import CommandInvocation
+from .commandinvocation import CommandInvocation
 from .response import SmarthomeResponse
 
 

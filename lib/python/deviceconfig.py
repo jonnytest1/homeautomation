@@ -1,14 +1,14 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from enum import Enum
-from featuretopic import FeatureTopics
-from deviceconfigcmd import DeviceConfigCommand
+from .featuretopic import FeatureTopics
+from .deviceconfigcmd import DeviceConfigCommand
 
 
 @dataclass()
 class DeviceConfig:
     name: str
     topic_prefixes: set[FeatureTopics]
-    commands: list[DeviceConfigCommand[Enum]] = []
+    commands: list[DeviceConfigCommand[Enum]] = field(default_factory=list)
 
     def to_json(self):
 
