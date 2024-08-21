@@ -96,6 +96,8 @@ updateDatabase(__dirname + '/src/models')
         })
       })
     }
+
+    await startNodeRed()
     //tuyaSTuffs()
 
   }).catch(e => {
@@ -117,7 +119,7 @@ const mediaServerConfig = {
 const nodeMediaServer = new NodeMediaServer(mediaServerConfig)
 nodeMediaServer.run();
 
-startNodeRed()
+
 
 /*
 app.get('/dbtest', async (req, res) => {
