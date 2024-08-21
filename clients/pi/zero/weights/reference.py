@@ -32,16 +32,59 @@ because if I used the 114000, I'd be getting milligrams instead of grams.
 '''
 
 
-hx.reset()
+# hx.reset()
 '''
+
+to calibrate get_weight(A|B):
+
 nothin ~ ~ 64 000
 with 1.25kg ~82 000
 with 2.5kg ~ 100 000
 
 
+with 2 and ref_unit=1
+        A       B
+ ~12kg 129028.0 35064.0
+ ~18kg 177649.0 45143.0
+  
+  1st set scale(reference unit)  with a weight diff and then offset
+  
+  aiming for gram: 
+      we have 
+      diff should be 3000 (cause i have 2 weights which share)
+        A: 177649-129028 = 48621
+        B: 45143-35064 = 10079
+        => 48621/3000 =16.207 for set_reference_unit_A
+        => 10079/3000 =3.35 for set_reference_unit_B
+      then restart
+      now:
+      
+         ~18kg 169092 46967
+         ~12kg 130932 34708
+         
+      then set to 0(no weighgt) and take the negative
+      
+      we got 
+      2252.977108656753 2610.447
+      
+      so => -2252 as set_offset_Aand -2610 as set_offset_B
+      
+      
+      
+      
+      9882- 6269 = 3613 at 3.38
+      9110-5718 = 3392 at 3.6
+      8410-5100 = 3310 at 3.8
 '''
-hx.set_reference_unit(reference_unit=14.4)
-hx.set_offset(37000)
+
+ref_unit_a = 14.4
+# if diff is too big make it bigger cause it gets divided
+ref_unit_b = 4
+hx.set_reference_unit_A(ref_unit_a)
+hx.set_reference_unit_B(ref_unit_b)
+hx.set_offset_A(37000)
+# offset gets subtracted
+hx.set_offset_B(3110*ref_unit_b)
 
 
 # i think this resets to base 0
@@ -66,17 +109,18 @@ while True:
         # print(binary_string + " " + np_arr8_string)
 
         # Prints the weight. Comment if you're debbuging the MSB and LSB issue.
-        val = hx.get_value(5)
-        print(f"val {val}")
-        print(f"weight {hx.get_weight(5)}")
+        val = hx.get_weight_A(5)
+        valB = hx.get_weight_B(5)
+        print(f"weight {val} {valB}")
+       # print(f"weight {hx.get_weight_A(5)} {hx.get_weight_B(5)}")
         # To get weight from both channels (if you have load cells hooked up
         # to both channel A and B), do something like this
         # val_A = hx.get_weight_A(5)
         # val_B = hx.get_weight_B(5)
         # print "A: %s  B: %s" % ( val_A, val_B )
 
-        hx.power_down()
-        hx.power_up()
+        # hx.power_down()
+        # hx.power_up()
         time.sleep(0.1)
 
     except (KeyboardInterrupt, SystemExit):
