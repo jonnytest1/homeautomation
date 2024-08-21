@@ -55,5 +55,9 @@ export class NodeEvent<C = unknown, P = unknown, G extends NodeDefOptinos = Node
     return JSON.parse(JSON.stringify(this))
   }
 
+  clone() {
+
+    return new NodeEvent(this.copy(), this.globalConfig)
+  }
 
 }

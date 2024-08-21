@@ -8,6 +8,10 @@ export type NumberCfg = {
   min?: number,
   max?: number
 }
+export type BooleanCfg = {
+  type: "boolean"
+  defaultV?: boolean
+}
 
 export type Code = {
   type: "monaco"
@@ -22,7 +26,7 @@ export type Select<T extends string = string> = {
 }
 export type PlaceHolder = {
   type: "placeholder",
-  of: Exclude<NodeOptionTypes<string>["type"], "placeholder"> | Array<Exclude<NodeOptionTypes<string>["type"], "placeholder">>
+  of: Exclude<NodeOptionTypes<string>["type"], "placeholder"> | Array<Exclude<NodeOptionTypes<string>["type"], "placeholder">> | "unknown"
 }
 
 export type Frame = {
@@ -48,9 +52,9 @@ type Titled = {
   title?: string
 }
 
-type PlaceholderType<T extends PlaceHolder> = T["of"] extends Array<infer U> ? U : T["of"]
+type PlaceholderType<T extends PlaceHolder> = T["of"] extends Array<infer U> ? U : T["of"] extends "unknown" ? unknown : T["of"]
 
-export type NodeOptionTypes<Keys extends string = string> = (Select | Text | Code | PlaceHolder | Frame | NumberCfg)
+export type NodeOptionTypes<Keys extends string = string> = (Select | Text | Code | PlaceHolder | Frame | NumberCfg | BooleanCfg)
   & Order
   & Invalidated<Keys>
   & Titled

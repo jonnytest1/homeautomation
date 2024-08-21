@@ -82,7 +82,7 @@ export function emitFromNode(nodeUuid: string, evt: NodeEvent, index?: number) {
     processInput({
       node: nextNode,
       nodeinput: emittingCon.index,
-      data: evt
+      data: evt.clone()
     })
   }
 }
@@ -343,7 +343,8 @@ function createCallbacks(node: ElementNode) {
   const nodeUuid = node.uuid
   return {
     continue: (evt, index) => {
-      emitFromNode(nodeUuid, evt, index)
+
+      emitFromNode(nodeUuid, evt.clone(), index)
     },
     updateNode(frontendEmit = true) {
       skipEmit = !frontendEmit
