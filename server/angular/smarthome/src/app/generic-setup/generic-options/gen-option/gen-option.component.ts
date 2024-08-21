@@ -70,11 +70,15 @@ export class GenOptionComponent implements OnChanges {
         return
       }
 
+      let modifiedValue = value
+      if (this.definition.type === "boolean" && target instanceof HTMLInputElement) {
+        modifiedValue = target.checked ? "on" : ""
+      }
 
       this.store.dispatch(backendActions.updateParameter({
         param: this.name,
         node: this.node.uuid,
-        value: value
+        value: modifiedValue
 
       }))
     } else {

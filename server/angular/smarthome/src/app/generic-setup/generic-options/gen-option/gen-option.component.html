@@ -21,10 +21,18 @@
     </ng-container>
   </ng-template>
   <ng-template #checkFrame>
-    <ng-container *ngIf="definition.type=='iframe';else inputEl">
+    <ng-container *ngIf="definition.type=='iframe';else checkBool">
       <app-frame-option [definition]="definition"
                         [name]="name"
                         [currentValue]="value"></app-frame-option>
+    </ng-container>
+  </ng-template>
+  <ng-template #checkBool>
+    <ng-container *ngIf="definition.type=='boolean';else inputEl">
+      <input type="checkbox"
+             #inputRef
+             name="{{name}}"
+             [checked]="value">
     </ng-container>
   </ng-template>
   <ng-template #inputEl>
