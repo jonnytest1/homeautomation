@@ -6,6 +6,7 @@ import type { NodeDefOptinos, NodeDefToType } from '../typing/node-options';
 import { mainTypeName } from '../json-schema-type-util';
 import { genericNodeDataStore } from '../generic-store/reference';
 import { backendToFrontendStoreActions } from '../generic-store/actions';
+import { updateServerContext } from '../element-node';
 import * as z from "zod"
 import { Script } from 'vm';
 
@@ -37,23 +38,26 @@ interface InputContext {
 
 
 interface EvaluatedInputContext extends InputContext {
-  secondsAgo: number
+  secondsAgo: number,
+  daysAgo: number
 }
 
-const nodeServerContext: Record<string, { [index: number]: InputContext }> = {}
-
 addTypeImpl({
-  server_context_type(s: never) {
+  server_context_type(s: { inputs: { [index: number]: InputContext } }) {
     return s
   },
   process(node, data, callbacks) {
 
     if (data.inputIndex !== 0) {
-      nodeServerContext[node.uuid] ??= {}
-      nodeServerContext[node.uuid][data.inputIndex] = {
-        timestamp: Date.now(),
-        evt: data.payload
-      }
+      updateServerContext(node, {
+        inputs: {
+          ...node.serverContext?.inputs ?? {},
+          [data.inputIndex]: {
+            timestamp: Date.now(),
+            evt: data.payload
+          }
+        }
+      })
       return
     }
 
@@ -68,24 +72,35 @@ addTypeImpl({
     const executionTime = Date.now()
 
 
-    const currentNodeServerContext = nodeServerContext[node.uuid] ?? {}
+    const currentNodeServerContext = node.serverContext?.inputs ?? {}
     const inputs: Record<number, EvaluatedInputContext> = Object.fromEntries(Object.entries(currentNodeServerContext)
-      .map(([key, val]) => [key, {
-        ...val,
-        secondsAgo: Math.floor((executionTime - val.timestamp) / 1000)
-      }]))
+      .map(([key, val]) => {
+        const secsAgo = Math.floor((executionTime - val.timestamp) / 1000);
+        return [key, {
+          ...val,
+          secondsAgo: secsAgo,
+          daysAgo: Math.floor(secsAgo / (60 * 60 * 24))
+        }];
+      }))
 
-    const returnValue = nodeScript.script.runInNewContext({
-      payload: data.payload,
-      inputs: inputs,
-      Date: DateMock
-    })
-    if (typeof returnValue !== "boolean") {
-      throw new Error("invalid return type")
+    let returnValue
+    try {
+      returnValue = nodeScript.script.runInNewContext({
+        payload: data.payload,
+        inputs: inputs,
+        Date: DateMock
+      })
+      if (typeof returnValue !== "boolean") {
+        throw new Error("invalid return type")
+      }
+
+    } catch (e) {
+      debugger
     }
     if (returnValue) {
       callbacks.continue(data)
     }
+
 
   },
   nodeDefinition: () => ({
@@ -182,7 +197,8 @@ function inputsGlobals(count: number) {
     var inputs:{
       [key in ${indices.join("|")}]:{
         timestamp:number, 
-        secondsAgo: number
+        secondsAgo: number,
+        daysAgo: number
         evt: unknown;
       }
     }
