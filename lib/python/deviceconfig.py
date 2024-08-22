@@ -8,14 +8,15 @@ from .deviceconfigcmd import DeviceConfigCommand
 class DeviceConfig:
     name: str
     topic_prefixes: set[FeatureTopics]
-    commands: list[DeviceConfigCommand[Enum]] = field(default_factory=list)
+    commands: list[DeviceConfigCommand] = field(default_factory=list)
 
     def to_json(self):
 
         command_list = []
 
         for command in self.commands:
+            typed_cmd: DeviceConfigCommand[Enum] = command
             command_list.append(
-                dict(name=command.name, responses=[c.value for c in command.responds_with]))
+                dict(name=command.name, responses=[c.value for c in typed_cmd.responds_with]))
 
         return dict(fn=[self.name], t=self.name, tp=set(self.topic_prefixes), commands=command_list)

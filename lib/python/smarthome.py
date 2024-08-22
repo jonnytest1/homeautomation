@@ -13,7 +13,7 @@ from .deviceconfigcmd import DeviceConfigCommand
 
 from .deviceconfig import DeviceConfig
 from .util.json import json_print
-from .devgpios import mqtt_led
+from .devgpios import init_gpios, mqtt_led
 
 
 @dataclass()
@@ -27,13 +27,17 @@ class SmartHome:
 
     setup_done = False
 
-    def __init__(self, mqtt_config: MqttConfig, device_config: DeviceConfig):
+    def __init__(self, mqtt_config: MqttConfig, device_config: DeviceConfig, with_gpio=True):
+        self.with_gpio = with_gpio
         self.mqtt = mqtt_config
         self.config = device_config
 
         self.command_dict: dict[str, DeviceConfigCommand] = dict()
         for command in self.config.commands:
             self.command_dict[command.name] = command
+
+        if (self.with_gpio):
+            init_gpios()
 
     def update_telemetry(self, data: dict):
         data["timestamp"] = datetime.now()
@@ -46,14 +50,18 @@ class SmartHome:
         self.mqttclient.username_pw_set(self.mqtt.user, self.mqtt.password)
 
         def on_connect(client, userdata, flags, rc, prop):
-            mqtt_led.on()
+            if (self.with_gpio):
+                mqtt_led.on()
             print("MQtt Connected: ", rc)
 
             if FeatureTopics.COMMAND in self.config.topic_prefixes:
                 self.mqttclient.subscribe(f"cmnd/{self.config.name}/#")
 
+            config_json = json_print(self.config)
+            print("publishing config: ", config_json)
+
             self.mqttclient.publish(
-                f"personal/discovery/{self.config.name}/config", json_print(self.config), retain=True)
+                f"personal/discovery/{self.config.name}/config", config_json, retain=True)
 
         def on_message(client, user, msg: mqtt.MQTTMessage):
 
@@ -68,6 +76,17 @@ class SmartHome:
 
     def serve_forever(self):
 
+        self.connect()
+
+        self.mqttclient.loop_forever()
+
+    def start_serve(self):
+
+        self.connect()
+
+        self.mqttclient.loop_start()
+
+    def connect(self):
         if not self.setup_done:
             self.setup()
 
@@ -79,5 +98,3 @@ class SmartHome:
             except OSError as e:
                 # could be network errors
                 errored = True
-
-        self.mqttclient.loop_forever()
