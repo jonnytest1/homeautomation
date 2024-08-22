@@ -22,6 +22,11 @@ def copy_all(watchdir):
             if os.path.exists(library_path):
                 copy_to_workspace(library_path,
                                   projectroot)
+            library_src_path = os.path.join(
+                workspaceFolderPath, "src", "smarthome")
+            if os.path.exists(path=library_src_path):
+                copy_to_workspace(library_src_path,
+                                  projectroot)
 
 
 def copy_to_workspace(targetDir, libDirectory):
