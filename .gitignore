@@ -3,8 +3,8 @@ public
 creds.h
 /server/.vscode/sftp.json
 package-lock.json
-clients/sound-detection/__pycache__/
-clients/sound-detection/model
+clients/**/sound-detection/__pycache__/
+clients/**/sound-detection/model
 sftp.json
 .history
 
@@ -36,11 +36,11 @@ server/src/services/generic-node/last-events.json
 server/src/services/generic-node/type-collapse.test.ts
 server/src/module-src/quicktype-core
 server/src/services/generic-node/validation/files/types
-clients/watch/watch/src/lib
-clients/watch/watch/example-rs-data.txt
+clients/**/watch/src/lib
+clients/**/watch/example-rs-data.txt
 
-!clients/watch/**/.pio/LoRaWAN/LoRaWAN.cpp
-clients/watch/watch/src/lora_config.h
+!clients/**/watch/**/.pio/LoRaWAN/LoRaWAN.cpp
+clients/**/watch/src/lora_config.h
 server/src/services/generic-node/nodes copy.json
 server/bash.exe.stackdump
 server/buildInfoPath
@@ -49,3 +49,12 @@ server/src/services/generic-node/node-data/nodes
 server/src/services/generic-node/node-data/deleted-node-data
 
 creds/env.py
+clients/drone/.venv/
+server/src/services/generic-node/node-services/tuya/devices.ts
+server/src/services/tuyapi.spec.ts
+server/src/services/tuya.py
+
+clients/archive/**/src/lib/*
+# cloned smarthome lib
+clients/pi/zero/weights/smarthome
+clients/pi/co2/src/smarthome
