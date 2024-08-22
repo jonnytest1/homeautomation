@@ -1,39 +1,38 @@
+from commands.beep import beepcmd
+from smarthome import SmartHome, MqttConfig, DeviceConfig, FeatureTopics
+import serial
+from env import mqtt_server, mqtt_user, mqtt_pwd
+import paho.mqtt.client as mqtt
+import sys
 import time
 import debugpy
-import paho.mqtt.client as mqtt
-from env import mqtt_server
-from json_print import json_print
-import datetime
-import serial
+
 try:
     debugpy.listen(("0.0.0.0", 5688))
     print("Waiting for debugger attach")
 except:
     debugpy.listen(("0.0.0.0", 5689))
-    print("Waiting for debugger attach on fallback port 5679")
+    print("Waiting for debugger attach on fallback port 5689")
     pass
 
-# debugpy.wait_for_client()
 print("continuing")
 
-
-mqttclient = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2)
-mqttclient.connect(mqtt_server, 1883, 60)
-mqttclient.loop_start()
-
-mqttclient.publish("personal/discovery/co2-scanner/config", json_print(dict(
-    t="co2-scanner",
-    fn=[
-        "co2-scanner"
-    ],
-    tp=[
-        "tele"
-    ],
-    commands=[]
-)), retain=True)
+mqtt = MqttConfig(mqtt_server, mqtt_user, mqtt_pwd)
 
 
-ser = serial.Serial("/dev/ttyS0", 9600)
+device_config = DeviceConfig("co2-scanner", {
+    FeatureTopics.TELE,
+    FeatureTopics.COMMAND
+}, commands=[
+    beepcmd
+])
+
+smarthome = SmartHome(mqtt, device_config, with_gpio=False)
+
+smarthome.start_serve()
+
+
+ser = serial.Serial("/dev/ttyS0", 9600, timeout=5)
 
 
 def check_valid(packet: list[int]):
@@ -49,11 +48,13 @@ def check_valid(packet: list[int]):
         raise Exception("invalid checksum")
 
 
-def read_co2():
+def read_co2():  # -> Any:
     resp = ser.write(
         bytearray([0xFF, 0x01, 0x86, 0x00, 0x00, 0x00, 0x00, 0x00, 0x79]))
 
     result = ser.read(9)
+    if len(result) < 8:
+        raise Exception("no response with 2 seconds")
     res_list = list(result)
     check_valid(res_list)
 
@@ -66,11 +67,14 @@ while True:
     try:
         co2 = read_co2()
         print("publish")
-        mqttclient.publish("tele/co2-scanner/SENSOR", json_print(dict(
-            co2_level=co2,
-            timestamp=datetime.datetime.now().isoformat()
-        )))
+
+        smarthome.update_telemetry(dict(
+            co2_level=co2
+        ))
         time.sleep(5)
-    except:
+    except KeyboardInterrupt:
+        sys.exit(0)
+    except Exception as e:
+        print(e)
 
         pass

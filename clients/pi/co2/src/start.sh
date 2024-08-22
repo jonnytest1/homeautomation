@@ -7,6 +7,6 @@
 # input_start= $HOME/starter.sh
 # co2_start =$HOME/co2/starter.sh
 cd "$HOME/co2"
-
+sleep 3
 python3 ./main.py >> "$HOME/co2/python-input.log"
 
