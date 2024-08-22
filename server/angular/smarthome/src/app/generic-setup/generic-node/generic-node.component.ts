@@ -97,7 +97,7 @@ export class GenericNodeComponent implements OnChanges, AfterViewInit, OnDestroy
     }
   }
   localeTime(time: number) {
-    return new Date(time).toLocaleTimeString()
+    return new Date(time).toLocaleTimeString(undefined, { hour12: false })
   }
 
   ngOnChanges(changes: SimpleChanges): void {

@@ -76,6 +76,10 @@ export function typeMerge(newType: string, oldType: string, mainInterfaceName: s
 
 
 function canDoSchema(jsonSchema: ExtendedJsonSchema | (JSONSchema6Definition & object)) {
+  if (jsonSchema.type == undefined) {
+    //any
+    return true
+  }
   if (jsonSchema.type == "object") {
     return true
   } else if (jsonSchema.type == "string" && (jsonSchema.enum?.length || jsonSchema.const)) {
@@ -102,6 +106,12 @@ export async function generateDtsFromSchema(jsonSchema: ExtendedJsonSchema | (JS
   } else {
     logKibana("WARN", "missing traceid for call")
   }
+
+
+  if (jsonSchema.type === undefined) {
+    return `export type ${mainTypeName} = any;`
+  }
+
   let wrapper = false
   if (!canDoSchema(jsonSchema)) {
     wrapper = true

@@ -258,11 +258,15 @@ const genericTypes = addTypeImpl({
 
       if (jsonSchema) {
         allRequired(jsonSchema)
-        node.runtimeContext.outputSchema = {
-          jsonSchema: jsonSchema,
-          mainTypeName: "Main",
-          dts: await generateDtsFromSchema(jsonSchema, `${node.type}-${node.uuid}-con type change`)
-        }
+
+        genericNodeDataStore.dispatch(backendToFrontendStoreActions.updateOutputSchema({
+          nodeUuid: node.uuid,
+          schema: {
+            jsonSchema: jsonSchema,
+            mainTypeName: "Main",
+            dts: await generateDtsFromSchema(jsonSchema, `${node.type}-${node.uuid}-con type change`)
+          }
+        }))
       }
 
     } catch (e) {
