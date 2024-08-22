@@ -3,7 +3,8 @@ import time
 from dataclasses import dataclass
 import debugpy
 import paho.mqtt.client as mqtt
-from env import mqtt_server
+from paho.mqtt.enums import CallbackAPIVersion
+from creds.env import mqtt_server
 from json_print import json_print
 import datetime
 try:
@@ -17,7 +18,7 @@ except:
 # debugpy.wait_for_client()
 print("continuing")
 
-mqttclient = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2)
+mqttclient = mqtt.Client(CallbackAPIVersion.VERSION2)
 mqttclient.connect(mqtt_server, 1883, 60)
 mqttclient.loop_start()
 

@@ -1,7 +1,7 @@
 from commands.beep import beepcmd
 from smarthome import SmartHome, MqttConfig, DeviceConfig, FeatureTopics
 import serial
-from env import mqtt_server, mqtt_user, mqtt_pwd
+from creds.env import mqtt_server, mqtt_user, mqtt_pwd
 import paho.mqtt.client as mqtt
 import sys
 import time
