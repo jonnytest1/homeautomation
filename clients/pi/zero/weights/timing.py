@@ -11,7 +11,7 @@ from weight_entry import WeightEntry
 
 MAX_NUM = 999999999999
 
-telemetry_time_secs = 20
+telemetry_time_secs = 6
 
 
 @dataclass()
