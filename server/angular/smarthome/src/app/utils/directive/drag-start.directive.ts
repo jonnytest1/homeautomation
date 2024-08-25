@@ -282,7 +282,9 @@ export class MBDropDirective implements OnInit, OnDestroy {
 
 
     for (const drop of dropDirectives) {
-      drop.emitDrop(eventRef)
+      if (drop !== this) {
+        drop.emitDrop(eventRef)
+      }
     }
   }
   emitDrop(eventRef: MBDragEvent) {

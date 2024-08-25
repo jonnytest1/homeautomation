@@ -12,9 +12,10 @@
             </div>
             <div>
               <app-gen-option [definition]="entry.value"
+                              setting="global"
                               [name]="entry.key"
                               [node]="node"
-                              [value]="node.parameters?.[entry.key]">
+                              [value]="(globals$ |async)?.[entry.key]">
               </app-gen-option>
             </div>
           </ng-container>

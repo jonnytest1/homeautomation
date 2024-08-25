@@ -28,14 +28,22 @@
     </ng-container>
   </ng-template>
   <ng-template #checkBool>
-    <ng-container *ngIf="definition.type=='boolean';else inputEl">
+    <ng-container *ngIf="definition.type=='boolean';else checkTextArea">
       <input type="checkbox"
              #inputRef
              name="{{name}}"
              [checked]="value">
     </ng-container>
   </ng-template>
+  <ng-template #checkTextArea>
+    <ng-container *ngIf="definition.type==='text' && definition.multiline; else inputEl">
+      <textarea name="{{name}}"
+                (keyup)="$event.stopPropagation()">{{value ??''}}</textarea>
+    </ng-container>
+  </ng-template>
+
   <ng-template #inputEl>
+
     <input [type]="definition.type"
            #inputRef
            (keyup)="$event.stopPropagation()"

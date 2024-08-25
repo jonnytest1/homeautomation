@@ -1,6 +1,6 @@
 import type { Action, ActionCreator, ActionCreatorProps, ActionReducer, NotAllowedCheck } from '@ngrx/store';
 import { createAction, props } from '@ngrx/store';
-import type { Connection, ElementNode, NodeData, SetConnectionError, UpdateEditorSchema, UpdateInputSchema, UpdateOutputSchema } from '../../settings/interfaces';
+import type { Connection, ElementNode, NodeData, NodeOptionTypes, SetConnectionError, UpdateEditorSchema, UpdateInputSchema, UpdateOutputSchema } from '../../settings/interfaces';
 import { type NodeDefintion } from '../../settings/interfaces';
 import type { GenericNodeState } from './reducers';
 import { patchNode } from './reducer-util';
@@ -51,6 +51,38 @@ export const backendActions = backendAction({
     param: string
     value: string
   }>()),
+  updateParameterDefinition: createActionWithReducer("update param definition", props<{
+    nodeUuid: string
+    param: string
+    value: NodeOptionTypes
+  }>(), (st, a) => {
+    return patchNode(st, a.nodeUuid, node => {
+      return {
+        ...node,
+        runtimeContext: {
+          ...node.runtimeContext,
+          parameters: {
+            ...node.runtimeContext.parameters,
+            [a.param]: a.value
+          }
+        }
+      }
+    })
+  }),
+  updateRuntimeInfo: createActionWithReducer("update runtime info", props<{
+    nodeUuid: string
+    info: string
+  }>(), (st, a) => {
+    return patchNode(st, a.nodeUuid, node => {
+      return {
+        ...node,
+        runtimeContext: {
+          ...node.runtimeContext,
+          info: a.info
+        }
+      }
+    })
+  }),
   updateNode: createAction("update node", props<{
     nodeUuid: string
     newNode: ElementNode

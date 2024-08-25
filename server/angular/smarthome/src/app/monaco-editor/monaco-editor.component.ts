@@ -91,7 +91,7 @@ export class MonacoEditorComponent implements OnInit, OnDestroy, ControlValueAcc
     const requireFnc = (window.require as any);
     requireFnc.config({
       paths: {
-        vs: 'https://typescript.azureedge.net/cdn/5.0.2/monaco/min/vs',
+        vs: 'https://typescript.azureedge.net/cdn/5.0.4/monaco/min/vs',
         sandbox: 'https://www.typescriptlang.org/js/sandbox',
       },
       ignoreDuplicateModules: ['vs/editor/editor.main'],

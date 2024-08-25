@@ -81,6 +81,10 @@ function canDoSchema(jsonSchema: ExtendedJsonSchema | (JSONSchema6Definition & o
     return true
   }
   if (jsonSchema.type == "object") {
+
+    if (!jsonSchema.properties) {
+      return false
+    }
     return true
   } else if (jsonSchema.type == "string" && (jsonSchema.enum?.length || jsonSchema.const)) {
     return true

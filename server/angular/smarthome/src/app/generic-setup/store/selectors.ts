@@ -7,7 +7,7 @@ import type { ElementNode } from '../../settings/interfaces';
 const genericNodeDAtaFeature = createFeatureSelector<GenericNodeState>(featureName)
 
 export const selectNodeData = createSelector(genericNodeDAtaFeature, d => d)
-
+export const selectGlobals = createSelector(genericNodeDAtaFeature, d => d.globals)
 export const selectNodes = createSelector(selectNodeData, data => {
   return data.nodes ?? []
 })

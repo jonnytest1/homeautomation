@@ -19,6 +19,7 @@ import { loadNodeData } from './generic-node-data-loader';
 import { logKibana } from '../../util/log';
 import { environment } from '../../environment';
 import { jsonClone } from '../../util/json-clone';
+import type { Action } from '../../util/data-store/action';
 import { BehaviorSubject, combineLatest, Subject, type Subscription } from "rxjs"
 import { watch } from "chokidar"
 import { filter, skip } from "rxjs/operators"
@@ -180,14 +181,17 @@ forNodes({
 
     let lastEmit = -1;
 
+    const actions: Array<Action<string, unknown> | undefined> = []
+
     subscriptionMap[node.uuid] = combineLatest([
-      genericNodeDataStore.select(selectNodeByUuid(node.uuid)),
+      genericNodeDataStore.selectWithCompleteAction(selectNodeByUuid(node.uuid)),
       genericNodeDataStore.select(selectTargetConnectorForNodeUuid(node.uuid))
     ])
       .pipe(
         skip(action === "initialize node store" ? 1 : 0),
       )
-      .subscribe(async ([node, connwctions]) => {
+      .subscribe(async ([[node, updateAction], connwctions]) => {
+        actions.push(updateAction)
         if (node) {
           lastEmit = Date.now()
           if (lastNodeStore && lastNodeStore > (Date.now() - (1000 * 60))) {
@@ -211,23 +215,33 @@ forNodes({
 
             Object.setPrototypeOf(node, ElementNodeImpl.prototype);
             Object.assign(node, createCallbacks(node))
+            console.log("running node check for " + node.uuid + " after " + updateAction?.type)
             pendingCheck = true
             try {
               checkInvalidations(typeImpl, node, last);
+              actions.length = 0
+              const nodeCpy = jsonClone(node)
 
               await typeImpl.nodeChanged?.(node as ElementNodeImpl<never>, last);
-              genericNodeDataStore.dispatch(backendToFrontendStoreActions.updateNode({
-                newNode: node
-              }))
+
+              const nodeChanged = genericNodeDataStore.getOnce(selectNodeByUuid(node.uuid))
+              if (!actions?.length) {
+                genericNodeDataStore.dispatch(backendToFrontendStoreActions.updateNode({
+                  newNode: node
+                }))
+              } else if (JSON.stringify(nodeCpy) !== JSON.stringify(node)) {
+                debugger;
+                logKibana("ERROR", "node changed with store update")
+              }
               const preTypeEmmit = lastEmit;
-              updateTypeSchema(node, {
+              updateTypeSchema(nodeChanged, {
                 typeImpls: typeImplementations.value
               })
                 .then(() => {
                   if (preTypeEmmit === lastEmit) {
                     // if there was an update from the node in the store we assume the node doesnt need manual update
                     genericNodeDataStore.dispatch(backendToFrontendStoreActions.updateNode({
-                      newNode: node
+                      newNode: nodeChanged
                     }))
                   }
 
@@ -240,14 +254,18 @@ forNodes({
                 })
                 .finally(() => {
                   pendingCheck = false
+                  console.log("unsetting pending for " + node.uuid)
                 });
             } catch (e) {
+              pendingCheck = false
+              console.log("unsetting pending error for " + node.uuid)
               logKibana("ERROR", {
                 message: "error during node change",
                 type: node.type,
 
                 node: node.uuid
               }, e)
+
             }
           } else {
             logKibana("ERROR", {

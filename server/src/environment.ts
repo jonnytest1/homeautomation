@@ -11,6 +11,8 @@ if (env.error) {
 export const environment = process.env as {
   WATCH_SERVICES: string;
   MQTT_SERVER: string
+  MQTT_USER?: string;
+  MQTT_PASSWORD?: string;
   REDIRECT: string
   DEBUG: string
   setup: string

@@ -1,14 +1,13 @@
-import { globalMqttConfig } from './mqtt-global'
+import { getClient, globalMqttConfig } from './mqtt-global'
 import { mqttConnection } from '../../mqtt-api'
 import { addTypeImpl } from '../generic-node-service'
 import type { ExtendedJsonSchema } from '../typing/generic-node-type'
 import { generateDtsFromSchema, generateZodTypeFromSchema, mainTypeName } from '../json-schema-type-util'
-import type { Select } from '../typing/node-options'
+import { argumentTypeToJsonSchema, type NodeOptionTypeWithName, type Select } from '../typing/node-options'
 import { updateRuntimeParameter } from '../element-node'
 import { logKibana } from '../../../util/log'
-import { genericNodeDataStore } from '../generic-store/reference'
 import { backendToFrontendStoreActions } from '../generic-store/actions'
-import { connect } from 'mqtt'
+import { genericNodeDataStore } from '../generic-store/reference'
 import type { ZodType } from 'zod'
 
 
@@ -30,7 +29,11 @@ addTypeImpl({
       console.error("missing global")
       return
     }
-    const client = connect(evt.globalConfig.mqtt_server)
+    const client = getClient(evt.globalConfig)
+
+    const config = mqttConnection.getDevice(topic)
+    const commandObj = config.commands.find(cmd => cmd.name === command)
+
 
     let argument = node.parameters?.argument
     if (argument == "<payload>" && typeof evt.payload == "string" && node.runtimeContext.inputSchema?.jsonSchema) {
@@ -39,12 +42,13 @@ addTypeImpl({
       argument = newPayload
     }
 
-    if (argument === undefined) {
+    if (argument === undefined && !(commandObj?.argument instanceof Array)) {
       return
     }
     let argStr = argument
-    const config = mqttConnection.getDevice(topic)
-    if (config?.sendsResponse()) {
+
+    const waitingforResponse = config?.sendsResponse() || commandObj?.responses
+    if (waitingforResponse) {
       const mqttEvt: { timestamp: number, argument?: string } = { timestamp: Date.now() }
       if (typeof argument === "string") {
         mqttEvt.argument = argument
@@ -53,16 +57,37 @@ addTypeImpl({
       } else {
         logKibana("ERROR", { message: "invalid argument for response", argument })
       }
+
+      if (commandObj?.argument instanceof Array) {
+        for (const arg of commandObj.argument) {
+          mqttEvt[arg.name] = evt.payload?.[arg.name] ?? node.parameters?.[arg.name]
+        }
+      }
       argStr = JSON.stringify(mqttEvt)
 
       const responseTopic = `response/${config.mqttDeviceName}/${command}/${mqttEvt.timestamp}`
-      client.subscribe(responseTopic)
+      client.subscribe(responseTopic, (e, grants) => {
+        if (e) {
+          debugger
+        }
+      })
 
       client.on("message", (topic, msg) => {
         if (topic === responseTopic) {
-          evt.updatePayload({
+          const payload = {
             response: `${msg.toString()}`
-          })
+          }
+
+          try {
+            const responseEvt = JSON.parse(payload.response)
+            if ("response" in responseEvt) {
+              Object.assign(payload, responseEvt)
+            }
+          } catch (e) {
+            //
+          }
+
+          evt.updatePayload(payload)
           callbacks.continue(evt)
           client.unsubscribe(responseTopic)
           client.endAsync()
@@ -73,14 +98,20 @@ addTypeImpl({
 
 
     const finalTopic = `${topic}${command}`
+    const finalArgStr = argStr
+    if (finalArgStr === undefined) {
+      return
+    }
 
     client.on("connect", () => {
-      console.log(`sending ${argStr} to ${finalTopic}`)
+      console.log(`sending ${finalArgStr} to ${finalTopic}`)
 
 
-      client.publish(finalTopic, argStr, async (err, msg) => {
+      client.publish(finalTopic, finalArgStr, {
+        retain: commandObj?.asyncRetained || false
+      }, async (err, msg) => {
         await new Promise(res => setTimeout(res, 1000))
-        if (!config?.sendsResponse()) {
+        if (!waitingforResponse) {
           callbacks.continue(evt)
           client.endAsync()
         }
@@ -144,41 +175,87 @@ addTypeImpl({
             delete node.parameters.argument
           }
           const command = device.commands.find(c => c.name == node.parameters?.command)
+
+          let isSingleArgument = true
           if (command?.argument) {
-            if (command.argument.type == "select") {
-              const cmdArg = command.argument as Select
-              node.runtimeContext.parameters["argument"] = {
-                type: "select",
-                options: [...cmdArg.options, "<payload>"]
-              }
-              if (node.parameters.argument == undefined) {
-                node.parameters.argument = cmdArg.options[0]
-              } else {
-                node.runtimeContext.info = `${device.friendlyName} - ${node.parameters.command} - ${node.parameters.argument}`
-                if (node.parameters.argument === "<payload>") {
-                  const jsonSchema: ExtendedJsonSchema = {
-                    type: "string",
-                    enum: [...cmdArg.options]
-                  }
+            let args: Array<NodeOptionTypeWithName> = []
 
+            if (command.argument instanceof Array) {
+              args = command.argument
 
-                  genericNodeDataStore.dispatch(backendToFrontendStoreActions.updateInputSchema({
-                    nodeUuid: node.uuid,
-                    schema: {
-                      jsonSchema: jsonSchema,
-                      mainTypeName: mainTypeName,
-                      dts: await generateDtsFromSchema(jsonSchema, `${node.type}-${node.uuid}-node change`)
-                    }
-                  }))
-                  zodValidators[node.uuid] = generateZodTypeFromSchema(jsonSchema)
-                } else {
-                  delete node.runtimeContext.inputSchema
-                }
+              if (!command.argument.some(arg => arg.name === "argument")) {
+
+                updateRuntimeParameter(node, "argument", {
+                  type: "select",
+                  options: ["<payload>", "hardcoded"],
+                  order: 3
+                })
+                isSingleArgument = false
               }
+
             } else {
-              node.runtimeContext.parameters["argument"] = command.argument as typeof node.runtimeContext.parameters["argument"]
+              const cmdArg = {
+                name: "argument",
+                ...command.argument
+              }
+
+              args = [cmdArg]
             }
 
+            const inputSchema: ExtendedJsonSchema = {
+              type: "string"
+            }
+            if (!isSingleArgument) {
+              inputSchema.type = "object"
+            }
+
+            for (const commandArgument of args) {
+              if (commandArgument.type == "select") {
+                const cmdArg = commandArgument as Select
+                node.runtimeContext.parameters[commandArgument.name] = {
+                  type: "select",
+                  options: [...cmdArg.options, "<payload>"]
+                }
+
+                if (node.parameters[commandArgument.name] == undefined) {
+                  node.parameters[commandArgument.name] = cmdArg.options[0]
+                } else {
+                  node.runtimeContext.info = `${device.friendlyName} - ${node.parameters.command} - ${node.parameters[commandArgument.name]}`
+                }
+              } else {
+
+                node.runtimeContext.parameters[commandArgument.name] = commandArgument as typeof node.runtimeContext.parameters["argument"]
+              }
+
+              inputSchema.properties ??= {}
+              inputSchema.properties[commandArgument.name] = argumentTypeToJsonSchema(commandArgument)
+
+            }
+
+            if (node.parameters.argument === "<payload>") {
+
+
+              //allRequired(inputSchema)
+
+              const inputSchemaObj = {
+                jsonSchema: inputSchema,
+                mainTypeName: mainTypeName,
+                dts: await generateDtsFromSchema(inputSchema, `${node.type}-${node.uuid}-node change`)
+              } as const
+              /**
+               * @deprecated but overwritten by update after change use updateInputSchema
+               */
+              node.runtimeContext.inputSchema = inputSchemaObj
+
+
+              genericNodeDataStore.dispatch(backendToFrontendStoreActions.updateInputSchema({
+                nodeUuid: node.uuid,
+                schema: inputSchemaObj
+              }))
+              zodValidators[node.uuid] = generateZodTypeFromSchema(inputSchema)
+            } else {
+              delete node.runtimeContext.inputSchema
+            }
 
           } else {
             //use empty string for no argument command

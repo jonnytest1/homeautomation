@@ -19,7 +19,7 @@ export class DataStore<T> {
 
   lastDispatch = -1
 
-  lastActionType: string | undefined
+  lastAction: Action<string, unknown> | undefined
 
   constructor(private initialState: T) {
     this.state = new BehaviorSubject(this.initialState)
@@ -46,9 +46,11 @@ export class DataStore<T> {
     return selector.pipe(this.state)
   }
   selectWithAction<R>(selector: Selector<T, R>) {
-    return selector.pipe(this.state).pipe(map(st => [st, this.lastActionType] as const))
+    return selector.pipe(this.state).pipe(map(st => [st, this.lastAction?.type] as const))
   }
-
+  selectWithCompleteAction<R>(selector: Selector<T, R>) {
+    return selector.pipe(this.state).pipe(map(st => [st, this.lastAction] as const))
+  }
   addReducer<Type extends string, P>(action: ActionCreator<Type, P>, reducer: Reducer<T, Action<Type, P>>) {
     if (this.reducers[action.type]) {
       throw new Error("duplciate reducer " + action.type)
@@ -84,9 +86,9 @@ export class DataStore<T> {
       return
     }
     const newState = reducer(this.state.value, action)
-    this.lastActionType = action.type
+    this.lastAction = action
     this.state.next(newState)
-    this.lastActionType = undefined
+    this.lastAction = undefined
     if (lastDispatch === this.lastDispatch) {
 
       this.effects[action.type]?.forEach(effect => {

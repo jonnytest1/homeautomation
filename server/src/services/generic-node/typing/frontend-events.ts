@@ -1,4 +1,5 @@
 import type { Connection, ElementNode, NodeData, Schemata } from './generic-node-type'
+import type { NodeOptionTypes } from './node-options'
 
 export type Load = {
   type: "load-node-data"
@@ -50,6 +51,18 @@ export type UpdateParam = {
   param: string
   value: string
 }
+export type UpdateParamDefinition = {
+  type: "update param definition",
+  nodeUuid: string
+  param: string
+  value: NodeOptionTypes
+}
+
+export type UpdateRuntimeInfo = {
+  type: "update runtime info",
+  nodeUuid: string
+  info: string
+}
 
 export type UpdateNode = {
   type: "update node",
@@ -76,6 +89,7 @@ export type UpdateInputSchema = {
 
 export type StoreEvents = UpdatepositionEvent | DeleteNOdeEvet | AddNOdeEvet | AddConnection | DeleteConnection
   | UpdateGlobals | UpdateParam | UpdateNode | UpdateEditorSchema | UpdateOutputSchema | UpdateInputSchema | SetConnectionError
+  | UpdateParamDefinition | UpdateRuntimeInfo
 
 
 export type BackendPageEvent = {

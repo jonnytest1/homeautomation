@@ -1,13 +1,13 @@
 import { JsonSchemaWatcher } from './json-schema-watcher';
 import type { ExtendedJsonSchema } from '../typing/generic-node-type';
 import { CompilerError, postfix } from '../json-schema-type-util';
+import { ResolvablePromise } from '../../../util/resolvable-promise';
 import {
   Diagnostic, SemanticDiagnosticsBuilderProgram, WatchOfConfigFile, createSemanticDiagnosticsBuilderProgram,
   createWatchCompilerHost, createWatchProgram, isExpressionStatement, sys, Node, isModuleDeclaration, isModuleBlock
 } from 'typescript';
 import { join, basename } from 'path';
 import { writeFileSync } from 'fs';
-
 
 const tsconfig = join(__dirname, "files", "tsconfig.json")
 const types = join(__dirname, "files", "types")
@@ -17,9 +17,28 @@ const types = join(__dirname, "files", "types")
 const fileRromiseMap: Record<string, { res, err, starttime?: number, timeadded: number, path: string }> = {}
 
 export async function validate(filename: string, dts: string, tracer?: string) {
+
+  const file = join(types, filename + ".ts")
+  while (fileRromiseMap[filename]) {
+    await ResolvablePromise.delayed(5)
+  }
   return new Promise<string>((res, err) => {
-    const file = join(types, filename + ".ts")
-    fileRromiseMap[filename] = { res, err, timeadded: Date.now(), path: file }
+
+
+    const valdiationTimeout = setTimeout(() => {
+      console.warn("validate didnt resolve ", dts)
+      debugger
+    }, 1000)
+
+
+    fileRromiseMap[filename] = {
+      res: (a) => {
+        clearTimeout(valdiationTimeout)
+        res(a)
+      }, err, timeadded: Date.now(), path: file
+    }
+
+
 
     writeFileSync(file, `// ${Date.now()}
     export {}

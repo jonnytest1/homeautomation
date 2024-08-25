@@ -1,6 +1,8 @@
+import type { ExtendedJsonSchema } from './generic-node-type'
 
 export type Text = {
   type: "text"
+  multiline?: true
 }
 
 export type NumberCfg = {
@@ -14,7 +16,8 @@ export type BooleanCfg = {
 }
 
 export type Code = {
-  type: "monaco"
+  type: "monaco",
+  mode?: "html"
   default?: string
 }
 
@@ -58,6 +61,10 @@ export type NodeOptionTypes<Keys extends string = string> = (Select | Text | Cod
   & Order
   & Invalidated<Keys>
   & Titled
+
+export type NodeOptionTypeWithOptionalName = NodeOptionTypes & { name?: string }
+export type NodeOptionTypeWithName = NodeOptionTypes & { name: string }
+
 export type NodeDefOptinos = {
   [name: string]: NodeOptionTypes
 }
@@ -94,3 +101,32 @@ export type NodeDefToRUntime<N extends NodeDefOptinos> = {
   [key in keyof N]?: N[key] extends PlaceHolder ? NodeOptionTypes<string> & { type: PlaceholderType<N[key]> } : N[key]
 }
 
+
+
+export function argumentTypeToJsonSchema(arg: NodeOptionTypes<string>): ExtendedJsonSchema {
+  if (arg.type === "select") {
+    return {
+      type: "string",
+      enum: [...arg.options]
+    }
+  } else if (arg.type === "number") {
+    return {
+      type: "number"
+    }
+  } else if (arg.type == "text") {
+    return {
+      type: "string"
+    }
+  } else if (arg.type == "boolean") {
+    return {
+      type: "boolean"
+    }
+  } else if (arg.type === "monaco" && arg.mode === "html") {
+    return {
+      type: "string"
+    }
+  } else {
+    throw new Error("invalid argument type " + arg.type)
+  }
+
+}

@@ -5,13 +5,13 @@ import { addTypeImpl } from '../../generic-node-service'
 import { generateDtsFromSchema, mainTypeName } from '../../json-schema-type-util'
 import { getLastEvent } from '../../last-event-service'
 import type { ExtendedJsonSchema, TypeImplSocket } from '../../typing/generic-node-type'
-import { globalMqttConfig } from '../mqtt-global'
+import { getClient, globalMqttConfig } from '../mqtt-global'
 import { NodeEvent } from '../../node-event'
 import { genericNodeDataStore } from '../../generic-store/reference'
 import { selectGlobals } from '../../generic-store/selectors'
 import { z } from 'zod'
 import { BehaviorSubject, firstValueFrom } from 'rxjs'
-import { MqttClient, connect } from 'mqtt'
+import type { MqttClient } from 'mqtt'
 import { join } from 'path'
 import { readFile } from 'fs/promises'
 
@@ -212,7 +212,7 @@ addTypeImpl({
     }
 
     if (globals.mqtt_server) {
-      mqttConneciton = connect(globals.mqtt_server)
+      mqttConneciton = getClient(globals)
       mqttConneciton.on("message", (e, data) => {
         const evt = JSON.parse(data.toString())
         const parsedEvt = layoutType.parse(evt.layout)

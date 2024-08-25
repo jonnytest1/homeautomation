@@ -22,7 +22,11 @@ export class MQTTIntegration {
   private commandMap: Record<string, CommandsEvent> = {}
   constructor() {
     const mqttUrl = environment.MQTT_SERVER
-    this.connection = connect(mqttUrl)
+    this.connection = connect({
+      host: mqttUrl,
+      username: environment.MQTT_USER,
+      password: environment.MQTT_PASSWORD
+    })
 
     this.connection.on("connect", () => {
 

@@ -1,6 +1,14 @@
 
-import type { NodeOptionTypes } from './generic-node/typing/node-options'
+import type { NodeOptionTypes, NodeOptionTypeWithName, NodeOptionTypeWithOptionalName } from './generic-node/typing/node-options'
 import type { CommandsEvent } from './mqtt-types'
+
+
+export type DeviceCommandConfig = {
+  name: string
+  argument?: NodeOptionTypeWithOptionalName | Array<NodeOptionTypeWithName>
+  responses?: Array<string>
+  asyncRetained?: boolean
+}
 
 //  https://tasmota.github.io/docs/Commands/#mqtt
 export interface DiscoveryConfigEvent {
@@ -8,8 +16,10 @@ export interface DiscoveryConfigEvent {
   t: string //topic
   tp: Array<string> // topic prefixes
 
-  commands?: Array<{ name: string }>
+  commands?: Array<DeviceCommandConfig>
 }
+
+
 
 
 export class DeviceConfig {
@@ -19,7 +29,7 @@ export class DeviceConfig {
   public topicPrefixes: Array<string>
   public friendlyName: string
 
-  commands: Array<{ name: string, argument?: NodeOptionTypes, responses?: Array<string> }> = []
+  commands: Array<DeviceCommandConfig> = []
 
   iscommandsSet = false
   constructor(public discoveryid: string, evt: DiscoveryConfigEvent, commandprops?: CommandsEvent) {

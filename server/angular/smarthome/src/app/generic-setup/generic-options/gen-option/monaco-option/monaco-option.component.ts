@@ -3,6 +3,7 @@ import type { OnInit } from '@angular/core';
 import { Component, Input, type OnChanges, type SimpleChanges, type ElementRef, ViewChild } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 import { MonacoEditorComponent } from '../../../../monaco-editor/monaco-editor.component';
+import { MonacoHtmlComponent } from '../../../../monaco-html/monaco-html.component';
 import { ElementNode, NodeOptionTypes } from '../../../../settings/interfaces';
 import { FormsModule } from '@angular/forms';
 
@@ -20,7 +21,7 @@ const expansionType = `
   selector: 'app-monaco-option',
   templateUrl: './monaco-option.component.html',
   styleUrls: ['./monaco-option.component.scss'],
-  imports: [CommonModule, MonacoEditorComponent, FormsModule],
+  imports: [CommonModule, MonacoEditorComponent, FormsModule, MonacoHtmlComponent],
   standalone: true
 })
 export class MonacoOptionComponent implements OnInit, OnChanges {
@@ -34,7 +35,7 @@ export class MonacoOptionComponent implements OnInit, OnChanges {
 
 
   @Input({ required: true })
-  definition: NodeOptionTypes
+  definition: NodeOptionTypes & { type: "monaco" }
 
 
   @ViewChild("hiddenValue")
@@ -67,7 +68,7 @@ export class MonacoOptionComponent implements OnInit, OnChanges {
       }
     }
 
-    return this._code || "'test'"
+    return this._code || null
   }
 
 
@@ -85,17 +86,26 @@ export class MonacoOptionComponent implements OnInit, OnChanges {
     }
     try {
       if (this.value) {
-        const monacoData = JSON.parse(this.value) as typeof this.monacoData
-        if (!this.monacoData || (monacoData.timestamp && monacoData.timestamp > this.monacoData.timestamp) || monacoData.node !== this.monacoData.node) {
-          this.monacoData = monacoData
-          this._code = this.monacoData.tsCode
-          this._additionalVal = this.monacoData.jsCode
+        if (this.definition.mode === "html") {
+          this._code = this.value
           if (this.elementRef) {
-            this.elementRef.nativeElement.value = JSON.stringify(this.monacoData)
+            this.elementRef.nativeElement.value = this.value
           }
         } else {
-          console.log("skipped update due to timing")
+          const monacoData = JSON.parse(this.value) as typeof this.monacoData
+          if (!this.monacoData || (monacoData.timestamp && monacoData.timestamp > this.monacoData.timestamp) || monacoData.node !== this.monacoData.node) {
+            this.monacoData = monacoData
+            this._code = this.monacoData.tsCode
+            this._additionalVal = this.monacoData.jsCode
+            if (this.elementRef) {
+              this.elementRef.nativeElement.value = JSON.stringify(this.monacoData)
+            }
+          } else {
+            console.log("skipped update due to timing")
+          }
         }
+
+
       }
     } catch (e) {
       debugger
@@ -143,10 +153,24 @@ export class MonacoOptionComponent implements OnInit, OnChanges {
 
   }
 
-  updateCode(evt: { js: string; ts: string; }) {
+  updateCode(evt: { js: string; ts: string; } | { html: string }) {
     if (this.lastNodeChange + (2000) > Date.now()) {
       return
     }
+    if ("html" in evt) {
+      if (this.definition.type == "monaco" && this.definition.mode === "html") {
+        this._code = evt.html
+        this.elementRef.nativeElement.value = evt.html
+        setTimeout(() => {
+          this.elementRef.nativeElement.dispatchEvent(new Event('change', { 'bubbles': true }))
+        }, 1)
+      }
+      return
+    }
+
+
+
+
     this.monacoData = {
       tsCode: evt.ts,
       timestamp: Date.now(),

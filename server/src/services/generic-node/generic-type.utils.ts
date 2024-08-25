@@ -203,28 +203,42 @@ export async function updateTypeSchema(node: ElementNode, nodeData: PreparedNode
 
 
   const nodeTypeImplemenations = nodeData.typeImpls[node.type]
+  const conChangeTimeout = setTimeout(() => {
+    console.warn("type schema update for " + node.uuid + " took long")
 
+  }, 1000)
   await nodeTypeImplemenations.connectionTypeChanged?.(node, schema);
-
+  clearTimeout(conChangeTimeout)
   if (node.runtimeContext?.editorSchema?.dts) {
     writeFile(join(typeData, `editorschema_${node.uuid}.ts`), node.runtimeContext?.editorSchema.dts)
   }
 
   const outConnections = genericNodeDataStore.getOnce(selectConnectionsFromNodeUuid(node.uuid))
+  try {
+    if (outConnections) {
+      for (const connectorIndex in outConnections) {
+        for (const connector of outConnections[connectorIndex]) {
+          try {
+            const nextNode = genericNodeDataStore.getOnce(selectNodeByUuid(connector.uuid))
 
-  if (outConnections) {
-    for (const connectorIndex in outConnections) {
-      for (const connector of outConnections[connectorIndex]) {
-        try {
-          const nextNode = genericNodeDataStore.getOnce(selectNodeByUuid(connector.uuid))
-          await updateTypeSchema(nextNode, nodeData)
-        } catch (e) {
-          throw new Error("error validating node " + connector.uuid, {
-            cause: e
-          })
+            const logTimeout = setTimeout(() => {
+              console.warn("type schema update for " + nextNode.uuid + " took long")
+
+            }, 1000)
+            await updateTypeSchema(nextNode, nodeData)
+            clearTimeout(logTimeout)
+          } catch (e) {
+            throw new Error("error validating node " + connector.uuid, {
+              cause: e
+            })
+          }
         }
       }
     }
+  } catch (e) {
+
+    debugger;
+    throw e;
   }
 }
 

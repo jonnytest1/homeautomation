@@ -5,13 +5,23 @@
             #hiddenValue
             name="{{name}}"></textarea>
   <ng-container *ngFor="let cd of [node.uuid]">
-    <app-monaco-editor *ngIf="typeDefinition|async ;let types"
-                       (keyup)="$event.stopPropagation()"
-                       [definition]="types"
-                       (change)="$event.stopPropagation()"
+
+    <ng-container *ngIf="definition.type==='monaco' && definition.mode==='html';else tsEditor">
+      <app-monaco-html (keyup)="$event.stopPropagation()"
                        (code)="updateCode($event)"
-                       [jsCode]="additionalVal"
                        [ngModel]="code">
-    </app-monaco-editor>
+      </app-monaco-html>
+    </ng-container>
+    <ng-template #tsEditor>
+      <app-monaco-editor *ngIf="typeDefinition|async ;let types"
+                         (keyup)="$event.stopPropagation()"
+                         [definition]="types"
+                         (change)="$event.stopPropagation()"
+                         (code)="updateCode($event)"
+                         [jsCode]="additionalVal"
+                         [ngModel]="code">
+      </app-monaco-editor>
+    </ng-template>
+
   </ng-container>
 </div>

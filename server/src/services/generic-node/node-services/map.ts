@@ -155,7 +155,7 @@ const genericTypes = addTypeImpl({
     cacheNodeScript(node);
   },
   async connectionTypeChanged(node, connectionSchema) {
-
+    const changed = false
     if (node.parameters?.mode == "switch") {
 
       const keys = Object.keys(connectionSchema.jsonSchema.properties ?? {});
@@ -221,7 +221,7 @@ const genericTypes = addTypeImpl({
       const outputType = "any"
 
 
-      let code = `
+      let editorCode = `
         namespace ${nodePref}{
           ${connectionSchema.dts}
 
@@ -239,7 +239,7 @@ const genericTypes = addTypeImpl({
       const lastStatement = node.parameters?.mode === "object" || node.parameters?.mode === "switch"
       if (lastStatement) {
         typeName = false
-        code = `
+        editorCode = `
         namespace ${nodePref}{
 
           ${globalTypesObjectValidation}
@@ -252,21 +252,27 @@ const genericTypes = addTypeImpl({
        `
       }
 
+      const typeSchemaTimeout = setTimeout(() => {
+        console.warn("type schema generation for " + node.uuid + " took long")
 
-      const jsonSchema = await getTypes(code, typeName, `${node.type}-output-gen--${node.uuid}`)
-
+      }, 1000)
+      const jsonSchema = await getTypes(editorCode, typeName, `${node.type}-output-gen--${node.uuid}`)
+      clearTimeout(typeSchemaTimeout)
 
       if (jsonSchema) {
         allRequired(jsonSchema)
 
-        genericNodeDataStore.dispatch(backendToFrontendStoreActions.updateOutputSchema({
-          nodeUuid: node.uuid,
-          schema: {
-            jsonSchema: jsonSchema,
-            mainTypeName: "Main",
-            dts: await generateDtsFromSchema(jsonSchema, `${node.type}-${node.uuid}-con type change`)
-          }
-        }))
+        if (JSON.stringify(jsonSchema) !== JSON.stringify(node.runtimeContext.outputSchema?.jsonSchema)) {
+
+          genericNodeDataStore.dispatch(backendToFrontendStoreActions.updateOutputSchema({
+            nodeUuid: node.uuid,
+            schema: {
+              jsonSchema: jsonSchema,
+              mainTypeName: "Main",
+              dts: await generateDtsFromSchema(jsonSchema, `${node.type}-${node.uuid}-con type change`)
+            }
+          }))
+        }
       }
 
     } catch (e) {
@@ -310,23 +316,28 @@ function updateEditorTypeSchema(node: EvalNode<typeof genericTypes["opts"], type
     `
 
   }
-
-
-  genericNodeDataStore.dispatch(backendToFrontendStoreActions.updateEditorSchema({
-    nodeUuid: node.uuid,
-    editorSchema: {
-      dts: `
+  const newDts = `
 ${connectionSchema.dts}
 
 type InputType=${connectionSchema.mainTypeName ??= mainTypeName}
 
 ${outputSchemaStr}
-      `, globals: `
+      `;
+  const newGlobals = `
      // type InputType = EditorSchema.InputType;    
       var context;
-      `
-    }
-  }))
+      `;
+  if (node.runtimeContext.editorSchema?.dts !== newDts || node.runtimeContext.editorSchema?.globals !== newGlobals) {
+    genericNodeDataStore.dispatch(backendToFrontendStoreActions.updateEditorSchema({
+      nodeUuid: node.uuid,
+      editorSchema: {
+        dts: newDts,
+        globals: newGlobals
+      }
+    }))
+  }
+
+
 }
 
 
@@ -343,7 +354,7 @@ function setNewCode(node: ElementNode, code: Omit<CodeData, "timestamp" | "node"
 
 
 function cacheNodeScript(node: ElementNode<NodeDefToType<{ code: { type: "monaco"; default: string; }; }>, unknown, unknown>) {
-  if (node.parameters) {
+  if (node.parameters?.code) {
     try {
       const codePAram = JSON.parse(node.parameters.code || '{}');
       const parsedCodeAData = codeSchema.parse(codePAram)

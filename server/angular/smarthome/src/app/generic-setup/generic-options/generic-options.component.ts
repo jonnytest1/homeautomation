@@ -7,7 +7,7 @@ import type { ElementNode } from '../../settings/interfaces';
 import { GenOptionComponent } from './gen-option/gen-option.component';
 import { MatIconModule } from '@angular/material/icon';
 import { Store } from '@ngrx/store';
-import { selectNode } from '../store/selectors';
+import { selectGlobals, selectNode } from '../store/selectors';
 import type { Observable } from 'rxjs';
 import { combineLatest, map } from 'rxjs';
 import { StoreService } from '../store/store-service';
@@ -38,6 +38,8 @@ export class GenericOptionsComponent implements AfterViewInit, OnChanges {
   node$: Observable<ElementNode | undefined>
 
   entries$: Observable<Array<{ name: string, value: NodeOptionTypes }>>
+
+  globals$ = this.store.select(selectGlobals)
 
   constructor(public con: GenericNodesDataService, private store: Store, private storeService: StoreService) {}
 

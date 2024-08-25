@@ -9,14 +9,17 @@ import { MonacoOptionComponent } from './monaco-option/monaco-option.component';
 import { Store } from '@ngrx/store';
 import { backendActions } from '../../store/action';
 import { logKibana } from '../../../global-error-handler';
-
+import { StoreService } from '../../store/store-service';
+import { first } from 'rxjs';
+import { selectGlobals } from '../../store/selectors';
+import { MonacoHtmlComponent } from "../../../monaco-html/monaco-html.component"
 
 
 @Component({
   selector: 'app-gen-option',
   templateUrl: './gen-option.component.html',
   styleUrls: ['./gen-option.component.scss'],
-  imports: [CommonModule, FormsModule, FrameOptionComponent, MonacoOptionComponent],
+  imports: [CommonModule, FormsModule, FrameOptionComponent, MonacoOptionComponent, MonacoHtmlComponent],
   standalone: true
 })
 export class GenOptionComponent implements OnChanges {
@@ -37,6 +40,10 @@ export class GenOptionComponent implements OnChanges {
   @Input()
   node: ElementNode
 
+
+  @Input()
+  setting: "global" | "node" = "node"
+
   @ViewChild("hiddenValue")
   elementRef: ElementRef<HTMLTextAreaElement>
 
@@ -44,7 +51,7 @@ export class GenOptionComponent implements OnChanges {
     trustedDocuemnt: SafeHtml
   }
 
-  constructor(private store: Store) {
+  constructor(private store: Store, private stService: StoreService) {
 
   }
 
@@ -75,12 +82,33 @@ export class GenOptionComponent implements OnChanges {
         modifiedValue = target.checked ? "on" : ""
       }
 
-      this.store.dispatch(backendActions.updateParameter({
-        param: this.name,
-        node: this.node.uuid,
-        value: modifiedValue
 
-      }))
+      if (this.setting === "global") {
+
+        this.store.select(selectGlobals).pipe(first()).subscribe(globals => {
+
+
+          const glboals = {
+            ...globals as Record<string, string>,
+            [this.name]: modifiedValue
+          }
+          this.store.dispatch(backendActions.updateGlobals({
+            globals: glboals
+
+
+          }))
+        })
+
+      } else {
+        this.store.dispatch(backendActions.updateParameter({
+          param: this.name,
+          node: this.node.uuid,
+          value: modifiedValue
+
+        }))
+      }
+
+
     } else {
       logKibana("ERROR", "target has no value");
     }

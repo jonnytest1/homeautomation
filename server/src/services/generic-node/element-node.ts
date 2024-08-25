@@ -2,7 +2,7 @@ import type { MapTypeToParam, NodeDefOptinos, NodeOptionTypes } from './typing/n
 import type { Callbacks, ElementNode as ELN, ElementNode, EvalNode, TypeImplementaiton } from './typing/generic-node-type';
 import type { NodeEvent } from './node-event';
 import { genericNodeDataStore } from './generic-store/reference';
-import { setServerContext } from './generic-store/actions';
+import { backendToFrontendStoreActions, setServerContext } from './generic-store/actions';
 export class ElementNodeImpl<T = { [optinoskey: string]: string }, P = Partial<NodeDefOptinos>> implements ELN<T, P>, Callbacks {
 
   parameters?: Partial<T & { name?: string }> | undefined;
@@ -67,6 +67,14 @@ export function updateRuntimeParameter<T, P, K extends (keyof P & keyof T & stri
   node.runtimeContext.parameters ??= {}
   node.parameters ??= {}
   node.runtimeContext.parameters[key] = param
+
+  genericNodeDataStore.dispatch(backendToFrontendStoreActions.updateParamDefinition({
+    nodeUuid: node.uuid,
+    param: key,
+    value: param
+  }))
+
+
   if (node.parameters?.[key] === undefined) {
 
     let value: T[K] | undefined = undefined
@@ -79,13 +87,19 @@ export function updateRuntimeParameter<T, P, K extends (keyof P & keyof T & stri
         if (param.options[inital]) {
           value = param.options[inital] as T[K]
         }
-      } else {
-        value = `${inital ?? ""}` as T[K]
+      } else if (inital) {
+
+        value = `${inital}` as T[K]
       }
     }
-
+    genericNodeDataStore.dispatch(backendToFrontendStoreActions.updateParam({
+      node: node.uuid,
+      param: key,
+      value: value as never
+    }))
     node.parameters[key] = value as never
   }
+
 }
 
 

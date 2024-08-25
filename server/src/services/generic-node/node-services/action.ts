@@ -4,6 +4,8 @@ import { Receiver } from '../../../models/receiver'
 import { logKibana } from '../../../util/log'
 import { ReceiverEvent } from '../../../models/receiver-event'
 import { updateRuntimeParameter } from '../element-node'
+import { genericNodeDataStore } from '../generic-store/reference'
+import { backendToFrontendStoreActions } from '../generic-store/actions'
 import { SqlCondition, load } from 'hibernatets'
 
 
@@ -108,7 +110,6 @@ addTypeImpl({
   }),
   async nodeChanged(node, prev) {
 
-    node.runtimeContext.parameters ??= {}
     const receiver = await load(Receiver, SqlCondition.ALL, [], {
       deep: ["actions"]
     })
@@ -130,8 +131,10 @@ addTypeImpl({
         optionDisplayNames: rec.actions.map(a => `${a.name} (${a.confirm == "1" ? "confirmed" : "direct"})`),
       })
 
-      node.runtimeContext.info = `${node.parameters.receiver} - ${node.parameters.action}`
-
+      genericNodeDataStore.dispatch(backendToFrontendStoreActions.updateRuntimeInfo({
+        nodeUuid: node.uuid,
+        info: `${node.parameters.receiver} - ${node.parameters.action}`
+      }))
 
     }
 

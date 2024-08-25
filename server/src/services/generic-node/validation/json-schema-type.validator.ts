@@ -104,6 +104,13 @@ export function validateJsonSchema(context: ValidationContext) {
     if (target.enum) {
       debugger
     }
+  } else if (target.type === "boolean") {
+    if (target.const) {
+      debugger
+    }
+    if (target.enum) {
+      debugger
+    }
   } else if (target.type === "string") {
     if (target.const) {
       debugger
@@ -111,7 +118,7 @@ export function validateJsonSchema(context: ValidationContext) {
     if (target.enum) {
       if (assigning.const) {
         if (!target.enum.includes(assigning.const)) {
-          throw new SchemaMatchingError(context, `constant ${assigning.const} is not part of the target enum ${target.enum.join(",")}`)
+          throw new SchemaMatchingError(context, `constant '${assigning.const}' is not part of the target enum ${target.enum.join(",")}`)
         }
       } else {
 

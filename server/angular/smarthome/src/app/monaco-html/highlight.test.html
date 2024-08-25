@@ -1,0 +1,29 @@
+<span id="duration"></span>
+
+<script>
+  setInterval(() => {
+    if(popupConfig) {
+      const secondsSince = (Date.now() - popupConfig.activesince) / 1000
+      const maxSeconds = 60 * 60 * 2
+      let remainingSecs = maxSeconds - secondsSince
+
+      if(remainingSecs < 0) {
+        const form = document.querySelector("form")
+        form.querySelector("[value=timeout]").click()
+
+      }
+
+      const hours = Math.floor(remainingSecs / (60 * 60))
+      remainingSecs -= hours * 60 * 60
+
+      const minutes = Math.floor(remainingSecs / 60)
+      remainingSecs -= minutes * 60
+
+      duration.textContent = `h:${hours} m: ${minutes} s: ${Math.floor(remainingSecs)}`
+
+
+
+    }
+    console.log("interval loop")
+  }, 1000)
+</script>
