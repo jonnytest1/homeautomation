@@ -1,5 +1,9 @@
-import type { ExtendedJsonSchema } from 'json-schema-merger';
+import type { JSONSchema6 } from 'json-schema';
 
+type ExtendedJsonSchema = JSONSchema6 & {
+  merged?: boolean;
+  _optional?: Array<string>;
+};
 
 
 export type Schemata = {

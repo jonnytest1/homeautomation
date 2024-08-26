@@ -15,3 +15,6 @@ export const genericNodeDataStore = new DataStore<DataState>({
 
 
 require("./reducers")
+
+
+export const withSideEffects = true

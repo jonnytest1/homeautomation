@@ -16,3 +16,4 @@ export function getNodeDefintions(): Record<string, NodeDefintion> {
   return nodeDefs;
 }
 
+export const withSideEffects = true

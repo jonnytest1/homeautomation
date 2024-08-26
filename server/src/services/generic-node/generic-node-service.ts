@@ -387,3 +387,4 @@ export function emitEvent(type: string, data: NodeEventData) {
   })
 }
 
+export const withSideEffects = true

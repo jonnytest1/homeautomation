@@ -7,6 +7,8 @@ import type { SocketResponses as sR, GenericNodeEvents as GNE, ActionTriggersEve
   from "../../../../../src/resources/websocket-response"
 
 export * from "../../../../../src/services/mqtt-types"
+export * from "../../../../../src/services/generic-node/typing/element-node"
+export * from "../../../../../src/services/generic-node/typing/node-definition"
 export * from "../../../../../src/services/generic-node/typing/generic-node-type"
 export * from "../../../../../src/services/generic-node/typing/frontend-events"
 export * from "../../../../../src/services/generic-node/typing/node-options"
