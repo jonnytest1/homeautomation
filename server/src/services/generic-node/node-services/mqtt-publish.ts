@@ -3,11 +3,12 @@ import { mqttConnection } from '../../mqtt-api'
 import { addTypeImpl } from '../generic-node-service'
 import type { ExtendedJsonSchema } from '../typing/generic-node-type'
 import { generateDtsFromSchema, generateZodTypeFromSchema, mainTypeName } from '../json-schema-type-util'
-import { argumentTypeToJsonSchema, type NodeOptionTypeWithName, type Select } from '../typing/node-options'
+import { type NodeOptionTypeWithName, type Select } from '../typing/node-options'
 import { updateRuntimeParameter } from '../element-node'
 import { logKibana } from '../../../util/log'
 import { backendToFrontendStoreActions } from '../generic-store/actions'
 import { genericNodeDataStore } from '../generic-store/reference'
+import { argumentTypeToJsonSchema } from '../typing/node-optinon-to-json-schema'
 import type { ZodType } from 'zod'
 
 
