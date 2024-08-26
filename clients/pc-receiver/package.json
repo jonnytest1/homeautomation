@@ -2,12 +2,12 @@
   "name": "pcreceiver",
   "version": "1.0.0",
   "description": "node",
-  "main": "index.ts",
   "dependencies": {
     "@types/node-notifier": "^8.0.5",
     "atob": "^2.1.2",
     "clap-detector": "^0.5.3",
     "dotenv": "",
+    "electron": "^27",
     "express": "^4.17.1",
     "express-hibernate-wrapper": "^1.0.11",
     "express-ws": "^4.0.0",

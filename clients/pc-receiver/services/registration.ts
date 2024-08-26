@@ -3,6 +3,10 @@ import { fetchHttps } from '../util/request';
 import { eventConfirmHandlerMap, eventHandlerMap } from './events/event-handler';
 import type { FrontendReceiver } from './server-interfaces';
 import { environment } from '../environment';
+import { popup, popupConfig } from './popup-service';
+
+
+///<reference path="../../../server/src/services/mqtt-tasmota.ts" />
 class Registration {
 
   readonly deviceKey = 'pc-receiver';
@@ -42,25 +46,47 @@ class Registration {
     }
 
 
-    this.client = connect(environment.MQTT_SERVER)
+    this.client = connect({
+      hostname: environment.MQTT_SERVER,
+      username: environment.MQTT_USER,
+      password: environment.MQTT_PASSWORD,
+    })
+    this.client.on("error", e => {
+      debugger;
+    })
+
     this.client.on("connect", () => {
+      const commands: Array<import("../../../server/src/services/mqtt-tasmota").DeviceCommandConfig> = Object.keys(eventHandlerMap).map(key => ({
+        name: key
+      }));
+
+      commands.push(popupConfig as any)
+
       this.client.publish("personal/discovery/pc-receiver/config", JSON.stringify({
         t: "pc-receiver", // topic
         fn: ["pc-receiver"],
         tp: ["cmnd", "tele"],
-        commands: Object.keys(eventHandlerMap).map(key => ({
-          name: key
-        }))
+        commands: commands
       }), { retain: true })
 
       this.client.on("message", (topic, payload) => {
         const command = topic.match(/cmnd\/pc-receiver\/(?<command>.*)$/)
         if (command?.groups?.command) {
-          const commandKey = command?.groups.command as keyof typeof eventHandlerMap
-          const eventHandler = eventHandlerMap[commandKey]
+          const commandKey = command?.groups.command as keyof typeof eventHandlerMap | (string & {})
+          const eventHandler: (payload: string) => void = eventHandlerMap[commandKey]
           if (eventHandler) {
             console.log(`running for ${commandKey}`)
-            eventHandler();
+            eventHandler(payload.toString());
+          } else if (commandKey === "popup") {
+            popup(payload.toString(), {
+              response: (resp: { ts: number }) => {
+                this.client.publish(`response/pc-receiver/${commandKey}/${resp.ts}`, JSON.stringify(resp));
+              },
+              overwrite: (payload) => {
+                this.client.publish(`cmnd/pc-receiver/${commandKey}`, JSON.stringify(payload), { retain: true })
+              }
+            })
+
           }
         }
       })

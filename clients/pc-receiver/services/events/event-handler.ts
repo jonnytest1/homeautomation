@@ -30,7 +30,7 @@ export const eventHandlerMap = {
   },
   "treadmill": () => {
     new TimerService(null).run({})
-  }
+  },
   /*"read": (data: { text: string }) => {
     debugger
   }*/
