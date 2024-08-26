@@ -46,5 +46,4 @@ export abstract class Wiring {
 
   abstract register(options: RegisterOptions);
 
-
 }

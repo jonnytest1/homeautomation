@@ -37,13 +37,19 @@ export class LocalStorageSerialization {
 
   storeToLocal(batteries: Array<Battery>,
   ) {
+    const nets = []
 
-    const json = JSON.stringify(batteries);
+    for (const battery of batteries) {
+      // stringify battery individually, cause no key is used to break up loops
+      nets.push(JSON.stringify(battery))
+    }
+    debugger
+    const json = JSON.stringify(nets);
     localStorage.setItem('el_network', json);
     console.log(json);
   }
   async load(options: Partial<FromJsonOptions & { remote: boolean }>): Promise<Array<Battery>> {
-    let json: string;
+    let parsed;
     if (options.remote) {
       const jsonStrings = await this.dataService.getWiringTemplates().toPromise();
 
@@ -53,12 +59,15 @@ export class LocalStorageSerialization {
         .afterDismissed()
         .toPromise();
 
-      json = picked;
+      parsed = JSON.parse(picked)
     } else {
-      json = localStorage.getItem('el_network');
-    }
-    const parsed = JSON.parse(json);
+      const netStr = localStorage.getItem('el_network');
 
+      parsed = JSON.parse(netStr).map(str => JSON.parse(str))
+
+    }
+
+    debugger
 
 
     return this.parseJson(parsed, options);

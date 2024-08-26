@@ -117,6 +117,8 @@ export class Battery extends Collection {
 
     if (key == "connectedWire") {
       return "BatteryRef"
+    } else if (key) {
+      return "BatteryRef"
     }
     return {
       type: this.constructor.name,

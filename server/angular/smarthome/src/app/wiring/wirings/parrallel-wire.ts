@@ -227,7 +227,8 @@ export class ParrallelWire extends Wiring {
     return {
       type: this.constructor.name,
       uuid: this.instance,
-      outC: this.outC.map(c => c.parent instanceof Battery ? "BatteryRef" : c.parent)
+      //instanceof Battery ? "BatteryRef" : c.parent
+      outC: this.outC.map(c => c.parent)
     }
   }
 
