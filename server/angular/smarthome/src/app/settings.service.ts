@@ -9,6 +9,7 @@ import { BehaviorSubject, ReplaySubject, Subject } from 'rxjs';
 import { map, switchMap, tap } from 'rxjs/operators';
 import { v4 as uuid } from 'uuid';
 import { ResolvablePromise } from './utils/resolvable-promise';
+import { getDeviceData } from './global-error-handler';
 
 
 let ws: WebSocket;
@@ -91,6 +92,14 @@ export class SettingsService extends AbstractHttpService {
 
   constructor(http: HttpClient, router: Router) {
     super(http, router);
+
+
+    this.onSocketOpen.initialize = s => {
+      sendSocketEvent({
+        type: "device-data",
+        data: getDeviceData()
+      })
+    }
     openWebsocket();
     const pingEvent = {
       type: "ping"
@@ -128,6 +137,8 @@ export class SettingsService extends AbstractHttpService {
       this.updateReceiver(messageEvent.data);
     } else if (this.isType(messageEvent, 'genericNode')) {
       this.genericNodeEvents.next(messageEvent.data)
+    } else if (this.isType(messageEvent, 'reload')) {
+      location.reload()
     }
   }
 

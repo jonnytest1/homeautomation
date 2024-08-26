@@ -27,6 +27,17 @@ interface ParamLog {
 }
 
 
+export function getDeviceData() {
+  return {
+    device: navigator.userAgent,
+    screenHeight: window.outerHeight + "px",
+    screenWidth: window.outerWidth + "px",
+    userAgentData: JSON.stringify(navigator["userAgentData"]?.toJSON()),
+    touchPoints: navigator.maxTouchPoints + "",
+    webdriver: navigator.webdriver + ""
+  }
+}
+
 export async function logKibana(level: 'INFO' | 'ERROR' | 'DEBUG', message: string | ParamLog, error?) {
   let logStack;
   try {
@@ -40,7 +51,7 @@ export async function logKibana(level: 'INFO' | 'ERROR' | 'DEBUG', message: stri
     Severity: level,
     application: `SmartHomeFe${devMode ? '_debug' : ''}`,
     log_stack: logStack,
-    device: navigator.userAgent
+    ...getDeviceData()
   };
   if (!message && error) {
     jsonData.message = base64safe(error.message);

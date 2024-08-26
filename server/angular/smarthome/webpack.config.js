@@ -6,7 +6,7 @@
 module.exports = {
   module: {
     rules: [{
-      test: /\.css$/,
+      test: /.*\.css$/,
       loader: 'raw-loader',
       resourceQuery: /raw/,
     }],
