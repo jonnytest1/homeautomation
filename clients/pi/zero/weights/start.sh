@@ -7,4 +7,5 @@ echo "starting server"
 # > journalctl -b to get logs since boot
 cd /home/jonathan/weights
 sleep 1
+echo "" > /home/jonathan/weights/python-input.log
 python3 ./main.py >> /home/jonathan/weights/python-input.log 2>&1 &

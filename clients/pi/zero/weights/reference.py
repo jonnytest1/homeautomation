@@ -82,9 +82,9 @@ ref_unit_a = 14.4
 ref_unit_b = 4
 hx.set_reference_unit_A(ref_unit_a)
 hx.set_reference_unit_B(ref_unit_b)
-hx.set_offset_A(37000)
+hx.set_offset_A(3500*ref_unit_a)
 # offset gets subtracted
-hx.set_offset_B(3110*ref_unit_b)
+hx.set_offset_B(2200*ref_unit_b)
 
 
 # i think this resets to base 0
