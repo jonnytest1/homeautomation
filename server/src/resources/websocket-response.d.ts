@@ -60,5 +60,6 @@ export interface SocketResponses {
    nodeUpdate: ElementNode*/
 
   genericNode: GenericNodeEvents
+  reload: void
 
 }

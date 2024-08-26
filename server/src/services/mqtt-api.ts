@@ -1,10 +1,11 @@
 import { DeviceConfig, DiscoveryConfigEvent, defaultCommandConfig } from './mqtt-tasmota'
 import { emitEvent } from './generic-node/generic-node-service'
 import type { CommandsEvent } from './mqtt-types'
+import { getClient } from './generic-node/node-services/mqtt-global'
 import { environment } from '../environment'
 import { logKibana } from '../util/log'
 import { ResolvablePromise } from '../util/resolvable-promise'
-import { MqttClient, connect } from "mqtt"
+import type { MqttClient } from "mqtt"
 
 
 
@@ -22,10 +23,10 @@ export class MQTTIntegration {
   private commandMap: Record<string, CommandsEvent> = {}
   constructor() {
     const mqttUrl = environment.MQTT_SERVER
-    this.connection = connect({
-      host: mqttUrl,
-      username: environment.MQTT_USER,
-      password: environment.MQTT_PASSWORD
+    this.connection = getClient({
+      mqtt_password: environment.MQTT_PASSWORD,
+      mqtt_server: mqttUrl,
+      mqtt_user: environment.MQTT_USER
     })
 
     this.connection.on("connect", () => {

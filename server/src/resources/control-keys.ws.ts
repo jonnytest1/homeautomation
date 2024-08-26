@@ -104,3 +104,6 @@ export class ControlKeysWebsocket {
 
   }
 }
+
+
+export const withSideEffects = true

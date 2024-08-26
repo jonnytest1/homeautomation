@@ -86,17 +86,22 @@ export class DataStore<T> {
       return
     }
     const newState = reducer(this.state.value, action)
-    this.lastAction = action
-    this.state.next(newState)
-    this.lastAction = undefined
-    if (lastDispatch === this.lastDispatch) {
+    if (newState !== this.state.value) {
+      this.lastAction = action
+      this.state.next(newState)
+      this.lastAction = undefined
 
-      this.effects[action.type]?.forEach(effect => {
-        effect(newState, action)
-      })
+      if (lastDispatch === this.lastDispatch) {
+
+        this.effects[action.type]?.forEach(effect => {
+          effect(newState, action)
+        })
+      } else {
+        console.log("skipping effect after new action dispatch")
+        // debugger
+      }
     } else {
-      console.log("skipping effect after new action dispatch")
-      // debugger
+      console.debug(`action ${action.type} resolved to same state reference`)
     }
   }
 

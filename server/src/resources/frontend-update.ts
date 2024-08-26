@@ -10,7 +10,10 @@ import { HttpRequest, Websocket, WS } from 'express-hibernate-wrapper';
 import { load, SqlCondition } from 'hibernatets';
 
 
-type ExtendedSocket = Websocket & { instanceId?: string }
+type ExtendedSocket = Websocket & {
+  instanceId?: string
+  deviceData: unknown
+}
 
 @WS({ path: "/updates" })
 export class FrontendWebsocket {
@@ -85,6 +88,12 @@ export class FrontendWebsocket {
     ws.send(JSON.stringify(data))
   }
 
+  static reloadAll() {
+    this.forSockets(s => {
+      this.sendToWebsocket(s, { type: "reload", data: undefined })
+    })
+  }
+
   static forSockets<T extends object>(callback: (socket: Websocket, props: T) => (void | Promise<void>)) {
     this.websockets.forEach(socket => {
       let props = {}
@@ -142,6 +151,8 @@ export class FrontendWebsocket {
               })
             }
           })
+        } else if (evt.type === "device-data") {
+          websocket.deviceData = evt.data
         }
       }
       // TODO
@@ -160,3 +171,7 @@ export class FrontendWebsocket {
 
   }
 }
+
+
+
+export const withSideEffects = true

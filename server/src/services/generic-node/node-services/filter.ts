@@ -7,6 +7,7 @@ import { mainTypeName } from '../json-schema-type-util';
 import { genericNodeDataStore } from '../generic-store/reference';
 import { backendToFrontendStoreActions } from '../generic-store/actions';
 import { updateServerContext } from '../element-node';
+import { lastEventTimesForNode } from '../last-event-service';
 import * as z from "zod"
 import { Script } from 'vm';
 
@@ -47,7 +48,6 @@ addTypeImpl({
     return s
   },
   process(node, data, callbacks) {
-
     if (data.inputIndex !== 0) {
       updateServerContext(node, {
         inputs: {
@@ -82,13 +82,16 @@ addTypeImpl({
           daysAgo: Math.floor(secsAgo / (60 * 60 * 24))
         }];
       }))
+    const lastEmit = genericNodeDataStore.getOnce(lastEventTimesForNode(node.uuid))
+    const lastOutputTs = lastEmit.output
 
     let returnValue
     try {
       returnValue = nodeScript.script.runInNewContext({
         payload: data.payload,
         inputs: inputs,
-        Date: DateMock
+        Date: DateMock,
+        lastOutputTs
       })
       if (typeof returnValue !== "boolean") {
         throw new Error("invalid return type")
@@ -119,6 +122,7 @@ addTypeImpl({
     }
   }),
   nodeChanged(node, prev) {
+
     if (node.parameters) {
       if (node.parameters.additional !== undefined) {
 
@@ -152,7 +156,7 @@ type InputType=${connectionSchema.mainTypeName ??= mainTypeName}
 
 
       ${node.parameters?.additional ? inputsGlobals(+node.parameters.additional) : ''}
-     
+      var lastOutputTs:number|undefined
       var context; 
       `
       },

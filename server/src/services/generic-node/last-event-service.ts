@@ -46,7 +46,9 @@ genericNodeDataStore.addReducer(setEventTimes, (s, a) => ({
 }))
 
 export const lastEventTimes = genericNodeDataStore.createSelector(st => st.lastEventTimes)
-
+export const lastEventTimesForNode = (nodeUuid: string) => {
+  return lastEventTimes.chain(times => times[nodeUuid])
+}
 
 export function setLastEventInputTime(node: ElementNode, eventTime: number) {
 
@@ -100,3 +102,6 @@ function loadEvents() {
 }
 
 loadEvents()
+
+
+export const withSideEffects = true

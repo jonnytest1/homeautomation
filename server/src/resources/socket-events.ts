@@ -15,8 +15,11 @@ export type GenericPageEvent = {
   data: unknown,
   nodeType: string
 }
+export type DeviceData = {
+  type: "device-data",
+  data: unknown,
+}
 
 
 
-
-export type FrontendToBackendEvents = GenericNodeEvent | Ping | GenericPageEvent
+export type FrontendToBackendEvents = GenericNodeEvent | Ping | GenericPageEvent | DeviceData

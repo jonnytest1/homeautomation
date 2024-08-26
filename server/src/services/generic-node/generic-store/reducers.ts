@@ -6,13 +6,18 @@ import { jsonClone } from '../../../util/json-clone'
 
 
 function patchNode(st: DataState, nodeUuid: string, mapper: (node: ElementNode) => ElementNode): DataState {
+  const previousnodeStr = JSON.stringify(st.nodeData.nodes[nodeUuid])
+  const newNode = mapper(st.nodeData.nodes[nodeUuid])
+  if (JSON.stringify(newNode) === previousnodeStr) {
+    return st
+  }
   return {
     ...st,
     nodeData: {
       ...st.nodeData,
       nodes: {
         ...st.nodeData.nodes,
-        [nodeUuid]: mapper(st.nodeData.nodes[nodeUuid])
+        [nodeUuid]: newNode
       }
     }
   }

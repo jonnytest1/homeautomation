@@ -66,13 +66,18 @@ export function updateRuntimeParameter<T, P, K extends (keyof P & keyof T & stri
 
   node.runtimeContext.parameters ??= {}
   node.parameters ??= {}
-  node.runtimeContext.parameters[key] = param
 
-  genericNodeDataStore.dispatch(backendToFrontendStoreActions.updateParamDefinition({
-    nodeUuid: node.uuid,
-    param: key,
-    value: param
-  }))
+  if (JSON.stringify(node.runtimeContext.parameters[key]) !== JSON.stringify(param)) {
+
+    node.runtimeContext.parameters[key] = param
+
+    genericNodeDataStore.dispatch(backendToFrontendStoreActions.updateParamDefinition({
+      nodeUuid: node.uuid,
+      param: key,
+      value: param
+    }))
+  }
+
 
 
   if (node.parameters?.[key] === undefined) {

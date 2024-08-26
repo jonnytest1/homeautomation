@@ -9,19 +9,19 @@ import type { NodeDefOptinos } from './typing/node-options';
 import type { NodeEventData } from './typing/node-event-data';
 import { setLastEvent, setLastEventInputTime, setLastEventOutputTime } from './last-event-service';
 import { ElementNodeImpl, checkInvalidations } from './element-node';
-import { deletedNodesDataFolder, nodesDataFolder, nodesFile, serviceFolder } from './generic-node-constants';
+import { deletedNodesDataFolder, nodesDataFolder, nodesFile } from './generic-node-constants';
 import { init } from './validation/watcher';
 import { genericNodeDataStore } from './generic-store/reference';
 import { backendToFrontendStoreActions, initializeStore } from './generic-store/actions';
 import { nodeglobalsSelector, selectGlobals, selectNodeByUuid, selectNodesOfType, selectTargetConnectorForNodeUuid } from './generic-store/selectors';
 import { forNodes, selectConnectionsFromContinue } from './generic-store/flow-selectors';
 import { loadNodeData } from './generic-node-data-loader';
+import { getLaodingFile, startHotRelaodingWatcher } from './hot-reloading';
 import { logKibana } from '../../util/log';
 import { environment } from '../../environment';
 import { jsonClone } from '../../util/json-clone';
 import type { Action } from '../../util/data-store/action';
 import { BehaviorSubject, combineLatest, Subject, type Subscription } from "rxjs"
-import { watch } from "chokidar"
 import { filter, skip } from "rxjs/operators"
 import { writeFileSync } from "fs"
 import { rename, mkdir } from "fs/promises"
@@ -89,33 +89,10 @@ export function emitFromNode(nodeUuid: string, evt: NodeEvent, index?: number) {
 }
 
 
-
-let loadingFile: string | undefined = undefined
 if (environment.WATCH_SERVICES) {
-  watch(serviceFolder, {})
-    .on("add", e => {
-      if (e.endsWith(".ts") && !e.endsWith("d.ts")) {
-        loadingFile = e
-        require(e)
-        loadingFile = undefined
-      }
-    })
-    .on("change", e => {
-      if (e.endsWith(".ts") && !e.endsWith("d.ts")) {
-        if (e in require.cache) {
-          delete require.cache[e]
-        }
-        loadingFile = e
-        require(e)
-        loadingFile = undefined
-        console.log("successfully loaded " + e)
-      }
-    }).on("ready", () => {
-      setTimeout(() => {
-        hasLoaded$.next(true)
-      })
-
-    })
+  startHotRelaodingWatcher().then(() => {
+    hasLoaded$.next(true)
+  })
 
 }
 
@@ -297,7 +274,7 @@ export function addTypeImpl<C, G extends NodeDefOptinos, O extends NodeDefOptino
 
   const currerntTypeImpls = typeImplementations.value
   const implementationType = typeImpl.nodeDefinition().type;
-  typeImpl._file = loadingFile
+  typeImpl._file = getLaodingFile()
 
 
 
@@ -312,7 +289,8 @@ export function addTypeImpl<C, G extends NodeDefOptinos, O extends NodeDefOptino
 
 
 
-  if (currerntTypeImpls[implementationType]?.unload) {
+  const typeImplUpdate = currerntTypeImpls[implementationType];
+  if (typeImplUpdate?.unload) {
     if (!elementNodes) {
       elementNodes = getElementNodes(implementationType);
     }
@@ -335,11 +313,30 @@ export function addTypeImpl<C, G extends NodeDefOptinos, O extends NodeDefOptino
   }
 
 
+  if (typeImplUpdate) {
+    reloadNodes(elementNodes, implementationType, currerntTypeImpls);
+  }
+
+
   return {} as {
     server_context: S,
     opts: O
   }
 }
+async function reloadNodes(elementNodes: ElementNodeImpl<never, Partial<NodeDefOptinos>>[] | null, implementationType: string, currerntTypeImpls: Record<string, TypeImplementaiton>) {
+  if (!elementNodes) {
+    elementNodes = getElementNodes(implementationType);
+  }
+
+  for (const node of elementNodes) {
+    await currerntTypeImpls[implementationType].nodeChanged?.(node, node);
+    await updateTypeSchema(node, {
+      typeImpls: typeImplementations.value
+    });
+  }
+  return elementNodes;
+}
+
 function getElementNodes(implementationType: string): ElementNodeImpl<never>[] {
   return genericNodeDataStore.getOnce(selectNodesOfType(implementationType)).map(node => {
     return new ElementNodeImpl<never>(node as ElementNode<never>, createCallbacks(node))

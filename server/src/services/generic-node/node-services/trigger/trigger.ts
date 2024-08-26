@@ -26,6 +26,7 @@ addTypeImpl({
 
   async nodeChanged(node, prevNode) {
     if (node.parameters?.trigger !== prevNode?.parameters?.trigger) {
+      console.log("emitting trigger from " + node.uuid)
       setImmediate(() => {
         try {
           node.continue(new NodeEvent({
