@@ -2,7 +2,6 @@ import { Connection } from './connection';
 import type { CurrentCurrent, CurrentOption, GetResistanceOptions, ResistanceReturn } from './wiring.a';
 import { Wiring } from './wiring.a';
 import { v4 } from "uuid"
-import { Battery } from './battery';
 import type { FromJsonOptions } from '../serialisation';
 import { Wire } from './wire';
 import type { RegisterOptions } from './interfaces/registration';
