@@ -1,11 +1,11 @@
 import { addTypeImpl } from '../generic-node-service'
-import type { ElementNode } from '../typing/generic-node-type'
+import type { ElementNode } from '../typing/element-node'
 import { Receiver } from '../../../models/receiver'
 import { logKibana } from '../../../util/log'
 import { ReceiverEvent } from '../../../models/receiver-event'
-import { updateRuntimeParameter } from '../element-node'
 import { genericNodeDataStore } from '../generic-store/reference'
 import { backendToFrontendStoreActions } from '../generic-store/actions'
+import { updateRuntimeParameter } from '../element-node-fnc'
 import { SqlCondition, load } from 'hibernatets'
 
 

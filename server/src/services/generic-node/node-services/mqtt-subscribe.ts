@@ -1,9 +1,9 @@
 import { mqttConnection } from '../../mqtt-api'
 import type { DeviceConfig } from '../../mqtt-tasmota'
-import type { ElementNode } from '../typing/generic-node-type'
+import type { ElementNode } from '../typing/element-node'
 import type { NodeEvent } from '../node-event'
 import { addTypeImpl } from '../generic-node-service'
-import { updateRuntimeParameter } from '../element-node'
+import { updateRuntimeParameter } from '../element-node-fnc'
 
 
 

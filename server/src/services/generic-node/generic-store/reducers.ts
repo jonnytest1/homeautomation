@@ -1,6 +1,8 @@
 import { backendToFrontendStoreActions, initializeStore, setServerContext } from './actions'
-import { genericNodeDataStore, type DataState } from './reference'
-import type { Connection, ElementNode } from '../typing/generic-node-type'
+import { genericNodeDataStore } from './reference'
+import type { DataState } from './state'
+import type { Connection } from '../typing/generic-node-type'
+import type { ElementNode } from '../typing/element-node'
 import { jsonClone } from '../../../util/json-clone'
 
 

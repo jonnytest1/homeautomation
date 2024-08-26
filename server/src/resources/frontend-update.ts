@@ -4,7 +4,7 @@ import { Timer } from '../models/timer';
 import { senderLoader } from '../services/sender-loader';
 import { Item } from '../models/inventory/item';
 import { Receiver } from '../models/receiver';
-import { genericNodeEvents } from '../services/generic-node/generic-node-socket';
+import { genericNodeEvents } from '../services/generic-node/socket/generic-node-socket';
 import type { StoreEvents } from '../services/generic-node/typing/frontend-events';
 import { HttpRequest, Websocket, WS } from 'express-hibernate-wrapper';
 import { load, SqlCondition } from 'hibernatets';
@@ -14,6 +14,7 @@ type ExtendedSocket = Websocket & {
   instanceId?: string
   deviceData: unknown
 }
+
 
 @WS({ path: "/updates" })
 export class FrontendWebsocket {

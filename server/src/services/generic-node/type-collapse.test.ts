@@ -1,8 +1,9 @@
 
 import { generateDtsFromSchema, generateJsonSchemaFromDts, mainTypeName } from './json-schema-type-util'
-import type { ExtendedJsonSchema } from './typing/generic-node-type'
+
 import { ScriptTarget, createProgram, isTypeAliasDeclaration, TypeFormatFlags, createSourceFile } from "typescript"
 import { FetchingJSONSchemaStore, InputData, JSONSchemaInput, quicktype } from 'quicktype-core'
+import type { ExtendedJsonSchema } from 'json-schema-merger'
 import { writeFileSync } from "fs"
 import { join } from "path"
 declare module "typescript" {

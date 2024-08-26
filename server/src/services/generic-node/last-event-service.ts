@@ -1,6 +1,7 @@
 import { lastEventFile, lastEventTimesFile } from './generic-node-constants';
 import type { NodeEventJsonData } from './node-event';
-import type { ElementNode, NodeEventTimes } from './typing/generic-node-type';
+import type { NodeEventTimes } from './typing/generic-node-type';
+import type { ElementNode } from './typing/element-node';
 import { genericNodeDataStore } from './generic-store/reference';
 import { createAction, props } from '../../util/data-store/action';
 import { BehaviorSubject } from 'rxjs';

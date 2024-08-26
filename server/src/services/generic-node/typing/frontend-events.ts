@@ -1,4 +1,6 @@
-import type { Connection, ElementNode, NodeData, Schemata } from './generic-node-type'
+import type { Connection, NodeData } from './generic-node-type'
+import type { Schemata } from './schemata'
+import type { ElementNode } from './element-node'
 import type { NodeOptionTypes } from './node-options'
 
 export type Load = {

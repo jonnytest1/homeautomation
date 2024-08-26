@@ -4,7 +4,9 @@ import type { Receiver } from '../models/receiver';
 import type { Sender } from "../models/sender"
 import type { Timer } from '../models/timer';
 import type { StoreEvents } from '../services/generic-node/typing/frontend-events';
-import type { ElementNode, NodeData, NodeDefintion, NodeEventTimes } from '../services/generic-node/typing/generic-node-type';
+import type { NodeData, NodeEventTimes } from '../services/generic-node/typing/generic-node-type';
+import type { NodeDefintion } from 'src/services/generic-node/typing/node-definition';
+import type { ElementNode } from 'src/services/generic-node/typing/element-node';
 
 
 export interface ActionTriggersEvent {

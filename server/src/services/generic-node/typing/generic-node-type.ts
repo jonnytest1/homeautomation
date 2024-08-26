@@ -1,22 +1,11 @@
 import type { NodeDefOptinos, NodeDefToRUntime, NodeDefToType } from './node-options'
+import type { ElementNode } from './element-node'
+import type { Callbacks } from './node-callbacks'
+import type { NodeDefintion } from './node-definition'
+import type { Schemata } from './schemata'
 import type { NodeEvent } from '../node-event'
 import type { ElementNodeImpl } from '../element-node'
-import type { JSONSchema6 } from 'json-schema'
 import type { Subject } from 'rxjs'
-
-export type NodeDefintion<G extends NodeDefOptinos = NodeDefOptinos, O extends NodeDefOptinos = NodeDefOptinos> = {
-  outputs?: number,
-  inputs?: number,
-  type: string
-  options?: O
-  globalConfig?: G
-  page?: string
-}
-
-export type Callbacks = {
-  continue: (evt: NodeEvent, index?: number) => void
-  updateNode(frontendEmit?: boolean)
-}
 
 type DefaultProps = {
   name: { type: "text" }
@@ -62,46 +51,6 @@ export type TypeImplementaiton<Context = unknown, Globals extends NodeDefOptinos
 }
 
 
-
-export type ExtendedJsonSchema = JSONSchema6 & { merged?: boolean, _optional?: Array<string> }
-
-
-export type Schemata = {
-  jsonSchema: ExtendedJsonSchema
-  dts: string
-  globalModDts?: string
-  mainTypeName: "Main"
-}
-
-export type ElementNode<T = { [optinoskey: string]: string }, P = NodeDefOptinos, S = object> = {
-  parameters?: Partial<T & { name?: string }>
-  position: {
-    x: number,
-    y: number
-  },
-  view?: string,
-  type: NodeDefintion["type"]
-  uuid: string,
-  serverContext?: S
-  runtimeContext: {
-    inputSchema?: Schemata
-    outputSchema?: Schemata
-    editorSchema?: {
-      dts: string,
-      globals?: string
-    }
-    inputs?: number,
-    outputs?: number
-    info?: string
-    parameters?: Partial<P>
-
-    /*connections?: {
-      incoming: Array<Connection & { node?: ElementNode }>,
-      outgoing: Array<Connection & { node?: ElementNode }>,
-    }*/
-  },
-  globalContext?: NodeDefOptinos
-}
 
 export interface ConnectorDefintion {
   uuid: string;

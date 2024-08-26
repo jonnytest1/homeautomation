@@ -1,6 +1,7 @@
 import { selectConnectionsFromNodeUuid, selectNodeMap } from './selectors';
 import { genericNodeDataStore } from './reference';
-import type { ConnectorDefintion, ElementNode } from '../typing/generic-node-type';
+import type { ConnectorDefintion } from '../typing/generic-node-type';
+import type { ElementNode } from '../typing/element-node';
 
 
 

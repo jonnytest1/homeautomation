@@ -1,4 +1,4 @@
-import type { ElementNode } from '../../typing/generic-node-type'
+import type { ElementNode } from '../../typing/element-node'
 export type SocketMap = {
   type: "layouts"
   param: object

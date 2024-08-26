@@ -1,11 +1,11 @@
 import { JsonSchemaWatcher } from './json-schema-watcher';
-import type { ExtendedJsonSchema } from '../typing/generic-node-type';
 import { CompilerError, postfix } from '../json-schema-type-util';
 import { ResolvablePromise } from '../../../util/resolvable-promise';
 import {
   Diagnostic, SemanticDiagnosticsBuilderProgram, WatchOfConfigFile, createSemanticDiagnosticsBuilderProgram,
   createWatchCompilerHost, createWatchProgram, isExpressionStatement, sys, Node, isModuleDeclaration, isModuleBlock
 } from 'typescript';
+import type { ExtendedJsonSchema } from 'json-schema-merger';
 import { join, basename } from 'path';
 import { writeFileSync } from 'fs';
 
@@ -27,7 +27,7 @@ export async function validate(filename: string, dts: string, tracer?: string) {
 
     const valdiationTimeout = setTimeout(() => {
       console.warn("validate didnt resolve ", dts)
-      debugger
+
     }, 1000)
 
 

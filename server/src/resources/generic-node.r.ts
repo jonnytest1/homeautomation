@@ -1,5 +1,5 @@
-import { typeImplementations } from '../services/generic-node/generic-node-service';
 import { serviceFolder } from '../services/generic-node/generic-node-constants';
+import { typeImplementations } from '../services/generic-node/type-implementations';
 import { GET, Path, type HttpRequest, type HttpResponse } from 'express-hibernate-wrapper';
 import { JSDOM } from "jsdom"
 import { relative, dirname, join, resolve } from 'path';

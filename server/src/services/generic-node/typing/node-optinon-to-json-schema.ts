@@ -1,5 +1,6 @@
-import type { ExtendedJsonSchema } from './generic-node-type'
+
 import type { NodeOptionTypes } from './node-options'
+import type { ExtendedJsonSchema } from 'json-schema-merger'
 
 export function argumentTypeToJsonSchema(arg: NodeOptionTypes<string>): ExtendedJsonSchema {
   if (arg.type === "select") {

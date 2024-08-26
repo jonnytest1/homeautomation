@@ -1,5 +1,6 @@
 import { Node, Program, SyntaxKind, TypeFormatFlags, forEachChild, Symbol as TSSymbol, SourceFile, Type, createSourceFile, ScriptTarget, createProgram, createCompilerHost, TypeChecker, getPreEmitDiagnostics } from 'typescript';
 import { Args, JsonSchemaGenerator, SymbolRef, getDefaultArgs } from 'typescript-json-schema';
+import type { ExtendedJsonSchema } from 'json-schema-merger';
 import { relative } from "path"
 
 export class JsonSchemaWatcher {

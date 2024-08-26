@@ -1,4 +1,4 @@
-import type { ExtendedJsonSchema } from './typing/generic-node-type'
+
 import { zodScripts } from './generic-node-constants'
 import { FetchingJSONSchemaStore, InputData, JSONSchemaInput, quicktype } from '../../module-src/module-wrappers'
 import { logKibana } from '../../util/log'
@@ -11,6 +11,7 @@ import { generateSchema, buildGenerator } from 'typescript-json-schema'
 import type * as z from "zod"
 import { v4 } from "uuid"
 import type { JSONSchema6Definition } from 'json-schema'
+import type { ExtendedJsonSchema } from 'json-schema-merger'
 import { join, dirname } from "path"
 import { writeFile, mkdir, rm } from "fs/promises"
 

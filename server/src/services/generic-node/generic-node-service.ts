@@ -1,14 +1,15 @@
 import type {
-  Callbacks, ElementNode,
-  NodeDefintion, NullTypeSubject, TypeImplementaiton
+  NullTypeSubject, TypeImplementaiton
 } from './typing/generic-node-type';
+import type { Callbacks } from './typing/node-callbacks';
+import type { ElementNode } from './typing/element-node';
 
 import { updateTypeSchema } from './generic-type.utils';
-import { NodeEvent } from './node-event';
+import type { NodeEvent } from './node-event';
 import type { NodeDefOptinos } from './typing/node-options';
 import type { NodeEventData } from './typing/node-event-data';
 import { setLastEvent, setLastEventInputTime, setLastEventOutputTime } from './last-event-service';
-import { ElementNodeImpl, checkInvalidations } from './element-node';
+import { ElementNodeImpl } from './element-node';
 import { deletedNodesDataFolder, nodesDataFolder, nodesFile } from './generic-node-constants';
 import { init } from './validation/watcher';
 import { genericNodeDataStore } from './generic-store/reference';
@@ -17,6 +18,11 @@ import { nodeglobalsSelector, selectGlobals, selectNodeByUuid, selectNodesOfType
 import { forNodes, selectConnectionsFromContinue } from './generic-store/flow-selectors';
 import { loadNodeData } from './generic-node-data-loader';
 import { getLaodingFile, startHotRelaodingWatcher } from './hot-reloading';
+import { createNodeEvent } from './generic-store/node-event-factory';
+import { checkInvalidations } from './element-node-fnc';
+import { registerGenericSocketHandler } from './socket/generic-node-socket-handler';
+import { typeImplementations } from './type-implementations';
+import { setSkip } from './emit-flag';
 import { logKibana } from '../../util/log';
 import { environment } from '../../environment';
 import { jsonClone } from '../../util/json-clone';
@@ -26,10 +32,6 @@ import { filter, skip } from "rxjs/operators"
 import { writeFileSync } from "fs"
 import { rename, mkdir } from "fs/promises"
 import { join } from "path"
-
-export let skipEmit = false
-
-export const typeImplementations = new BehaviorSubject<Record<string, TypeImplementaiton>>({})
 
 const hasLoaded$ = new BehaviorSubject(false)
 
@@ -51,21 +53,6 @@ genericNodeDataStore.selectWithAction(nodeglobalsSelector)
       storeTimeout = undefined
     }, 500)
   })
-
-export async function addNode(node: ElementNode) {
-  const typeImpl = typeImplementations.value[node.type]
-  if (typeImpl) {
-    node.runtimeContext ??= {}
-    const nodeDef = typeImpl.nodeDefinition();
-    node.runtimeContext.inputs = nodeDef.inputs
-    node.runtimeContext.outputs = nodeDef.outputs
-  }
-
-  genericNodeDataStore.dispatch(backendToFrontendStoreActions.updateNode({
-    newNode: node,
-  }))
-}
-
 
 export function emitFromNode(nodeUuid: string, evt: NodeEvent, index?: number) {
   setLastEventOutputTime(nodeUuid, Date.now())
@@ -144,6 +131,7 @@ genericNodeDataStore.addEffect(backendToFrontendStoreActions.removeConnnection, 
   }
 })
 
+registerGenericSocketHandler()
 
 
 forNodes({
@@ -270,6 +258,7 @@ loadNodeData()
 
 init()
 
+
 export function addTypeImpl<C, G extends NodeDefOptinos, O extends NodeDefOptinos, P, S, TS extends NullTypeSubject>(typeImpl: TypeImplementaiton<C, G, O, P, S, TS>) {
 
   const currerntTypeImpls = typeImplementations.value
@@ -317,7 +306,7 @@ export function addTypeImpl<C, G extends NodeDefOptinos, O extends NodeDefOptino
     reloadNodes(elementNodes, implementationType, currerntTypeImpls);
   }
 
-
+  console.log(`added type implementaiton for ${implementationType}`)
   return {} as {
     server_context: S,
     opts: O
@@ -343,17 +332,6 @@ function getElementNodes(implementationType: string): ElementNodeImpl<never>[] {
   });
 }
 
-export function getNodeDefintions(): Record<string, NodeDefintion> {
-  const nodeDefs: Record<string, NodeDefintion> = {}
-  for (const key in typeImplementations.value) {
-    nodeDefs[key] = typeImplementations.value[key].nodeDefinition()
-  }
-  return nodeDefs;
-}
-
-
-
-
 function createCallbacks(node: ElementNode) {
   const nodeUuid = node.uuid
   return {
@@ -362,11 +340,11 @@ function createCallbacks(node: ElementNode) {
       emitFromNode(nodeUuid, evt.clone(), index)
     },
     updateNode(frontendEmit = true) {
-      skipEmit = !frontendEmit
+      setSkip(!frontendEmit)
       genericNodeDataStore.dispatch(backendToFrontendStoreActions.updateNode({
         newNode: { ...node }
       }))
-      skipEmit = false
+      setSkip(false)
     }
   } satisfies Callbacks
 }
@@ -399,8 +377,7 @@ export function emitEvent(type: string, data: NodeEventData) {
 
   const nodes = genericNodeDataStore.getOnce(selectNodesOfType(type))
   nodes.forEach(node => {
-    const globals = genericNodeDataStore.getOnce(selectGlobals)
-    const event = new NodeEvent(data, globals)
+    const event = createNodeEvent(data)
 
     processInput({
       node: node,

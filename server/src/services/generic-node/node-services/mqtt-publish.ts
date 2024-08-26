@@ -1,15 +1,15 @@
 import { getClient, globalMqttConfig } from './mqtt-global'
 import { mqttConnection } from '../../mqtt-api'
 import { addTypeImpl } from '../generic-node-service'
-import type { ExtendedJsonSchema } from '../typing/generic-node-type'
 import { generateDtsFromSchema, generateZodTypeFromSchema, mainTypeName } from '../json-schema-type-util'
-import { type NodeOptionTypeWithName, type Select } from '../typing/node-options'
-import { updateRuntimeParameter } from '../element-node'
+import type { NodeOptionTypeWithName, Select } from '../typing/node-options'
 import { logKibana } from '../../../util/log'
 import { backendToFrontendStoreActions } from '../generic-store/actions'
 import { genericNodeDataStore } from '../generic-store/reference'
 import { argumentTypeToJsonSchema } from '../typing/node-optinon-to-json-schema'
+import { updateRuntimeParameter } from '../element-node-fnc'
 import type { ZodType } from 'zod'
+import type { ExtendedJsonSchema } from 'json-schema-merger'
 
 
 const zodValidators: Record<string, Promise<ZodType>> = {}

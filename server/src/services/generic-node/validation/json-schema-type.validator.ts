@@ -1,4 +1,5 @@
-import type { ExtendedJsonSchema } from '../typing/generic-node-type';
+import type { ExtendedJsonSchema } from 'json-schema-merger'
+
 
 
 interface ValidationContext {

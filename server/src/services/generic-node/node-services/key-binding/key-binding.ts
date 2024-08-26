@@ -1,17 +1,17 @@
 import type { SocketMap } from './page-events'
 import type { DeviceConfig } from '../../../mqtt-tasmota'
-import { updateRuntimeParameter, type ElementNodeImpl } from '../../element-node'
+import type { ElementNodeImpl } from '../../element-node'
 import { addTypeImpl } from '../../generic-node-service'
 import { generateDtsFromSchema, mainTypeName } from '../../json-schema-type-util'
 import { getLastEvent } from '../../last-event-service'
-import type { ExtendedJsonSchema, TypeImplSocket } from '../../typing/generic-node-type'
+import type { TypeImplSocket } from '../../typing/generic-node-type'
 import { getClient, globalMqttConfig } from '../mqtt-global'
-import { NodeEvent } from '../../node-event'
-import { genericNodeDataStore } from '../../generic-store/reference'
-import { selectGlobals } from '../../generic-store/selectors'
+import { updateRuntimeParameter } from '../../element-node-fnc'
+import { createNodeEvent } from '../../generic-store/node-event-factory'
 import { z } from 'zod'
 import { BehaviorSubject, firstValueFrom } from 'rxjs'
 import type { MqttClient } from 'mqtt'
+import type { ExtendedJsonSchema } from 'json-schema-merger'
 import { join } from 'path'
 import { readFile } from 'fs/promises'
 
@@ -35,7 +35,7 @@ addTypeImpl({
       } else if (emit.type === "page-trigger") {
         const key = emit.key
         Object.values(nodesMap).forEach(node => {
-          node.continue(new NodeEvent({
+          node.continue(createNodeEvent({
             context: {
               manualKey: true
             },
@@ -43,7 +43,7 @@ addTypeImpl({
               type: "press",
               key: key
             }
-          }, genericNodeDataStore.getOnce(selectGlobals)))
+          }))
         })
       } else {
         debugger;

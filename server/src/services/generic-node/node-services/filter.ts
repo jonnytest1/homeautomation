@@ -1,13 +1,13 @@
 
 
 import { addTypeImpl } from '../generic-node-service';
-import type { ElementNode } from '../typing/generic-node-type';
+import type { ElementNode } from '../typing/element-node';
 import type { NodeDefOptinos, NodeDefToType } from '../typing/node-options';
 import { mainTypeName } from '../json-schema-type-util';
 import { genericNodeDataStore } from '../generic-store/reference';
 import { backendToFrontendStoreActions } from '../generic-store/actions';
-import { updateServerContext } from '../element-node';
 import { lastEventTimesForNode } from '../last-event-service';
+import { updateServerContext } from '../element-node-fnc';
 import * as z from "zod"
 import { Script } from 'vm';
 

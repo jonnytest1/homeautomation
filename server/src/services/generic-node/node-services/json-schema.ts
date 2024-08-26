@@ -1,12 +1,12 @@
 
 
 
-import type { ExtendedJsonSchema } from '../typing/generic-node-type'
+
 import { generateDtsFromSchema, generateZodTypeFromSchema, mainTypeName } from '../json-schema-type-util'
 import { addTypeImpl } from '../generic-node-service'
 import type { ZodType } from 'zod'
 
-import { createSchema, mergeSchema, type MergeSchemaOptions } from "json-schema-merger"
+import { createSchema, mergeSchema, type ExtendedJsonSchema, type MergeSchemaOptions } from "json-schema-merger"
 
 function updateSchema(newObject: unknown, oldSchema: ExtendedJsonSchema | null, enumKeyList: Array<string>, params: MergeSchemaOptions["params"]) {
   const newSchema = createSchema(newObject)

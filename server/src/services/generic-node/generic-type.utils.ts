@@ -1,5 +1,7 @@
 
-import type { ElementNode, ExtendedJsonSchema, PreparedNodeData, Schemata } from './typing/generic-node-type';
+import type { PreparedNodeData } from './typing/generic-node-type';
+import type { Schemata } from './typing/schemata';
+import type { ElementNode } from './typing/element-node';
 import { CompilerError, allRequired, expansionType, generateDtsFromSchema, mainTypeName } from './json-schema-type-util';
 import { getTypes, validate } from './validation/watcher';
 import { nodeDescriptor, nodeTypeName } from './element-node';
@@ -11,6 +13,7 @@ import { selectConnectionsFromNodeUuid, selectNodeByUuid, selectTargetConnectorF
 import { logKibana } from '../../util/log';
 import { generateSchema } from 'typescript-json-schema';
 import type { Diagnostic, DiagnosticMessageChain, DiagnosticRelatedInformation } from 'typescript';
+import type { ExtendedJsonSchema } from 'json-schema-merger';
 import { writeFile } from "fs/promises"
 import { join } from 'path';
 

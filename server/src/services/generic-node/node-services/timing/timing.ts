@@ -1,11 +1,12 @@
 import { TimerFactory } from '../../../event/timer-factory';
-import { nodeDescriptor, updateRuntimeParameter } from '../../element-node';
+import { nodeDescriptor } from '../../element-node';
 import { addTypeImpl, emitFromNode } from '../../generic-node-service';
 import { generateDtsFromSchema, mainTypeName } from '../../json-schema-type-util';
 import { logKibana } from '../../../../util/log';
-import { NodeEvent } from '../../node-event';
 import { jsonClone } from '../../../../util/json-clone';
 import { ResolvablePromise } from '../../../../util/resolvable-promise';
+import { updateRuntimeParameter } from '../../element-node-fnc';
+import { createNodeEvent } from '../../generic-store/node-event-factory';
 import { z } from 'zod';
 import type { JSONSchema6 } from 'json-schema';
 import { readFile } from 'fs/promises';
@@ -29,10 +30,10 @@ type EventData = {
 }
 export async function handleTimedEvent(data: EventData) {
   await initPr.prRef
-  emitFromNode(data.node, new NodeEvent({
+  emitFromNode(data.node, createNodeEvent({
     payload: data.data,
     context: data.context
-  }, {}))
+  }))
 }
 
 

@@ -1,7 +1,9 @@
-import { genericNodeDataStore, type DataState } from './reference'
+import { genericNodeDataStore } from './reference'
+import type { DataState } from './state'
 import { createAction, props, type ActionCreator } from '../../../util/data-store/action'
 import type { AddConnection, DeleteConnection, DeleteNOdeEvet, SetConnectionError, StoreEvents, UpdateEditorSchema, UpdateGlobals, UpdateInputSchema, UpdateOutputSchema, UpdateParam, UpdateParamDefinition, UpdatepositionEvent, UpdateRuntimeInfo } from '../typing/frontend-events'
-import type { ElementNode, NodeData } from '../typing/generic-node-type'
+import type { NodeData } from '../typing/generic-node-type'
+import type { ElementNode } from '../typing/element-node'
 
 function createReducerAction<T extends (StoreEvents["type"] & string)>(type: T, props: () => Omit<(StoreEvents & { type: T }), "type">) {
   return createAction(type, props)

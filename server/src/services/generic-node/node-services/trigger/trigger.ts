@@ -1,9 +1,9 @@
 import { addTypeImpl } from '../../generic-node-service';
-import { updateRuntimeParameter } from '../../element-node';
-import { NodeEvent } from '../../node-event';
 import { genericNodeDataStore } from '../../generic-store/reference';
 import { backendToFrontendStoreActions } from '../../generic-store/actions';
 import { generateDtsFromSchema, mainTypeName } from '../../json-schema-type-util';
+import { updateRuntimeParameter } from '../../element-node-fnc';
+import { createNodeEvent } from '../../generic-store/node-event-factory';
 import type { ExtendedJsonSchema } from 'json-schema-merger';
 import { join } from "path"
 import { readFile } from 'fs/promises'
@@ -29,7 +29,7 @@ addTypeImpl({
       console.log("emitting trigger from " + node.uuid)
       setImmediate(() => {
         try {
-          node.continue(new NodeEvent({
+          node.continue(createNodeEvent({
             context: {
               triggernode: node.uuid,
             },

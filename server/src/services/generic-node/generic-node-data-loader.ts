@@ -2,7 +2,8 @@ import { currentVersion, migrate } from './data-versioning';
 import { nodesDataFolder, nodesFile } from './generic-node-constants';
 import { initializeStore } from './generic-store/actions';
 import { genericNodeDataStore } from './generic-store/reference';
-import type { ElementNode, NodeData } from './typing/generic-node-type';
+import type { NodeData } from './typing/generic-node-type';
+import type { ElementNode } from './typing/element-node';
 import { logKibana } from '../../util/log';
 import { join } from "path"
 import { readFileSync, readdirSync, mkdirSync } from "fs"

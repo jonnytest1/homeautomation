@@ -2,17 +2,21 @@
 
 import { CompilerError, allRequired, generateDtsFromSchema, mainTypeName } from '../json-schema-type-util';
 import { addTypeImpl } from '../generic-node-service';
-import type { ElementNode, EvalNode, ExtendedJsonSchema, Schemata } from '../typing/generic-node-type';
+import type { EvalNode } from '../typing/generic-node-type';
+import type { Schemata } from '../typing/schemata';
+import type { ElementNode } from '../typing/element-node';
 import type { NodeDefToType } from '../typing/node-options';
 import { tscConnectionInterfaceAndGlobals } from '../../../util/tsc-compiler';
 import type { Delayed } from '../../../models/connection-response';
-import { nodeTypeName, updateRuntimeParameter, updateServerContext } from '../element-node';
+import { nodeTypeName } from '../element-node';
 import { getTypes } from '../validation/watcher';
 import { genericNodeDataStore } from '../generic-store/reference';
 import { backendToFrontendStoreActions } from '../generic-store/actions';
+import { updateRuntimeParameter, updateServerContext } from '../element-node-fnc';
 import { Json2dts } from "json2dts"
 import * as z from "zod"
 import { createCompilerHost } from 'typescript';
+import type { ExtendedJsonSchema } from 'json-schema-merger';
 import { Script } from 'vm';
 
 declare module "typescript" {
