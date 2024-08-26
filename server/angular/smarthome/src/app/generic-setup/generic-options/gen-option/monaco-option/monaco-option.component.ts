@@ -148,8 +148,9 @@ export class MonacoOptionComponent implements OnInit, OnChanges {
 
       export {};
       `
-
-    this.typeDefinition.next(typeDefinition)
+    if (typeDefinition !== this.typeDefinition.value) {
+      this.typeDefinition.next(typeDefinition)
+    }
 
   }
 

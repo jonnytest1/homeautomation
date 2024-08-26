@@ -73,6 +73,12 @@ export interface AST {
 }
 
 export type SandBox = {
+  /**
+   * 
+   * @param definition 
+  * @param filename gets prefixed with file://
+   */
+  addLibraryToRuntime(definition: string, filename: string): unknown
   getWorkerProcess(): Promise<any>
   getModel(): MonacoModel | null
   editor: Editor
