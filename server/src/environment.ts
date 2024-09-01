@@ -19,4 +19,6 @@ export const environment = process.env as {
   LOG_URL: string
   GENERIC_NODE_DATA: string
   LOG_SUFFIX: string
+
+  DOCKER_CONTAINER_NAME: string
 }

@@ -54,8 +54,20 @@ genericNodeDataStore.selectWithAction(nodeglobalsSelector)
     }, 500)
   })
 
+declare global {
+  var debugNode: (uuid: string) => void
+}
+
+
+globalThis.debugNode = (uuid: string) => {
+  const node = genericNodeDataStore.getOnce(selectNodeByUuid(uuid))
+
+  console.log(node)
+}
+
+
 export function emitFromNode(nodeUuid: string, evt: NodeEvent, index?: number) {
-  setLastEventOutputTime(nodeUuid, Date.now())
+  setLastEventOutputTime(nodeUuid, index ?? 0, Date.now())
   const emittingConnections = genericNodeDataStore.getOnce(selectConnectionsFromContinue({
     fromIndex: index,
     fromNode: nodeUuid
@@ -132,7 +144,6 @@ genericNodeDataStore.addEffect(backendToFrontendStoreActions.removeConnnection, 
 })
 
 registerGenericSocketHandler()
-
 
 forNodes({
   added(node, action) {
@@ -353,7 +364,7 @@ function createCallbacks(node: ElementNode) {
 async function processInput(data: { node: ElementNode, nodeinput: number, data: NodeEvent }) {
   const typeimpl = typeImplementations.value[data.node.type]
   if (typeimpl) {
-    setLastEventInputTime(data.node, Date.now())
+    setLastEventInputTime(data.node, data.nodeinput ?? 0, Date.now())
     try {
       const eventCopy = data.data.copy()
       data.data.inputIndex = data.nodeinput

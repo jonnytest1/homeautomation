@@ -9,7 +9,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { Store } from '@ngrx/store';
 import { selectGlobals, selectNode } from '../store/selectors';
 import type { Observable } from 'rxjs';
-import { combineLatest, map } from 'rxjs';
+import { combineLatest, map, timer } from 'rxjs';
 import { StoreService } from '../store/store-service';
 import { RouterModule } from '@angular/router';
 
@@ -40,6 +40,24 @@ export class GenericOptionsComponent implements AfterViewInit, OnChanges {
   entries$: Observable<Array<{ name: string, value: NodeOptionTypes }>>
 
   globals$ = this.store.select(selectGlobals)
+
+
+  activity$ = combineLatest([
+    this.con.nodeEventTimes,
+    timer(0, 100),
+  ]).pipe(
+    map(([eventTimes]) => {
+
+      if (!this.nodeUuid || !eventTimes?.[this.nodeUuid]) {
+        return {
+          input: undefined,
+          output: undefined
+        }
+      }
+      return eventTimes[this.nodeUuid]
+    })
+  )
+
 
   constructor(public con: GenericNodesDataService, private store: Store, private storeService: StoreService) {}
 
@@ -94,6 +112,14 @@ export class GenericOptionsComponent implements AfterViewInit, OnChanges {
   }
 
 
+  localeTime(time: number | undefined) {
+
+    if (!time) {
+      return undefined
+    }
+    const eventTime = new Date(time);
+    return eventTime.toLocaleString("sv-SE", { hour12: false })
+  }
 
 
   ngAfterViewInit(): void {

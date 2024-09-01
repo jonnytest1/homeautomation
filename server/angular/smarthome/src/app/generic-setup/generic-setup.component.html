@@ -14,6 +14,7 @@
          (touchmove)="mouseDragMove($event,wrapperElement)"
          (mouseup)="mouseDragEnd($event,wrapperElement)"
          [disableDragPreview]="true"
+         [mouseDrag]="true"
          (mb-dragstart)="mouseDragSTart($event,wrapperElement)"
          (wheel)="onscroll($event);$event.preventDefault()">
 

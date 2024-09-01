@@ -261,7 +261,7 @@ export class MonacoEditorComponent implements OnInit, OnDestroy, ControlValueAcc
   ngOnChanges(changes: SimpleChanges): void {
     if ("definition" in changes && typeof monaco !== "undefined") {
       monaco?.languages?.typescript?.typescriptDefaults.addExtraLib(this.definition, 'file:///global/global.d.ts');
-      this.sandbox.addLibraryToRuntime(this.definition, "global/global.d.ts")
+      this.sandbox?.addLibraryToRuntime(this.definition, "global/global.d.ts")
     }
   }
 

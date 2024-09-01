@@ -31,6 +31,7 @@ export type MBDragEvent = Event & {
   position: Vector2
   offsetPosition: Vector2
   dataTransferHandler: DragDataHandler
+  isMouseEvent?: boolean
 }
 
 
@@ -57,7 +58,7 @@ function prepareEvent(event: Event) {
   const evt = event as MBDragEvent
   evt.position = position;
   evt.offsetPosition = offsetPos;
-
+  evt.isMouseEvent = event.type === "mousedown"
   return evt;
 }
 
@@ -96,6 +97,11 @@ export class MBDragStartDirective implements OnDestroy {
   @Input()
   disableDragPreview = false
 
+  // partial implementation (so far) of dragging simulated without preview on desktop
+  @Input()
+  mouseDrag = false
+
+
   constructor(private elementRef: ElementRef) {}
   ngOnDestroy(): void {
     dragCpy?.remove()
@@ -104,7 +110,11 @@ export class MBDragStartDirective implements OnDestroy {
 
   @HostListener("touchstart", ['$event'])
   @HostListener("dragstart", ['$event'])
+  @HostListener("mousedown", ['$event'])
   tap(event: Event) {
+    if (event.type === "mousedown" && !this.mouseDrag) {
+      return
+    }
 
     const eventRef = prepareEvent(event)
     dragDataHandler = new DragDataHandler()

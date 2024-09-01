@@ -69,6 +69,12 @@
       <pre>{{node.runtimeContext.outputSchema?.dts ?? ''}}</pre>
       props:
       <span>{{node.parameters| json}}</span><br>
+
+      <br>
+      <span *ngFor="let entry of (activity$ |async) |keyvalue">
+        {{entry.key}} : {{localeTime(entry.value)}}<br>
+      </span>
+      <br>
       <span>{{node.runtimeContext?.parameters| json}}</span>
     </ng-container>
   </ng-container>

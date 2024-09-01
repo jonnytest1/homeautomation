@@ -84,4 +84,9 @@ export type SchemaCollection = {
   mainTypeName: "Main"
 }
 */
-export type NodeEventTimes = Record<string, { input?: number, output?: number }>
+export type NodeEventTimes = Record<string, {
+  input?: number,
+  output?: number,
+  [key: `input${number}`]: number
+  [key: `output${number}`]: number
+}>

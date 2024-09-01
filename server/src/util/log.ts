@@ -18,7 +18,7 @@ function base64safe(value: string) {
 
 
 
-function assignb64Safe(data: Record<string, any>, collector: Record<string, string | Element>, shortOnly = false) {
+function assignb64Safe(data: Record<string, any>, collector: Record<string, string | Element | number>, shortOnly = false) {
 
   for (const i in data) {
     let key;
@@ -68,9 +68,10 @@ export async function logKibana(level: 'INFO' | 'ERROR' | 'DEBUG' | "WARN", mess
   message: string,
   [k: string]: any
 }, error?) {
-  let jsonData: { [key: string]: string } = {
+  let jsonData: { [key: string]: string | number } = {
     Severity: level,
     application: `SmartHome${environment.DEBUG ? '_debug' : ''}${environment.LOG_SUFFIX ?? ''}`,
+    docker_container_name: environment.DOCKER_CONTAINER_NAME
   };
 
   if (level === "ERROR" || level === "WARN") {

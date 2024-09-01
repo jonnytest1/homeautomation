@@ -343,7 +343,7 @@ export class GenericSetupComponent implements OnInit {
 
       }
     }
-    if (ev.key === "d") {
+    if (ev.key === "d" || (ev.key == "i" && ev.ctrlKey)) {
       this.connections.debugMode.next(!this.connections.debugMode.value)
     }
   }

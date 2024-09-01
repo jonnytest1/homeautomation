@@ -12,32 +12,41 @@ export const lastEventDataObs = new BehaviorSubject<Record<string, NodeEventJson
 
 const setInputTimeAction = createAction("set input time", props<{
   nodeUuid: string,
-  eventTime: number
+  eventTime: number,
+  index: number
 }>())
 const setOutputTimeAction = createAction("set output time", props<{
   nodeUuid: string,
-  eventTime: number
+  eventTime: number,
+  index: number
 }>())
 const setEventTimes = createAction("set event times", props<{
   data: NodeEventTimes,
 }>())
-genericNodeDataStore.addReducer(setInputTimeAction, (s, a) => ({
-  ...s,
-  lastEventTimes: {
-    ...s.lastEventTimes,
-    [a.nodeUuid]: {
-      ...s.lastEventTimes[a.nodeUuid] ?? {},
-      input: a.eventTime
-    }
+genericNodeDataStore.addReducer(setInputTimeAction, (s, a) => {
+  let key = "input"
+  if (a.index > 0) {
+    key += a.index
   }
-}))
+  return ({
+    ...s,
+    lastEventTimes: {
+      ...s.lastEventTimes,
+      [a.nodeUuid]: {
+        ...s.lastEventTimes[a.nodeUuid] ?? {},
+        [key]: a.eventTime
+      }
+    }
+  });
+})
 genericNodeDataStore.addReducer(setOutputTimeAction, (s, a) => ({
   ...s,
   lastEventTimes: {
     ...s.lastEventTimes,
     [a.nodeUuid]: {
       ...s.lastEventTimes[a.nodeUuid] ?? {},
-      output: a.eventTime
+      //0 should jsut be "output"
+      [`output${a.index || ""}`]: a.eventTime
     }
   }
 }))
@@ -51,18 +60,20 @@ export const lastEventTimesForNode = (nodeUuid: string) => {
   return lastEventTimes.chain(times => times[nodeUuid])
 }
 
-export function setLastEventInputTime(node: ElementNode, eventTime: number) {
+export function setLastEventInputTime(node: ElementNode, index: number, eventTime: number) {
 
   genericNodeDataStore.dispatch(setInputTimeAction({
     nodeUuid: node.uuid,
-    eventTime
+    eventTime,
+    index: index
   }))
   writeFileSync(lastEventTimesFile, JSON.stringify(genericNodeDataStore.getOnce(lastEventTimes), undefined, "   "))
 }
-export function setLastEventOutputTime(nodeUuid: string, eventTime: number) {
+export function setLastEventOutputTime(nodeUuid: string, index: number, eventTime: number) {
   genericNodeDataStore.dispatch(setOutputTimeAction({
     nodeUuid: nodeUuid,
-    eventTime
+    eventTime,
+    index
   }))
   writeFileSync(lastEventTimesFile, JSON.stringify(genericNodeDataStore.getOnce(lastEventTimes), undefined, "   "))
 }

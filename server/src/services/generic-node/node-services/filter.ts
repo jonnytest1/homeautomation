@@ -8,6 +8,7 @@ import { genericNodeDataStore } from '../generic-store/reference';
 import { backendToFrontendStoreActions } from '../generic-store/actions';
 import { lastEventTimesForNode } from '../last-event-service';
 import { updateServerContext } from '../element-node-fnc';
+import { logKibana } from '../../../util/log';
 import * as z from "zod"
 import { Script } from 'vm';
 
@@ -87,12 +88,18 @@ addTypeImpl({
 
     let returnValue
     try {
-      returnValue = nodeScript.script.runInNewContext({
+      const contextObject = {
         payload: data.payload,
         inputs: inputs,
         Date: DateMock,
         lastOutputTs
+      };
+      logKibana("DEBUG", {
+        message: "filter context",
+        ...contextObject,
+        nodeid: node.uuid
       })
+      returnValue = nodeScript.script.runInNewContext(contextObject)
       if (typeof returnValue !== "boolean") {
         throw new Error("invalid return type")
       }

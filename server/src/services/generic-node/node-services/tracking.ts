@@ -29,7 +29,7 @@ addTypeImpl({
   },
   process(node, data, callbacks) {
     const evt = TrackingEvent.create(data, node)
-    console.log("save tracking event")
+    console.log("save tracking event for " + node.parameters?.name)
     if (activeTrackingMap[node.uuid]) {
       clearTimeout(activeTrackingMap[node.uuid])
     }
