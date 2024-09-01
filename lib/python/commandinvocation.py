@@ -3,7 +3,7 @@ from dataclasses import dataclass
 from enum import Enum
 import json
 import paho.mqtt.client as mqtt
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 from .response import SmarthomeResponse
 
 from .featuretopic import FeatureTopics
@@ -16,6 +16,7 @@ if TYPE_CHECKING:
 class CommandInvocation:
     message: mqtt.MQTTMessage
     sm: "SmartHome"
+    user: Any
 
     def invoke(self):
         self.command = self.message.topic.split(

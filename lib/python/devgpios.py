@@ -2,19 +2,20 @@
 from gpiozero import LED
 
 
-mqtt_led: LED = None  # type: ignore
+class LEDs:
+    # turns on asap (i.e. with python process)
+    program_status: LED
+    # idk
+    connectionstatus: LED
+    # turns on with mqtt connect
+    mqtt_led: LED
+
+    def init(self):
+        self.mqtt_led = LED("GPIO26")
+        self.program_status = LED("GPIO21")
+        self. connectionstatus = LED("GPIO20")
+        self.program_status.on()
+        self.mqtt_led.off()
 
 
-status: LED = None  # type: ignore
-connectionstatus: LED = None  # type: ignore
-
-
-def init_gpios():
-    global connectionstatus
-    global mqtt_led
-    global status
-    mqtt_led = LED("GPIO26")
-    status = LED("GPIO21")
-    connectionstatus = LED("GPIO20")
-    status.on()
-    mqtt_led.off()
+leds = LEDs()

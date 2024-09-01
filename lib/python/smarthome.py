@@ -13,7 +13,7 @@ from .deviceconfigcmd import DeviceConfigCommand
 
 from .deviceconfig import DeviceConfig
 from .util.json import json_print
-from .devgpios import init_gpios, mqtt_led
+from .devgpios import leds
 
 
 @dataclass()
@@ -37,13 +37,15 @@ class SmartHome:
             self.command_dict[command.name] = command
 
         if (self.with_gpio):
-            init_gpios()
+            leds.init()
 
     def update_telemetry(self, data: dict):
         data["timestamp"] = datetime.now()
 
-        self.mqttclient.publish(
+        message = self.mqttclient.publish(
             f"tele/{self.config.name}/SENSOR", json_print(data), retain=True)
+
+        message.wait_for_publish(5)
 
     def setup(self):
         self.mqttclient = mqtt.Client(CallbackAPIVersion.VERSION2)
@@ -51,7 +53,7 @@ class SmartHome:
 
         def on_connect(client, userdata, flags, rc, prop):
             if (self.with_gpio):
-                mqtt_led.on()
+                leds.mqtt_led.on()
             print("MQtt Connected: ", rc)
 
             if FeatureTopics.COMMAND in self.config.topic_prefixes:
@@ -65,7 +67,7 @@ class SmartHome:
 
         def on_message(client, user, msg: mqtt.MQTTMessage):
 
-            invocation = CommandInvocation(message=msg, sm=self)
+            invocation = CommandInvocation(message=msg, sm=self, user=user)
             invocation.invoke()
 
         self.mqttclient.on_message = on_message
@@ -96,5 +98,6 @@ class SmartHome:
                 self.mqttclient.connect(self.mqtt.url, 1883, 60,)
                 errored = False
             except OSError as e:
+                print("error in mqtt connect retrying ", e)
                 # could be network errors
                 errored = True
