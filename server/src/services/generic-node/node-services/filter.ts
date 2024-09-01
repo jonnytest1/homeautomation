@@ -29,6 +29,8 @@ const DateMock = function (): Date {
 
   return dateRef;
 };
+DateMock.now = () => Date.now()
+
 const jsCache: Record<string, z.infer<typeof codeSchema> & { script: Script }> = {}
 
 

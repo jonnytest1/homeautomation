@@ -151,10 +151,9 @@ const genericTypes = addTypeImpl({
       }
     }
     if (!node.runtimeContext.parameters?.code) {
-      node.runtimeContext.parameters ??= {}
-      node.runtimeContext.parameters.code = {
+      updateRuntimeParameter(node, "code", {
         type: "monaco"
-      }
+      })
     }
     cacheNodeScript(node);
   },
@@ -347,13 +346,16 @@ ${outputSchemaStr}
 
 
 function setNewCode(node: ElementNode, code: Omit<CodeData, "timestamp" | "node">) {
-  node.parameters ??= {}
   const codeData: CodeData = {
     ...code,
     timestamp: Date.now(),
     node: node.uuid
   }
-  node.parameters.code = JSON.stringify(codeData)
+  genericNodeDataStore.dispatch(backendToFrontendStoreActions.updateParam({
+    node: node.uuid,
+    param: "code",
+    value: JSON.stringify(codeData)
+  }))
 }
 
 

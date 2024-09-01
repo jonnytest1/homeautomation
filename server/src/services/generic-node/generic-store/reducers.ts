@@ -219,8 +219,13 @@ genericNodeDataStore.addReducer(backendToFrontendStoreActions.removeNode, (st, a
 
   for (const nodeUuid in newTargetConnectorMap) {
     for (const index in newTargetConnectorMap[nodeUuid]) {
-      newTargetConnectorMap[nodeUuid][index] = newTargetConnectorMap[nodeUuid][index]
-        .filter(con => con.uuid !== a.node)
+      const nodeTargetList = newTargetConnectorMap[nodeUuid][index]
+      if (nodeTargetList.some(con => con.source.uuid === a.node)) {
+        newTargetConnectorMap[nodeUuid][index] = nodeTargetList
+          .filter(con => con.source.uuid !== a.node)
+      }
+
+
     }
   }
 

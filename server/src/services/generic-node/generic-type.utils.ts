@@ -67,6 +67,9 @@ export async function updateTypeSchema(node: ElementNode, nodeData: PreparedNode
     const allConnectorsToConnection0 = connectionsTargetingCurrentNode[0]
     const schemata = await Promise.all(allConnectorsToConnection0.map(async con => {
       const connectionNode = genericNodeDataStore.getOnce(selectNodeByUuid(con.source.uuid))
+      if (!connectionNode) {
+        debugger
+      }
       const compSchema = connectionNode.runtimeContext.outputSchema
       if (compSchema?.dts && node.runtimeContext.inputSchema) {
         try {
