@@ -37,7 +37,9 @@ export class RepeatingAudio {
 
 
   private startAudio(audio: string) {
-    this.audioHandle = spawn(RepeatingAudio.vlcExe, [`${RepeatingAudio.prefixPath}\\${audio}`, ...this.startArguments], {});
+    const args = [`${RepeatingAudio.prefixPath}\\${audio}`, ...this.startArguments]
+    console.log(`starting audio file with ${args.join(" ")}`)
+    this.audioHandle = spawn(RepeatingAudio.vlcExe, args, {});
     this.audioHandle.on("exit", (code, signal) => {
       this.audioHandle.kill();
       if (!this.stopped && signal !== "SIGTERM") {

@@ -6,13 +6,16 @@ describe("n", () => {
 
 
   it("notify", async () => {
+    debugger
     await new NotificationHandler({
       notification: {
         title: `EVENT`,
         body: "est",
-        sound: pick(["hintnotification", "wronganswer"])
+        sound: pick(["red-alert_nuclear_buzzer-99741"])
       }
     }, environment.serverip)
       .show({ send: console.log, close: () => { } } as any);
+
+    debugger
   })
 })

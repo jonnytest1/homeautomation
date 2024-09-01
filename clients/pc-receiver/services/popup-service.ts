@@ -149,6 +149,11 @@ export async function popup(data: string, callback: { response: (resp: { ts: num
     activeWindow.hide()
     activeWindow = undefined
   }
+
+  logKibana("INFO", {
+    message: "starting popup",
+    cfg: JSON.stringify(popupCfg)
+  })
   await activeWindow.loadURL(`data:text/html;base64,${Buffer.from(html).toString("base64")}`)
 
 

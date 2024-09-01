@@ -5,7 +5,7 @@ import { environment } from '../environment'
 
 export async function checkHeat() {
   return new Promise(res => {
-    const client = connect(environment.MQTT_SERVER)
+    const client = getClient()
     client.on("connect", () => {
       client.on("message", (topic, message) => {
         console.log(topic)
@@ -27,10 +27,18 @@ export async function checkHeat() {
   })
 }
 
+export function getClient() {
+  return connect({
+    hostname: environment.MQTT_SERVER,
+    username: environment.MQTT_USER,
+    password: environment.MQTT_PASSWORD,
+  })
+}
+
 export function heaterOff() {
   const cmndSTart = Date.now()
   return new Promise<void>(res => {
-    const client = connect(environment.MQTT_SERVER)
+    const client = getClient()
     client.on("connect", () => {
       if (cmndSTart < (Date.now() - (1000 * 60))) {
         client.end()

@@ -4,6 +4,7 @@ import { eventConfirmHandlerMap, eventHandlerMap } from './events/event-handler'
 import type { FrontendReceiver } from './server-interfaces';
 import { environment } from '../environment';
 import { popup, popupConfig } from './popup-service';
+import { getClient } from './mqtt';
 
 
 ///<reference path="../../../server/src/services/mqtt-tasmota.ts" />
@@ -46,11 +47,7 @@ class Registration {
     }
 
 
-    this.client = connect({
-      hostname: environment.MQTT_SERVER,
-      username: environment.MQTT_USER,
-      password: environment.MQTT_PASSWORD,
-    })
+    this.client = getClient()
     this.client.on("error", e => {
       debugger;
     })

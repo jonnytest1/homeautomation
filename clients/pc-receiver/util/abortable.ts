@@ -10,6 +10,9 @@ export function setLastAbort() {
 interface AbortOpts {
   onAbort?: () => (void | Promise<void>)
 
+  // runs on abort whith abortDisabled
+  onAbortAttempt?: () => (void | Promise<void>)
+
   abortDisabled?: boolean
 }
 
@@ -19,10 +22,15 @@ export async function abortable(calls: Array<() => Promise<unknown>>, opts: Abor
 
   for (const call of calls) {
     await call();
-    if (abortTs > start && !opts.abortDisabled) {
-      console.log(`calling abort`)
-      await opts.onAbort?.()
-      return
+    if (abortTs > start) {
+      if (opts.abortDisabled) {
+        await opts.onAbortAttempt?.()
+      } else {
+        console.log(`calling abort`)
+        await opts.onAbort?.()
+        return
+      }
+
     }
   }
 }

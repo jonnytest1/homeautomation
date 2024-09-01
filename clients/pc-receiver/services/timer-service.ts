@@ -165,6 +165,7 @@ export class TimerService {
 
       await abortable(promiseList, {
         onAbort: () => new TextReader({ text: "aborted" }).read(),
+        onAbortAttempt: () => new TextReader({ text: "not this time" }).read(),
         abortDisabled: abortDisabled
       })
     } catch (e) {
