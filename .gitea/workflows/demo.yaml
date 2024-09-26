@@ -22,6 +22,7 @@ jobs:
         run: |
           ls ${{ gitea.workspace }}
       - run: echo "🍏 This job's status is ${{ job.status }}."
+      - run: whoami
       - run: docker ps
       - run: python "./.gitea/workflows/setup.py" install
       - run: python "./.gitea/workflows/deploy.py"
