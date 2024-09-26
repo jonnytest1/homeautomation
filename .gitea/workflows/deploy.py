@@ -1,7 +1,7 @@
 import socket
 import os
 
-socket_path = '/home/smarthome/deployment/dpl.sock'
+socket_path = '/var/run/c_dpl.sock'
 
 client = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
 
