@@ -1,4 +1,4 @@
 from setuptools import setup
 
 
-setup(libraries=["debugpy"])
+setup(install_requires=["debugpy"])
