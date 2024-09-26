@@ -1,8 +1,6 @@
 import socket
 import os
 
-import debugpy
-
 socket_path = '/var/run/dpl/c_dpl.sock'
 
 
