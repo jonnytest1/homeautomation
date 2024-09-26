@@ -9,7 +9,7 @@ jobs:
     container:
       image: "cert-runner"
       volumes:
-        - /var/run/c_dpl.sock:/var/run/c_dpl.sock
+        - /var/run/dpl:/var/run/dpl
     steps:
       - run: echo "🎉 The job was automatically triggered by a ${{ gitea.event_name }} event."
       - run: echo "🐧 This job is now running on a ${{ runner.os }} server hosted by Gitea!"
