@@ -21,4 +21,3 @@ jobs:
       - run: echo "🍏 This job's status is ${{ job.status }}."
       - run: docker ps
       - run: python "./.gitea/workflows/deploy.py"
-      - run: apt-get install socat && printf GET | socat UNIX-CONNECT:/tmp/server.sock -
