@@ -2,11 +2,14 @@ name: Gitea Actions Demo
 run-name: ${{ gitea.actor }} is testing out Gitea Actions 🚀
 on: [push]
 
+
 jobs:
   Explore-Gitea-Actions:
     runs-on: smarthome
     container:
       image: "cert-runner"
+      volumes:
+        - /home/smarthome/deployment/dpl.sock:/var/run/c_dpl.sock
     steps:
       - run: echo "🎉 The job was automatically triggered by a ${{ gitea.event_name }} event."
       - run: echo "🐧 This job is now running on a ${{ runner.os }} server hosted by Gitea!"
@@ -20,5 +23,5 @@ jobs:
           ls ${{ gitea.workspace }}
       - run: echo "🍏 This job's status is ${{ job.status }}."
       - run: docker ps
+      - run: sleep 120
       - run: python "./.gitea/workflows/deploy.py"
-      - run: apt-get install socat && printf GET | socat UNIX-CONNECT:/tmp/server.sock -
