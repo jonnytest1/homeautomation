@@ -1,7 +1,8 @@
+# pip install python-dateutil
 from dateutil.rrule import rrulestr
 from datetime import datetime
 import sys
-
+# pip install pytz
 import pytz
 
 inputtime = sys.argv[1]

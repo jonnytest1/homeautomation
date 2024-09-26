@@ -100,7 +100,7 @@ export class TimerService {
         await new Promise(res => setTimeout(res, 50))
         return this.phoneReachable(target, attempt + 1)
       }
-      if (typeof e === "object" && "stdout" in e && typeof e.stdout === "string" && e.stdout.includes("konnte Host") && e.stdout.includes("nicht finden")) {
+      if (e && typeof e === "object" && "stdout" in e && typeof e.stdout === "string" && e.stdout.includes("konnte Host") && e.stdout.includes("nicht finden")) {
         logKibana("WARN", { message: "exception executing ping" }, e)
         return false
       }

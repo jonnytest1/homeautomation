@@ -53,6 +53,7 @@ class Registration {
     })
 
     this.client.on("connect", () => {
+      console.log("mqtt connected")
       const commands: Array<import("../../../server/src/services/mqtt-tasmota").DeviceCommandConfig> = Object.keys(eventHandlerMap).map(key => ({
         name: key
       }));

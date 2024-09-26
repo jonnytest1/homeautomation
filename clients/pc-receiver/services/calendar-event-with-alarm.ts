@@ -26,7 +26,7 @@ class EventAlarm implements AlarmProvider {
   }
   calculateTimeOffset() {
     const triggerMAtch = this.trigger.match(/(?<relative>-)?P(?<days>\d+)D.*?T?((?<hours>\d+)H)?((?<minutes>\d+)M)?((?<seconds>\d+)S)?/)
-    if (!triggerMAtch) {
+    if (!triggerMAtch?.groups) {
       console.error("invalid regex parsing TRIGGER for alarm ", this.trigger)
       return
     }

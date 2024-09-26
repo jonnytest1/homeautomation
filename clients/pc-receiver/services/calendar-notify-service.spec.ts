@@ -3,6 +3,7 @@ import { EventWithAlarm } from './calendar-event-with-alarm'
 import { CalenderService, getNextRRule } from './calendar-notify-service'
 import { uidBlackList } from './calendar-uid-blacklist'
 import { MINUTE } from '../constant'
+import { GeneratedAPIs } from 'googleapis/build/src/apis'
 
 
 
@@ -46,8 +47,8 @@ describe("calender", () => {
 
     const t = '2024-01-23T20:30:00.000+01:00'
 
-    const nextT = getNextRRule(new Date(t), new Date(), "RRULE:FREQ=DAILY").toLocaleString()
-    const nextZ = getNextRRule(new Date(z), new Date(), "RRULE:FREQ=DAILY").toLocaleString()
+    const nextT = getNextRRule(new Date(t), new Date(), "RRULE:FREQ=DAILY")?.toLocaleString()
+    const nextZ = getNextRRule(new Date(z), new Date(), "RRULE:FREQ=DAILY")?.toLocaleString()
 
 
     expect(nextZ).toContain("23:01")
@@ -58,11 +59,11 @@ describe("calender", () => {
   it("get next rrule after", () => {
     const z = '2023-09-27T23:01:00.000+02:00'
 
-    const next = getNextRRule(new Date(z), new Date(z), "RRULE:FREQ=DAILY").toLocaleString()
+    const next = getNextRRule(new Date(z), new Date(z), "RRULE:FREQ=DAILY")?.toLocaleString()
     expect(next).toBe("28.9.2023, 23:01:00")
 
     const oneMilliPrior = +new Date(z) - 1
-    const nextOneSec = getNextRRule(new Date(z), new Date(oneMilliPrior), "RRULE:FREQ=DAILY").toLocaleString()
+    const nextOneSec = getNextRRule(new Date(z), new Date(oneMilliPrior), "RRULE:FREQ=DAILY")?.toLocaleString()
     expect(nextOneSec).toBe("27.9.2023, 23:01:00")
   })
 })

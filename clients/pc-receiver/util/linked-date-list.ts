@@ -11,7 +11,7 @@ export class LinkedDateEventList<V> {
     if (this.next === undefined) {
       this.next = new LinkedDateEventList(element)
     } else {
-      if (element.timestamp > this.next.value.timestamp) {
+      if (element.timestamp! > this.next.value!.timestamp!) {
         this.next.add(element)
       } else {
         const previousNext = this.next
@@ -22,7 +22,7 @@ export class LinkedDateEventList<V> {
   }
 
   shift() {
-    this.next = this.next.next
+    this.next = this.next!.next
   }
 
 }

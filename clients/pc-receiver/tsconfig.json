@@ -3,6 +3,7 @@
     "esModuleInterop": true,
     "target": "ES2021",
     "moduleResolution": "Node",
+    "strictNullChecks": true,
     "lib": [
       "ESNext",
       "DOM",

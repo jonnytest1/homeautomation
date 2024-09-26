@@ -1,7 +1,7 @@
 import { app, BrowserWindow, protocol } from "electron"
 import { logKibana } from '../util/log'
 
-let activeWindow: BrowserWindow = undefined
+let activeWindow: BrowserWindow | undefined = undefined
 
 
 export const popupConfig = {
@@ -34,7 +34,9 @@ type PopupArgsObj = {
   [arg in PopupArgs[number]as arg["name"]]: arg
 }
 
-type PopupARgsConfig = import("../../../server/src/services/generic-node/typing/node-options").NodeDefToType<PopupArgsObj>
+type PopupARgsConfig = import("../../../server/src/services/generic-node/typing/node-options").NodeDefToType<PopupArgsObj> & {
+  popupStartTime?: number
+}
 
 /*
 protocol.registerSchemesAsPrivileged([
@@ -62,6 +64,7 @@ export async function popup(data: string, callback: { response: (resp: { ts: num
   if (!popupCfg.active) {
     logKibana("INFO", "closing previous window after close command")
     activeWindow?.hide()
+    activeWindow?.webContents.forcefullyCrashRenderer()
     activeWindow = undefined
     return
   }
@@ -82,7 +85,7 @@ export async function popup(data: string, callback: { response: (resp: { ts: num
     })
 
     activeWindow.webContents.on("did-finish-load", () => {
-      activeWindow.show()
+      activeWindow?.show()
     })
 
     activeWindow.webContents.session.protocol.registerStringProtocol("form", e => {
@@ -128,9 +131,9 @@ export async function popup(data: string, callback: { response: (resp: { ts: num
           // ${Date.now()}
       </script>
    */
-
+  popupCfg.popupStartTime = Date.now()
   onStartLoad = () => {
-    activeWindow.webContents.executeJavaScript(`window.popupConfig=${JSON.stringify(popupCfg)};`)
+    activeWindow?.webContents.executeJavaScript(`window.popupConfig=${JSON.stringify(popupCfg)};`)
   }
   onForm = url => {
     const request = new URL(url)
@@ -142,11 +145,12 @@ export async function popup(data: string, callback: { response: (resp: { ts: num
     })
     callback.overwrite({
       ...popupCfg,
+      response: data.response,
       active: false
     })
 
 
-    activeWindow.hide()
+    activeWindow?.hide()
     activeWindow = undefined
   }
 

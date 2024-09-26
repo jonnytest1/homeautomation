@@ -29,7 +29,7 @@ export const eventHandlerMap = {
     setLastAbort()
   },
   "treadmill": () => {
-    new TimerService(null).run({})
+    new TimerService("").run({})
   },
   /*"read": (data: { text: string }) => {
     debugger

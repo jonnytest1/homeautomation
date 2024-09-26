@@ -80,7 +80,7 @@ export class FritzBoxClient {
     const phone = data.find(dev => dev.name === phoneName)
     // const current = this.getCurrentVolume()
 
-    if (phone.type !== "active") {
+    if (phone?.type !== "active") {
       return
     }
 

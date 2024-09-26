@@ -31,7 +31,7 @@ export function getNextRRule(event_start: Date, after: Date, rule: string) {
     return new Date(data)
   } catch (e) {
     debugger
-    throw new Error("failed parsing rrule.py response: " + response.stdout, { cause: e });
+    throw new Error(`failed parsing rrule.py response: ${response.stdout}\n${response.stderr}`, { cause: e });
   }
 }
 
@@ -137,14 +137,25 @@ export class CalenderService {
   }
 
   timer() {
-    const nextEvt = this.reminderList.next.value
-    const timeDiff = +nextEvt.timestamp - +new Date()
-    console.log(`starting timer for ${nextEvt.data.event.summary} at ${nextEvt.timestamp.toLocaleString()}`)
+    const nextEvt = this.reminderList.next?.value
+
+    if (!nextEvt) {
+      return
+    }
+
+    const timestamp = nextEvt.timestamp;
+    if (!timestamp) {
+      logKibana("ERROR", "no timestamp for event")
+      return
+    }
+
+    const timeDiff = +timestamp - +new Date()
+    console.log(`starting timer for ${nextEvt.data.event.summary} at ${nextEvt.timestamp?.toLocaleString()}`)
     console.log(`id : ${nextEvt.data.event.uid}`)
 
 
     setTimeout(async () => {
-      if ((+nextEvt.timestamp + 1000) >= (Date.now())) {
+      if ((+timestamp + 1000) >= (Date.now())) {
         await new Promise(res => setTimeout(res, 100))
         this.timer()
       } else {
