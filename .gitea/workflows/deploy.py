@@ -17,6 +17,7 @@ print(f"connecting to {socket_path}")
 client.connect(socket_path)
 
 changed_files = get_changed_files()
+print("git diff: ")
 print(changed_files)
 message = json.dumps(dict(type="deploy", files=changed_files))
 client.sendall(message.encode())
