@@ -15,7 +15,7 @@ except:
 # debugpy.wait_for_client()
 relay.off()
 # actually jsut used as an indicator led
-devgpios.leds.connectionstatus.off()
+# devgpios.leds.connectionstatus.off()
 
 
 device_config = DeviceConfig("water-supply", {

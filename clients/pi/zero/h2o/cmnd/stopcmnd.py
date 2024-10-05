@@ -1,7 +1,7 @@
 
 from enum import Enum
 from smarthome import DeviceConfigCommand, CommandInvocation
-from relay import relay
+from .relay import relay
 
 
 class RefillResponse(Enum):

@@ -14,8 +14,10 @@ class RefillResponse(Enum):
 
 
 refill_trigger_valid_until: Union[datetime, None, Literal["blocked"]] = None
+refill_trigger_valid_from: Union[datetime, None] = None
 
-refill_active_seconds = 5
+refill_active_seconds = 6
+min_delay_seconds = 1
 
 
 def led_delayed_off():
@@ -25,7 +27,10 @@ def led_delayed_off():
 
 def set_valid():
     global refill_trigger_valid_until
+    global refill_trigger_valid_from
     valid_until = datetime.now() + timedelta(seconds=refill_active_seconds)
+
+    refill_trigger_valid_from = datetime.now() + timedelta(seconds=min_delay_seconds)
     refill_trigger_valid_until = valid_until
     devgpios.leds.connectionstatus.on()
 
@@ -57,6 +62,8 @@ def onrefill(inv: CommandInvocation):
         set_valid()
         return RefillResponse.CONFIRM
     else:
+        if refill_trigger_valid_from is None or refill_trigger_valid_from > datetime.now():
+            return RefillResponse.CONFIRM
         refill_trigger_valid_until = "blocked"
         refill()
         refill_trigger_valid_until = None
