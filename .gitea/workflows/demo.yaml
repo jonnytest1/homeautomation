@@ -28,8 +28,3 @@ jobs:
       #- run: docker ps
       - run: python "./.gitea/workflows/setup.py" install
       - run: python "./.gitea/workflows/deploy.py"
-      - name: cache last commit action
-        uses: actions/cache@v3
-        with:
-          path: last_action.commit
-          key: smarthome_commit_cache
