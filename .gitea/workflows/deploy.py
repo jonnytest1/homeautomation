@@ -22,11 +22,19 @@ print(changed_files)
 message = json.dumps(dict(type="deploy", files=changed_files))
 client.sendall(message.encode())
 
-response = client.recv(1024)
 
-response_data = json.loads(response.decode())
+buff: str = ""
 
-for line in response_data["logs"]:
-    print(line)
+while True:
+    try:
+        buff += client.recv(1024).decode()
 
-client.close()
+        response_data = json.loads(buff)
+
+        for line in response_data["logs"]:
+            print(line)
+
+        client.close()
+        break
+    except json.JSONDecodeError as e:
+        continue
