@@ -23,6 +23,10 @@ message = json.dumps(dict(type="deploy", files=changed_files))
 client.sendall(message.encode())
 
 response = client.recv(1024)
-print(f'Received response: {response.decode()}')
+
+response_data = json.loads(response.decode())
+
+for line in response_data["logs"]:
+    print(line)
 
 client.close()
