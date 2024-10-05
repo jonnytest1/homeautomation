@@ -16,7 +16,9 @@ client = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
 print(f"connecting to {socket_path}")
 client.connect(socket_path)
 
-message = json.dumps(dict(type="deploy", files=get_changed_files()))
+changed_files = get_changed_files()
+print(changed_files)
+message = json.dumps(dict(type="deploy", files=changed_files))
 client.sendall(message.encode())
 
 response = client.recv(1024)
