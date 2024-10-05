@@ -51,7 +51,7 @@ String onRequest(HttpRequest *client)
       pinState = lampOff;
     }
 
-    HttpClientRequest request(serverEndpoint() + "/nodets/rest/receiver/state");
+    HttpClientRequest request(serverEndpoint() + "/rest/receiver/state");
     request.jsonBody(stringify(JsonFactory::obj({
         {"deviceKey", JsonFactory::str(getDeviceKey().c_str())},
         {"state", JsonFactory::str(pinState == lampOn ? "true" : "false")},
@@ -130,7 +130,7 @@ void registerReceiver()
       {"actions", actions} //
   });
 
-  HttpClientRequest request(serverEndpoint() + "/nodets/rest/receiver");
+  HttpClientRequest request(serverEndpoint() + "/rest/receiver");
   request.jsonBody(stringify(data));
   request.callback = triggerHandler;
   Serial.println("sending reuqest");
