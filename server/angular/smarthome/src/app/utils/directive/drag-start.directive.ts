@@ -40,7 +40,7 @@ function prepareEvent(event: Event) {
   let position: Vector2
   let offsetPos: Vector2
 
-  if (event instanceof TouchEvent) {
+  if ("TouchEvent" in window && event instanceof TouchEvent) {
     const touch = event.changedTouches[0] || event.targetTouches[0];
     position = new Vector2(touch.clientX, touch.clientY)
 
@@ -126,7 +126,7 @@ export class MBDragStartDirective implements OnDestroy {
     dragCpy?.remove()
     startEvent = eventRef
 
-    if (event instanceof TouchEvent) {
+    if ("TouchEvent" in window && event instanceof TouchEvent) {
 
 
       if (!this.disableDragPreview) {

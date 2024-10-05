@@ -19,6 +19,6 @@ export class DropDataHandler<DropData extends Record<string, any>> {
   }
 
   hasKey<T extends keyof DropData & string>(evt: MBDragEvent, key: T) {
-    return evt.dataTransferHandler.hasKey(key.toLowerCase())
+    return evt.dataTransferHandler?.hasKey(key.toLowerCase()) || false
   }
 }

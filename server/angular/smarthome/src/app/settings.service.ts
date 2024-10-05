@@ -9,7 +9,7 @@ import { BehaviorSubject, ReplaySubject, Subject } from 'rxjs';
 import { map, switchMap, tap } from 'rxjs/operators';
 import { v4 as uuid } from 'uuid';
 import { ResolvablePromise } from './utils/resolvable-promise';
-import { getDeviceData } from './global-error-handler';
+import { getDeviceData, logKibana } from './global-error-handler';
 
 
 let ws: WebSocket;
@@ -99,6 +99,7 @@ export class SettingsService extends AbstractHttpService {
         type: "device-data",
         data: getDeviceData()
       })
+      logKibana("INFO", "socket init")
     }
     openWebsocket();
     const pingEvent = {

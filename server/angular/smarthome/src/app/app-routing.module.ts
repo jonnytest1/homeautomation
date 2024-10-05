@@ -49,7 +49,7 @@ const routes: Routes = [
     path: 'nodered',
     component: IframeComponent,
     data: {
-      src: "https://192.168.178.54/nodered"
+      src: "https://smarthome/nodered"
     }
   }, {
     path: "inputs",

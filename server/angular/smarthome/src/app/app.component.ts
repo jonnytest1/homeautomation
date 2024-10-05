@@ -10,11 +10,19 @@ import { map, startWith } from 'rxjs/operators';
 export class AppComponent {
   constructor(private cdr: ChangeDetectorRef, activeRoute: ActivatedRoute) {
     window["defaultLog"] = true
+    const params = new URL(location.href);
     //
 
 
-    if (new URL(location.href).searchParams.get("kiosk")) {
+    if (params.searchParams.get("kiosk")) {
       document.body.parentElement.classList.add("kiosk")
+    }
+    if (params.searchParams.get("shadow")) {
+      document.body.parentElement.classList.add("shadow")
+    }
+    if (params.searchParams.get("lightshadow")) {
+      document.body.parentElement.classList.add("shadow")
+      document.body.parentElement.classList.add("light")
     }
   }
   title = 'smarthome';
@@ -29,8 +37,8 @@ export class AppComponent {
 
   public static isMobile() {
     return fromEvent(window, 'resize').pipe(
-      map(() => window.innerWidth < 600),
-      startWith(window.innerWidth < 600)
+      map(() => window.innerWidth < 801),
+      startWith(window.innerWidth < 801)
     );
   }
   openFromContent() {

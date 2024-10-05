@@ -34,7 +34,8 @@ export function getDeviceData() {
     screenWidth: window.outerWidth + "px",
     userAgentData: JSON.stringify(navigator["userAgentData"]?.toJSON()),
     touchPoints: navigator.maxTouchPoints + "",
-    webdriver: navigator.webdriver + ""
+    webdriver: navigator.webdriver + "",
+    url: location.href
   }
 }
 

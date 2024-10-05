@@ -21,13 +21,12 @@
     ],
     "types": [],
     "lib": [
-      "es2018",
-      "dom",
+      "DOM",
       "ES2019",
       "ES2019.Object",
-      "ES2015",
       "ESNext",
       "DOM.Iterable",
+      "ES2022"
     ],
   }
 }

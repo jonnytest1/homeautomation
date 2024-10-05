@@ -1,7 +1,7 @@
 {
   "$schema": "./node_modules/@angular/cli/lib/config/schema.json",
   "version": 1,
-  "newProjectRoot": "projects", 
+  "newProjectRoot": "projects",
   "schematics": {
     "@schematics/angular:component": {
       "style": "scss",
@@ -15,7 +15,6 @@
       "sourceRoot": "src",
       "projectType": "application",
       "prefix": "app",
-     
       "architect": {
         "build": {
           "builder": "@angular-builders/custom-webpack:browser",
@@ -69,7 +68,8 @@
                   "maximumError": "7mb"
                 }
               ]
-            }
+            },
+            "fe": {}
           }
         },
         "serve": {
@@ -77,7 +77,6 @@
           "options": {
             "browserTarget": "smarthome:build",
             "ssl": true
-
           },
           "configurations": {
             "production": {
@@ -98,7 +97,9 @@
             "polyfills": "src/polyfills.ts",
             "tsConfig": "tsconfig.spec.json",
             "karmaConfig": "src/karma.conf.js",
-            "styles": ["src/styles.less"],
+            "styles": [
+              "src/styles.less"
+            ],
             "scripts": [],
             "assets": [
               "src/favicon.ico",
@@ -110,8 +111,13 @@
         "lint": {
           "builder": "@angular-devkit/build-angular:tslint",
           "options": {
-            "tsConfig": ["src/tsconfig.app.json", "src/tsconfig.spec.json"],
-            "exclude": ["**/node_modules/**"]
+            "tsConfig": [
+              "src/tsconfig.app.json",
+              "src/tsconfig.spec.json"
+            ],
+            "exclude": [
+              "**/node_modules/**"
+            ]
           }
         }
       }
@@ -137,7 +143,9 @@
           "builder": "@angular-devkit/build-angular:tslint",
           "options": {
             "tsConfig": "e2e/tsconfig.e2e.json",
-            "exclude": ["**/node_modules/**"]
+            "exclude": [
+              "**/node_modules/**"
+            ]
           }
         }
       }

@@ -158,7 +158,7 @@ export class GenericNodeComponent implements OnChanges, AfterViewInit, OnDestroy
     }
 
 
-    if (evt instanceof TouchEvent) {
+    if ("TouchEvent" in window && evt instanceof TouchEvent) {
       inpt.style.backgroundColor = "red"
     }
   }

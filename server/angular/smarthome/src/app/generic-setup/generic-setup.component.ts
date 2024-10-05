@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
-import type { OnInit } from '@angular/core';
-import { Component, HostListener, inject } from '@angular/core';
+import type { ElementRef, OnInit } from '@angular/core';
+import { Component, HostListener, inject, ViewChild } from '@angular/core';
 import { createStateMachine } from '../utils/state-machine';
 import { Vector2 } from '../wiring/util/vector';
 import { PositionDirective } from './position.directive';
@@ -14,7 +14,7 @@ import { GenericOptionsComponent } from './generic-options/generic-options.compo
 import { ActivatedRoute, Router } from '@angular/router';
 import type { Connection, ElementNode, NodeData, NodeDefintion } from '../settings/interfaces';
 import { logKibana } from '../global-error-handler';
-import { filter, map, combineLatestWith, first, tap } from 'rxjs/operators';
+import { filter, map, combineLatestWith, first, tap, withLatestFrom } from 'rxjs/operators';
 import type { Observable } from 'rxjs';
 import { BehaviorSubject, combineLatest } from 'rxjs';
 import { Store } from '@ngrx/store';
@@ -30,6 +30,7 @@ import { DblClickDirective } from "../utils/directive/dbl-click.directive"
 import { MBDagOverDirective, MBDragStartDirective, MBDropDirective, type MBDragEvent } from "../utils/directive/drag-start.directive"
 import { MatIconModule } from '@angular/material/icon';
 import { TouchModeService } from './touchmode-service';
+import { ResolvablePromise } from '../utils/resolvable-promise';
 
 
 const dataHandler = new DropDataHandler<DropData>()
@@ -52,6 +53,11 @@ export class GenericSetupComponent implements OnInit {
   static pageInset = new Vector2(0, 0)
   zoom = 1;
   zoomTransform: Vector2
+  hideMenu$ = new BehaviorSubject<boolean>(false)
+
+
+  @ViewChild("wrapperElement")
+  private wrapperEl: ElementRef<HTMLElement>;
 
   readonly state = createStateMachine("initial", "dragging", "dragpreview", "move", "mousedragview").withData<{
     move: ElementNode,
@@ -134,12 +140,18 @@ export class GenericSetupComponent implements OnInit {
     connections.loadGenericData();
     this.storeNodeData$.subscribe(this.storeNodeDataBeh$)
     combineLatest([
-      active.queryParams as Observable<{ active?: string, view?: string }>,
-      this.storeNodeData$.pipe(
+      active.queryParams as Observable<{
+        active?: string,
+        view?: string
+        scrollx?: string,
+        scrolly: string,
+        hidemenu?: string
+      }>,
+    ]).pipe(
+      withLatestFrom(this.storeNodeData$.pipe(
         filter(d => !!d?.nodes?.length)
-      )
-    ]).pipe(first())
-      .subscribe(([query, nodeData]) => {
+      )))
+      .subscribe(([[query], nodeData]) => {
         const activeNOde = query?.active
         if (activeNOde) {
           const newActive = nodeData.nodes.find(node => node.uuid === activeNOde)
@@ -149,15 +161,67 @@ export class GenericSetupComponent implements OnInit {
               node: newActive
             }])
           }
+        } else {
+          this.activeElements$.next(undefined)
         }
-        if (query.view) {
-          this.activeView$.next(query.view)
-        }
+      });
+
+
+
+    (active.queryParams as Observable<{
+      active?: string,
+      view?: string
+      focus?: string,
+      hidemenu?: string
+    }>).subscribe((query) => {
+      if (query.view !== this.activeView$.value) {
+        this.activeView$.next(query.view)
+      }
+      if (query.hidemenu === "hidden") {
+        this.hideMenu$.next(true)
+      }
+      if (query.focus) {
+        this.scrollIntoView(query.focus)
+      }
+    });
+  }
+
+  async scrollIntoView(node: string) {
+    this.zoom = 3
+    while (!this.wrapperEl?.nativeElement) {
+      await ResolvablePromise.delayed(50)
+    }
+
+    const nodeSelector = `.node_${node}`;
+    while (!this.wrapperEl.nativeElement.querySelector(nodeSelector)) {
+      await ResolvablePromise.delayed(50)
+    }
+    requestAnimationFrame(() => {
+      const element = this.wrapperEl.nativeElement.querySelector(nodeSelector);
+      element?.scrollIntoView({
+        block: "center",
+        inline: "center",
+        behavior: "instant" as any
       })
+      setTimeout(() => {
+        element?.scrollIntoView({
+          block: "center",
+          inline: "center",
+          behavior: "instant" as any
+        })
+        const bounds = element?.getBoundingClientRect()
+        if (bounds) {
+          this.wrapperEl.nativeElement?.scrollBy(bounds?.width / 2, bounds?.height / 2)
+        }
+      }, 33)
+    })
+
   }
 
   ngOnInit() {
   }
+
+
 
   getTransform() {
     const zoomRounded = Math.round(100 * this.zoom) / 100
@@ -183,7 +247,7 @@ export class GenericSetupComponent implements OnInit {
   dropAllowed(evt: MBDragEvent) {
     let isAllowed = true;
 
-    if (!dataHandler.hasKey(evt, "dragOffset")) {
+    if (!dataHandler?.hasKey(evt, "dragOffset")) {
       if (this.connections.pendingConnection) {
         this.connections.setTarget(evt)
       }
@@ -219,14 +283,15 @@ export class GenericSetupComponent implements OnInit {
   }
   async doubleClick(node: ElementNode) {
     if (node.type === "view") {
-      this.activeView$.next(node.uuid)
       await this.router.navigate([], {
         queryParams: {
-          view: node.uuid
+          view: node.uuid,
+          active: null
         },
+        //single click-setActiveNode creates history entry so this replaces it
+        replaceUrl: true,
         queryParamsHandling: "merge"
       })
-      this.setActiveNode(undefined)
 
     }
   }
@@ -406,7 +471,7 @@ export class GenericSetupComponent implements OnInit {
 
   }
   mouseDragMove(mousevent: MouseEvent | TouchEvent, el: HTMLElement) {
-    if (mousevent instanceof TouchEvent) {
+    if ("TouchEvent" in window && mousevent instanceof TouchEvent) {
       mousevent.preventDefault()
     }
     if (this.state.ismousedragview) {

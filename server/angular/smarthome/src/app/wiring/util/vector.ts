@@ -42,7 +42,7 @@ export class Vector2 {
   }
   constructor(x: number | { x: number; y: number } | TouchEvent, y?: number) {
     if (typeof x === 'object') {
-      if (x instanceof TouchEvent) {
+      if ("targetTouches" in x) {
         const touch = x.targetTouches.item(x.targetTouches.length - 1)
 
         this.y = touch.pageY;

@@ -45,6 +45,7 @@
              class="node"
              [position]="node.position">
           <app-generic-node [prefix]="node.type"
+                            [ngClass]="['node_'+node.uuid]"
                             [nodeUuid]="node.uuid"
                             [selected]="isInElements(activeElements,node)"
                             [editable]="true"
@@ -87,7 +88,8 @@
     </div>
   </div>
 
-  <div class="nodelist">
+  <div class="nodelist"
+       *ngIf="(hideMenu$|async)!==true">
     <div *ngFor="let n of nodeDefs|keyvalue"
          class="dragelement"
          draggable="true"

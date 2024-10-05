@@ -31,17 +31,27 @@ html {
     top: -100vw;
     left: -22px;
     cursor: none;
-    background-color: #000000d9;
-    font-size: 30px;
-    filter: brightness(0.5);
+
 
     --vwidth: 100vh;
     --vheight: 100vw;
+    font-size: 30px;
+
+  }
+
+  &.shadow {
+    background-color: #000000d9;
+    filter: brightness(0.5);
 
     mat-sidenav-container.sidenav-container {
       background: #ffffff00;
 
     }
 
+    &.light {
+      background-color: #8b8383d9;
+    }
   }
+
+
 }
