@@ -1,6 +1,6 @@
 
 import { GET, HttpRequest, HttpResponse, Path } from 'express-hibernate-wrapper';
-import { DataBaseBase } from 'hibernatets/mariadb-base';
+import { MariaDbBase } from 'hibernatets/dbs/mariadb-base';
 
 @Path("transformation")
 export class TransformationResource {
@@ -8,7 +8,7 @@ export class TransformationResource {
     path: "keys/:senderid"
   })
   async getTransofrmations(req: HttpRequest, res: HttpResponse) {
-    const dbBase = new DataBaseBase();
+    const dbBase = new MariaDbBase();
     const tranformations = await dbBase.selectQuery<{ evkey: string }>(
       `SELECT evkey
             FROM (SELECT DISTINCT SUBSTRING_INDEX(SUBSTRING_INDEX(\`data\`,'message":"',-1),'"',1) as evkey,sender 

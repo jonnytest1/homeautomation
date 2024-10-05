@@ -213,6 +213,9 @@ export async function updateTypeSchema(node: ElementNode, nodeData: PreparedNode
     console.warn("type schema update for " + node.uuid + " took long")
 
   }, 1000)
+  if (!nodeTypeImplemenations) {
+    debugger
+  }
   await nodeTypeImplemenations.connectionTypeChanged?.(node, schema);
   clearTimeout(conChangeTimeout)
   if (node.runtimeContext?.editorSchema?.dts) {

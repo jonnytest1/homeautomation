@@ -83,6 +83,7 @@ export class ControlKeysWebsocket {
     websocket.on("message", async (message) => {
       const evt = JSON.parse(message) as SendingKeyEvent
       if (evt.type == "keys") {
+        console.log(`key event ${JSON.stringify(evt.data)}`)
         this.key_cache = evt
         emitEvent("key binding", {
           payload: evt,
@@ -95,8 +96,9 @@ export class ControlKeysWebsocket {
           })
 
 
-      } else if (evt.type == "ping")
+      } else if (evt.type == "ping") {
         websocket.send(JSON.stringify({ type: "pong" }))
+      }
     })
     if (this.key_cache) {
       this.sendKeyData(websocket, this.key_cache.data)

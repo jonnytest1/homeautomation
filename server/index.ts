@@ -2,6 +2,7 @@ import { EventScheduler } from './src/services/event/event-scheduler';
 import { logKibana } from './src/util/log';
 import { startNodeRed } from './src/node-red/server';
 import { environment } from './src/environment';
+import { setDbInit } from './src/models/db-state';
 import { updateDatabase } from 'hibernatets';
 import { HttpRequest, initialize, ResponseCodeError } from 'express-hibernate-wrapper';
 Error.stackTraceLimit = Infinity;
@@ -18,6 +19,7 @@ if (environment.setup) {
 
 updateDatabase(__dirname + '/src/models')
   .then(async () => {
+    setDbInit()
     console.log("updated database")
     const redirected: string | null = null;
     await initialize(__dirname + '/src/resources', {
@@ -42,8 +44,8 @@ updateDatabase(__dirname + '/src/models')
         })
         app.use((req: HttpRequest, res, next) => {
           const forwardedFor = req.headers.http_x_forwarded_for;
-          if ((!forwardedFor || typeof forwardedFor !== 'string' || !forwardedFor.startsWith('192.168.178')) && environment.DEBUG !== "true") {
-            res.status(403).send();
+          if ((!forwardedFor || typeof forwardedFor !== 'string' || !forwardedFor.startsWith('192.168.')) && environment.DEBUG !== "true") {
+            res.header("ip check", "denied").status(403).send();
             return;
           }
           next();

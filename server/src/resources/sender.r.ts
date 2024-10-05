@@ -11,7 +11,7 @@ import { SenderTriggerService } from '../services/sender-trigger-service';
 import { mqttConnection } from '../services/mqtt-api';
 import { emitEvent } from '../services/generic-node/generic-node-service';
 import { assign, loadOne, ResponseCodeError } from 'express-hibernate-wrapper';
-import { DataBaseBase } from 'hibernatets/mariadb-base';
+import { MariaDbBase } from 'hibernatets/dbs/mariadb-base';
 import { load, queries, save } from 'hibernatets';
 import { Path, POST, HttpRequest, HttpResponse, GET } from 'express-hibernate-wrapper';
 
@@ -76,7 +76,7 @@ export class SenderResource {
     path: "eventkeys"
   })
   async getEventKeys(req: HttpRequest, res) {
-    const eventKEys = await new DataBaseBase().selectQuery<{ evkey: string }>(
+    const eventKEys = await new MariaDbBase().selectQuery<{ evkey: string }>(
       `SELECT DISTINCT SUBSTRING_INDEX(SUBSTRING_INDEX(\`data\`,'message":"',-1),'"',1) as evkey
             FROM eventhistory 
             WHERE SENDER = ?`, [req.query.id])

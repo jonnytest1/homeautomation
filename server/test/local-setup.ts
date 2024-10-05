@@ -4,7 +4,7 @@ import { ControlKeysWebsocket } from "../src/resources/control-keys.ws"
 import { ReconnectingSocket } from '../src/util/reconnecting-socket';
 import { ResolvablePromise } from '../src/util/resolvable-promise';
 import { emitEvent } from '../src/services/generic-node/generic-node-service';
-import { DataBaseBase } from 'hibernatets/mariadb-base';
+import { MariaDbBase } from 'hibernatets/dbs/mariadb-base';
 import { EventEmitter } from "events"
 
 const hookKeys = true;
@@ -54,7 +54,7 @@ if (hookKeys) {
 }
 
 if (eventReplay) {
-  const db = new DataBaseBase("smarthome")
+  const db = new MariaDbBase("smarthome")
   db.selectQuery<{ type: string, data: string }>("SELECT * FROM `smarthome`.`eventhistory` ORDER BY id DESC", [])
     .then(async eventHistory => {
 

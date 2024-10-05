@@ -23,8 +23,32 @@ type SetNodeParamVAlue<K extends string, V extends NodeOptionTypes> = {
   [key in K]: MapTypeToParam<V, K>
 }
 
-export function updateRuntimeParameter<T, P, K extends (keyof P & keyof T & string), V extends NodeOptionTypes & P[K]>(node: ElementNode<T, P>,
-  key: K, param: V, inital: number | string | false = 0): asserts node is ElementNode<T, P> & {
+
+
+
+export function setNodeParameter<T, K extends ((keyof T & string)), V extends T[K]>(
+  node: ElementNode<T, unknown>,
+  key: K,
+  param: V,) {
+
+  if (node.parameters && node.parameters[key] === param) {
+    return
+  }
+
+  genericNodeDataStore.dispatch(backendToFrontendStoreActions.updateParam({
+    node: node.uuid,
+    param: key,
+    value: param as never
+  }))
+
+
+}
+
+export function updateRuntimeParameter<T, P, K extends ((keyof P & keyof T & string)), V extends NodeOptionTypes & P[K]>(
+  node: ElementNode<T, P>,
+  key: K,
+  param: V,
+  inital: number | string | false = 0): asserts node is ElementNode<T, P> & {
     parameters: SetNodeParamVAlue<K, V>,
     runtimeContext: {
       parameters: SetNodeOption<K>
@@ -94,3 +118,4 @@ export function checkInvalidations<T, P, K extends (keyof P & keyof T & string),
   }
 
 }
+

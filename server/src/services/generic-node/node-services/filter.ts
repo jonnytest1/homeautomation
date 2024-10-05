@@ -7,8 +7,8 @@ import { mainTypeName } from '../json-schema-type-util';
 import { genericNodeDataStore } from '../generic-store/reference';
 import { backendToFrontendStoreActions } from '../generic-store/actions';
 import { lastEventTimesForNode } from '../last-event-service';
-import { updateServerContext } from '../element-node-fnc';
-import { logKibana } from '../../../util/log';
+import { updateRuntimeParameter, updateServerContext } from '../element-node-fnc';
+import { HOUR } from '../../../constant';
 import * as z from "zod"
 import { Script } from 'vm';
 
@@ -47,10 +47,37 @@ interface EvaluatedInputContext extends InputContext {
 }
 
 addTypeImpl({
-  server_context_type(s: { inputs: { [index: number]: InputContext } }) {
+  server_context_type(s: {
+    inputs: { [index: number]: InputContext },
+    inputhistory?: Array<{ timestamp: number, evt: unknown, index: number }>
+    outputhistory?: Array<{ timestamp: number, evt: unknown, index: number }>
+  }) {
     return s
   },
   process(node, data, callbacks) {
+
+    const inputHistory = node.serverContext?.inputhistory ?? []
+    const historyKey = `inputhistory${data.inputIndex > 0 ? data.inputIndex : ""}`
+    if (node.parameters?.[historyKey]?.length) {
+      const inputhistoryNum = +node.parameters?.[historyKey]
+      if (!isNaN(inputhistoryNum) && inputhistoryNum > 0) {
+        const inputHistoryDays = inputhistoryNum * HOUR * 24
+
+        inputHistory.push({
+          timestamp: Date.now(),
+          evt: data.payload,
+          index: data.inputIndex,
+        })
+        const cutoff = Date.now() - inputHistoryDays
+        while (inputHistory[0]?.timestamp < cutoff) {
+          inputHistory.shift()
+        }
+        updateServerContext(node, {
+          inputhistory: inputHistory
+        })
+      }
+    }
+
     if (data.inputIndex !== 0) {
       updateServerContext(node, {
         inputs: {
@@ -63,6 +90,7 @@ addTypeImpl({
       })
       return
     }
+
 
     let nodeScript = jsCache[node.uuid]
     if (!nodeScript) {
@@ -90,27 +118,87 @@ addTypeImpl({
 
     let returnValue
     try {
+
+
+
+      // eslint-disable-next-line no-constant-condition
+      while (true) {
+        if (inputHistory[0]) {
+          const input0ts = inputHistory[0]?.timestamp
+          const input0key = `inputhistory${inputHistory[0].index > 0 ? inputHistory[0].index : ""}`;
+          const inputhistoryNum = +node.parameters?.[input0key]
+          if (!isNaN(inputhistoryNum) && inputhistoryNum > 0) {
+            const inputHistoryDays = inputhistoryNum * HOUR * 24
+            const cutoff = Date.now() - inputHistoryDays
+
+            if (input0ts < cutoff) {
+              inputHistory.shift()
+            } else {
+              break;
+            }
+
+          } else {
+            inputHistory.shift()
+          }
+        } else {
+          break
+        }
+
+      }
       const contextObject = {
         payload: data.payload,
         inputs: inputs,
         Date: DateMock,
-        lastOutputTs
+        lastOutputTs,
+        inputhistory: inputHistory,
+        outputhistory: node.serverContext?.outputhistory ?? [],
+        setInfo: (text: string) => {
+          if (text != node.runtimeContext.info) {
+            genericNodeDataStore.dispatch(backendToFrontendStoreActions.updateRuntimeInfo({
+              info: text,
+              nodeUuid: node.uuid
+            }))
+          }
+        }
       };
-      logKibana("DEBUG", {
-        message: "filter context",
-        ...contextObject,
-        nodeid: node.uuid
-      })
+      /*  logKibana("DEBUG", {
+         message: "filter context",
+         ...contextObject,
+         nodeid: node.uuid
+       }) */
       returnValue = nodeScript.script.runInNewContext(contextObject)
       if (typeof returnValue !== "boolean") {
         throw new Error("invalid return type")
       }
 
+
     } catch (e) {
       debugger
     }
+
     if (returnValue) {
-      callbacks.continue(data)
+      const emitIndex = 0
+      if (node.parameters?.outputhistory?.length) {
+        const outputHistoryNum = +node.parameters?.outputhistory
+        if (!isNaN(outputHistoryNum) && outputHistoryNum > 0) {
+          const outputHistoryDays = outputHistoryNum * HOUR * 24
+
+          const outputHistoryData = node.serverContext?.outputhistory ?? []
+          outputHistoryData.push({
+            timestamp: Date.now(),
+            evt: data.payload,
+            index: emitIndex
+          })
+          const cutoff = Date.now() - outputHistoryDays
+          while (outputHistoryData[0]?.timestamp < cutoff) {
+            outputHistoryData.shift()
+          }
+          updateServerContext(node, {
+            outputhistory: outputHistoryData
+          })
+        }
+      }
+      callbacks.continue(data, emitIndex)
     }
 
 
@@ -124,9 +212,18 @@ addTypeImpl({
         type: "number",
         min: 0
       },
+      outputhistory: {
+        type: "number",
+        title: "output history days",
+      },
+      inputhistory: {
+        type: "number",
+        title: "input history days",
+      },
       code: {
         type: "monaco",
-        default: `function filter(input:InputType):boolean{\n\n}`
+        default: `function filter(input:InputType):boolean{\n\n}`,
+        order: -1
       }
     }
   }),
@@ -134,9 +231,24 @@ addTypeImpl({
 
     if (node.parameters) {
       if (node.parameters.additional !== undefined) {
-
-
         node.runtimeContext.inputs = +node.parameters.additional + 1
+
+        for (let i = 1; i < Infinity; i++) {
+          if (i < node.runtimeContext.inputs) {
+            updateRuntimeParameter(node, `inputhistory${i}` as "inputhistory", {
+              type: "number",
+              title: `input history days index:${i}`,
+              order: 1
+            })
+          } else if (node.runtimeContext.parameters?.[`inputhistory${i}`]) {
+            updateRuntimeParameter(node, `inputhistory${i}` as "inputhistory", undefined as any)
+            //delete node.runtimeContext.parameters?.[`inputhistory${i}`]
+          } else {
+            break;
+          }
+
+        }
+
         genericNodeDataStore.dispatch(backendToFrontendStoreActions.updateNode({
           newNode: node
         }))
@@ -165,7 +277,10 @@ type InputType=${connectionSchema.mainTypeName ??= mainTypeName}
 
 
       ${node.parameters?.additional ? inputsGlobals(+node.parameters.additional) : ''}
-      var lastOutputTs:number|undefined
+      var lastOutputTs:number|undefined,
+      var  inputhistory: Array<{timestamp:number,evt:unknown,index:number}>,
+      var  outputhistory: Array<{timestamp:number,evt:unknown,index:number}>
+      var setInfo:(text:string)=>void
       var context; 
       `
       },

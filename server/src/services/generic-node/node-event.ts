@@ -1,11 +1,11 @@
 
-import type { NodeEventData } from './typing/node-event-data';
+import type { ContextObject, NodeEventData } from './typing/node-event-data';
 import type { NodeDefOptinos, NodeDefToType } from './typing/node-options';
 
 
-export type NodeEventJsonData<P = unknown> = {
+export type NodeEventJsonData<P = unknown, C = unknown> = {
   payload: P,
-  context: unknown
+  context: ContextObject<C>
 }
 
 
@@ -13,7 +13,7 @@ export type NodeEventJsonData<P = unknown> = {
 export class NodeEvent<C = unknown, P = unknown, G extends NodeDefOptinos = NodeDefOptinos> {
 
   declare payload: P
-  declare context: C
+  declare context: C & { eventCount?: number, [key: string]: unknown }
 
   declare globalConfig: NodeDefToType<G>
 
@@ -49,13 +49,13 @@ export class NodeEvent<C = unknown, P = unknown, G extends NodeDefOptinos = Node
   }
 
 
-  copy(): NodeEventJsonData {
+  copy(): NodeEventJsonData<unknown, C> {
     return JSON.parse(JSON.stringify(this))
   }
 
   clone() {
 
-    return new NodeEvent(this.copy(), this.globalConfig)
+    return new NodeEvent<C>(this.copy(), this.globalConfig)
   }
 
 }

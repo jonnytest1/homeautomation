@@ -16,6 +16,8 @@ type ExtendedSocket = Websocket & {
 }
 
 
+
+
 @WS({ path: "/updates" })
 export class FrontendWebsocket {
 
@@ -172,7 +174,9 @@ export class FrontendWebsocket {
 
   }
 }
-
+global.reloadAll = () => {
+  FrontendWebsocket.reloadAll()
+}
 
 
 export const withSideEffects = true

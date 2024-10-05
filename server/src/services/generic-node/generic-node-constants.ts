@@ -21,5 +21,3 @@ export const deletedNodesDataFolder = join(nodesContextFolder, "deleted-node-dat
 export const nodesDataFolder = join(nodesContextFolder, "nodes")
 
 export const lastEventFile = join(nodefolder, "last-events.json")
-
-export const lastEventTimesFile = join(nodefolder, "last-event-times.json")

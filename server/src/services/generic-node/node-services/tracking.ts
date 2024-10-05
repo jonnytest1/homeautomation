@@ -3,15 +3,26 @@ import { logKibana } from '../../../util/log';
 import { addTypeImpl } from '../generic-node-service';
 import { mainTypeName } from '../json-schema-type-util';
 import { HOUR, MINUTE } from '../../../constant';
-import { openPools } from 'hibernatets/mariadb-base';
 import { save } from 'hibernatets';
-import { DataBaseBase } from 'hibernatets/mariadb-base';
+import { MariaDbBase, openPools } from 'hibernatets/dbs/mariadb-base';
 
+const trackingPool = new MariaDbBase(undefined, {
+  connectionLimit: 20,
+  trace: true, logPackets: true,
+  keepAliveDelay: 5000,
+  idleTimeout: 560,
+  maxAllowedPacket: 67108864
 
-const trackingPool = new DataBaseBase(undefined, 10)
+})
 
 
 const activeTrackingMap: Record<string, NodeJS.Timeout> = {}
+
+
+const trackingEventBuffer: Array<TrackingEvent> = []
+
+
+let interval: NodeJS.Timeout
 
 
 addTypeImpl({
@@ -29,7 +40,7 @@ addTypeImpl({
   },
   process(node, data, callbacks) {
     const evt = TrackingEvent.create(data, node)
-    console.log("save tracking event for " + node.parameters?.name)
+    console.log("add tracking event for " + node.parameters?.name)
     if (activeTrackingMap[node.uuid]) {
       clearTimeout(activeTrackingMap[node.uuid])
     }
@@ -42,14 +53,8 @@ addTypeImpl({
       })
     }, node.parameters?.activityTimeHours ? +node.parameters?.activityTimeHours * HOUR : MINUTE * 10)
 
-    save(evt, { db: trackingPool }).catch(e => {
-      logKibana("ERROR", {
-        message: "error while saving event",
-        node: node.uuid,
-        openPools: Object.values(openPools)
-      }, e)
-    })
-    callbacks.continue(data)
+    trackingEventBuffer.push(evt)
+    return
   },
   nodeChanged(node, prevNode) {
     node.runtimeContext ??= {}
@@ -61,5 +66,28 @@ addTypeImpl({
   },
   unload(nodeas, globals) {
     trackingPool.end()
+    if (interval) {
+      clearInterval(interval)
+    }
   },
+  initializeServer() {
+    interval = setInterval(() => {
+      if (trackingEventBuffer.length) {
+        const savingBuffer = [...trackingEventBuffer]
+        trackingEventBuffer.length = 0
+        save(savingBuffer, { db: trackingPool })
+          .then(() => {
+            console.log("saved " + savingBuffer.length + " events")
+          })
+          .catch(e => {
+            logKibana("ERROR", {
+              message: "error while saving event",
+              nodes: savingBuffer,
+              openPools: Object.values(openPools)
+            }, e)
+          })
+      }
+    }, 5000)
+
+  }
 })

@@ -12,7 +12,7 @@ import { nodeTypeName } from '../element-node';
 import { getTypes } from '../validation/watcher';
 import { genericNodeDataStore } from '../generic-store/reference';
 import { backendToFrontendStoreActions } from '../generic-store/actions';
-import { updateRuntimeParameter, updateServerContext } from '../element-node-fnc';
+import { setNodeParameter, updateRuntimeParameter, updateServerContext } from '../element-node-fnc';
 import { Json2dts } from "json2dts"
 import * as z from "zod"
 import { createCompilerHost } from 'typescript';
@@ -118,6 +118,13 @@ const genericTypes = addTypeImpl({
   nodeChanged(node, prev) {
     node.parameters ??= {}
     if (prev == undefined && !node?.parameters?.mode) {
+
+      setNodeParameter(node, "mode", "map")
+      genericNodeDataStore.dispatch(backendToFrontendStoreActions.updateParam({
+        node: node.uuid,
+        param: "mode",
+        value: "map"
+      }))
       node.parameters.mode = "map"
     }
     if (!node.parameters?.code) {
@@ -293,11 +300,6 @@ const genericTypes = addTypeImpl({
     updateServerContext(node, {
       outputSchema: schema
     })
-    //if (node.serverContext.connectionSchema) {
-
-
-    // updateEditorTypeSchema(node, node.serverContext.connectionSchema)
-    //}
   },
 
 })

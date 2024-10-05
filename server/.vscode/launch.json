@@ -9,6 +9,16 @@
       "request": "attach",
       "name": "Attach to server",
       "address": "192.168.178.54",
+      "port": 14748,
+      "localRoot": "${workspaceFolder}",
+      "remoteRoot": "/var/node"
+    },
+    {
+      "type": "node",
+      "request": "attach",
+      "name": "(new)Attach to server",
+      "address": "smarthome",
+      "timeout": 4000,
       "port": 14747,
       "localRoot": "${workspaceFolder}",
       "remoteRoot": "/var/node"

@@ -5,6 +5,7 @@ import { getClient } from './generic-node/node-services/mqtt-global'
 import { environment } from '../environment'
 import { logKibana } from '../util/log'
 import { ResolvablePromise } from '../util/resolvable-promise'
+import { dbInitialited } from '../models/db-state'
 import type { MqttClient } from "mqtt"
 
 
@@ -28,7 +29,12 @@ export class MQTTIntegration {
       mqtt_server: mqttUrl,
       mqtt_user: environment.MQTT_USER
     })
-
+    this.connection.on("error", e => {
+      console.error(e)
+    })
+    this.connection.on("close", () => {
+      console.error("mqtt closed")
+    })
     this.connection.on("connect", () => {
 
       this.connection.on("message", (topic, message) => {
@@ -42,13 +48,15 @@ export class MQTTIntegration {
               break;
             }
           }
-          emitEvent("mqtt subscribe", {
-            payload: messageStr,
-            context: {
-              topic: topic,
-              device: matchedDevice
-            }
-          })
+          if (dbInitialited) {
+            emitEvent("mqtt subscribe", {
+              payload: messageStr,
+              context: {
+                topic: topic,
+                device: matchedDevice
+              }
+            })
+          }
 
           for (const resolvertopic in this.resolvers) {
             if (resolvertopic.startsWith(topic)) {

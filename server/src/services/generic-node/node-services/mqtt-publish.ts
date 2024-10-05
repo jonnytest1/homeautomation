@@ -8,6 +8,7 @@ import { backendToFrontendStoreActions } from '../generic-store/actions'
 import { genericNodeDataStore } from '../generic-store/reference'
 import { argumentTypeToJsonSchema } from '../typing/node-optinon-to-json-schema'
 import { updateRuntimeParameter } from '../element-node-fnc'
+import type { ElementNode } from '../typing/element-node'
 import type { ZodType } from 'zod'
 import type { ExtendedJsonSchema } from 'json-schema-merger'
 
@@ -69,29 +70,33 @@ addTypeImpl({
       const responseTopic = `response/${config.mqttDeviceName}/${command}/${mqttEvt.timestamp}`
       client.subscribe(responseTopic, (e, grants) => {
         if (e) {
-          debugger
+          console.error(e)
         }
       })
 
       client.on("message", (topic, msg) => {
         if (topic === responseTopic) {
-          const payload = {
-            response: `${msg.toString()}`
-          }
-
           try {
-            const responseEvt = JSON.parse(payload.response)
-            if ("response" in responseEvt) {
-              Object.assign(payload, responseEvt)
+            const payload = {
+              response: `${msg.toString()}`
             }
-          } catch (e) {
-            //
+
+            try {
+              const responseEvt = JSON.parse(payload.response)
+              if ("response" in responseEvt) {
+                Object.assign(payload, responseEvt)
+              }
+            } catch (e) {
+              //
+            }
+
+            evt.updatePayload(payload)
+            callbacks.continue(evt)
+          } finally {
+            client.unsubscribe(responseTopic)
+            client.endAsync()
           }
 
-          evt.updatePayload(payload)
-          callbacks.continue(evt)
-          client.unsubscribe(responseTopic)
-          client.endAsync()
         }
       })
     }
@@ -103,15 +108,14 @@ addTypeImpl({
     if (finalArgStr === undefined) {
       return
     }
-
-    client.on("connect", () => {
+    client.once("connect", () => {
       console.log(`sending ${finalArgStr} to ${finalTopic}`)
-
 
       client.publish(finalTopic, finalArgStr, {
         retain: commandObj?.asyncRetained || false
       }, async (err, msg) => {
-        await new Promise(res => setTimeout(res, 1000))
+
+        await new Promise(res => setTimeout(res, 500))
         if (!waitingforResponse) {
           callbacks.continue(evt)
           client.endAsync()
@@ -161,16 +165,13 @@ addTypeImpl({
 
       const device = mqttConnection.getDevice(node.parameters?.topic)
 
-      node.runtimeContext.info = device.friendlyName
+      let deviceInfo = device.friendlyName
       if (device.commands) {
         const commandOtpinos = device.commands.map(c => c.name)
-        node.runtimeContext.parameters["command"] = { type: "select", options: commandOtpinos }
 
 
+        updateRuntimeParameter(node, "command", { type: "select", options: commandOtpinos })
 
-        if (node.parameters.command == undefined) {
-          node.parameters.command = commandOtpinos[0]
-        }
         if (node.parameters?.command) {
           if (prev?.parameters?.command && node.parameters?.command !== prev?.parameters?.command) {
             delete node.parameters.argument
@@ -178,6 +179,11 @@ addTypeImpl({
           const command = device.commands.find(c => c.name == node.parameters?.command)
 
           let isSingleArgument = true
+
+          if (command) {
+            deviceInfo = `${device.friendlyName} - ${node.parameters?.command}`
+          }
+
           if (command?.argument) {
             let args: Array<NodeOptionTypeWithName> = []
 
@@ -210,22 +216,21 @@ addTypeImpl({
               inputSchema.type = "object"
             }
 
+            //@ts-expect-error 2590
+            const nodeCp = node as ElementNode<Record<string, unknown>, Record<string, Select>>
             for (const commandArgument of args) {
               if (commandArgument.type == "select") {
                 const cmdArg = commandArgument as Select
-                node.runtimeContext.parameters[commandArgument.name] = {
+
+                updateRuntimeParameter(nodeCp, commandArgument.name, {
                   type: "select",
                   options: [...cmdArg.options, "<payload>"]
-                }
+                })
 
-                if (node.parameters[commandArgument.name] == undefined) {
-                  node.parameters[commandArgument.name] = cmdArg.options[0]
-                } else {
-                  node.runtimeContext.info = `${device.friendlyName} - ${node.parameters.command} - ${node.parameters[commandArgument.name]}`
-                }
-              } else {
+                deviceInfo = `${device.friendlyName} - ${nodeCp.parameters.command} - ${nodeCp.parameters[commandArgument.name]} `
+              } else if (commandArgument) {
 
-                node.runtimeContext.parameters[commandArgument.name] = commandArgument as typeof node.runtimeContext.parameters["argument"]
+                updateRuntimeParameter(nodeCp, commandArgument.name, commandArgument as never)
               }
 
               inputSchema.properties ??= {}
@@ -241,12 +246,12 @@ addTypeImpl({
               const inputSchemaObj = {
                 jsonSchema: inputSchema,
                 mainTypeName: mainTypeName,
-                dts: await generateDtsFromSchema(inputSchema, `${node.type}-${node.uuid}-node change`)
+                dts: await generateDtsFromSchema(inputSchema, `${node.type} -${node.uuid} -node change`)
               } as const
               /**
                * @deprecated but overwritten by update after change use updateInputSchema
                */
-              node.runtimeContext.inputSchema = inputSchemaObj
+              //node.runtimeContext.inputSchema = inputSchemaObj
 
 
               genericNodeDataStore.dispatch(backendToFrontendStoreActions.updateInputSchema({
@@ -267,7 +272,10 @@ addTypeImpl({
 
       }
 
-
+      genericNodeDataStore.dispatch(backendToFrontendStoreActions.updateRuntimeInfo({
+        nodeUuid: node.uuid,
+        info: deviceInfo
+      }))
       if (device.sendsResponse()) {
         const responseType: ExtendedJsonSchema = {
           type: "string"
@@ -285,11 +293,15 @@ addTypeImpl({
           },
           required: ["response"]
         }
-        node.runtimeContext.outputSchema = {
-          jsonSchema: jsonSchema,
-          mainTypeName: "Main",
-          dts: await generateDtsFromSchema(jsonSchema, `${node.type}-${node.uuid}-node response`)
-        }
+
+        genericNodeDataStore.dispatch(backendToFrontendStoreActions.updateOutputSchema({
+          nodeUuid: node.uuid,
+          schema: {
+            jsonSchema: jsonSchema,
+            mainTypeName: "Main",
+            dts: await generateDtsFromSchema(jsonSchema, `${node.type} -${node.uuid} -node response`)
+          }
+        }))
       }
     }
   }

@@ -1,13 +1,23 @@
 
 import { config } from 'dotenv';
 import { join } from "path"
-const env = config({
-  path: join(__dirname, '..', ".env")
-});
-if (env.error) {
-  console.error(env.error)
-}
+import { existsSync } from "fs"
 
+
+function preloadEnv() {
+  const envFile = join(__dirname, '..', ".env");
+  if (existsSync(envFile)) {
+    const env = config({
+      path: envFile
+    });
+    if (env.error) {
+      console.error(env.error)
+    }
+  } else {
+    console.warn("no .env file")
+  }
+}
+preloadEnv();
 export const environment = process.env as {
   WATCH_SERVICES: string;
   MQTT_SERVER: string

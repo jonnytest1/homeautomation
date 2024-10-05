@@ -1,13 +1,32 @@
-import { lastEventFile, lastEventTimesFile } from './generic-node-constants';
+import { lastEventFile } from './generic-node-constants';
 import type { NodeEventJsonData } from './node-event';
 import type { NodeEventTimes } from './typing/generic-node-type';
 import type { ElementNode } from './typing/element-node';
 import { genericNodeDataStore } from './generic-store/reference';
+import { LastEventTime } from './models/last-event-time';
+import { LastNodeEvent } from './models/last-node-event';
 import { createAction, props } from '../../util/data-store/action';
+import { logKibana } from '../../util/log';
 import { BehaviorSubject } from 'rxjs';
+import { load, PsqlBase, save, SqlCondition } from 'hibernatets';
 import { writeFileSync, readFileSync } from "fs"
 
-export const lastEventDataObs = new BehaviorSubject<Record<string, NodeEventJsonData>>({})
+const lastEventDataObs = new BehaviorSubject<Record<string, NodeEventJsonData>>({})
+
+
+setInterval(() => {
+  const value = lastEventDataObs.value;
+  if (value && Object.keys(value).length) {
+    const fileContent = JSON.stringify(value, undefined, "   ");
+    if (!fileContent.trim()) {
+      console.error("fileContent was empty")
+      return
+    }
+    writeFileSync(lastEventFile, fileContent)
+  }
+
+
+}, 60000)
 
 
 const setInputTimeAction = createAction("set input time", props<{
@@ -60,6 +79,11 @@ export const lastEventTimesForNode = (nodeUuid: string) => {
   return lastEventTimes.chain(times => times[nodeUuid])
 }
 
+
+const eventTimesPool = new PsqlBase({
+  keepAlive: true
+})
+
 export function setLastEventInputTime(node: ElementNode, index: number, eventTime: number) {
 
   genericNodeDataStore.dispatch(setInputTimeAction({
@@ -67,15 +91,30 @@ export function setLastEventInputTime(node: ElementNode, index: number, eventTim
     eventTime,
     index: index
   }))
-  writeFileSync(lastEventTimesFile, JSON.stringify(genericNodeDataStore.getOnce(lastEventTimes), undefined, "   "))
+
+  const evtTime = LastEventTime.from(node.uuid, `input${index === 0 ? "" : index}`, eventTime)
+  save(evtTime, {
+    db: eventTimesPool,
+    updateOnDuplicate: true
+  }).catch(e => {
+    debugger
+  })
 }
 export function setLastEventOutputTime(nodeUuid: string, index: number, eventTime: number) {
+
   genericNodeDataStore.dispatch(setOutputTimeAction({
     nodeUuid: nodeUuid,
     eventTime,
     index
   }))
-  writeFileSync(lastEventTimesFile, JSON.stringify(genericNodeDataStore.getOnce(lastEventTimes), undefined, "   "))
+  const evtTime = LastEventTime.from(nodeUuid, `output${index === 0 ? "" : index}`, eventTime)
+
+  save(evtTime, {
+    db: eventTimesPool,
+    updateOnDuplicate: true
+  }).catch(e => {
+    debugger
+  })
 }
 export function setLastEvent(node: ElementNode, event: NodeEventJsonData) {
   lastEventDataObs.next({
@@ -83,7 +122,17 @@ export function setLastEvent(node: ElementNode, event: NodeEventJsonData) {
     [node.uuid]: event
   })
 
-  writeFileSync(lastEventFile, JSON.stringify(lastEventDataObs.value, undefined, "   "))
+
+  const evt = LastNodeEvent.from(node, event)
+  save(evt, {
+    updateOnDuplicate: true,
+    db: eventTimesPool
+  }).catch(e => {
+    logKibana("ERROR", {
+      message: "error saving event",
+      node: node.uuid
+    }, e)
+  })
 }
 
 
@@ -96,21 +145,64 @@ export function getLastEvent<P>(node: { uuid: string }): NodeEventJsonData<P> {
 
 function loadEvents() {
   try {
+
+    load(LastNodeEvent, SqlCondition.ALL, undefined, {
+      db: eventTimesPool,
+    })
+      .then(events => {
+
+        const eventTimes: Record<string, NodeEventJsonData> = {
+          ...lastEventDataObs.value ?? {}
+        }
+
+
+        for (const evt of events) {
+          eventTimes[evt.nodeUuid] = evt.event
+        }
+
+        lastEventDataObs.next(eventTimes)
+      })
+      .catch(e => {
+        console.error(e)
+        debugger
+        logKibana("ERROR", {
+          message: "error laoding last events"
+        }, e)
+      })
+
+
+
     const data = readFileSync(lastEventFile, { encoding: "utf8" })
     const eventDAta = JSON.parse(data)
     lastEventDataObs.next(eventDAta)
   } catch (e) {
     console.error(e)
-  }
+    lastEventDataObs.next({})
 
-  try {
-    const data = readFileSync(lastEventTimesFile, { encoding: "utf8" })
-    const eventDAta = JSON.parse(data)
-
-    genericNodeDataStore.dispatch(setEventTimes({ data: eventDAta }))
-  } catch (e) {
-    console.error(e)
   }
+  genericNodeDataStore.dispatch(setEventTimes({ data: {} }))
+
+  load(LastEventTime, SqlCondition.ALL, undefined, {
+    db: eventTimesPool
+  })
+    .then(times => {
+
+      const eventTimes: NodeEventTimes = {}
+
+      for (const time of times) {
+        eventTimes[time.nodeUuid] ??= {}
+        eventTimes[time.nodeUuid][time.keyindex] = +time.timestamp
+      }
+      genericNodeDataStore.dispatch(setEventTimes({ data: eventTimes }))
+    })
+    .catch(e => {
+      console.error(e)
+      debugger
+      logKibana("ERROR", {
+        message: "error laoding last event times"
+      }, e)
+    })
+
 }
 
 loadEvents()

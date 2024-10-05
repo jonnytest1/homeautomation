@@ -10,11 +10,11 @@ import type { NodeDefOptinos } from './typing/node-options';
 import type { NodeEventData } from './typing/node-event-data';
 import { setLastEvent, setLastEventInputTime, setLastEventOutputTime } from './last-event-service';
 import { ElementNodeImpl } from './element-node';
-import { deletedNodesDataFolder, nodesDataFolder, nodesFile } from './generic-node-constants';
+import { deletedNodesDataFolder, nodesContextFolder, nodesDataFolder, nodesFile } from './generic-node-constants';
 import { init } from './validation/watcher';
 import { genericNodeDataStore } from './generic-store/reference';
 import { backendToFrontendStoreActions, initializeStore } from './generic-store/actions';
-import { nodeglobalsSelector, selectGlobals, selectNodeByUuid, selectNodesOfType, selectTargetConnectorForNodeUuid } from './generic-store/selectors';
+import { nodeDataSelector, nodeglobalsSelector, selectGlobals, selectNodeByUuid, selectNodesOfType, selectTargetConnectorForNodeUuid } from './generic-store/selectors';
 import { forNodes, selectConnectionsFromContinue } from './generic-store/flow-selectors';
 import { loadNodeData } from './generic-node-data-loader';
 import { getLaodingFile, startHotRelaodingWatcher } from './hot-reloading';
@@ -29,6 +29,7 @@ import { jsonClone } from '../../util/json-clone';
 import type { Action } from '../../util/data-store/action';
 import { BehaviorSubject, combineLatest, Subject, type Subscription } from "rxjs"
 import { filter, skip } from "rxjs/operators"
+import { PsqlBase, updateDatabase } from 'hibernatets';
 import { writeFileSync } from "fs"
 import { rename, mkdir } from "fs/promises"
 import { join } from "path"
@@ -51,11 +52,13 @@ genericNodeDataStore.selectWithAction(nodeglobalsSelector)
       writeFileSync(nodesFile, JSON.stringify({ ...nodeData }, undefined, "   "))
       lastStoreTime = Date.now()
       storeTimeout = undefined
-    }, 500)
+    }, 2000)
   })
+
 
 declare global {
   var debugNode: (uuid: string) => void
+  var debugNextCall: (uuid: string) => void
 }
 
 
@@ -64,6 +67,17 @@ globalThis.debugNode = (uuid: string) => {
 
   console.log(node)
 }
+
+let debugActive: string | null = null
+
+globalThis.debugNextCall = (uuid: string) => {
+  debugActive = uuid
+}
+
+setInterval(() => {
+  const historyFile = join(nodesContextFolder, `nodes-history-${new Date().toISOString().split("T")[0]}.json`)
+  writeFileSync(historyFile, JSON.stringify(genericNodeDataStore.getOnce(nodeDataSelector), undefined, "   "))
+}, 1000 * 60 * 60 * 24)
 
 
 export function emitFromNode(nodeUuid: string, evt: NodeEvent, index?: number) {
@@ -174,14 +188,14 @@ forNodes({
             clearTimeout(lastNodeStoreTimeout)
           }
           lastNodeStoreTimeout = setTimeout(() => {
-            console.log("writing nodes for " + action)
+            console.log(`writing node for ${updateAction?.type} ${node.uuid} ${node.type}`)
 
             const file = join(nodesDataFolder, node.uuid + ".json")
             writeFileSync(file, JSON.stringify(node, undefined, "   "))
 
             lastNodeStore = Date.now()
             lastNodeStoreTimeout = undefined
-          }, 500)
+          }, 5000)
 
           if (pendingCheck) {
             return
@@ -197,15 +211,18 @@ forNodes({
               checkInvalidations(typeImpl, node, last);
               actions.length = 0
               const nodeCpy = jsonClone(node)
+              const passedNode = jsonClone(node)
+              Object.setPrototypeOf(passedNode, ElementNodeImpl.prototype);
+              Object.assign(passedNode, createCallbacks(passedNode))
 
-              await typeImpl.nodeChanged?.(node as ElementNodeImpl<never>, last);
+              await typeImpl.nodeChanged?.(passedNode as ElementNodeImpl<never>, last);
 
               const nodeChanged = genericNodeDataStore.getOnce(selectNodeByUuid(node.uuid))
               if (!actions?.length) {
                 genericNodeDataStore.dispatch(backendToFrontendStoreActions.updateNode({
-                  newNode: node
+                  newNode: passedNode
                 }))
-              } else if (JSON.stringify(nodeCpy) !== JSON.stringify(node)) {
+              } else if (JSON.stringify(nodeCpy) !== JSON.stringify(passedNode)) {
                 debugger;
                 logKibana("ERROR", "node changed with store update")
               }
@@ -268,7 +285,15 @@ forNodes({
 loadNodeData()
 
 init()
-
+updateDatabase(__dirname + '/models', {
+  dbPoolGEnerator: PsqlBase,
+  modelDb: "public"
+}).then(() => {
+  console.log("updated db")
+}).catch(e => {
+  debugger
+  throw e
+})
 
 export function addTypeImpl<C, G extends NodeDefOptinos, O extends NodeDefOptinos, P, S, TS extends NullTypeSubject>(typeImpl: TypeImplementaiton<C, G, O, P, S, TS>) {
 
@@ -311,7 +336,6 @@ export function addTypeImpl<C, G extends NodeDefOptinos, O extends NodeDefOptino
     typeImpl.initializeServer(elementNodes, globals as never)
 
   }
-
 
   if (typeImplUpdate) {
     reloadNodes(elementNodes, implementationType, currerntTypeImpls);
@@ -368,6 +392,11 @@ async function processInput(data: { node: ElementNode, nodeinput: number, data: 
     try {
       const eventCopy = data.data.copy()
       data.data.inputIndex = data.nodeinput
+
+      if (debugActive === data.node.uuid) {
+        debugActive = null
+        debugger
+      }
       await typeimpl.process(data.node as ElementNode<never>, data.data, createCallbacks(data.node))
 
 
@@ -384,16 +413,35 @@ async function processInput(data: { node: ElementNode, nodeinput: number, data: 
   }
 }
 
-export function emitEvent(type: string, data: NodeEventData) {
 
+let eventIndex = 0
+
+export function emitEvent(type: string, data: NodeEventData) {
+  data.context.eventIndex = eventIndex++
   const nodes = genericNodeDataStore.getOnce(selectNodesOfType(type))
   nodes.forEach(node => {
     const event = createNodeEvent(data)
 
+    const start = Date.now()
     processInput({
       node: node,
       nodeinput: 0,
       data: event
+    }).then(() => {
+      const end = Date.now()
+
+      const duration = end - start;
+      if (duration > 1000) {
+        logKibana("ERROR", {
+          message: "handled event",
+          type,
+          context: JSON.stringify(data.context),
+          start,
+          end,
+          duration: duration
+        })
+      }
+
     })
   })
 }

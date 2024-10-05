@@ -8,6 +8,7 @@ import { handleTimedEvent } from '../generic-node/node-services/timing/timing';
 import type { LoadOptions } from 'hibernatets/load';
 import type { ConstructorClass } from 'hibernatets/interface/mapping';
 import { load, queries } from 'hibernatets';
+import { MariaDbBase } from 'hibernatets/dbs/mariadb-base';
 
 type CallbackClass<T = unknown> = {
   classRef: ConstructorClass<T>;
@@ -29,10 +30,21 @@ export class EventScheduler {
 
 
   repeatedFailures?: number
+  trackingPool: MariaDbBase;
 
   constructor() {
     console.log("starting event scheduler")
 
+
+    this.trackingPool = new MariaDbBase(undefined, {
+      connectionLimit: 6,
+      // trace: true, 
+      logPackets: true,
+      keepAliveDelay: 5000,
+      idleTimeout: 560,
+      maxAllowedPacket: 67108864
+
+    })
 
     const callbackClasses: Array<CallbackClass> = [{
       classRef: Sender,
@@ -78,7 +90,8 @@ export class EventScheduler {
 
   private async callTimer() {
     const timer = await load(Timer, "alerted='false' AND endtimestamp < UNIX_TIMESTAMP(NOW(3))*1000", [], {
-      first: true
+      first: true,
+      db: this.trackingPool
     });
     if (!timer) {
       return;
@@ -96,7 +109,8 @@ export class EventScheduler {
       }
     } else {
       let thisArgsObject = await load<unknown>(callback.classRef, +timer.timerClassId, undefined, {
-        deep: true
+        deep: true,
+        db: this.trackingPool
       }) as Sender | Connection;
       try {
         const callbackClass = callback as CallbackClass<Sender | Connection>

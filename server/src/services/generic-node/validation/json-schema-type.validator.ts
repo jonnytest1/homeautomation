@@ -65,7 +65,35 @@ export function validateJsonSchema(context: ValidationContext) {
   }
 
   if (!target.type || !assigning.type) {
-    throw new SchemaMatchingError(context, "invalid schema type")
+    if (target.anyOf) {
+      let foundMatch = false;
+      const errors: Array<SchemaMatchingError> = []
+      for (let i = 0; i < target.anyOf.length; i++) {
+        const schemaOption = target.anyOf[i]
+        try {
+          validateJsonSchema({
+            ...context,
+            target: schemaOption as ExtendedJsonSchema,
+            assigning: assigning,
+            path: [...context.path, `[_${i}]`]
+          })
+          //target = schemaOption
+          foundMatch = true
+        } catch (e) {
+          errors.push(e)
+        }
+      }
+
+      if (!foundMatch) {
+        throw new SchemaMatchingError(context, "didnt match any schema")
+      }
+      return
+      // done
+    } else {
+      throw new SchemaMatchingError(context, "invalid schema type")
+    }
+
+
   }
   if (target.type !== assigning.type) {
     throw new SchemaMatchingError(context, `different schema Types ${target.type} and ${assigning.type}`)

@@ -38,5 +38,6 @@ export class TimerFactory {
       .then(() => {
         FrontendWebsocket.updateTimers()
       })
+    return timer
   }
 }
