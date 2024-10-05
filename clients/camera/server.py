@@ -17,7 +17,7 @@ sys.stdout = open("/home/pi/python/log.log", "a")
 print("hello world")
 
 PORT = 28080
-SERVER_IP = 'https://192.168.178.54/nodets/'
+SERVER_IP = 'https://smarthome/'
 
 cameraHandlerInstance = CameraHandler()
 
@@ -46,7 +46,7 @@ class CustomHandler(http.server.SimpleHTTPRequestHandler):
             else:
                 response, mimetype = cameraHandlerInstance.trigger(postdata)
 
-            if(response is None):
+            if (response is None):
                 self.send_response(204)
                 self.end_headers()
             else:
