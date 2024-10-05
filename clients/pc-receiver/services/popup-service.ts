@@ -2,6 +2,7 @@ import { app, BrowserWindow, protocol } from "electron"
 import { logKibana } from '../util/log'
 
 let activeWindow: BrowserWindow | undefined = undefined
+let windowShown = false
 
 
 export const popupConfig = {
@@ -62,10 +63,15 @@ export async function popup(data: string, callback: { response: (resp: { ts: num
   await app.whenReady()
 
   if (!popupCfg.active) {
-    logKibana("INFO", "closing previous window after close command")
+    if (windowShown) {
+      logKibana("INFO", "closing previous window after close command")
+    }
+
     activeWindow?.hide()
+    activeWindow?.webContents.executeJavaScript(`window.stopped=true;`);
     activeWindow?.webContents.forcefullyCrashRenderer()
     activeWindow = undefined
+    windowShown = false
     return
   }
 
@@ -86,6 +92,7 @@ export async function popup(data: string, callback: { response: (resp: { ts: num
 
     activeWindow.webContents.on("did-finish-load", () => {
       activeWindow?.show()
+      windowShown = true
     })
 
     activeWindow.webContents.session.protocol.registerStringProtocol("form", e => {
@@ -106,7 +113,11 @@ export async function popup(data: string, callback: { response: (resp: { ts: num
        })
      })*/
   }
-  let actionRow = `<button type="submit" name="response" value="dismissed" ${popupCfg.dismissable ? "" : "hidden"}>dismiss</button>
+  popupCfg.popupStartTime = Date.now()
+  let actionRow = `
+
+  <input type="hidden" name="formts" value="${popupCfg.popupStartTime}">
+  <button type="submit" name="response" value="dismissed" ${popupCfg.dismissable ? "" : "hidden"}>dismiss</button>
     <button type="submit" name="response" value="timeout" hidden>timeout</button>`
 
 
@@ -131,13 +142,22 @@ export async function popup(data: string, callback: { response: (resp: { ts: num
           // ${Date.now()}
       </script>
    */
-  popupCfg.popupStartTime = Date.now()
   onStartLoad = () => {
     activeWindow?.webContents.executeJavaScript(`window.popupConfig=${JSON.stringify(popupCfg)};`)
   }
   onForm = url => {
     const request = new URL(url)
-    const data = Object.fromEntries(request.searchParams.entries()) as { response: "timeout" | "dismissed", [k: string]: string; }// {timeout:"true"}
+    const data = Object.fromEntries(request.searchParams.entries()) as {
+      response: "timeout" | "dismissed",
+      formts: string
+      [k: string]: string;
+    }// {timeout:"true"}
+
+    if (+data.ts !== popupCfg.popupStartTime) {
+      debugger
+      return
+    }
+
 
     callback.response({
       ts: popupCfg["timestamp"],
