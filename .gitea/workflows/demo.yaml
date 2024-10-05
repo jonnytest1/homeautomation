@@ -19,11 +19,11 @@ jobs:
           fetch-depth: 2
       # - run: echo "💡 The ${{ gitea.repository }} repository has been cloned to the runner."
       #- run: echo "🖥️ The workflow is now ready to test your code on the runner."
-      - name: List files in the repository
-        run: |
-          ls ${{ gitea.workspace }}
-      - run: echo "🍏 This job's status is ${{ job.status }}."
-      - run: whoami
-      - run: docker ps
+      #- name: List files in the repository
+      #  run: |
+      #    ls ${{ gitea.workspace }}
+      #- run: echo "🍏 This job's status is ${{ job.status }}."
+      #- run: whoami
+      #- run: docker ps
       - run: python "./.gitea/workflows/setup.py" install
       - run: python "./.gitea/workflows/deploy.py"
