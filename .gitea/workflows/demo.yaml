@@ -9,6 +9,7 @@ jobs:
       image: "cert-runner"
       volumes:
         - /var/run/dpl/c_dpl.sock:/var/run/dpl/c_dpl.sock
+        - /home/smarthome/last_action:/var/run/dpl/last_action
     steps:
       #- run: echo "🎉 The job was automatically triggered by a ${{ gitea.event_name }} event."
       #- run: echo "🐧 This job is now running on a ${{ runner.os }} server hosted by Gitea!"
@@ -16,7 +17,7 @@ jobs:
       - name: Check out repository code
         uses: actions/checkout@v4
         with:
-          fetch-depth: 2
+          fetch-depth: 10
       # - run: echo "💡 The ${{ gitea.repository }} repository has been cloned to the runner."
       #- run: echo "🖥️ The workflow is now ready to test your code on the runner."
       #- name: List files in the repository
@@ -27,3 +28,8 @@ jobs:
       #- run: docker ps
       - run: python "./.gitea/workflows/setup.py" install
       - run: python "./.gitea/workflows/deploy.py"
+      - name: cache last commit action
+        uses: actions/cache@v3
+        with:
+          path: last_action.commit
+          key: smarthome_commit_cache
