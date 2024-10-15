@@ -1,0 +1,57 @@
+[{
+    "type": "Battery",
+    "prov": {
+        "type": "Wire",
+        "connectedWire": {
+            "type": "PiPico",
+            "uuid": "8faa3d99-bfe9-4746-bdf5-7608c722ec28",
+            "code": "",
+            "ui": {
+                "y": 260,
+                "x": 970
+            },
+            "connections": {
+                "16": {
+                    "connection": {
+                        "type": "Wire",
+                        "connectedWire": {
+                            "type": "LED",
+                            "resistance": 5,
+                            "outC": {
+                                "type": "Wire",
+                                "connectedWire": {
+                                    "type": "PiPico",
+                                    "ref": "8faa3d99-bfe9-4746-bdf5-7608c722ec28",
+                                    "pinConnection": 23
+                                }
+                            },
+                            "ui": {
+                                "y": 150,
+                                "x": 1230
+                            },
+                            "uuid": "3407b4a7-d387-42f4-8b24-a05a526b7d94"
+                        }
+                    },
+                    "mode": "OUT",
+                    "outputValue": 0
+                }
+            },
+            "batteryCon": {
+                "id": 3,
+                "connection": {
+                    "type": "Wire",
+                    "connectedWire": "BatteryRef"
+                }
+            }
+        }
+    },
+    "voltage": 5,
+    "ui": {
+        "y": 280,
+        "x": 690
+    },
+    "enabled": false,
+    "charge": 0.01,
+    "maxAmpere": 36
+}
+]

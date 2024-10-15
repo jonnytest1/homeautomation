@@ -92,7 +92,7 @@ export class Wire extends Collection {
 
 
   register(options: RegisterOptions) {
-    options.nodes.push(this);
+    options.nodes.push({ name: this.constructor.name });
     return this.outC.register({ ...options, from: this });
   }
 

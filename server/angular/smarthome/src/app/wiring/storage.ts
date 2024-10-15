@@ -41,7 +41,7 @@ export class LocalStorageSerialization {
 
     for (const battery of batteries) {
       // stringify battery individually, cause no key is used to break up loops
-      nets.push(JSON.stringify(battery))
+      nets.push(battery.jsonStringify())
     }
     debugger
     const json = JSON.stringify(nets);
@@ -66,10 +66,6 @@ export class LocalStorageSerialization {
       parsed = JSON.parse(netStr).map(str => JSON.parse(str))
 
     }
-
-    debugger
-
-
     return this.parseJson(parsed, options);
 
   }
@@ -87,7 +83,7 @@ export class LocalStorageSerialization {
       constorlRefsInitialized: controlRefsinitialized.prRef,
       controllerRefs: controllerRefs
     }));
-    debugger
+
     Object.keys(controllerRefs).forEach(key => {
       const controller = controllerRefs[key];
       const controlRef = controlRegfs[key];

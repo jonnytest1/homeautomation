@@ -49,6 +49,7 @@ export class WiringComponent implements OnInit, AfterContentChecked, OnDestroy {
 
 
   nodes: Array<NodeEl> = [];
+  currentWireCache: string;
 
   constructor(private cdr: ChangeDetectorRef,
     private viewRef: ViewContainerRef,
@@ -56,7 +57,7 @@ export class WiringComponent implements OnInit, AfterContentChecked, OnDestroy {
     public serialize: LocalStorageSerialization) {
 
     this.batteries = [];
-
+    const structureCache = []
 
     this.interval = setInterval(() => {
       this.cdr.markForCheck();
@@ -68,15 +69,21 @@ export class WiringComponent implements OnInit, AfterContentChecked, OnDestroy {
 
         const structreArray = battery.getStructure();
 
-        if (!this.dataStructures[i] || structreArray.length !== this.dataStructures[i].length) {
+        const structCache = JSON.stringify(structreArray);
+
+        if (!this.dataStructures[i] || structureCache[i] !== structCache) {
           this.dataStructures[i] = structreArray;
+          structureCache[i] = structCache
         }
 
       });
 
       const positinons = this.getWirePositions();
-      if (JSON.stringify(this.wirePositions) !== JSON.stringify(positinons)) {
+      const cachePos = JSON.stringify(positinons.map(pos => ({ ...pos, wire: null })))
+
+      if (this.currentWireCache !== cachePos) {
         this.wirePositions = positinons;
+        this.currentWireCache = cachePos
       }
     }, 100);
 
@@ -129,10 +136,10 @@ export class WiringComponent implements OnInit, AfterContentChecked, OnDestroy {
 
     return [...wireList].map(wire => {
       const connectionParent = wire.inC?.parent;
-      const from = connectionParent?.uiNode?.getInOutComponent()?.getOutVector();
+      const from = connectionParent?.uiNode?.getInOutComponent(wire.inC?.id)?.getOutVector();
 
       const toParent = wire.outC?.parent;
-      const to = toParent?.uiNode?.getInOutComponent()?.getInVector();
+      const to = toParent?.uiNode?.getInOutComponent(wire.outC?.id)?.getInVector();
 
       if (!to || !from) {
         return undefined;

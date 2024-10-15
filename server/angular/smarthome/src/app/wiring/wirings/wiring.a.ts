@@ -24,6 +24,8 @@ export interface CurrentOption {
 
 export interface GetResistanceOptions {
   forParrallel?: number;
+  addStep: (w: Wiring) => void
+
 }
 
 
@@ -31,6 +33,8 @@ export interface ResistanceReturn {
   resistance: number;
 
   afterBlock: Array<ResistanceReturn>;
+
+  steps: Array<any>
 }
 
 export abstract class Wiring {
@@ -45,5 +49,9 @@ export abstract class Wiring {
   abstract pushCurrent(options: CurrentOption, from: Wiring | null): CurrentCurrent;
 
   abstract register(options: RegisterOptions);
+
+  /* abstract fromRegistration(data) {
+ 
+   }*/
 
 }

@@ -71,12 +71,12 @@ export class NetDisplayComponent implements OnInit {
           subArray.push(item)
 
         }
-      } else if (item instanceof ControlCollection || item instanceof Battery) {
+      } else if ("name" in item && (item.name == "ControlCollection" || item.name == "Battery")) {
         subArray = []
         this.parsedData.push(item)
         this.parsedData.push(subArray)
         this.indentItem.push(item)
-      } else if (item instanceof Collection && this.data.length > 3 && !(item instanceof Wire)) {
+      } else if ("name" in item && (item.name == "Collection" && this.data.length > 3)) {
         const inConnection = this.parsedData.pop()
         skipNext = true
         const subArray = []
@@ -84,14 +84,23 @@ export class NetDisplayComponent implements OnInit {
           subArray.push(inConnection)
         }
         subArray.push(item);
-        if (item.outC) {
-          subArray.push(item.outC)
-        }
+        //if (item.outC) {
+        // subArray.push(item.outC)
+        //}
         this.parsedData.push(subArray)
       } else if (item instanceof Array) {
-        this.parsedData.push({
-          parrallel: item
-        })
+
+
+
+        this.parsedData.push([{
+          parrallel: item.map(i => {
+            if (i instanceof Array) {
+              return i
+            } else {
+              return [i]
+            }
+          })
+        }])
       } else {
         this.parsedData.push(item)
       }

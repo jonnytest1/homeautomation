@@ -28,5 +28,9 @@
       "DOM.Iterable",
       "ES2022"
     ],
-  }
+  },
+  "exclude": [
+    "**/*.test.ts",
+    "**/*.spec.ts"
+  ]
 }

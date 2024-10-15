@@ -20,7 +20,7 @@ export class LED extends Resistor {
 
   getTotalResistance(from: any, options: GetResistanceOptions): ResistanceReturn {
     if (this.blown) {
-      return noConnection()
+      return noConnection(this)
     }
     return super.getTotalResistance(from, options)
   }

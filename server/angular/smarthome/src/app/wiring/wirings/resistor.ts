@@ -7,7 +7,7 @@ import { Connection } from './connection';
 import type { Wire } from './wire';
 import type { CurrentCurrent, CurrentOption, GetResistanceOptions, ResistanceReturn, Wiring } from './wiring.a';
 import { v4 } from "uuid"
-import type { RegisterOptions } from './interfaces/registration';
+import type { RegisterOptions, REgistrationNode } from './interfaces/registration';
 
 export class Resistor extends Collection implements Wiring {
 
@@ -44,7 +44,16 @@ export class Resistor extends Collection implements Wiring {
     }, this);
   }
   register(options: RegisterOptions) {
-    options.nodes.push(this)
+    const repr: REgistrationNode = { name: this.constructor.name };
+    if (options.withSerialise) {
+      repr.details = {
+        resistance: this.resistance,
+        uuid: this.uuid,
+        ui: this.uiNode,
+      }
+    }
+
+    options.nodes.push(repr)
     return this.outC.register({ ...options, from: this })
   }
   applytoJson(json: Record<string, any>): void {
@@ -58,6 +67,9 @@ export class Resistor extends Collection implements Wiring {
     this.uuid = json.uuid
     this.resistance = json.resistance
   }
+
+
+
 
   static fromJSON(json: any, context: FromJsonOptions): Wire {
     const self = new Resistor(json.resistance);

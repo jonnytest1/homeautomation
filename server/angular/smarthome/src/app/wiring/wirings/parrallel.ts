@@ -50,7 +50,7 @@ export class Parrallel extends ControlCollection implements Wiring {
     if (from == this.innerOutConnection) {
       if (options.forParrallel) {
         if (options.forParrallel === 1) {
-          return noResistance();
+          return noResistance(this);
         }
         this.resistanceAfterBlock = this.outC.getTotalResistance(this, { ...options, forParrallel: options.forParrallel - 1 });
         return this.resistanceAfterBlock;
@@ -67,7 +67,7 @@ export class Parrallel extends ControlCollection implements Wiring {
       }
     });
     if (resistancetotal == 0) {
-      return noResistance();
+      return noResistance(this);
     }
     this.resistance = 1 / resistancetotal;
     const resistanceAfter = this.outC.getTotalResistance(this, options);
@@ -95,6 +95,9 @@ export class Parrallel extends ControlCollection implements Wiring {
 
 
   getStructure() {
-    return this.containers.map(container => container instanceof ControlCollection ? container.getStructure() : container);
+    return this.containers
+      .map(container => container instanceof ControlCollection ? container.getStructure() : {
+        name: container.constructor.name
+      });
   }
 }

@@ -53,7 +53,7 @@ export abstract class UINode<T extends Collection = Collection> {
     return wires;
   }
 
-  getInOutComponent(): InOutComponent {
+  getInOutComponent(wireId: string): InOutComponent {
     return this.inOutComponent;
   }
 

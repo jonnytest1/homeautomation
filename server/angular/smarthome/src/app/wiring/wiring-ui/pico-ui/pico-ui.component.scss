@@ -1,0 +1,23 @@
+img{
+  margin-left: 7px;
+}
+.pico{
+  display: flex;
+}
+
+.connector{
+  position: absolute;
+  
+
+  &.top{
+    top:-8px;
+  }
+
+  &.bottom{
+    bottom:-8px
+  }
+}
+
+.spacer{
+  height: 110px;
+}

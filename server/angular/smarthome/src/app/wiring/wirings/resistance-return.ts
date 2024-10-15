@@ -1,16 +1,18 @@
-import type { ResistanceReturn } from './wiring.a';
+import type { ResistanceReturn, Wiring } from './wiring.a';
 
-export function noConnection(): ResistanceReturn {
+export function noConnection(obj: Wiring): ResistanceReturn {
   return {
     resistance: NaN,
-    afterBlock: []
+    afterBlock: [],
+    steps: [obj]
   }
 }
 
 
-export function noResistance(): ResistanceReturn {
+export function noResistance(obj: Wiring): ResistanceReturn {
   return {
     resistance: 0,
-    afterBlock: []
+    afterBlock: [],
+    steps: [obj]
   }
 }

@@ -1,13 +1,15 @@
 
+import { iterateJsonStringify } from '../../utils/json-stringify-iterator';
 import type { FromJsonOptions } from '../serialisation';
 import { JsonSerializer } from '../serialisation';
 import { Collection } from './collection';
 import { Connection } from './connection';
-import type { RegisterOptions } from './interfaces/registration';
+import type { RegisterOptions, REgistrationNode } from './interfaces/registration';
 import { noResistance } from './resistance-return';
 import type { CurrentCurrent, CurrentOption, GetResistanceOptions, ResistanceReturn, Wiring } from './wiring.a';
 
 export class Battery extends Collection {
+  static jsonStringifyTime: number;
 
   constructor(public voltage: number | null, ampereHours: number) {
     super(null, null);
@@ -34,11 +36,12 @@ export class Battery extends Collection {
 
   enabled = false;
 
-  getTotalResistance(from: Connection, options: GetResistanceOptions): ResistanceReturn {
+  getTotalResistance(from: Connection | null, options: GetResistanceOptions): ResistanceReturn {
+    options.addStep(this)
     if (!from) {
       return this.outC.getTotalResistance(this, options);
     } else {
-      return noResistance();
+      return noResistance(this);
     }
 
   }
@@ -62,7 +65,14 @@ export class Battery extends Collection {
 
   checkContent(deltaSeconds: number) {
     if (this.enabled) {
-      this.networkResistance = this.getTotalResistance(null, {}).resistance;
+      const steps = []
+      const opts: GetResistanceOptions = {
+        addStep(w) {
+          steps.push(w)
+        }
+      };
+      const totalResistance = this.getTotalResistance(null, opts);
+      this.networkResistance = totalResistance.resistance;
     } else {
       this.networkResistance = NaN;
     }
@@ -101,20 +111,38 @@ export class Battery extends Collection {
 
 
   register(options: RegisterOptions) {
+    const instanceNode: REgistrationNode = { name: "Battery" };
     if (options.from == this.inC) {
-      options.nodes.push(this);
+      options.nodes.push(instanceNode);
       return;
     }
-    options.nodes.push(this);
+    if (options.withSerialise) {
+      instanceNode.details = {
+        enabled: this.enabled,
+        voltage: this.voltage,
+        ui: this.uiNode,
+        charge: this.ampereSeconds === Infinity ? "Infinity" : this.ampereSeconds / (60 * 60),
+        maxAmpere: this.maxAmpereSeconds === Infinity ? "Infinity" : this.maxAmpereSeconds
+      }
+    }
+
+    options.nodes.push(instanceNode);
     this.outC?.register(options);
   }
   getStructure() {
     const nodes = [];
-    this.register({ nodes, until: this.inC, from: this, parrallelLevel: 0, registrationTimestamp: Date.now() });
+    this.register({
+      nodes,
+      until: this.inC,
+      from: this,
+      parrallelLevel: 0,
+      registrationTimestamp: Date.now(),
+      withSerialise: false
+    });
     return nodes;
   }
   toJSON(key?) {
-
+    //throw new Error("deprecated")
     if (key == "connectedWire") {
       return "BatteryRef"
     } else if (key) {
@@ -131,7 +159,6 @@ export class Battery extends Collection {
     };
   }
 
-
   static fromJSON(fromJSON: jsonType, options: FromJsonOptions): Battery {
     if (typeof fromJSON !== "string") {
 
@@ -141,7 +168,6 @@ export class Battery extends Collection {
       if (fromJSON.maxAmpere == "Infinity") {
         fromJSON.maxAmpere = Infinity
       }
-      debugger
       const battery = new Battery(fromJSON.voltage, +fromJSON.charge ?? 0.001);
       battery.enabled = fromJSON.enabled;
       battery.maxAmpereSeconds = +fromJSON.maxAmpere ?? +fromJSON.charge ?? 0.0001;
@@ -170,6 +196,20 @@ export class Battery extends Collection {
     }
 
   }
+
+
+  jsonStringify() {
+    try {
+      Battery.jsonStringifyTime = Date.now()
+
+
+      return iterateJsonStringify(this)
+    } finally {
+      Battery.jsonStringifyTime = null
+    }
+  }
+
+
 }
 
 type jsonType = ReturnType<(Battery)['toJSON']>

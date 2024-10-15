@@ -13,10 +13,11 @@ import { RelayUiComponent } from './relay-ui/relay-ui.component';
 import { TransformatorUiComponent } from './transformator-ui/transformator-ui.component';
 
 @NgModule({
+
   imports: [
-    CommonModule, MatIconModule, MatBottomSheetModule
+    CommonModule, MatIconModule, MatBottomSheetModule, InOutComponent
   ],
-  declarations: [InOutComponent, LedUiComponent, TransformatorUiComponent,
+  declarations: [LedUiComponent, TransformatorUiComponent,
 
     RelayUiComponent,
     BatteryUiComponent, ResistorUiComponent, SwitchComponent, WireUiComponent,

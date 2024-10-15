@@ -4,11 +4,14 @@ import { BindingBoolean } from '../../../utils/type-checker';
 import { BoundingBox } from '../../util/bounding-box';
 import { WiringDataService } from '../../wiring.service';
 import { ParrallelWire } from '../../wirings/parrallel-wire';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-in-out',
   templateUrl: './in-out.component.html',
-  styleUrls: ['./in-out.component.less']
+  styleUrls: ['./in-out.component.less'],
+  standalone: true,
+  imports: [CommonModule]
 })
 export class InOutComponent implements OnInit, AfterViewInit {
 
@@ -21,7 +24,13 @@ export class InOutComponent implements OnInit, AfterViewInit {
   @Input()
   noInput: BindingBoolean;
 
+  @Input()
+  singleInOut: BindingBoolean;
+
   hover = false;
+
+  @Input()
+  title: string
 
   @ViewChild('inLabel')
   public inLabel: ElementRef<HTMLElement>;
@@ -68,8 +77,23 @@ export class InOutComponent implements OnInit, AfterViewInit {
   }
 
   storeOutgoing() {
-    this.wiringService.dragConnection = this.node.outC;
-    this.wiringService.currentWire = { from: this.getOutVector(), to: this.getOutVector() };
+    if (this.singleInOut) {
+      this.wiringService.dragConnection = this.node.inC;
+      this.wiringService.currentWire = { from: this.getOutVector(), to: this.getOutVector() };
+    } else {
+      this.wiringService.dragConnection = this.node.outC;
+      this.wiringService.currentWire = { from: this.getOutVector(), to: this.getOutVector() };
+    }
+
+  }
+
+
+  dragOver(evt: DragEvent) {
+    if (this.singleInOut && this.wiringService.dragConnection === this.node.inC) {
+      //if its the same connection dont allow drop
+      return
+    }
+    evt.preventDefault()
   }
 
   onDrop(event) {

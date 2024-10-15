@@ -26,7 +26,7 @@ export class ParrallelWire extends Wiring {
 
   getTotalResistance(from: Wiring, options: GetResistanceOptions): ResistanceReturn {
     if (!this.outC.length) {
-      return noConnection()
+      return noConnection(this)
     }
 
     let parrallelIndex = options.forParrallel;
@@ -68,20 +68,22 @@ export class ParrallelWire extends Wiring {
       }
     })
     if (resistanceAfter == "NaN") {
-      return noConnection()
+      return noConnection(this)
     }
     this.resistance = 1 / this.resistancetotal;
     if (this.inC.length > 1) {
       resistanceAfter.push({
         resistance: this.resistance,
-        afterBlock: []
+        afterBlock: [],
+        steps: [this]
       })
     }
 
     if (this.resistancetotal == 0 || this.inC.length > 1) {
       return {
         resistance: 0,
-        afterBlock: resistanceAfter
+        afterBlock: resistanceAfter,
+        steps: [this]
       }
     }
     const resistanceAfterEl = resistanceAfter.pop()
@@ -90,11 +92,12 @@ export class ParrallelWire extends Wiring {
     return {
       ...resistanceAfter,
       resistance: resistanceAfterEl.resistance + this.resistance,
-      afterBlock: resistanceAfter
+      afterBlock: resistanceAfter,
+      steps: [this]
     }
   }
 
-  pushCurrent(options: CurrentOption): CurrentCurrent {
+  pushCurrent(options: CurrentOption, _): CurrentCurrent {
     if (this.inC.length > 1) {
       if (this.outC.length > 1) {
         throw new Error("not implemented")
@@ -178,7 +181,7 @@ export class ParrallelWire extends Wiring {
   }
 
   register(options: RegisterOptions) {
-    options.nodes.push(this)
+    options.nodes.push({ name: this.constructor.name })
 
     const nodes = this.outC.map(c => {
       const parrallelNodes = []

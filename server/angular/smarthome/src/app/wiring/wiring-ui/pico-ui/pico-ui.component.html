@@ -1,0 +1,40 @@
+<div class="pico">
+  <ng-container *ngFor="let inp of topUiComponets;let index=index">
+    <app-in-out #inout
+                class="connector top"
+                [singleInOut]="true"
+                [ngClass]="['con'+index]"
+                [title]="node.getId(inp.inC)+''"
+                [ngStyle]="{marginLeft:6+((index+1)*13)+'px'}"
+                [node]="inp">
+
+      <div class="spacer">
+
+      </div>
+    </app-in-out>
+  </ng-container>
+  <img src="assets/icons/pipico.png"
+       (click)="openSnackbar()" />
+  <ng-container *ngFor="let outp of bottomUiComponents;let index=index">
+    <app-in-out #inout
+                class="connector bottom"
+                [singleInOut]="true"
+                [title]="node.getId(outp.inC)+''"
+                [ngClass]="['con'+index]"
+                [ngStyle]="{marginLeft:6+((index+1)*13)+'px'}"
+                [node]="outp">
+
+      <div class="spacer">
+
+      </div>
+    </app-in-out>
+  </ng-container>
+</div>
+
+
+<ng-template #options>
+  <textarea #textscr
+            (change)="node.updateCode(textscr.value)">
+  {{node.script}}
+  </textarea>
+</ng-template>

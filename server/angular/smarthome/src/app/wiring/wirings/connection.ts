@@ -7,7 +7,7 @@ import type { CurrentCurrent, CurrentOption, GetResistanceOptions, ResistanceRet
 export class Connection implements Wiring {
 
 
-  constructor(public parent: Wiring, private id: string) {}
+  constructor(public parent: Wiring, public id: string) {}
 
 
   resistance: number;
@@ -16,6 +16,7 @@ export class Connection implements Wiring {
   connectedTo?: Wire | ParrallelWire;
 
   getTotalResistance(from: Wiring | null, options: GetResistanceOptions): ResistanceReturn {
+    options.addStep(this)
     let target = this.parent;
 
     if (from === this.parent) {
@@ -23,7 +24,7 @@ export class Connection implements Wiring {
 
     }
     if (target == undefined) {
-      return noConnection();
+      return noConnection(this);
     }
     return target.getTotalResistance(this, options);
   }
@@ -42,7 +43,7 @@ export class Connection implements Wiring {
 
   }
   register(options: RegisterOptions) {
-    options.nodes.push(this);
+    options.nodes.push({ name: "Connection" });
     let target = this.parent;
 
     if (options.from === this.parent) {

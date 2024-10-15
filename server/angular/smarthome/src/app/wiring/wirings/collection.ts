@@ -18,10 +18,10 @@ export class Collection extends Wiring {
 
   register(options: RegisterOptions) {
     if (options.from == this.outC) {
-      options.nodes.push(this);
+      options.nodes.push({ name: "Collection" });
       return this.outC?.register({ ...options, from: this });
     }
-    options.nodes.push(this);
+    options.nodes.push({ name: this.constructor.name });
     return this.inC?.register({ ...options, from: this });
   }
 
@@ -29,7 +29,7 @@ export class Collection extends Wiring {
     // to implement
   }
 
-  toJSON(): any {
+  toJSON(key?, c?): any {
     const jsonObj = {
       type: this.constructor.name
     };

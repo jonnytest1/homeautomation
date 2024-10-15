@@ -16,10 +16,11 @@ export class Switch extends Resistor {
     super(0)
   }
   getTotalResistance(from: any, options: GetResistanceOptions): ResistanceReturn {
+    options.addStep(this)
     if (this.enabled) {
       return super.getTotalResistance(from, options)
     }
-    return noConnection()
+    return noConnection(this)
   }
 
 
