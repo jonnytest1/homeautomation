@@ -13,6 +13,7 @@ import type { Switch } from './wirings/switch';
 import { Wire } from './wirings/wire';
 import { ParrallelWire } from './wirings/parrallel-wire';
 import { NODE_TEMPLATES } from './node-templates';
+import { createStateMachine } from '../utils/state-machine';
 
 export interface NodeTemplate {
 
@@ -32,6 +33,7 @@ export interface NodeEl {
   styleUrls: ['./wiring.component.scss']
 })
 export class WiringComponent implements OnInit, AfterContentChecked, OnDestroy {
+
   batteries: Battery[];
 
 
@@ -50,6 +52,15 @@ export class WiringComponent implements OnInit, AfterContentChecked, OnDestroy {
 
   nodes: Array<NodeEl> = [];
   currentWireCache: string;
+
+
+  states = createStateMachine("default", "rotation").withData<{
+    rotation: {
+      start: Vector2
+      startrotation: number
+      node: UINode
+    }
+  }>()
 
   constructor(private cdr: ChangeDetectorRef,
     private viewRef: ViewContainerRef,
@@ -90,7 +101,7 @@ export class WiringComponent implements OnInit, AfterContentChecked, OnDestroy {
     this.preloadImages();
   }
   preloadImages() {
-    for (const image of ['/assets/icons/relay_right.png']) {
+    for (const image of ['/assets/icons/relay_right.png', '/assets/icons/pipico.png']) {
       const img = new Image();
       img.src = image;
     }
@@ -216,6 +227,35 @@ export class WiringComponent implements OnInit, AfterContentChecked, OnDestroy {
   }
 
   ngOnInit() {
+  }
+
+
+
+
+  rotationStart($event: MouseEvent, uiNode: UINode) {
+    this.states.setrotation({
+      start: new Vector2($event),
+      startrotation: uiNode.getRotation() ?? 0,
+      node: uiNode
+    })
+  }
+
+  mousemove($event: MouseEvent) {
+    if (this.states.isrotation) {
+      const movement = new Vector2($event).subtract(this.states.getrotation.start)
+
+      let negative = false
+      if (movement.x < 0) {
+        negative = true
+      }
+
+
+      let length = movement.length();
+      if (negative) {
+        length *= -1
+      }
+      this.states.getrotation.node.setRotation(this.states.getrotation.startrotation + length)
+    }
   }
 
 }

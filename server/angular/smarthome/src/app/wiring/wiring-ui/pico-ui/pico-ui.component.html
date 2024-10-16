@@ -34,7 +34,8 @@
 
 <ng-template #options>
   <textarea #textscr
+            [value]="node.script"
             (change)="node.updateCode(textscr.value)">
-  {{node.script}}
+
   </textarea>
 </ng-template>

@@ -11,7 +11,7 @@ import { UINode } from '../ui-node';
   templateUrl: './battery-ui.component.html',
   styleUrls: ['./battery-ui.component.less']
 })
-export class BatteryUiComponent extends UINode<Battery>  {
+export class BatteryUiComponent extends UINode<Battery> {
 
   constructor(injector: Injector) {
     super(new Battery(5, 0.01), injector);
@@ -50,6 +50,12 @@ export class BatteryUiComponent extends UINode<Battery>  {
 
   refill() {
     this.node.ampereSeconds = this.node.maxAmpereSeconds;
+  }
+
+
+  updateMaxAmpere(val) {
+    this.node.maxAmpereSeconds = +val * 3600
+    this.refill()
   }
 
   logStructure(template: TemplateRef<any>) {

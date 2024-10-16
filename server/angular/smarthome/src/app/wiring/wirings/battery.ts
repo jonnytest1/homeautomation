@@ -171,7 +171,7 @@ export class Battery extends Collection {
       const battery = new Battery(fromJSON.voltage, +fromJSON.charge ?? 0.001);
       battery.enabled = fromJSON.enabled;
       battery.maxAmpereSeconds = +fromJSON.maxAmpere ?? +fromJSON.charge ?? 0.0001;
-      JsonSerializer.createUiRepresation(battery, fromJSON, options);
+      JsonSerializer.createUiRepresation(battery, fromJSON as any, options);
 
       const prov = fromJSON.prov
       if ("type" in prov) {

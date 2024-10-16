@@ -48,6 +48,22 @@
         .node-wrapper{
             position: absolute;
             transform: translate(-50% ,-50%);
+
+
+
+            .rotationhandle{
+              display:none;
+              position: absolute;
+              right:-12px;
+              top:0px;
+            }
+
+
+            &:hover{
+              .rotationhandle{
+                display: initial;
+              }
+            }
         }
     }
 }

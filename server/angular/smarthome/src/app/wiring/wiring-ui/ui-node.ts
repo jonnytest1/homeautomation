@@ -14,6 +14,8 @@ export abstract class UINode<T extends Collection = Collection> {
 
   private position: Vector2;
 
+  private rotation: number
+
   @ViewChild('options')
   public optionsTemplate?: TemplateRef<any>;
 
@@ -57,9 +59,17 @@ export abstract class UINode<T extends Collection = Collection> {
     return this.inOutComponent;
   }
 
+  setRotation(rot: number) {
+    this.rotation = rot;
+  }
+  getRotation() {
+    return this.rotation;
+  }
+
   setPosition(vector: Vector2) {
     this.position = vector;
   }
+
 
   getPosition(): Vector2 {
     return this.position;
@@ -71,7 +81,10 @@ export abstract class UINode<T extends Collection = Collection> {
 
 
   toJSON() {
-    return this.getPosition();
+    return {
+      ...this.getPosition(),
+      rotation: this.rotation
+    }
   }
 
 }

@@ -1,4 +1,6 @@
-<mat-sidenav-container class="drop-in-container">
+<mat-sidenav-container class="drop-in-container"
+                       (mousemove)="mousemove($event)"
+                       (mouseup)="states.setdefault()">
   <mat-sidenav opened="true"
                position="end"
                mode="side">
@@ -47,8 +49,14 @@
          (dragstart)="startDragNode(node,$event)"
          class="node-wrapper"
          draggable="true"
+         [style.transform]="'rotate('+node.uiInstance.getRotation()+'deg)'"
          [style.left]="node.uiInstance.getPosition().x+'px'"
          [style.top]="node.uiInstance.getPosition().y+'px'">
+      <div class="rotationhandle"
+           (dragstart)="$event.stopPropagation()"
+           (mousedown)="$event.stopPropagation();rotationStart($event,node.uiInstance)">
+        🔄
+      </div>
       <app-view-template [addingData]="node.componentRef"></app-view-template>
     </div>
 

@@ -41,9 +41,18 @@ export interface FromJson<T extends string = ""> {
   fromJSON: (json: any, context: FromJsonOptions) => T extends "Battery" ? Battery : Wire
 }
 
+
+type UIJson = {
+  ui: {
+    x: number,
+    y: number,
+    rotation?: number
+  }
+}
+
 export class JsonSerializer {
 
-  static async createUiRepresation(node: Wiring & Collection, json: any, optinos: FromJsonOptions) {
+  static async createUiRepresation(node: Wiring & Collection, json: UIJson, optinos: FromJsonOptions) {
     await optinos.constorlRefsInitialized;
     const conststructorName = node.constructor.name;
     const uiConstructor = optinos.elementMap[conststructorName].uiConstructor
@@ -61,6 +70,10 @@ export class JsonSerializer {
         uiInstance: element.instance,
         componentRef: element
       })
+      if (json.ui.rotation) {
+        element.instance.setRotation(json.ui.rotation)
+      }
+
 
     }
   }
