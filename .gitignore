@@ -59,3 +59,4 @@ clients/archive/**/src/lib/*
 clients/pi/zero/weights/smarthome
 clients/pi/co2/src/smarthome
 clients/pi/zero/h2o/smarthome
+clients/pi/bluetooth-distance/src/env.py
