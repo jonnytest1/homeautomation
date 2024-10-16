@@ -34,6 +34,8 @@ import { writeFileSync } from "fs"
 import { rename, mkdir } from "fs/promises"
 import { join } from "path"
 
+
+
 const hasLoaded$ = new BehaviorSubject(false)
 
 
@@ -102,7 +104,7 @@ export function emitFromNode(nodeUuid: string, evt: NodeEvent, index?: number) {
 }
 
 
-if (environment.WATCH_SERVICES) {
+if (environment.WATCH_SERVICES && !environment.SMARTHOME_DISABLED) {
   startHotRelaodingWatcher().then(() => {
     hasLoaded$.next(true)
   })
@@ -417,6 +419,10 @@ async function processInput(data: { node: ElementNode, nodeinput: number, data: 
 let eventIndex = 0
 
 export function emitEvent(type: string, data: NodeEventData) {
+  if (environment.SMARTHOME_DISABLED) {
+    return
+  }
+
   data.context.eventIndex = eventIndex++
   const nodes = genericNodeDataStore.getOnce(selectNodesOfType(type))
   nodes.forEach(node => {

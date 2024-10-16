@@ -49,7 +49,8 @@
       "env": {
         "setup": "true",
         "WATCH_SERVICES": "true",
-        "LOG_SUFFIX": "local"
+        "LOG_SUFFIX": "local",
+        "SMARTHOME_DISABLED": "true"
       },
       "args": [
         "${workspaceFolder}\\index.ts"

@@ -31,4 +31,5 @@ export const environment = process.env as {
   LOG_SUFFIX: string
 
   DOCKER_CONTAINER_NAME: string
+  SMARTHOME_DISABLED: string
 }

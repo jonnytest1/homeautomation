@@ -16,7 +16,7 @@ class RefillResponse(Enum):
 refill_trigger_valid_until: Union[datetime, None, Literal["blocked"]] = None
 refill_trigger_valid_from: Union[datetime, None] = None
 
-refill_active_seconds = 6
+refill_active_seconds = 8
 min_delay_seconds = 1
 
 
@@ -47,7 +47,7 @@ def refill():
     invalidate()
     print("refill command triggered")
     relay.on()
-    sleep(7)
+    sleep(refill_active_seconds)
     relay.off()
     print("reset")
 

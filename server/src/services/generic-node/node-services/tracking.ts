@@ -2,7 +2,7 @@ import { TrackingEvent } from '../../../models/generic-node/tracking-event';
 import { logKibana } from '../../../util/log';
 import { addTypeImpl } from '../generic-node-service';
 import { mainTypeName } from '../json-schema-type-util';
-import { HOUR, MINUTE } from '../../../constant';
+import { DAYS, HOUR, MINUTE } from '../../../constant';
 import { save } from 'hibernatets';
 import { MariaDbBase, openPools } from 'hibernatets/dbs/mariadb-base';
 
@@ -24,6 +24,38 @@ const trackingEventBuffer: Array<TrackingEvent> = []
 
 let interval: NodeJS.Timeout
 
+let archiveInterV: NodeJS.Timeout
+
+
+async function archive() {
+  const start = Date.now()
+  trackingPool.sqlquery(`
+        INSERT INTO trackingeventarchive
+          SELECT *
+          from trackingevent
+          where trackingevent.time_col < DATE_ADD(CURRENT_DATE(),INTERVAL -20 DAY);`.replace(/\n/g, " "))
+    .then(() => {
+      return trackingPool.sqlquery(`
+        DELETE FROM trackingevent 
+          WHERE EXISTS(
+            SELECT * FROM 
+            trackingeventarchive WHERE 
+            trackingevent.id=trackingeventarchive.id
+          );`.replace(/\n/g, " "))
+    })
+    .then(() => {
+      logKibana("INFO", {
+        message: "archived events",
+        duration: Date.now() - start
+      })
+    })
+    .catch(e => {
+      logKibana("ERROR", {
+        message: "error while archiving events",
+        openPools: Object.values(openPools),
+      }, e)
+    })
+}
 
 addTypeImpl({
   nodeDefinition() {
@@ -69,6 +101,9 @@ addTypeImpl({
     if (interval) {
       clearInterval(interval)
     }
+    if (archiveInterV) {
+      clearInterval(archiveInterV)
+    }
   },
   initializeServer() {
     interval = setInterval(() => {
@@ -88,6 +123,6 @@ addTypeImpl({
           })
       }
     }, 5000)
-
+    archiveInterV = setInterval(archive, DAYS * 1)
   }
 })

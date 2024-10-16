@@ -5,6 +5,7 @@ import { Sender } from '../../models/sender';
 import { Timer } from '../../models/timer';
 import { logKibana } from '../../util/log';
 import { handleTimedEvent } from '../generic-node/node-services/timing/timing';
+import { environment } from '../../environment';
 import type { LoadOptions } from 'hibernatets/load';
 import type { ConstructorClass } from 'hibernatets/interface/mapping';
 import { load, queries } from 'hibernatets';
@@ -89,7 +90,13 @@ export class EventScheduler {
   }
 
   private async callTimer() {
-    const timer = await load(Timer, "alerted='false' AND endtimestamp < UNIX_TIMESTAMP(NOW(3))*1000", [], {
+    let sql = "alerted='false' AND endtimestamp < UNIX_TIMESTAMP(NOW(3))*1000";
+    const filter = [];
+    if (environment.SMARTHOME_DISABLED) {
+      sql += ` AND timerClassName != 'generic-event'`
+    }
+
+    const timer = await load(Timer, sql, filter, {
       first: true,
       db: this.trackingPool
     });

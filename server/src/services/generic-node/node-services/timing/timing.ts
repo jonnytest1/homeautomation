@@ -29,7 +29,7 @@ const payloadSchema = z.object({
   payload: z.optional(z.any())
 })
 
-type EventData = {
+export type EventData = {
   node: string,
   data: unknown
   context: unknown
