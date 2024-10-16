@@ -63,7 +63,6 @@ function assignb64Safe(data: Record<string, any>, collector: Record<string, stri
   }
 }
 
-
 export async function logKibana(level: 'INFO' | 'ERROR' | 'DEBUG' | "WARN", message: string | {
   message: string,
   [k: string]: any
@@ -134,6 +133,11 @@ export async function logKibana(level: 'INFO' | 'ERROR' | 'DEBUG' | "WARN", mess
       'Content-Type': 'text/plain'
     },
     body: btoa(JSON.stringify(jsonData))
+  }).catch(e => {
+    if (e.message.includes("Client network socket disconnected")) {
+      return
+    }
+    throw e;
   });
 }
 
