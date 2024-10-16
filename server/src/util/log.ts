@@ -134,6 +134,7 @@ export async function logKibana(level: 'INFO' | 'ERROR' | 'DEBUG' | "WARN", mess
     },
     body: btoa(JSON.stringify(jsonData))
   }).catch(e => {
+
     if (e.message.includes("Client network socket disconnected")) {
       return
     }
