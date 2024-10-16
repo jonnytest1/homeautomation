@@ -92,6 +92,7 @@ export async function popup(data: string, callback: { response: (resp: { ts: num
 
     activeWindow.webContents.on("did-finish-load", () => {
       activeWindow?.show()
+      activeWindow?.setAlwaysOnTop(true)
       windowShown = true
     })
 
@@ -178,9 +179,16 @@ export async function popup(data: string, callback: { response: (resp: { ts: num
     message: "starting popup",
     cfg: JSON.stringify(popupCfg)
   })
-  await activeWindow.loadURL(`data:text/html;base64,${Buffer.from(html).toString("base64")}`)
+  try {
+    await activeWindow.loadURL(`data:text/html;base64,${Buffer.from(html).toString("base64")}`)
 
 
+  } catch (e) {
+    logKibana("ERROR", {
+      message: "error loading popup",
+      cfg: JSON.stringify(popupCfg)
+    }, e)
+  }
   //
 
 
