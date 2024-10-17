@@ -24,6 +24,7 @@ import { registerGenericSocketHandler } from './socket/generic-node-socket-handl
 import { typeImplementations } from './type-implementations';
 import { setSkip } from './emit-flag';
 import { NodeContextData as DataBackup } from './models/node-backup';
+import { NodeEntry } from './models/node-entry';
 import { logKibana } from '../../util/log';
 import { environment } from '../../environment';
 import { jsonClone } from '../../util/json-clone';
@@ -198,6 +199,10 @@ forNodes({
           lastNodeStoreTimeout = setTimeout(() => {
             console.log(`writing node for ${updateAction?.type} ${node.uuid} ${node.type}`)
 
+
+
+            save(NodeEntry.from(node), { db: backupPool, updateOnDuplicate: true })
+
             const file = join(nodesDataFolder, node.uuid + ".json")
             writeFileSync(file, JSON.stringify(node, undefined, "   "))
 
@@ -291,7 +296,7 @@ forNodes({
   },
 })
 
-loadNodeData()
+loadNodeData(backupPool)
 
 init()
 updateDatabase(__dirname + '/models', {
