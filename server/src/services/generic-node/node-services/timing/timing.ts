@@ -13,6 +13,7 @@ import { convertTimeDiff } from '../../../../util/time';
 import { selectNodeByUuid } from '../../generic-store/selectors';
 import { Timer } from '../../../../models/timer';
 import type { NodeEventData } from '../../typing/node-event-data';
+import { defaultCallTrace } from '../../node-trace';
 import { z } from 'zod';
 import type { JSONSchema6 } from 'json-schema';
 import { load } from 'hibernatets';
@@ -85,7 +86,7 @@ export async function handleTimedEvent(data: EventData) {
   emitFromNode(data.node, createNodeEvent({
     payload: data.data,
     context: data.context as NodeEventData["context"]
-  }))
+  }), 0, defaultCallTrace(node, "timed event"))
 }
 
 

@@ -25,6 +25,7 @@ import { setSkip } from './emit-flag';
 import { NodeContextData as DataBackup } from './models/node-backup';
 import { NodeEntry } from './models/node-entry';
 import { NodeHistory } from './models/node-history';
+import { defaultCallTrace, type CallTrace, type RecursiveCallTrace } from './node-trace';
 import { logKibana } from '../../util/log';
 import { environment } from '../../environment';
 import { jsonClone } from '../../util/json-clone';
@@ -84,15 +85,6 @@ globalThis.debugNextCall = (uuid: string) => {
   debugActive = uuid
 }
 
-
-
-type RecursiveCallTrace = Record<string, Array<RecursiveCallTrace>>
-type CallTrace = {
-  nodes: Array<string>,
-  callTrace: RecursiveCallTrace,
-  callTraceRoot: RecursiveCallTrace,
-  initContext: string
-}
 
 export function emitFromNode(nodeUuid: string, evt: NodeEvent, index: number, trace: CallTrace) {
   setLastEventOutputTime(nodeUuid, index ?? 0, Date.now())
@@ -392,22 +384,6 @@ async function reloadNodes(elementNodes: ElementNodeImpl<never, Partial<NodeDefO
     });
   }
   return elementNodes;
-}
-
-function defaultCallTrace(node: ElementNode, initContext: string): CallTrace {
-  const tr: RecursiveCallTrace = {}
-  const nodes: Array<string> = [];
-
-  if (node) {
-    nodes.push(node.uuid)
-    tr[node.uuid] = []
-  }
-  return {
-    nodes: nodes,
-    callTrace: tr,
-    callTraceRoot: tr,
-    initContext
-  }
 }
 
 
