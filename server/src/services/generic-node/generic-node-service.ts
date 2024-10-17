@@ -296,7 +296,7 @@ forNodes({
     subscriptionMap[node]?.unsubscribe()
 
     load(NodeEntry, {
-      filter: e => e.id = node,
+      filter: e => e.nodeUuid = node,
       options: {
         first: true,
         db: backupPool
