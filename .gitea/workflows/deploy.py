@@ -1,6 +1,7 @@
 import socket
 import os
 import json
+import sys
 
 from git import current_commit, get_changed_files
 
@@ -48,6 +49,9 @@ while True:
         file = open(commit_file, "w")
         file.write(current_commit())
         file.close()
+
+        if response_data["type"] == "error":
+            sys.exit(1)
         break
     except json.JSONDecodeError as e:
         continue
