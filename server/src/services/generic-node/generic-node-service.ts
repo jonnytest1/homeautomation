@@ -290,7 +290,8 @@ forNodes({
 
   },
 })
-loadNodeData(backupPool)
+
+loadNodeData()
 
 init()
 updateDatabase(__dirname + '/models', {
