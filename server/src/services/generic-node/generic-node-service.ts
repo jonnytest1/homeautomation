@@ -10,7 +10,7 @@ import type { NodeDefOptinos } from './typing/node-options';
 import type { NodeEventData } from './typing/node-event-data';
 import { setLastEvent, setLastEventInputTime, setLastEventOutputTime } from './last-event-service';
 import { ElementNodeImpl } from './element-node';
-import { deletedNodesDataFolder, nodesContextFolder, nodesDataFolder, nodesFile } from './generic-node-constants';
+import { deletedNodesDataFolder, nodesContextFolder, nodesDataFolder } from './generic-node-constants';
 import { init } from './validation/watcher';
 import { genericNodeDataStore } from './generic-store/reference';
 import { backendToFrontendStoreActions, initializeStore } from './generic-store/actions';
@@ -23,13 +23,14 @@ import { checkInvalidations } from './element-node-fnc';
 import { registerGenericSocketHandler } from './socket/generic-node-socket-handler';
 import { typeImplementations } from './type-implementations';
 import { setSkip } from './emit-flag';
+import { NodeBackup as DataBackup } from './models/node-backup';
 import { logKibana } from '../../util/log';
 import { environment } from '../../environment';
 import { jsonClone } from '../../util/json-clone';
 import type { Action } from '../../util/data-store/action';
 import { BehaviorSubject, combineLatest, Subject, type Subscription } from "rxjs"
 import { filter, skip } from "rxjs/operators"
-import { PsqlBase, updateDatabase } from 'hibernatets';
+import { PsqlBase, save, updateDatabase } from 'hibernatets';
 import { writeFileSync } from "fs"
 import { rename, mkdir } from "fs/promises"
 import { join } from "path"
@@ -42,6 +43,10 @@ const hasLoaded$ = new BehaviorSubject(false)
 let storeTimeout: NodeJS.Timeout | undefined
 let lastStoreTime = -1
 
+
+const backupPool = new PsqlBase({
+  keepAlive: true
+})
 genericNodeDataStore.selectWithAction(nodeglobalsSelector)
   .pipe(filter(([d, action]) => !!d.connections.length && action !== "initialize node store"))
   .subscribe(([nodeData, a]) => {
@@ -51,7 +56,8 @@ genericNodeDataStore.selectWithAction(nodeglobalsSelector)
     storeTimeout = setTimeout(() => {
       console.log("writing connections and globals for " + a)
 
-      writeFileSync(nodesFile, JSON.stringify({ ...nodeData }, undefined, "   "))
+      const today = new Date().toISOString().split("T")[0]
+      save(DataBackup.from(nodeData, today), { updateOnDuplicate: true, db: backupPool })
       lastStoreTime = Date.now()
       storeTimeout = undefined
     }, 2000)

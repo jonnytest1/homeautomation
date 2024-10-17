@@ -10,6 +10,8 @@ type SelectorParent<T, R> = {
   pipe(state: Observable<T>): Observable<R>
 }
 
+export type SelectorReturnType<S extends Selector<any, any>> = S extends Selector<any, infer R> ? R : never
+
 
 export class Selector<T, R> {
   constructor(private mappingFunction: SelectorFnc<T, R>, private parent: SelectorParent<any, T>) {
