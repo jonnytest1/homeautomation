@@ -8,15 +8,19 @@ import type { ElementNode } from '../typing/element-node'
 function createReducerAction<T extends (StoreEvents["type"] & string)>(type: T, props: () => Omit<(StoreEvents & { type: T }), "type">) {
   return createAction(type, props)
 }
-
-function patchNode(st: DataState, nodeUuid: string, mapper: (node: ElementNode) => ElementNode): DataState {
+export function patchNode(st: DataState, nodeUuid: string, mapper: (node: ElementNode) => ElementNode): DataState {
+  const previousnodeStr = JSON.stringify(st.nodeData.nodes[nodeUuid])
+  const newNode = mapper(st.nodeData.nodes[nodeUuid])
+  if (JSON.stringify(newNode) === previousnodeStr) {
+    return st
+  }
   return {
     ...st,
     nodeData: {
       ...st.nodeData,
       nodes: {
         ...st.nodeData.nodes,
-        [nodeUuid]: mapper(st.nodeData.nodes[nodeUuid])
+        [nodeUuid]: newNode
       }
     }
   }

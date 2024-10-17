@@ -1,29 +1,9 @@
-import { backendToFrontendStoreActions, initializeStore, setServerContext } from './actions'
+import { backendToFrontendStoreActions, initializeStore, patchNode, setServerContext } from './actions'
 import { genericNodeDataStore } from './reference'
 import type { DataState } from './state'
 import type { Connection } from '../typing/generic-node-type'
-import type { ElementNode } from '../typing/element-node'
 import { jsonClone } from '../../../util/json-clone'
 
-
-
-function patchNode(st: DataState, nodeUuid: string, mapper: (node: ElementNode) => ElementNode): DataState {
-  const previousnodeStr = JSON.stringify(st.nodeData.nodes[nodeUuid])
-  const newNode = mapper(st.nodeData.nodes[nodeUuid])
-  if (JSON.stringify(newNode) === previousnodeStr) {
-    return st
-  }
-  return {
-    ...st,
-    nodeData: {
-      ...st.nodeData,
-      nodes: {
-        ...st.nodeData.nodes,
-        [nodeUuid]: newNode
-      }
-    }
-  }
-}
 
 genericNodeDataStore.addReducer(backendToFrontendStoreActions.updateNode, (st, a) => {
   return patchNode(st, a.newNode.uuid, n => {

@@ -5,7 +5,6 @@ import type { ElementNode } from './typing/element-node';
 import { CompilerError, allRequired, expansionType, generateDtsFromSchema, mainTypeName } from './json-schema-type-util';
 import { getTypes, validate } from './validation/watcher';
 import { nodeDescriptor, nodeTypeName } from './element-node';
-import { typeData } from './generic-node-constants';
 import { SchemaMatchingError, validateJsonSchema } from './validation/json-schema-type.validator';
 import { genericNodeDataStore } from './generic-store/reference';
 import { backendToFrontendStoreActions } from './generic-store/actions';
@@ -14,8 +13,6 @@ import { logKibana } from '../../util/log';
 import { generateSchema } from 'typescript-json-schema';
 import type { Diagnostic, DiagnosticMessageChain, DiagnosticRelatedInformation } from 'typescript';
 import type { ExtendedJsonSchema } from 'json-schema-merger';
-import { writeFile } from "fs/promises"
-import { join } from 'path';
 
 /*
 export async function parseTypeSafe(node: ElementNode<unknown>, data: unknown) {
@@ -107,7 +104,6 @@ export async function updateTypeSchema(node: ElementNode, nodeData: PreparedNode
         type ResultType=${nodeTypePrefix}_NodeInput.${mainTypeName}
     }
 `;
-          // writeFile(join(typeData, `${node.uuid}__${connectionNode.uuid}.ts`), str)
           await validate(`connections_to_${node.uuid}`, str, `${node.type}-${node.uuid}-con input check`)
 
           genericNodeDataStore.dispatch(backendToFrontendStoreActions.setConnectionError({
@@ -219,7 +215,8 @@ export async function updateTypeSchema(node: ElementNode, nodeData: PreparedNode
   await nodeTypeImplemenations.connectionTypeChanged?.(node, schema);
   clearTimeout(conChangeTimeout)
   if (node.runtimeContext?.editorSchema?.dts) {
-    writeFile(join(typeData, `editorschema_${node.uuid}.ts`), node.runtimeContext?.editorSchema.dts)
+    // just for debuging ... probably
+    //  writeFile(join(typeData, `editorschema_${node.uuid}.ts`), node.runtimeContext?.editorSchema.dts)
   }
 
   const outConnections = genericNodeDataStore.getOnce(selectConnectionsFromNodeUuid(node.uuid))
