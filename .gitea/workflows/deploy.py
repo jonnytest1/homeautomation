@@ -50,7 +50,7 @@ while True:
         file.write(current_commit())
         file.close()
 
-        if response_data["type"] == "error":
+        if "type" in response_data and response_data["type"] == "error":
             sys.exit(1)
         break
     except json.JSONDecodeError as e:
