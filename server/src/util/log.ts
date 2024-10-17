@@ -63,6 +63,8 @@ function assignb64Safe(data: Record<string, any>, collector: Record<string, stri
   }
 }
 
+
+let pendingCalls = 0;
 export async function logKibana(level: 'INFO' | 'ERROR' | 'DEBUG' | "WARN", message: string | {
   message: string,
   [k: string]: any
@@ -129,19 +131,33 @@ export async function logKibana(level: 'INFO' | 'ERROR' | 'DEBUG' | "WARN", mess
     }
   }
   console.log(jsonData);
+
+  pendingCalls++
   fetch(environment.LOG_URL, {
     method: 'POST',
     headers: {
       'Content-Type': 'text/plain'
     },
     body: btoa(JSON.stringify(jsonData))
-  }).catch(e => {
+  })
+    .catch(e => {
 
-    if (e.message.includes("Client network socket disconnected")) {
-      return
-    }
-    throw e;
-  });
+      if (e.message.includes("Client network socket disconnected")) {
+        return
+      }
+      console.error(e)
+
+      if (pendingCalls < 5) {
+        logKibana("ERROR", {
+          message: "error sending log",
+          data: JSON.stringify(jsonData)
+        }, e)
+      }
+
+    }).then(() => {
+
+      pendingCalls--
+    });
 }
 
 
