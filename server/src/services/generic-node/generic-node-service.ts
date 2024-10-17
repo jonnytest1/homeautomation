@@ -35,7 +35,7 @@ import { load, PsqlBase, save, updateDatabase } from 'hibernatets';
 
 
 
-const hasLoaded$ = new BehaviorSubject(false)
+export const hasLoaded$ = new BehaviorSubject(false)
 
 
 let storeTimeout: NodeJS.Timeout | undefined
@@ -85,23 +85,38 @@ globalThis.debugNextCall = (uuid: string) => {
 }
 
 
-export function emitFromNode(nodeUuid: string, evt: NodeEvent, index?: number) {
+
+type RecursiveCallTrace = Record<string, Array<RecursiveCallTrace>>
+type CallTrace = {
+  nodes: Array<string>,
+  callTrace: RecursiveCallTrace,
+  callTraceRoot: RecursiveCallTrace,
+  initContext: string
+}
+
+export function emitFromNode(nodeUuid: string, evt: NodeEvent, index: number, trace: CallTrace) {
   setLastEventOutputTime(nodeUuid, index ?? 0, Date.now())
   const emittingConnections = genericNodeDataStore.getOnce(selectConnectionsFromContinue({
     fromIndex: index,
     fromNode: nodeUuid
   }))
 
+  trace.callTrace[nodeUuid] ??= []
   for (const emittingCon of emittingConnections) {
     const nextNode = genericNodeDataStore.getOnce(selectNodeByUuid(emittingCon.uuid))
     if (!nextNode) {
       logKibana("WARN", { message: "node not found", uuid: emittingCon.uuid })
       return
     }
+    const connectionTrace: RecursiveCallTrace = {}
+    trace.callTrace[nodeUuid].push(connectionTrace)
     processInput({
       node: nextNode,
       nodeinput: emittingCon.index,
       data: evt.clone()
+    }, {
+      ...trace,
+      callTrace: connectionTrace
     })
   }
 }
@@ -210,7 +225,7 @@ forNodes({
           if (typeImpl) {
 
             Object.setPrototypeOf(node, ElementNodeImpl.prototype);
-            Object.assign(node, createCallbacks(node))
+            Object.assign(node, createCallbacks(node, defaultCallTrace(node, `action subscribe ${updateAction?.type} _preval`)))
             console.log("running node check for " + node.uuid + " after " + updateAction?.type)
             pendingCheck = true
             try {
@@ -219,7 +234,7 @@ forNodes({
               const nodeCpy = jsonClone(node)
               const passedNode = jsonClone(node)
               Object.setPrototypeOf(passedNode, ElementNodeImpl.prototype);
-              Object.assign(passedNode, createCallbacks(passedNode))
+              Object.assign(passedNode, createCallbacks(passedNode, defaultCallTrace(passedNode, `action subscribe ${updateAction?.type} _cloned`)))
 
               await typeImpl.nodeChanged?.(passedNode as ElementNodeImpl<never>, last);
 
@@ -379,18 +394,35 @@ async function reloadNodes(elementNodes: ElementNodeImpl<never, Partial<NodeDefO
   return elementNodes;
 }
 
+function defaultCallTrace(node: ElementNode, initContext: string): CallTrace {
+  const tr: RecursiveCallTrace = {}
+  const nodes: Array<string> = [];
+
+  if (node) {
+    nodes.push(node.uuid)
+    tr[node.uuid] = []
+  }
+  return {
+    nodes: nodes,
+    callTrace: tr,
+    callTraceRoot: tr,
+    initContext
+  }
+}
+
+
 function getElementNodes(implementationType: string): ElementNodeImpl<never>[] {
   return genericNodeDataStore.getOnce(selectNodesOfType(implementationType)).map(node => {
-    return new ElementNodeImpl<never>(node as ElementNode<never>, createCallbacks(node))
+    return new ElementNodeImpl<never>(node as ElementNode<never>, createCallbacks(node, defaultCallTrace(node, "getElementNodes")))
   });
 }
 
-function createCallbacks(node: ElementNode) {
+function createCallbacks(node: ElementNode, trace: CallTrace) {
   const nodeUuid = node.uuid
   return {
     continue: (evt, index) => {
 
-      emitFromNode(nodeUuid, evt.clone(), index)
+      emitFromNode(nodeUuid, evt.clone(), index ?? 0, trace)
     },
     updateNode(frontendEmit = true) {
       setSkip(!frontendEmit)
@@ -403,7 +435,7 @@ function createCallbacks(node: ElementNode) {
 }
 
 
-async function processInput(data: { node: ElementNode, nodeinput: number, data: NodeEvent }) {
+async function processInput(data: { node: ElementNode, nodeinput: number, data: NodeEvent }, trace: CallTrace) {
   const typeimpl = typeImplementations.value[data.node.type]
   if (typeimpl) {
     setLastEventInputTime(data.node, data.nodeinput ?? 0, Date.now())
@@ -415,7 +447,8 @@ async function processInput(data: { node: ElementNode, nodeinput: number, data: 
         debugActive = null
         debugger
       }
-      await typeimpl.process(data.node as ElementNode<never>, data.data, createCallbacks(data.node))
+      trace.nodes.push(data.node.uuid)
+      await typeimpl.process(data.node as ElementNode<never>, data.data, createCallbacks(data.node, trace))
 
 
       setLastEvent(data.node, eventCopy)
@@ -445,11 +478,12 @@ export function emitEvent(type: string, data: NodeEventData) {
     const event = createNodeEvent(data)
 
     const start = Date.now()
+
     processInput({
       node: node,
       nodeinput: 0,
       data: event
-    }).then(() => {
+    }, defaultCallTrace(node, "emitEvent call")).then(() => {
       const end = Date.now()
 
       const duration = end - start;

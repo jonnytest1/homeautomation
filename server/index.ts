@@ -3,6 +3,7 @@ import { logKibana } from './src/util/log';
 import { startNodeRed } from './src/node-red/server';
 import { environment } from './src/environment';
 import { setDbInit } from './src/models/db-state';
+import { hasLoaded$ } from './src/services/generic-node/generic-node-service';
 import { updateDatabase } from 'hibernatets';
 import { HttpRequest, initialize, ResponseCodeError } from 'express-hibernate-wrapper';
 Error.stackTraceLimit = Infinity;
@@ -37,6 +38,9 @@ updateDatabase(__dirname + '/src/models')
         });
         app.use((req, res, next) => {
           if (req.path == "/healthcheck") {
+            if (!environment.SMARTHOME_DISABLED && !hasLoaded$.value) {
+              return res.status(400).send("smarthome pending")
+            }
             res.status(200).send("OK")
             return;
           }
