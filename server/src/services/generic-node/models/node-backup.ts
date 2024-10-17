@@ -2,12 +2,20 @@ import type { SelectorReturnType } from '../../../util/data-store/selector'
 import type { nodeglobalsSelector } from '../generic-store/selectors'
 import { column, primary, table } from 'hibernatets'
 
-@table()
+@table({
+  constraints: [{
+    type: "unique",
+    columns: ["date"]
+  }]
+})
 
-export class NodeBackup {
+export class NodeContextData {
+
+  @primary()
+  id: string
 
 
-  @primary({ strategy: "custom" })
+  @column()
   date: string
 
   @column({
@@ -28,7 +36,7 @@ export class NodeBackup {
   lastUpdate: Date
 
   static from(data: SelectorReturnType<typeof nodeglobalsSelector>) {
-    const obj = new NodeBackup()
+    const obj = new NodeContextData()
 
     const now = new Date()
     obj.date = now.toISOString().split("T")[0]

@@ -23,7 +23,7 @@ import { checkInvalidations } from './element-node-fnc';
 import { registerGenericSocketHandler } from './socket/generic-node-socket-handler';
 import { typeImplementations } from './type-implementations';
 import { setSkip } from './emit-flag';
-import { NodeBackup as DataBackup } from './models/node-backup';
+import { NodeContextData as DataBackup } from './models/node-backup';
 import { logKibana } from '../../util/log';
 import { environment } from '../../environment';
 import { jsonClone } from '../../util/json-clone';
@@ -63,6 +63,12 @@ genericNodeDataStore.selectWithAction(nodeglobalsSelector)
   })
 
 
+setInterval(() => {
+  const historyFile = join(nodesContextFolder, `nodes-history-${new Date().toISOString().split("T")[0]}.json`)
+
+  writeFileSync(historyFile, JSON.stringify(genericNodeDataStore.getOnce(nodeDataSelector), undefined, "   "))
+}, 1000 * 60 * 60 * 24)
+
 declare global {
   var debugNode: (uuid: string) => void
   var debugNextCall: (uuid: string) => void
@@ -80,11 +86,6 @@ let debugActive: string | null = null
 globalThis.debugNextCall = (uuid: string) => {
   debugActive = uuid
 }
-
-setInterval(() => {
-  const historyFile = join(nodesContextFolder, `nodes-history-${new Date().toISOString().split("T")[0]}.json`)
-  writeFileSync(historyFile, JSON.stringify(genericNodeDataStore.getOnce(nodeDataSelector), undefined, "   "))
-}, 1000 * 60 * 60 * 24)
 
 
 export function emitFromNode(nodeUuid: string, evt: NodeEvent, index?: number) {
@@ -289,7 +290,7 @@ forNodes({
 
   },
 })
-loadNodeData()
+loadNodeData(backupPool)
 
 init()
 updateDatabase(__dirname + '/models', {
