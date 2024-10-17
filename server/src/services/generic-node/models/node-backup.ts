@@ -10,7 +10,6 @@ export class NodeBackup {
   @primary({ strategy: "custom" })
   date: string
 
-
   @column({
     type: "text",
     size: "large",
