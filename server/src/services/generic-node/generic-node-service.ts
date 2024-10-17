@@ -10,7 +10,7 @@ import type { NodeDefOptinos } from './typing/node-options';
 import type { NodeEventData } from './typing/node-event-data';
 import { setLastEvent, setLastEventInputTime, setLastEventOutputTime } from './last-event-service';
 import { ElementNodeImpl } from './element-node';
-import { deletedNodesDataFolder, nodesContextFolder, nodesDataFolder } from './generic-node-constants';
+import { deletedNodesDataFolder, nodesDataFolder } from './generic-node-constants';
 import { init } from './validation/watcher';
 import { genericNodeDataStore } from './generic-store/reference';
 import { backendToFrontendStoreActions, initializeStore } from './generic-store/actions';
@@ -25,6 +25,7 @@ import { typeImplementations } from './type-implementations';
 import { setSkip } from './emit-flag';
 import { NodeContextData as DataBackup } from './models/node-backup';
 import { NodeEntry } from './models/node-entry';
+import { NodeHistory } from './models/node-history';
 import { logKibana } from '../../util/log';
 import { environment } from '../../environment';
 import { jsonClone } from '../../util/json-clone';
@@ -65,9 +66,8 @@ genericNodeDataStore.selectWithAction(nodeglobalsSelector)
 
 
 setInterval(() => {
-  const historyFile = join(nodesContextFolder, `nodes-history-${new Date().toISOString().split("T")[0]}.json`)
-
-  writeFileSync(historyFile, JSON.stringify(genericNodeDataStore.getOnce(nodeDataSelector), undefined, "   "))
+  const historyEntry = NodeHistory.from(genericNodeDataStore.getOnce(nodeDataSelector))
+  save(historyEntry, { db: backupPool, updateOnDuplicate: true })
 }, 1000 * 60 * 60 * 24)
 
 declare global {
