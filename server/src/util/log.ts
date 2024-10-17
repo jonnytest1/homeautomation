@@ -70,7 +70,9 @@ export async function logKibana(level: 'INFO' | 'ERROR' | 'DEBUG' | "WARN", mess
   let jsonData: { [key: string]: string | number } = {
     Severity: level,
     application: `SmartHome${environment.DEBUG ? '_debug' : ''}${environment.LOG_SUFFIX ?? ''}`,
-    docker_container_name: environment.DOCKER_CONTAINER_NAME
+    docker_container_name: environment.DOCKER_CONTAINER_NAME,
+    temp_dpl_name: environment.TEMPORARY_DEPLOYMENT_NAME,
+    npm: environment.SKIP_NPM
   };
 
   if (level === "ERROR" || level === "WARN") {

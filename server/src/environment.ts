@@ -19,6 +19,8 @@ function preloadEnv() {
 }
 preloadEnv();
 export const environment = process.env as {
+  SKIP_NPM: string | number;
+  TEMPORARY_DEPLOYMENT_NAME: string | number;
   WATCH_SERVICES: string;
   MQTT_SERVER: string
   MQTT_USER?: string;
