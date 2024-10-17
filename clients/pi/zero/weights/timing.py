@@ -41,9 +41,15 @@ def get_data(sensor_data: list[WeightEntry]):
 
     for res in sensor_data:
         if abs(res.weight_a - res.weight_b) > 1500:
-            print(f"skipped frame {res.weight_a} {res.weight_b}")
-            sensor_len -= 1
-            continue
+            if (res.weight_a > 20000 and res.weight_b > 20000):
+                if abs(res.weight_a - res.weight_b) > 10000:
+                    print(f"skipped frame {res.weight_a} {res.weight_b} ")
+                    sensor_len -= 1
+                    continue
+            else:
+                print(f"skipped frame {res.weight_a} {res.weight_b}")
+                sensor_len -= 1
+                continue
         if res.weight_a < -1000 or res.weight_b < -1000:
             print(f"skipped negative frame {res.weight_a} {res.weight_b}")
             sensor_len -= 1
