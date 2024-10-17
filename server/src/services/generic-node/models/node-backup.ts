@@ -25,7 +25,6 @@ export class NodeBackup {
   })
   data: SelectorReturnType<typeof nodeglobalsSelector>
 
-
   static from(data: SelectorReturnType<typeof nodeglobalsSelector>, date: string) {
     const obj = new NodeBackup()
     obj.date = date
