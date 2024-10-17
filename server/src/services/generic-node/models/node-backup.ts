@@ -24,10 +24,16 @@ export class NodeBackup {
   })
   data: SelectorReturnType<typeof nodeglobalsSelector>
 
-  static from(data: SelectorReturnType<typeof nodeglobalsSelector>, date: string) {
+  @column({ type: "date" })
+  lastUpdate: Date
+
+  static from(data: SelectorReturnType<typeof nodeglobalsSelector>) {
     const obj = new NodeBackup()
-    obj.date = date
+
+    const now = new Date()
+    obj.date = now.toISOString().split("T")[0]
     obj.data = data
+    obj.lastUpdate = now
     return obj
   }
 }

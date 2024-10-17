@@ -56,8 +56,7 @@ genericNodeDataStore.selectWithAction(nodeglobalsSelector)
     storeTimeout = setTimeout(() => {
       console.log("writing connections and globals for " + a)
 
-      const today = new Date().toISOString().split("T")[0]
-      save(DataBackup.from(nodeData, today), { updateOnDuplicate: true, db: backupPool })
+      save(DataBackup.from(nodeData), { updateOnDuplicate: true, db: backupPool })
       lastStoreTime = Date.now()
       storeTimeout = undefined
     }, 2000)
