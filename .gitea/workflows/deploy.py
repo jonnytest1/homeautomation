@@ -12,7 +12,8 @@ if os.path.exists(socket_path):
     print("exists")
 
 
-client = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+fam: socket.AddressFamily = socket.AF_UNIX  # type: ignore
+client = socket.socket(fam, socket.SOCK_STREAM)
 
 print(f"connecting to {socket_path}")
 client.connect(socket_path)
