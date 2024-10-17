@@ -46,12 +46,13 @@ while True:
 
         client.close()
 
+        if "type" in response_data and response_data["type"] == "error":
+            sys.exit(1)
+
         file = open(commit_file, "w")
         file.write(current_commit())
         file.close()
 
-        if "type" in response_data and response_data["type"] == "error":
-            sys.exit(1)
         break
     except json.JSONDecodeError as e:
         continue
