@@ -1,4 +1,3 @@
-import { lastEventFile } from './generic-node-constants';
 import type { NodeEventJsonData } from './node-event';
 import type { NodeEventTimes } from './typing/generic-node-type';
 import type { ElementNode } from './typing/element-node';
@@ -9,25 +8,8 @@ import { createAction, props } from '../../util/data-store/action';
 import { logKibana } from '../../util/log';
 import { BehaviorSubject } from 'rxjs';
 import { load, PsqlBase, save, SqlCondition } from 'hibernatets';
-import { writeFileSync, readFileSync } from "fs"
 
 const lastEventDataObs = new BehaviorSubject<Record<string, NodeEventJsonData>>({})
-
-
-setInterval(() => {
-  const value = lastEventDataObs.value;
-  if (value && Object.keys(value).length) {
-    const fileContent = JSON.stringify(value, undefined, "   ");
-    if (!fileContent.trim()) {
-      console.error("fileContent was empty")
-      return
-    }
-    writeFileSync(lastEventFile, fileContent)
-  }
-
-
-}, 60000)
-
 
 const setInputTimeAction = createAction("set input time", props<{
   nodeUuid: string,
@@ -172,9 +154,9 @@ function loadEvents() {
 
 
 
-    const data = readFileSync(lastEventFile, { encoding: "utf8" })
-    const eventDAta = JSON.parse(data)
-    lastEventDataObs.next(eventDAta)
+    // const data = readFileSync(lastEventFile, { encoding: "utf8" })
+    /// const eventDAta = JSON.parse(data)
+    // lastEventDataObs.next(eventDAta)
   } catch (e) {
     console.error(e)
     lastEventDataObs.next({})

@@ -33,7 +33,6 @@ import type { Action } from '../../util/data-store/action';
 import { BehaviorSubject, combineLatest, Subject, type Subscription } from "rxjs"
 import { filter, skip } from "rxjs/operators"
 import { PsqlBase, save, updateDatabase } from 'hibernatets';
-import { writeFileSync } from "fs"
 import { rename, mkdir } from "fs/promises"
 import { join } from "path"
 
@@ -202,9 +201,6 @@ forNodes({
 
 
             save(NodeEntry.from(node), { db: backupPool, updateOnDuplicate: true })
-
-            const file = join(nodesDataFolder, node.uuid + ".json")
-            writeFileSync(file, JSON.stringify(node, undefined, "   "))
 
             lastNodeStore = Date.now()
             lastNodeStoreTimeout = undefined
