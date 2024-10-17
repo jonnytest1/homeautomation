@@ -34,6 +34,10 @@ export class NodeEntry {
   @column({ type: "date" })
   lastUpdate: Date
 
+
+  @column({ type: "boolean" })
+  deleted = false
+
   static from(node: ElementNode) {
     const obj = new NodeEntry()
 

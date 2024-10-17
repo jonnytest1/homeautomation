@@ -51,6 +51,7 @@ async function loadNodeFiles() {
   try {
 
     const nodes = await load(NodeEntry, {
+      filter: n => n.deleted = false,
       options: {
         db: backupPool
       }

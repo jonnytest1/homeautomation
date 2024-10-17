@@ -10,7 +10,6 @@ import type { NodeDefOptinos } from './typing/node-options';
 import type { NodeEventData } from './typing/node-event-data';
 import { setLastEvent, setLastEventInputTime, setLastEventOutputTime } from './last-event-service';
 import { ElementNodeImpl } from './element-node';
-import { deletedNodesDataFolder, nodesDataFolder } from './generic-node-constants';
 import { init } from './validation/watcher';
 import { genericNodeDataStore } from './generic-store/reference';
 import { backendToFrontendStoreActions, initializeStore } from './generic-store/actions';
@@ -32,9 +31,7 @@ import { jsonClone } from '../../util/json-clone';
 import type { Action } from '../../util/data-store/action';
 import { BehaviorSubject, combineLatest, Subject, type Subscription } from "rxjs"
 import { filter, skip } from "rxjs/operators"
-import { PsqlBase, save, updateDatabase } from 'hibernatets';
-import { rename, mkdir } from "fs/promises"
-import { join } from "path"
+import { load, PsqlBase, save, updateDatabase } from 'hibernatets';
 
 
 
@@ -200,7 +197,7 @@ forNodes({
 
 
 
-            save(NodeEntry.from(node), { db: backupPool, updateOnDuplicate: true })
+            save(NodeEntry.from(node), { db: backupPool, updateOnDuplicate: { skip: ["deleted"] } })
 
             lastNodeStore = Date.now()
             lastNodeStoreTimeout = undefined
@@ -282,11 +279,22 @@ forNodes({
   },
   removed(node) {
     subscriptionMap[node]?.unsubscribe()
-    const file = join(nodesDataFolder, node + ".json")
-    const targetFile = join(deletedNodesDataFolder, node + ".json")
-    mkdir(deletedNodesDataFolder, { recursive: true }).then(() => {
-      rename(file, targetFile)
+
+    load(NodeEntry, {
+      filter: e => e.id = node,
+      options: {
+        first: true,
+        db: backupPool
+      }
+    }).then((e) => {
+      e.deleted = true
     })
+
+    //const file = join(nodesDataFolder, node + ".json")
+    //const targetFile = join(deletedNodesDataFolder, node + ".json")
+    /* mkdir(deletedNodesDataFolder, { recursive: true }).then(() => {
+       rename(file, targetFile)
+     })*/
 
 
   },
