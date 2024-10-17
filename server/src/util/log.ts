@@ -154,7 +154,7 @@ export async function logKibana(level: 'INFO' | 'ERROR' | 'DEBUG' | "WARN", mess
         }, e)
       }
 
-    }).then(() => {
+    }).finally(() => {
 
       pendingCalls--
     });
