@@ -107,7 +107,34 @@ export const backendActions = backendAction({
       }
     }))
   }),
-
+  updateInputs: createActionWithReducer("update inputs", props<{
+    nodeUuid: string
+    inputs: number
+  }>(), (st, a) => {
+    return patchNode(st, a.nodeUuid, node => {
+      return {
+        ...node,
+        runtimeContext: {
+          ...node.runtimeContext,
+          inputs: a.inputs
+        }
+      }
+    })
+  }),
+  updateOutputs: createActionWithReducer("update outputs", props<{
+    nodeUuid: string
+    outputs: number
+  }>(), (st, a) => {
+    return patchNode(st, a.nodeUuid, node => {
+      return {
+        ...node,
+        runtimeContext: {
+          ...node.runtimeContext,
+          outputs: a.outputs
+        }
+      }
+    })
+  }),
 })
 
 

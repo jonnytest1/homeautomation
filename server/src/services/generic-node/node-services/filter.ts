@@ -176,8 +176,13 @@ addTypeImpl({
       debugger
     }
 
-    if (returnValue) {
-      const emitIndex = 0
+    if (returnValue != false) {
+      let emitIndex = 0
+
+      if (typeof returnValue == "number") {
+        emitIndex = returnValue
+      }
+
       if (node.parameters?.outputhistory?.length) {
         const outputHistoryNum = +node.parameters?.outputhistory
         if (!isNaN(outputHistoryNum) && outputHistoryNum > 0) {
@@ -212,6 +217,10 @@ addTypeImpl({
         type: "number",
         min: 0
       },
+      additional_output: {
+        type: "number",
+        min: 0
+      },
       outputhistory: {
         type: "number",
         title: "output history days",
@@ -222,7 +231,7 @@ addTypeImpl({
       },
       code: {
         type: "monaco",
-        default: `function filter(input:InputType):boolean{\n\n}`,
+        default: `function filter(input:InputType):OutputType{\n\n}`,
         order: -1
       }
     }
@@ -231,27 +240,49 @@ addTypeImpl({
 
     if (node.parameters) {
       if (node.parameters.additional !== undefined) {
-        node.runtimeContext.inputs = +node.parameters.additional + 1
+        if (node.runtimeContext.inputs != +node.parameters.additional + 1) {
+          genericNodeDataStore.dispatch(backendToFrontendStoreActions.updateInputs({
+            nodeUuid: node.uuid,
+            inputs: +node.parameters.additional + 1
+          }))
+          for (let i = 1; i < Infinity; i++) {
+            if (i < +node.parameters.additional + 1) {
+              updateRuntimeParameter(node, `inputhistory${i}` as "inputhistory", {
+                type: "number",
+                title: `input history days index:${i}`,
+                order: 1
+              })
+            } else if (node.runtimeContext.parameters?.[`inputhistory${i}`]) {
+              updateRuntimeParameter(node, `inputhistory${i}` as "inputhistory", undefined as any)
+            } else {
+              break;
+            }
 
-        for (let i = 1; i < Infinity; i++) {
-          if (i < node.runtimeContext.inputs) {
-            updateRuntimeParameter(node, `inputhistory${i}` as "inputhistory", {
-              type: "number",
-              title: `input history days index:${i}`,
-              order: 1
-            })
-          } else if (node.runtimeContext.parameters?.[`inputhistory${i}`]) {
-            updateRuntimeParameter(node, `inputhistory${i}` as "inputhistory", undefined as any)
-            //delete node.runtimeContext.parameters?.[`inputhistory${i}`]
-          } else {
-            break;
           }
-
         }
+      }
 
-        genericNodeDataStore.dispatch(backendToFrontendStoreActions.updateNode({
-          newNode: node
-        }))
+      if (node.parameters.additional_output !== undefined) {
+        if (node.runtimeContext.outputs != +node.parameters.additional_output + 1) {
+          genericNodeDataStore.dispatch(backendToFrontendStoreActions.updateOutputs({
+            nodeUuid: node.uuid,
+            outputs: +node.parameters.additional_output + 1
+          }))
+
+          for (let i = 1; i < Infinity; i++) {
+            if (i < +node.parameters.additional_output + 1) {
+              updateRuntimeParameter(node, `outputhistory${i}` as "outputhistory", {
+                type: "number",
+                title: `output history days index:${i}`,
+                order: 1
+              })
+            } else if (node.runtimeContext.parameters?.[`outputhistory${i}`]) {
+              updateRuntimeParameter(node, `outputhistory${i}` as "outputhistory", undefined as any)
+            } else {
+              break;
+            }
+          }
+        }
       }
     }
 
@@ -272,9 +303,10 @@ addTypeImpl({
 ${connectionSchema.dts}
 
 type InputType=${connectionSchema.mainTypeName ??= mainTypeName}
+type OutputType=boolean ${node.parameters?.additional_output ? `|number |${outputsObjectGlobals(+node.parameters?.additional_output)}` : ''} 
       `, globals: `
      // type InputType = EditorSchema.InputType;    
-
+      
 
       ${node.parameters?.additional ? inputsGlobals(+node.parameters.additional) : ''}
       var lastOutputTs:number|undefined,
@@ -317,7 +349,16 @@ function cacheNodeScript(node: ElementNode<NodeDefToType<{ code: { type: "monaco
   return jsCache[node.uuid]
 }
 
+function outputsObjectGlobals(count: number) {
 
+  const indices = new Array(count).fill(undefined).map((_, i) => i + 1)
+  return `
+    {
+      0: boolean
+      [key in ${indices.join("|")}]:any
+    }
+  `
+}
 function inputsGlobals(count: number) {
 
   const indices = new Array(count).fill(undefined).map((_, i) => i + 1)

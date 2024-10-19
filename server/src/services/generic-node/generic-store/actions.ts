@@ -1,7 +1,7 @@
 import { genericNodeDataStore } from './reference'
 import type { DataState } from './state'
 import { createAction, props, type ActionCreator } from '../../../util/data-store/action'
-import type { AddConnection, DeleteConnection, DeleteNOdeEvet, SetConnectionError, StoreEvents, UpdateEditorSchema, UpdateGlobals, UpdateInputSchema, UpdateOutputSchema, UpdateParam, UpdateParamDefinition, UpdatepositionEvent, UpdateRuntimeInfo } from '../typing/frontend-events'
+import type { AddConnection, DeleteConnection, DeleteNOdeEvet, SetConnectionError, StoreEvents, UpdateEditorSchema, UpdateGlobals, UpdateInputs, UpdateInputSchema, UpdateOutputs, UpdateOutputSchema, UpdateParam, UpdateParamDefinition, UpdatepositionEvent, UpdateRuntimeInfo } from '../typing/frontend-events'
 import type { NodeData } from '../typing/generic-node-type'
 import type { ElementNode } from '../typing/element-node'
 
@@ -28,6 +28,8 @@ export function patchNode(st: DataState, nodeUuid: string, mapper: (node: Elemen
 
 /**
  * @file file://./../../../../angular/smarthome/src/app/generic-setup/store/reducers.ts
+ * error shown:
+ * @file file://./../../../../angular/smarthome/src/app/generic-setup/generic-node-data-service.ts
  */
 
 
@@ -93,7 +95,29 @@ export const backendToFrontendStoreActions = {
   removeConnnection: createReducerAction("delete connection", props<DeleteConnection>()),
   setConnectionError: createReducerAction("set con error", props<SetConnectionError>()),
 
-  removeNode: createReducerAction("delete node", props<DeleteNOdeEvet>())
+  removeNode: createReducerAction("delete node", props<DeleteNOdeEvet>()),
+  updateOutputs: genericNodeDataStore.createReducerAction("update outputs", (st, a) => {
+    return patchNode(st, a.nodeUuid, n => {
+      return {
+        ...n,
+        runtimeContext: {
+          ...n.runtimeContext,
+          outputs: a.outputs
+        }
+      }
+    })
+  }, props<UpdateOutputs>()),
+  updateInputs: genericNodeDataStore.createReducerAction("update inputs", (st, a) => {
+    return patchNode(st, a.nodeUuid, n => {
+      return {
+        ...n,
+        runtimeContext: {
+          ...n.runtimeContext,
+          inputs: a.inputs
+        }
+      }
+    })
+  }, props<UpdateInputs>()),
 
 } satisfies Record<string, ActionCreator<StoreEvents["type"], any>>
 

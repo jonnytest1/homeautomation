@@ -61,9 +61,9 @@ async function loadNodeFiles() {
     })
     const nodeList = nodes.map(n => n.node)
 
-    const nodeIds = new Set(nodes.map(n => n.nodeUuid))
+   /*  const nodeIds = new Set(nodes.map(n => n.nodeUuid))
 
-    const nodeEntries = readdirSync(nodesDataFolder, { withFileTypes: true });
+   const nodeEntries = readdirSync(nodesDataFolder, { withFileTypes: true });
 
     for (const nodeEntry of nodeEntries) {
       if (nodeEntry.isFile()) {
@@ -77,7 +77,7 @@ async function loadNodeFiles() {
           nodeList.push(nodeData)
         }
       }
-    }
+    }*/
 
 
 
