@@ -9,6 +9,8 @@ import { backendToFrontendStoreActions } from '../generic-store/actions';
 import { lastEventTimesForNode } from '../last-event-service';
 import { updateRuntimeParameter, updateServerContext } from '../element-node-fnc';
 import { HOUR } from '../../../constant';
+import type { NodeEvent } from '../node-event';
+import type { EvalNode } from '../typing/generic-node-type';
 import * as z from "zod"
 import { Script } from 'vm';
 
@@ -116,7 +118,7 @@ addTypeImpl({
     const lastEmit = genericNodeDataStore.getOnce(lastEventTimesForNode(node.uuid))
     const lastOutputTs = lastEmit.output
 
-    let returnValue
+    let returnValue: boolean | number | { 0: boolean, 1: unknown } = false
     try {
 
 
@@ -159,6 +161,14 @@ addTypeImpl({
               nodeUuid: node.uuid
             }))
           }
+        },
+        emit(index: number, event) {
+          if (index > 0) {
+            const copy = data.clone()
+            copy.updatePayload(event)
+            addOutputHistoryEvent(node, copy, index);
+            callbacks.continue(data, index)
+          }
         }
       };
       /*  logKibana("DEBUG", {
@@ -167,14 +177,23 @@ addTypeImpl({
          nodeid: node.uuid
        }) */
       returnValue = nodeScript.script.runInNewContext(contextObject)
-      if (typeof returnValue !== "boolean") {
-        throw new Error("invalid return type")
-      }
-
-
     } catch (e) {
       debugger
     }
+
+    if (typeof returnValue == "object") {
+      for (let i = 1; i < +(node.parameters?.additional_output ?? 0) + 1; i++) {
+        if (returnValue[i]) {
+          const copy = data.clone()
+          copy.updatePayload(returnValue[i])
+          addOutputHistoryEvent(node, copy, i);
+          callbacks.continue(data, i)
+        }
+      }
+
+      returnValue = returnValue[0]
+    }
+
 
     if (returnValue != false) {
       let emitIndex = 0
@@ -183,26 +202,7 @@ addTypeImpl({
         emitIndex = returnValue
       }
 
-      if (node.parameters?.outputhistory?.length) {
-        const outputHistoryNum = +node.parameters?.outputhistory
-        if (!isNaN(outputHistoryNum) && outputHistoryNum > 0) {
-          const outputHistoryDays = outputHistoryNum * HOUR * 24
-
-          const outputHistoryData = node.serverContext?.outputhistory ?? []
-          outputHistoryData.push({
-            timestamp: Date.now(),
-            evt: data.payload,
-            index: emitIndex
-          })
-          const cutoff = Date.now() - outputHistoryDays
-          while (outputHistoryData[0]?.timestamp < cutoff) {
-            outputHistoryData.shift()
-          }
-          updateServerContext(node, {
-            outputhistory: outputHistoryData
-          })
-        }
-      }
+      addOutputHistoryEvent(node, data, emitIndex);
       callbacks.continue(data, emitIndex)
     }
 
@@ -313,6 +313,7 @@ type InputType=${connectionSchema.mainTypeName ??= mainTypeName}
       var  inputhistory: Array<{timestamp:number,evt:unknown,index:number}>,
       var  outputhistory: Array<{timestamp:number,evt:unknown,index:number}>
       var setInfo:(text:string)=>void
+      var emit(index:${node.parameters?.additional_output ? emitTypes(+node.parameters?.additional_output) : 'never'},data:any):void
       var context; 
       `
       },
@@ -329,6 +330,29 @@ type InputType=${connectionSchema.mainTypeName ??= mainTypeName}
     }))
   }
 })
+function addOutputHistoryEvent(node: EvalNode<{ additional: { type: "number"; min: number; }; additional_output: { type: "number"; min: number; }; outputhistory: { type: "number"; title: string; }; inputhistory: { type: "number"; title: string; }; code: { type: "monaco"; default: string; order: number; }; }, { inputs: { [index: number]: InputContext; }; inputhistory?: Array<{ timestamp: number; evt: unknown; index: number; }>; outputhistory?: Array<{ timestamp: number; evt: unknown; index: number; }>; }>, data: NodeEvent<unknown, unknown, NodeDefOptinos>, emitIndex: number) {
+  if (node.parameters?.outputhistory?.length) {
+    const outputHistoryNum = +node.parameters?.outputhistory;
+    if (!isNaN(outputHistoryNum) && outputHistoryNum > 0) {
+      const outputHistoryDays = outputHistoryNum * HOUR * 24;
+
+      const outputHistoryData = node.serverContext?.outputhistory ?? [];
+      outputHistoryData.push({
+        timestamp: Date.now(),
+        evt: data.payload,
+        index: emitIndex
+      });
+      const cutoff = Date.now() - outputHistoryDays;
+      while (outputHistoryData[0]?.timestamp < cutoff) {
+        outputHistoryData.shift();
+      }
+      updateServerContext(node, {
+        outputhistory: outputHistoryData
+      });
+    }
+  }
+}
+
 function cacheNodeScript(node: ElementNode<NodeDefToType<{ code: { type: "monaco"; default: string; }; }>, NodeDefOptinos, unknown>) {
   if (node.parameters?.code) {
     try {
@@ -348,6 +372,14 @@ function cacheNodeScript(node: ElementNode<NodeDefToType<{ code: { type: "monaco
 
   return jsCache[node.uuid]
 }
+
+
+function emitTypes(count: number) {
+  const indices = new Array(count).fill(undefined).map((_, i) => i + 1)
+
+  return indices.join("|")
+}
+
 
 function outputsObjectGlobals(count: number) {
 

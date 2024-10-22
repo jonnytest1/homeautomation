@@ -23,6 +23,7 @@ const String configJsonString = R"({
   "commands": [{
     "name": "display",
     "responses":["done"],
+    "asyncRetained": true,
     "argument": [
         { "name":"num1","type": "number" }, { "name":"num2","type": "number" }, 
         { "name":"num3","type": "number" }, { "name":"num4","type": "number" }
