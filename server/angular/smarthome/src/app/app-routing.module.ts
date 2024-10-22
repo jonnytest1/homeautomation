@@ -6,8 +6,9 @@ import { IframeComponent } from './iframe/iframe.component';
 import { InventoryComponent } from './inventory/inventory.component';
 import { TimersComponent } from './timers/timers.component';
 import { TodoComponent } from './todo/todo.component';
-import { WiringComponent } from './wiring/wiring.component';
 import { InputsComponent } from './inputs/inputs.component';
+import { WiringComponent } from "electronics-lib"
+
 
 const routes: Routes = [
   {
