@@ -60,3 +60,7 @@ clients/pi/zero/weights/smarthome
 clients/pi/co2/src/smarthome
 clients/pi/zero/h2o/smarthome
 clients/pi/bluetooth-distance/src/env.py
+clients/arduino/8x8/8x8/src/mqtt.h
+clients/arduino/8x8/8x8/arduinoide/8x8/mqtt.h
+clients/arduino/8x8/8x8/arduinoide/8x8/mqtt_cred.h
+server/angular/smarthome/src/app/wiring/devices/matrix/creds.ts

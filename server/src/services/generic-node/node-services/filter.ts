@@ -231,7 +231,7 @@ addTypeImpl({
       },
       code: {
         type: "monaco",
-        default: `function filter(input:InputType):OutputType{\n\n}`,
+        default: `function filter(input:InputType):FilterType{\n\n}`,
         order: -1
       }
     }
@@ -303,10 +303,10 @@ addTypeImpl({
 ${connectionSchema.dts}
 
 type InputType=${connectionSchema.mainTypeName ??= mainTypeName}
-type OutputType=boolean ${node.parameters?.additional_output ? `|number |${outputsObjectGlobals(+node.parameters?.additional_output)}` : ''} 
       `, globals: `
      // type InputType = EditorSchema.InputType;    
-      
+
+      type FilterType=boolean ${node.parameters?.additional_output ? `|number |${outputsObjectGlobals(+node.parameters?.additional_output)}` : ''} ;
 
       ${node.parameters?.additional ? inputsGlobals(+node.parameters.additional) : ''}
       var lastOutputTs:number|undefined,
@@ -352,12 +352,9 @@ function cacheNodeScript(node: ElementNode<NodeDefToType<{ code: { type: "monaco
 function outputsObjectGlobals(count: number) {
 
   const indices = new Array(count).fill(undefined).map((_, i) => i + 1)
-  return `
-    {
-      0: boolean
+  return `({0: boolean} & {
       [key in ${indices.join("|")}]:any
-    }
-  `
+    })`
 }
 function inputsGlobals(count: number) {
 

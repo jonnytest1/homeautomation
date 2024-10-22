@@ -48,9 +48,10 @@
       ],
       "env": {
         "setup": "true",
+        "setup_mqtt_clone": "true",
         "WATCH_SERVICES": "true",
         "LOG_SUFFIX": "local",
-        "SMARTHOME_DISABLED": "true"
+        // "SMARTHOME_DISABLED": "true"
       },
       "args": [
         "${workspaceFolder}\\index.ts"

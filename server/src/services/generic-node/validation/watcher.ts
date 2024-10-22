@@ -1,11 +1,13 @@
 import { JsonSchemaWatcher } from './json-schema-watcher';
+import { create, validateMorph } from './morph';
 import { CompilerError, postfix } from '../json-schema-type-util';
 import { ResolvablePromise } from '../../../util/resolvable-promise';
 import {
   Diagnostic, SemanticDiagnosticsBuilderProgram, WatchOfConfigFile, createSemanticDiagnosticsBuilderProgram,
-  createWatchCompilerHost, createWatchProgram, isExpressionStatement, sys, Node, isModuleDeclaration, isModuleBlock
+  createWatchCompilerHost, createWatchProgram, sys
 } from 'typescript';
 import type { ExtendedJsonSchema } from 'json-schema-merger';
+import { ts } from 'ts-morph';
 import { join, basename } from 'path';
 import { writeFileSync } from 'fs';
 
@@ -90,55 +92,60 @@ function reportWatchStatusChanged(diagnostic: Diagnostic, ...args) {
 let watchProgram: WatchOfConfigFile<SemanticDiagnosticsBuilderProgram>
 
 let schemaWatcher: JsonSchemaWatcher
-export function init() {
+export async function init() {
   const host = createWatchCompilerHost(tsconfig, {
     noEmit: true
   }, sys, createSemanticDiagnosticsBuilderProgram, reportDiagnostic, reportWatchStatusChanged)
 
   watchProgram = createWatchProgram(host)
-  schemaWatcher = new JsonSchemaWatcher(watchProgram.getProgram().getProgram())
+
+
+  const proj = await create()
+
+  schemaWatcher = new JsonSchemaWatcher(proj.createProgram())
   schemaWatcher.buildWatchGenerator({})
+
+
+}
+
+export function getWatcher() {
+  return schemaWatcher
 }
 
 export async function getTypes(dts: string, mainType_else_laststatement: string | false, tracer: string) {
 
-  const file = await validate(tracer, dts, tracer)
-  const program = watchProgram.getProgram().getProgram()
+  return validateMorph(dts, tracer, {
+    extractor: (pr, file) => {
+      const program = pr
+      const typeChecker = program.getTypeChecker()
+      let statement: ts.Node = file.statements[file.statements.length - 1]
+      if (ts.isModuleDeclaration(statement)) {
+        const modStatements = statement.body
+        if (modStatements && ts.isModuleBlock(modStatements)) {
+          statement = modStatements.statements[modStatements.statements.length - 1]
+        }
+      }
+      if (mainType_else_laststatement !== false) {
+        const decl = file.getNamedDeclarations().get(mainType_else_laststatement);
+        if (decl) {
+          statement = decl[decl.length - 1]
 
+        }
 
-  const tsSourceFile = program.getSourceFile(file)
-  if (!tsSourceFile) {
-    throw new Error("didnt get source file")
-  }
-  const typeChecker = program.getTypeChecker()
+      }
 
+      if (ts.isExpressionStatement(statement)) {
+        statement = statement.expression
+      }
+      const typeDecl = typeChecker.getTypeAtLocation(statement)
+      //as unknown as SourceFile
+      schemaWatcher.addSourceFile(file)
+      //as unknown as Type
+      const generated = schemaWatcher?.getTypeDefinition(typeDecl);
 
-  let statement: Node = tsSourceFile.statements[tsSourceFile.statements.length - 1]
-  if (isModuleDeclaration(statement)) {
-    const modStatements = statement.body
-    if (modStatements && isModuleBlock(modStatements)) {
-      statement = modStatements.statements[modStatements.statements.length - 1]
+      postfix(generated)
+      return generated as ExtendedJsonSchema
     }
-  }
-  if (mainType_else_laststatement !== false) {
-    const decl = tsSourceFile.getNamedDeclarations().get(mainType_else_laststatement);
-    if (decl) {
-      statement = decl[decl.length - 1]
-
-    }
-
-  }
-
-  if (isExpressionStatement(statement)) {
-    statement = statement.expression
-  }
-  const typeDecl = typeChecker.getTypeAtLocation(statement)
-
-  schemaWatcher.addSourceFile(tsSourceFile)
-  const generated = schemaWatcher?.getTypeDefinition(typeDecl);
-
-  postfix(generated)
-  return generated as ExtendedJsonSchema
-
+  })
 
 }

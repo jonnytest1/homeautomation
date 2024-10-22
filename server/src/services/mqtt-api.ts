@@ -35,7 +35,7 @@ export class MQTTIntegration {
     this.connection.on("close", () => {
       console.error("mqtt closed")
     })
-    this.connection.on("connect", () => {
+    this.connection.once("connect", () => {
 
       this.connection.on("message", (topic, message) => {
         try {

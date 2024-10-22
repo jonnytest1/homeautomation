@@ -4,6 +4,7 @@ import { ControlKeysWebsocket } from "../src/resources/control-keys.ws"
 import { ReconnectingSocket } from '../src/util/reconnecting-socket';
 import { ResolvablePromise } from '../src/util/resolvable-promise';
 import { emitEvent } from '../src/services/generic-node/generic-node-service';
+import { getClient } from '../src/services/generic-node/node-services/mqtt-global';
 import { MariaDbBase } from 'hibernatets/dbs/mariadb-base';
 import { EventEmitter } from "events"
 
@@ -14,6 +15,10 @@ const eventReplay = false
 
 const env = environment as typeof environment & {
   KEY_ENDPOINT: string
+  setup_mqtt_clone?: true
+  MQTT_PROD_SERVER
+  MQTT_PROD_USER
+  MQTT_PROD_PASSWORD
 }
 
 ControlKeysWebsocket.key_cache = {
@@ -98,4 +103,32 @@ if (copyDatabase) {
        debugger
      })
   */
+}
+
+
+
+if (env.setup_mqtt_clone) {
+  const cli = getClient({
+    mqtt_password: env.MQTT_PROD_PASSWORD,
+    mqtt_server: env.MQTT_PROD_SERVER,
+    mqtt_user: env.MQTT_PROD_USER
+  })
+
+  const mqttUrl = environment.MQTT_SERVER
+  const currentCon = getClient({
+    mqtt_password: environment.MQTT_PASSWORD,
+    mqtt_server: mqttUrl,
+    mqtt_user: environment.MQTT_USER
+  })
+
+
+  cli.once("connect", () => {
+    cli.on("message", (topic, data) => {
+      currentCon.publish(topic, data, { retain: true })
+    })
+    cli.subscribe("+/discovery/+/config")
+    setTimeout(() => {
+      cli.end()
+    }, 5000)
+  })
 }

@@ -170,7 +170,7 @@ addTypeImpl({
         const commandOtpinos = device.commands.map(c => c.name)
 
 
-        updateRuntimeParameter(node, "command", { type: "select", options: commandOtpinos })
+        updateRuntimeParameter(node, "command", { type: "select", options: commandOtpinos }, commandOtpinos[0])
 
         if (node.parameters?.command) {
           if (prev?.parameters?.command && node.parameters?.command !== prev?.parameters?.command) {
@@ -232,9 +232,16 @@ addTypeImpl({
 
                 updateRuntimeParameter(nodeCp, commandArgument.name, commandArgument as never)
               }
+              const argumentSChema = argumentTypeToJsonSchema(commandArgument)
 
-              inputSchema.properties ??= {}
-              inputSchema.properties[commandArgument.name] = argumentTypeToJsonSchema(commandArgument)
+              if (isSingleArgument) {
+                Object.assign(inputSchema, argumentSChema)
+              } else {
+                inputSchema.properties ??= {}
+                inputSchema.properties[commandArgument.name] = argumentSChema
+              }
+
+
 
             }
 

@@ -3,16 +3,18 @@ import type { PreparedNodeData } from './typing/generic-node-type';
 import type { Schemata } from './typing/schemata';
 import type { ElementNode } from './typing/element-node';
 import { CompilerError, allRequired, expansionType, generateDtsFromSchema, mainTypeName } from './json-schema-type-util';
-import { getTypes, validate } from './validation/watcher';
+import { getTypes, getWatcher } from './validation/watcher';
 import { nodeDescriptor, nodeTypeName } from './element-node';
 import { SchemaMatchingError, validateJsonSchema } from './validation/json-schema-type.validator';
 import { genericNodeDataStore } from './generic-store/reference';
 import { backendToFrontendStoreActions } from './generic-store/actions';
 import { selectConnectionsFromNodeUuid, selectNodeByUuid, selectTargetConnectorForNodeUuid } from './generic-store/selectors';
+import { validateMorph } from './validation/morph';
 import { logKibana } from '../../util/log';
 import { generateSchema } from 'typescript-json-schema';
 import type { Diagnostic, DiagnosticMessageChain, DiagnosticRelatedInformation } from 'typescript';
 import type { ExtendedJsonSchema } from 'json-schema-merger';
+import type { ts } from 'ts-morph';
 
 /*
 export async function parseTypeSafe(node: ElementNode<unknown>, data: unknown) {
@@ -69,8 +71,9 @@ export async function updateTypeSchema(node: ElementNode, nodeData: PreparedNode
       }
       const compSchema = connectionNode.runtimeContext.outputSchema
       if (compSchema?.dts && node.runtimeContext.inputSchema) {
+        const nodeTypePrefix = nodeTypeName(node)
+        let diagnosicsFiles: ReadonlyArray<ts.Diagnostic> | undefined
         try {
-          const nodeTypePrefix = nodeTypeName(node)
           const connectionNodePrefi = nodeTypeName(connectionNode)
 
           validateJsonSchema({
@@ -104,7 +107,15 @@ export async function updateTypeSchema(node: ElementNode, nodeData: PreparedNode
         type ResultType=${nodeTypePrefix}_NodeInput.${mainTypeName}
     }
 `;
-          await validate(`connections_to_${node.uuid}`, str, `${node.type}-${node.uuid}-con input check`)
+          await validateMorph(str, `${node.type}-${node.uuid}-con input check`, {
+            extractor(p, file) {
+              //nothin
+            },
+            preerror(diagnostics) {
+              diagnosicsFiles = diagnostics
+
+            },
+          })
 
           genericNodeDataStore.dispatch(backendToFrontendStoreActions.setConnectionError({
             connection: con.uuid,
@@ -132,12 +143,31 @@ export async function updateTypeSchema(node: ElementNode, nodeData: PreparedNode
 
               for (const subType of ["ExpandedConInput", "ExpandedNodeInput"])
                 if (messageText.includes(subType)) {
-                  const subSchema = generateSchema(e.program, subType, { ignoreErrors: true })
-                  if (subSchema) {
-                    let dtsrelace = await generateDtsFromSchema(subSchema as ExtendedJsonSchema, `${node.type}-${node.uuid}-err handling resolve`)
-                    dtsrelace = dtsrelace.trim().replace("export type Main = ", "").replace(/;$/, "").trim()
-                    messageText = messageText.replace(subType, dtsrelace)
+
+
+                  const w = getWatcher().copy(e.program)
+                  const diagnosticFile = diagnosicsFiles?.[0]?.file;
+                  if (diagnosticFile) {
+                    // as unknown as SourceFile
+                    w.addSourceFile(diagnosticFile)
+
+                    const typeName = nodeTypePrefix + "_" + subType;
+                    try {
+                      const subSchema = generateSchema(e.program, typeName, { ignoreErrors: true }, undefined, w.getSchemaGenerator())
+                      if (subSchema) {
+                        let dtsrelace = await generateDtsFromSchema(subSchema as ExtendedJsonSchema, `${node.type}-${node.uuid}-err handling resolve`)
+                        dtsrelace = dtsrelace.trim().replace("export type Main = ", "").replace(/;$/, "").trim()
+                        messageText = messageText.replace(typeName, dtsrelace)
+                      }
+                    } catch (e) {
+                      logKibana("WARN", "error wihle replacing type in error", e)
+                    }
                   }
+
+
+                  //w.getTypeDefinition()
+
+
                 }
               genericNodeDataStore.dispatch(backendToFrontendStoreActions.setConnectionError({
                 connection: con.uuid,
@@ -234,6 +264,7 @@ export async function updateTypeSchema(node: ElementNode, nodeData: PreparedNode
             await updateTypeSchema(nextNode, nodeData)
             clearTimeout(logTimeout)
           } catch (e) {
+            debugger;
             throw new Error("error validating node " + connector.uuid, {
               cause: e
             })

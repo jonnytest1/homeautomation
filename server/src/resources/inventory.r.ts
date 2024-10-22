@@ -33,6 +33,7 @@ export class INventoryResource {
     }
     const items = await load(Item, SqlCondition.ALL, undefined, {
       deep: ["order"],
+      db: pool
     });
 
     const trackingInfoMap: Record<string, Item> = {}

@@ -12,6 +12,7 @@ import type * as z from "zod"
 import { v4 } from "uuid"
 import type { JSONSchema6Definition } from 'json-schema'
 import type { ExtendedJsonSchema } from 'json-schema-merger'
+import type { ts } from 'ts-morph'
 import { join, dirname } from "path"
 import { writeFile, mkdir, rm } from "fs/promises"
 
@@ -202,7 +203,7 @@ export function programFromSource(name: string, source: string) {
 
 export class CompilerError extends Error {
 
-  constructor(message: string, public error_diagnostics: Array<Omit<Diagnostic, "file">>) {
+  constructor(message: string, public error_diagnostics: Array<Omit<Diagnostic, "file">>, public program?: ts.Program) {
     super(message)
 
   }
