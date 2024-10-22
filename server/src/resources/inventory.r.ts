@@ -5,8 +5,19 @@ import { imageLaoder } from '../services/image-converter';
 import { logKibana } from '../util/log';
 import { assign, HttpRequest, HttpResponse, Path, POST } from 'express-hibernate-wrapper';
 import { load, queries, save, SqlCondition } from 'hibernatets';
+import { MariaDbBase } from 'hibernatets/dbs/mariadb-base';
 
 
+
+const pool = new MariaDbBase(undefined, {
+  connectionLimit: 6,
+  // trace: true, 
+  logPackets: true,
+  keepAliveDelay: 5000,
+  idleTimeout: 560,
+  maxAllowedPacket: 67108864
+
+})
 
 @Path('inventory')
 export class INventoryResource {
@@ -21,7 +32,7 @@ export class INventoryResource {
       orderArray = [orderArray]
     }
     const items = await load(Item, SqlCondition.ALL, undefined, {
-      deep: ["order"]
+      deep: ["order"],
     });
 
     const trackingInfoMap: Record<string, Item> = {}

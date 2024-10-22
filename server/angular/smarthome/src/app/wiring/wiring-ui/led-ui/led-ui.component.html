@@ -1,8 +1,0 @@
-<app-in-out [node]="node">
-  <mat-icon [style.color]="backgroundColor()"
-            (click)="openSnackbar()">{{getIcon()}}</mat-icon>
-</app-in-out>
-
-<ng-template #options>
-  <button (click)="node.blown=false">reset</button>
-</ng-template>
