@@ -167,7 +167,7 @@ addTypeImpl({
             const copy = data.clone()
             copy.updatePayload(event)
             addOutputHistoryEvent(node, copy, index);
-            callbacks.continue(data, index)
+            callbacks.continue(copy, index)
           }
         }
       };
@@ -187,7 +187,7 @@ addTypeImpl({
           const copy = data.clone()
           copy.updatePayload(returnValue[i])
           addOutputHistoryEvent(node, copy, i);
-          callbacks.continue(data, i)
+          callbacks.continue(copy, i)
         }
       }
 
@@ -313,7 +313,7 @@ type InputType=${connectionSchema.mainTypeName ??= mainTypeName}
       var  inputhistory: Array<{timestamp:number,evt:unknown,index:number}>,
       var  outputhistory: Array<{timestamp:number,evt:unknown,index:number}>
       var setInfo:(text:string)=>void
-      var emit(index:${node.parameters?.additional_output ? emitTypes(+node.parameters?.additional_output) : 'never'},data:any):void
+      var emit(index:${node.parameters?.additional_output ? emitTypes(+node.parameters?.additional_output) : 'never'},data:any)=>void
       var context; 
       `
       },
