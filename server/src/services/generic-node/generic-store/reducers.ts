@@ -189,8 +189,10 @@ genericNodeDataStore.addReducer(backendToFrontendStoreActions.removeNode, (st, a
 
   for (const nodeUuid in newConnectorMap) {
     for (const index in newConnectorMap[nodeUuid]) {
-      newConnectorMap[nodeUuid][index] = newConnectorMap[nodeUuid][index]
-        .filter(con => con.uuid !== a.node)
+      if (newConnectorMap[nodeUuid][index]) {
+        newConnectorMap[nodeUuid][index] = newConnectorMap[nodeUuid][index]
+          ?.filter(con => con.uuid !== a.node)
+      }
     }
   }
 
@@ -200,7 +202,7 @@ genericNodeDataStore.addReducer(backendToFrontendStoreActions.removeNode, (st, a
   for (const nodeUuid in newTargetConnectorMap) {
     for (const index in newTargetConnectorMap[nodeUuid]) {
       const nodeTargetList = newTargetConnectorMap[nodeUuid][index]
-      if (nodeTargetList.some(con => con.source.uuid === a.node)) {
+      if (nodeTargetList?.some(con => con.source.uuid === a.node)) {
         newTargetConnectorMap[nodeUuid][index] = nodeTargetList
           .filter(con => con.source.uuid !== a.node)
       }
