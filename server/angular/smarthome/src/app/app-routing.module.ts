@@ -7,7 +7,6 @@ import { InventoryComponent } from './inventory/inventory.component';
 import { TimersComponent } from './timers/timers.component';
 import { TodoComponent } from './todo/todo.component';
 import { InputsComponent } from './inputs/inputs.component';
-import { WiringComponent } from "electronics-lib"
 
 
 const routes: Routes = [
@@ -45,7 +44,7 @@ const routes: Routes = [
     component: TodoComponent
   }, {
     path: 'wiring',
-    component: WiringComponent
+    loadChildren: () => import('./wiring/wiring.module').then(c => c.WiringModule)
   }, {
     path: 'nodered',
     component: IframeComponent,

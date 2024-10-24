@@ -4,10 +4,11 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatSortModule } from '@angular/material/sort';
 
-import { WiringModule as ElectronicsModule, templateService, esp32LibraryToken, newClassBound, stringTypeLiteral, instantiate } from "electronics-lib"
+import { WiringModule as ElectronicsModule, templateService, esp32LibraryToken, newClassBound, stringTypeLiteral, instantiate, WiringComponent } from "electronics-lib"
 import { files, wiringLayout } from './layout';
 import { mqttLib, mqttReplace } from './libs/mqtt';
 import { jsonLib } from './libs/json';
+import { RouterModule } from '@angular/router';
 
 function provideToken<T extends InjectionToken<unknown>>(token: T, value: T extends InjectionToken<infer U> ? U : never) {
   return {
@@ -20,7 +21,11 @@ function provideToken<T extends InjectionToken<unknown>>(token: T, value: T exte
   imports: [
     CommonModule,
     MatSidenavModule,
-    MatSortModule, MatIconModule, ElectronicsModule
+    MatSortModule, MatIconModule, ElectronicsModule, RouterModule.forChild([{
+      pathMatch: "prefix",
+      path: "",
+      component: WiringComponent
+    }])
   ],
   declarations: [],
   exports: [],
