@@ -253,7 +253,7 @@ export async function updateTypeSchema(node: ElementNode, nodeData: PreparedNode
   try {
     if (outConnections) {
       for (const connectorIndex in outConnections) {
-        for (const connector of outConnections[connectorIndex]) {
+        for (const connector of outConnections[connectorIndex] ?? []) {
           try {
             const nextNode = genericNodeDataStore.getOnce(selectNodeByUuid(connector.uuid))
 
