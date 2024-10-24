@@ -145,9 +145,18 @@ void bitColumn(int ten1, CRGB color)
   }
 }
 
-void setBitBlock(int multiplikator, int ten1, int ten2, int ten3, int ten4, CRGB color)
+int multiplierColor[]={CRGB::Blue,CRGB::Green,CRGB::Yellow};
+
+
+void setBitBlock(int ten1, int ten2, int ten3, int ten4, CRGB color)
 {
   clear();
+  int mult1=0;
+  while (ten1>10) {
+      leds[55] = multiplierColor[mult1];
+      mult1++;
+      ten1-=10;
+  }
 
   bitBlock(ten1, color, -3);
   bitBlock(ten2, color, 0);

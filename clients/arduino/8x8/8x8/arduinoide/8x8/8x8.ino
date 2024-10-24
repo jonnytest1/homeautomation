@@ -35,6 +35,8 @@ const String configJsonString = R"({
 void onMessage(String &topic, String &payload)
 {
 
+  FastLED.setBrightness(1);
+
   JsonDocument doc;
   deserializeJson(doc, payload);
 
@@ -47,7 +49,7 @@ void onMessage(String &topic, String &payload)
   if(num3==0&&num2==0&&num4==0&& num1<10){
     singleDigit(num1, CRGB::Orange);
   }else{
-    setBitBlock(1, num1,num2, num3,num4, CRGB::Orange);
+    setBitBlock(num1,num2, num3,num4, CRGB::Orange);
   }
   FastLED.show();
 
@@ -66,7 +68,7 @@ void setup()
   client.setHost("mqtt.fritz.box", 1883);
   client.onMessage(onMessage);
   client.begin(cli);
-  FastLED.setBrightness(10);
+  FastLED.setBrightness(1);
 
   for(int i=0;i<8;i++){
     clear();
