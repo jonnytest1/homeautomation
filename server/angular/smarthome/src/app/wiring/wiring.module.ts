@@ -21,10 +21,11 @@ function provideToken<T extends InjectionToken<unknown>>(token: T, value: T exte
   imports: [
     CommonModule,
     MatSidenavModule,
-    MatSortModule, MatIconModule, ElectronicsModule, RouterModule.forChild([{
+    MatSortModule, MatIconModule, ElectronicsModule,
+    RouterModule.forChild([{
       pathMatch: "prefix",
       path: "",
-      component: WiringComponent
+      component: WiringComponent,
     }])
   ],
   declarations: [],

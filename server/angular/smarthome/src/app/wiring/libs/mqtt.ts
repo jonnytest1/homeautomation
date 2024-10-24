@@ -3,7 +3,8 @@ import mqtt from "mqtt"
 import { ResolvablePromise } from '../../utils/resolvable-promise'
 import {
   type TypeValue, type FunctionTypeLiteral, type VoidTypeLiteral, type StringTypeLiteral,
-  type IntTypeLiteral, newClassBound, stringTypeLiteral, consumeFunction, type JscppInclude
+  type IntTypeLiteral, newClassBound, stringTypeLiteral, consumeFunction, type JscppInclude,
+  type CppExecuterParams
 } from 'electronics-lib'
 
 
@@ -28,79 +29,82 @@ export function mqttLib() {
   let connectionMock = false
   let callct = 0
   return {
-    "MQTT.h": {
-      load: (rt) => {
-        const pubSubCli = newClassBound<[]>(rt)("MQTTClient", [])
-        rt.regFunc((rt, self, serverVar, portV) => {
-          server = rt.getStringFromCharArray(serverVar)
-          port = portV.v
+    "MQTT.h": (exec) => {
+      return {
+        load: (rt) => {
+          const pubSubCli = newClassBound<[]>(rt)("MQTTClient", [])
+          rt.regFunc((rt, self, serverVar, portV) => {
+            server = rt.getStringFromCharArray(serverVar)
+            port = portV.v
 
-        }, pubSubCli, "setHost", [stringTypeLiteral(rt), rt.intTypeLiteral], rt.voidTypeLiteral)
+          }, pubSubCli, "setHost", [stringTypeLiteral(rt), rt.intTypeLiteral], rt.voidTypeLiteral)
 
-        rt.regFunc((rt, self, callbackV) => {
-          callback = callbackV
-        }, pubSubCli, "onMessage", [rt.functionType(rt.voidTypeLiteral, [stringTypeLiteral(rt), stringTypeLiteral(rt)])], rt.voidTypeLiteral)
+          rt.regFunc((rt, self, callbackV) => {
+            callback = callbackV
+          }, pubSubCli, "onMessage", [rt.functionType(rt.voidTypeLiteral, [stringTypeLiteral(rt), stringTypeLiteral(rt)])], rt.voidTypeLiteral)
 
-        rt.regFunc((rt, self, idV, userV, passwdV) => {
-          const user = rt.getStringFromCharArray(userV)
-          const pwd = rt.getStringFromCharArray(passwdV)
-          cli = mqtt.connect({
-            host: server,
-            protocol: location.protocol === "https:" ? "wss" : "ws",
-            port: port,
-            username: user,
-            password: pwd,
-          })
-
-          cli.once("connect", () => {
-            connected.resolve(true)
-
-            cli.on("message", (t, data) => {
-              if (callback) {
-                const dataString = data.toString()
-                try {
-                  consumeFunction(rt, callback, [rt.makeCharArrayFromString(t), rt.makeCharArrayFromString(dataString), rt.val(rt.intTypeLiteral, dataString.length)])
-
-                } catch (e) {
-                  debugger
-                }
-              }
+          rt.regFunc((rt, self, idV, userV, passwdV) => {
+            const user = rt.getStringFromCharArray(userV)
+            const pwd = rt.getStringFromCharArray(passwdV)
+            cli = mqtt.connect({
+              host: server,
+              protocol: location.protocol === "https:" ? "wss" : "ws",
+              port: port,
+              username: user,
+              password: pwd,
             })
-          })
 
-          cli.on("error", e => {
-            debugger
-          })
-          return rt.val(rt.boolTypeLiteral, true)
-        }, pubSubCli, "connect", [stringTypeLiteral(rt), stringTypeLiteral(rt), stringTypeLiteral(rt)], rt.boolTypeLiteral)
+            cli.once("connect", () => {
+              connected.resolve(true)
+              exec.logs.push({ color: "green", "line": "mqtt connected" })
 
-        rt.regFunc((rt, self) => {
-          callct++;
+              cli.on("message", (t, data) => {
+                if (callback) {
+                  const dataString = data.toString()
+                  try {
+                    consumeFunction(rt, callback, [rt.makeCharArrayFromString(t), rt.makeCharArrayFromString(dataString)])
 
-          if (callct > 2) {
-            connectionMock = true
-          }
-          return rt.val(rt.boolTypeLiteral, connectionMock)
+                  } catch (e) {
+                    debugger
+                  }
+                }
+              })
+            })
 
-        }, pubSubCli, "connected", [], rt.boolTypeLiteral)
+            cli.on("error", e => {
+              debugger
+            })
+            return rt.val(rt.boolTypeLiteral, true)
+          }, pubSubCli, "connect", [stringTypeLiteral(rt), stringTypeLiteral(rt), stringTypeLiteral(rt)], rt.boolTypeLiteral)
 
-        rt.regFunc((rt, self, topicV) => {
-          const topic = rt.getStringFromCharArray(topicV)
-          connected.then(() => {
-            cli.subscribe(topic)
-          })
-        }, pubSubCli, "subscribe", [stringTypeLiteral(rt)], rt.voidTypeLiteral)
+          rt.regFunc((rt, self) => {
+            callct++;
 
-        rt.regFunc((rt, self, topicV, dataV) => {
-          const topic = rt.getStringFromCharArray(topicV)
-          const data = rt.getStringFromCharArray(dataV)
-          connected.then(() => {
-            console.log(topic, data)
-            cli.publish(topic, data)
-          })
-          return rt.val(rt.boolTypeLiteral, true)
-        }, pubSubCli, "publish", [stringTypeLiteral(rt), stringTypeLiteral(rt)], rt.boolTypeLiteral, [{ type: rt.boolTypeLiteral }, { type: rt.intTypeLiteral }] as any)
+            if (callct > 2) {
+              connectionMock = true
+            }
+            return rt.val(rt.boolTypeLiteral, connectionMock)
+
+          }, pubSubCli, "connected", [], rt.boolTypeLiteral)
+
+          rt.regFunc((rt, self, topicV) => {
+            const topic = rt.getStringFromCharArray(topicV)
+            connected.then(() => {
+              cli.subscribe(topic)
+            })
+          }, pubSubCli, "subscribe", [stringTypeLiteral(rt)], rt.voidTypeLiteral)
+
+          rt.regFunc((rt, self, topicV, dataV) => {
+            const topic = rt.getStringFromCharArray(topicV)
+            const data = rt.getStringFromCharArray(dataV)
+            connected.then(() => {
+              console.log(topic, data)
+              cli.publish(topic, data)
+            })
+            return rt.val(rt.boolTypeLiteral, true)
+          }, pubSubCli, "publish", [stringTypeLiteral(rt), stringTypeLiteral(rt)], rt.boolTypeLiteral, [{ type: rt.boolTypeLiteral }, { type: rt.intTypeLiteral }] as any)
+        }
       }
     }
-  } satisfies JscppInclude
+  } satisfies CppExecuterParams["includes"]
 }

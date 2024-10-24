@@ -1,6 +1,6 @@
 import { NgModule } from '@angular/core';
-import type { Routes } from '@angular/router';
-import { RouterModule } from '@angular/router';
+import type { ActivatedRouteSnapshot, DetachedRouteHandle, Routes } from '@angular/router';
+import { RouteReuseStrategy, RouterModule, BaseRouteReuseStrategy } from '@angular/router';
 import { CameraComponent } from './camera/camera.component';
 import { IframeComponent } from './iframe/iframe.component';
 import { InventoryComponent } from './inventory/inventory.component';
@@ -57,7 +57,8 @@ const routes: Routes = [
   }];
 
 @NgModule({
-  imports: [RouterModule.forRoot(routes)],
+  imports: [RouterModule.forRoot(routes, {})],
+  providers: [],
   exports: [RouterModule]
 })
 export class AppRoutingModule {}
@@ -67,5 +68,6 @@ export class AppRoutingModule {}
 setTimeout(() => {
 
   import("./generic-setup/generic-setup-module")
+  import("./wiring/wiring.module")
 
 }, 1000)

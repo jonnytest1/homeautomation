@@ -29,7 +29,7 @@
     "@types/webpack": "^5.28.5",
     "codemirror": "^5.58.1",
     "core-js": "^2.5.4",
-    "electronics-lib": "^1.0.45",
+    "electronics-lib": "^1.0.51",
     "flv.js": "^1.5.0",
     "google-charts": "^2.0.0",
     "hammerjs": "^2.0.8",
