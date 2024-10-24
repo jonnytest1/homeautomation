@@ -8,9 +8,10 @@ import { MariaDbBase, openPools } from 'hibernatets/dbs/mariadb-base';
 
 const trackingPool = new MariaDbBase(undefined, {
   connectionLimit: 20,
-  trace: true, logPackets: true,
-  keepAliveDelay: 5000,
-  idleTimeout: 560,
+  trace: true,
+  logPackets: true,
+  keepAliveDelay: 1000,
+  idleTimeout: 540,
   maxAllowedPacket: 67108864
 
 })

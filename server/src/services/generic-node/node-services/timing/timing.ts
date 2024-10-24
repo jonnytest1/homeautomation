@@ -66,8 +66,6 @@ function startRuntimeInterval(timer: Timer) {
       intervalRef: intervalId
     }
   }
-
-
 }
 
 export async function handleTimedEvent(data: EventData) {
@@ -88,10 +86,6 @@ export async function handleTimedEvent(data: EventData) {
     context: data.context as NodeEventData["context"]
   }), 0, defaultCallTrace(node, "timed event"))
 }
-
-
-
-
 
 addTypeImpl({
   nodeDefinition: () => ({
@@ -176,16 +170,23 @@ addTypeImpl({
         context: evt.context
       } satisfies EventData
 
-      const end = Date.now() + durationMillis
+
+      if (durationMillis < 10000) {
+        setTimeout(() => {
+          handleTimedEvent(evtData)
+        }, durationMillis)
+      } else {
+
+        const timer = TimerFactory.createCallback("generic-event", {
+          time: durationMillis,
+          nestedObject: evtData,
+          sentData: evt.payload
+        })
+        startRuntimeInterval(timer)
+      }
 
 
 
-      const timer = TimerFactory.createCallback("generic-event", {
-        time: durationMillis,
-        nestedObject: evtData,
-        sentData: evt.payload
-      })
-      startRuntimeInterval(timer)
     } else if (node.parameters.type === "schedule") {
       if (node.parameters.emitting === "emitting") {
         throw new Error("emitting doesnt haev inputs")

@@ -6,9 +6,17 @@ import { ReceiverEvent } from '../../../models/receiver-event'
 import { genericNodeDataStore } from '../generic-store/reference'
 import { backendToFrontendStoreActions } from '../generic-store/actions'
 import { updateRuntimeParameter } from '../element-node-fnc'
-import { SqlCondition, load } from 'hibernatets'
+import { MariaDbBase, SqlCondition, load } from 'hibernatets'
 
+const pool = new MariaDbBase(undefined, {
+  connectionLimit: 6,
+  // trace: true, 
+  logPackets: true,
+  keepAliveDelay: 5000,
+  idleTimeout: 560,
+  maxAllowedPacket: 67108864
 
+})
 
 const pendingActonMap: { [uuid: string]: number } = {}
 
@@ -35,7 +43,8 @@ addTypeImpl({
           filter: new SqlCondition("name").equals(actionName),
           depths: 1
         }
-      }
+      },
+      db: pool
     })
 
     if (!receiver) {
