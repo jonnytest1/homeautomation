@@ -1,19 +1,13 @@
-import { TrackingEvent } from '../../../models/generic-node/tracking-event';
+import { TrackingEvent } from '../models/tracking-event';
 import { logKibana } from '../../../util/log';
 import { addTypeImpl } from '../generic-node-service';
 import { mainTypeName } from '../json-schema-type-util';
 import { DAYS, HOUR, MINUTE } from '../../../constant';
-import { save } from 'hibernatets';
-import { MariaDbBase, openPools } from 'hibernatets/dbs/mariadb-base';
+import { PsqlBase, save } from 'hibernatets';
+import { openPools } from 'hibernatets/dbs/mariadb-base';
 
-const trackingPool = new MariaDbBase(undefined, {
-  connectionLimit: 20,
-  trace: true,
-  logPackets: true,
-  keepAliveDelay: 1000,
-  idleTimeout: 540,
-  maxAllowedPacket: 67108864
-
+const trackingPool = new PsqlBase({
+  keepAlive: true
 })
 
 
