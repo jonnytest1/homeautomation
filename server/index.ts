@@ -107,7 +107,10 @@ updateDatabase(__dirname + '/src/models')
     //tuyaSTuffs()
 
   }).catch(e => {
-    logKibana("ERROR", "failed updating database or server start", e)
+    logKibana("ERROR", "failed updating database or server start", e);
+    setTimeout(() => {
+      process.exit(1);
+    }, 500)
   });
 const mediaServerConfig = {
   rtmp: {
