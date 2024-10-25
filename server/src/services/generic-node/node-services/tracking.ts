@@ -4,7 +4,6 @@ import { addTypeImpl } from '../generic-node-service';
 import { mainTypeName } from '../json-schema-type-util';
 import { DAYS, HOUR, MINUTE } from '../../../constant';
 import { PsqlBase, save } from 'hibernatets';
-import { openPools } from 'hibernatets/dbs/mariadb-base';
 
 const trackingPool = new PsqlBase({
   keepAlive: true
@@ -46,8 +45,7 @@ async function archive() {
     })
     .catch(e => {
       logKibana("ERROR", {
-        message: "error while archiving events",
-        openPools: Object.values(openPools),
+        message: "error while archiving events"
       }, e)
     })
 }
@@ -112,8 +110,7 @@ addTypeImpl({
           .catch(e => {
             logKibana("ERROR", {
               message: "error while saving event",
-              nodes: savingBuffer,
-              openPools: Object.values(openPools)
+              nodes: savingBuffer
             }, e)
           })
       }
