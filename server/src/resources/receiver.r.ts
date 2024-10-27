@@ -6,7 +6,19 @@ import { ReceiverData } from '../models/receiver-data';
 import { emitEvent } from '../services/generic-node/generic-node-service';
 import { HttpRequest, assign } from 'express-hibernate-wrapper';
 import { SqlCondition, load, save } from 'hibernatets';
+import { MariaDbBase } from 'hibernatets/dbs/mariadb-base';
 import { Path, POST, GET, HttpResponse } from 'express-hibernate-wrapper';
+
+
+const pool = new MariaDbBase(undefined, {
+  connectionLimit: 6,
+  // trace: true, 
+  logPackets: true,
+  keepAliveDelay: 5000,
+  idleTimeout: 560,
+  maxAllowedPacket: 67108864
+
+})
 
 @Path('receiver')
 export class ReceiverResource {
@@ -15,7 +27,7 @@ export class ReceiverResource {
     path: ''
   })
   async register(req, res) {
-    const existingReceiver = await load(Receiver, s => s.deviceKey = req.body.deviceKey, [], { first: true });
+    const existingReceiver = await load(Receiver, s => s.deviceKey = req.body.deviceKey, [], { first: true, db: pool });
     if (existingReceiver) {
       if (existingReceiver.type == "ws" || existingReceiver.type == "ip" || existingReceiver.type == "http") {
         let newIp = req.headers.http_x_forwarded_for
@@ -67,7 +79,7 @@ export class ReceiverResource {
     }
     const actionName = req.params.actionName + req.params[0]
     const receiver = await load(Receiver, new SqlCondition("deviceKey").equals(req.params.receiverId), [], {
-      first: true,
+      first: true, db: pool,
       interceptArrayFunctions: true,
       deep: {
         actions: {
@@ -126,6 +138,7 @@ export class ReceiverResource {
     const receiver = await load(Receiver, new SqlCondition("deviceKey").equals(req.params.receiverId), [], {
       first: true,
       interceptArrayFunctions: true,
+      db: pool,
       deep: {
         actions: {
           filter: new SqlCondition("name").equals(actionName),
@@ -179,7 +192,9 @@ export class ReceiverResource {
         .send("missing state");
     }
     const receiver = await load(Receiver, s => s.deviceKey = req.body.deviceKey, [], {
-      first: true, deep: true,
+      first: true,
+      db: pool,
+      deep: true,
       interceptArrayFunctions: true,
     });
 
