@@ -9,11 +9,16 @@ import { genericNodeDataStore } from '../generic-store/reference'
 import { argumentTypeToJsonSchema } from '../typing/node-optinon-to-json-schema'
 import { updateRuntimeParameter } from '../element-node-fnc'
 import type { ElementNode } from '../typing/element-node'
+import { ResolvablePromise } from '../../../util/resolvable-promise'
 import type { ZodType } from 'zod'
 import type { ExtendedJsonSchema } from 'json-schema-merger'
+import type { MqttClient } from 'mqtt'
 
 
 const zodValidators: Record<string, Promise<ZodType>> = {}
+
+let mqttClient: MqttClient
+const connectedPr = new ResolvablePromise<boolean>()
 
 addTypeImpl({
   async process(node, evt, callbacks) {
@@ -31,8 +36,7 @@ addTypeImpl({
       console.error("missing global")
       return
     }
-    const client = getClient(evt.globalConfig)
-
+    const client = mqttClient
     const config = mqttConnection.getDevice(topic)
     const commandObj = config.commands.find(cmd => cmd.name === command)
 
@@ -68,37 +72,38 @@ addTypeImpl({
       argStr = JSON.stringify(mqttEvt)
 
       const responseTopic = `response/${config.mqttDeviceName}/${command}/${mqttEvt.timestamp}`
+
+
+
+
       client.subscribe(responseTopic, (e, grants) => {
         if (e) {
           console.error(e)
         }
       })
-
-      client.on("message", (topic, msg) => {
+      const messageHandler = (topic, msg) => {
         if (topic === responseTopic) {
-          try {
-            const payload = {
-              response: `${msg.toString()}`
-            }
-
-            try {
-              const responseEvt = JSON.parse(payload.response)
-              if ("response" in responseEvt) {
-                Object.assign(payload, responseEvt)
-              }
-            } catch (e) {
-              //
-            }
-
-            evt.updatePayload(payload)
-            callbacks.continue(evt)
-          } finally {
-            client.unsubscribe(responseTopic)
-            client.endAsync()
+          client.off("message", messageHandler)
+          const payload = {
+            response: `${msg.toString()}`
           }
 
+          try {
+            const responseEvt = JSON.parse(payload.response)
+            if ("response" in responseEvt) {
+              Object.assign(payload, responseEvt)
+            }
+          } catch (e) {
+            //
+          }
+
+          evt.updatePayload(payload)
+          callbacks.continue(evt)
+
         }
-      })
+      }
+
+      client.on("message", messageHandler)
     }
 
 
@@ -108,7 +113,7 @@ addTypeImpl({
     if (finalArgStr === undefined) {
       return
     }
-    client.once("connect", () => {
+    connectedPr.prRef.then(() => {
       console.log(`sending ${finalArgStr} to ${finalTopic}`)
 
       client.publish(finalTopic, finalArgStr, {
@@ -118,7 +123,6 @@ addTypeImpl({
         await new Promise(res => setTimeout(res, 500))
         if (!waitingforResponse) {
           callbacks.continue(evt)
-          client.endAsync()
         }
       })
     })
@@ -216,7 +220,7 @@ addTypeImpl({
               inputSchema.type = "object"
             }
 
-            //@ts-expect-error 2590
+
             const nodeCp = node as ElementNode<Record<string, unknown>, Record<string, Select>>
             for (const commandArgument of args) {
               if (commandArgument.type == "select") {
@@ -288,6 +292,7 @@ addTypeImpl({
           type: "string"
         }
         if (node.parameters.command) {
+          //@ts-expect-error 2590
           const command = device.commands.find(c => c.name == node.parameters?.command)
           if (command?.responses) {
             responseType.enum = command.responses
@@ -311,7 +316,16 @@ addTypeImpl({
         }))
       }
     }
-  }
+  },
+  initializeServer(nodes, globals) {
+    mqttClient = getClient(globals)
+    mqttClient.once("connect", () => {
+      connectedPr.resolve(true)
+    })
+  },
+  unload(nodeas, globals) {
+    mqttClient.endAsync()
+  },
 })
 
 
