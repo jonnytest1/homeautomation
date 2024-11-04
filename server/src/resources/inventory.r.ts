@@ -108,6 +108,32 @@ export class INventoryResource {
   }
 
 
+  @POST("/location/new")
+  async newLocation(req: HttpRequest, res: HttpResponse) {
+    const body = req.body
+
+    if (body.id) {
+      const location = await load(Location, l => l.id = body.id, undefined, {
+        db: pool,
+        first: true
+      });
+
+      if (location) {
+        await assign(location, req.body);
+
+        return
+      }
+    }
+
+    const location = new Location()
+    await assign(location, req.body);
+    await save(location)
+    await queries(location)
+
+    res.send(location)
+  }
+
+
   @POST("/location")
   async setLocation(req: HttpRequest, res: HttpResponse) {
     const body = req.body

@@ -36,4 +36,10 @@ export class InventoryService {
       itemid: item.id
     }).subscribe()
   }
+
+  createLocation(item: LocationFe) {
+    return this.httpClient.post<LocationFe>(`${environment.prefixPath}rest/inventory/location/new`, item).subscribe(loc => {
+      this.locations$.next([...this.locations$.value, loc])
+    })
+  }
 }

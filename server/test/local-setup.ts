@@ -5,12 +5,15 @@ import { ReconnectingSocket } from '../src/util/reconnecting-socket';
 import { ResolvablePromise } from '../src/util/resolvable-promise';
 import { emitEvent } from '../src/services/generic-node/generic-node-service';
 import { getClient } from '../src/services/generic-node/node-services/mqtt-global';
+import { genericNodeDataStore } from '../src/services/generic-node/generic-store/reference';
+import { backendToFrontendStoreActions } from '../src/services/generic-node/generic-store/actions';
 import { MariaDbBase } from 'hibernatets/dbs/mariadb-base';
 import { EventEmitter } from "events"
 
 const hookKeys = true;
 const copyDatabase = true
 const eventReplay = false
+const setMqttGlobals = true
 
 
 const env = environment as typeof environment & {
@@ -105,7 +108,16 @@ if (copyDatabase) {
   */
 }
 
-
+if (setMqttGlobals) {
+  genericNodeDataStore.dispatch(backendToFrontendStoreActions.updateGlobals({
+    globals: {
+      mqtt_password: environment.MQTT_PASSWORD,
+      mqtt_server: environment.MQTT_SERVER,
+      mqtt_user: environment.MQTT_USER,
+      mqtt_port: `1884`
+    }
+  }))
+}
 
 if (env.setup_mqtt_clone) {
   const cli = getClient({
