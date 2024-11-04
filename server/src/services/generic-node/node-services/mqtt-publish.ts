@@ -273,14 +273,11 @@ addTypeImpl({
             } else {
               delete node.runtimeContext.inputSchema
             }
-
           } else {
             //use empty string for no argument command
             node.parameters.argument = ""
           }
         }
-
-
       }
 
       genericNodeDataStore.dispatch(backendToFrontendStoreActions.updateRuntimeInfo({
