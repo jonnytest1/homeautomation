@@ -29,6 +29,7 @@ import { IframeComponent } from './iframe/iframe.component';
 import { InputsComponent } from './inputs/inputs.component';
 import { StoreModule } from '@ngrx/store';
 import { EffectsModule } from '@ngrx/effects';
+import { InventoryDetailComponent } from './inventory/inventory-detail/inventory-detail.component';
 
 export class MyHammerConfig extends HammerGestureConfig {
   overrides = <any>{
@@ -52,7 +53,7 @@ export class MyHammerConfig extends HammerGestureConfig {
     AppRoutingModule, SettingsModule, FormsModule, MatInputModule, MatTableModule,
     MatSidenavModule, MatListModule, MatIconModule, MatGridListModule, MatSortModule,
     BrowserAnimationsModule, NgCircleProgressModule.forRoot(),
-    EffectsModule.forRoot(),
+    EffectsModule.forRoot(), InventoryDetailComponent,
     StoreModule.forRoot({}, {
       runtimeChecks: {
         // temporary until generic node is refactored for state usage

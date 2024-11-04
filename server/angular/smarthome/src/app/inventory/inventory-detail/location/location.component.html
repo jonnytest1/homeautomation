@@ -1,0 +1,9 @@
+<select #selectEl
+        (change)="updateLocation(selectEl.value)">
+  <option [value]=""></option>
+  <option *ngFor="let loc of inventoryService.locations$|async"
+          [selected]="item?.location?.id===loc.id"
+          [value]="loc.id">
+    {{loc.description}}
+  </option>
+</select>

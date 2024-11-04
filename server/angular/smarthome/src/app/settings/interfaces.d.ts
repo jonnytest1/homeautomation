@@ -2,6 +2,7 @@ import type { TransformationRes } from '../../../../../src/models/connection-res
 import type { Sender as NodeSender } from '../../../../../src/models/sender';
 import type { Timer } from '../../../../../src/models/timer';
 import type { Item } from '../../../../../src/models/inventory/item';
+import type { Location } from '../../../../../src/models/inventory/location';
 import type { Transformation } from '../../../../../src/models/transformation';
 import type { SocketResponses as sR, GenericNodeEvents as GNE, ActionTriggersEvent as ATE }
   from "../../../../../src/resources/websocket-response"
@@ -92,3 +93,4 @@ export type ReceiverFe = ConnectionFe["receiver"];
 
 
 export type ItemFe = FrontendProperties<Item>
+export type LocationFe = FrontendProperties<Location>

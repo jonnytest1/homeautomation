@@ -7,7 +7,7 @@ export class Item {
 
 
   @primary()
-  id
+  id: number
 
   @column()
   @settable

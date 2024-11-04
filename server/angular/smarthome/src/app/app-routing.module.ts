@@ -7,6 +7,7 @@ import { InventoryComponent } from './inventory/inventory.component';
 import { TimersComponent } from './timers/timers.component';
 import { TodoComponent } from './todo/todo.component';
 import { InputsComponent } from './inputs/inputs.component';
+import { InventoryDetailComponent } from './inventory/inventory-detail/inventory-detail.component';
 
 
 const routes: Routes = [
@@ -39,6 +40,9 @@ const routes: Routes = [
   }, {
     path: 'inventory',
     component: InventoryComponent
+  }, {
+    path: 'inventory/item/:itemid',
+    component: InventoryDetailComponent
   }, {
     path: 'todo',
     component: TodoComponent

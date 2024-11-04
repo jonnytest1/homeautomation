@@ -27,9 +27,12 @@
       </th>
       <td mat-cell
           *matCellDef="let element">
-        <app-regex-highlighted [data]="element"
-                               [highlightInfo]="element?.highlightInfo|async"
-                               [text]="element.description"></app-regex-highlighted>
+        <a [routerLink]="'item/'+element.id">
+          <app-regex-highlighted [data]="element"
+                                 [highlightInfo]="element?.highlightInfo|async"
+                                 [text]="element.description"></app-regex-highlighted>
+
+        </a>
       </td>
     </ng-container>
 

@@ -125,7 +125,13 @@ export class InventoryComponent implements OnInit, AfterViewInit {
     }
   }
   getProductId(item: ItemFe) {
-    return item.productLink?.split("/product/")?.[1] ?? ''
+    if (item.productLink?.includes("/product/")) {
+      return item.productLink?.split("/product/")?.[1] ?? ''
+
+    } else if (item.productLink?.includes("/dp/")) {
+      return item.productLink?.split("/dp/")?.[1] ?? ''
+    }
+
   }
 
   getLocation(item: ItemFe) {

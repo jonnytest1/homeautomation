@@ -3,10 +3,10 @@ import { FrontendOrder, Item } from '../models/inventory/item';
 import { Order } from '../models/inventory/order';
 import { imageLaoder } from '../services/image-converter';
 import { logKibana } from '../util/log';
-import { assign, HttpRequest, HttpResponse, Path, POST } from 'express-hibernate-wrapper';
+import { Location } from "../models/inventory/location"
+import { assign, GET, HttpRequest, HttpResponse, Path, POST } from 'express-hibernate-wrapper';
 import { load, queries, save, SqlCondition } from 'hibernatets';
 import { MariaDbBase } from 'hibernatets/dbs/mariadb-base';
-
 
 
 const pool = new MariaDbBase(undefined, {
@@ -95,5 +95,40 @@ export class INventoryResource {
     }
     res.send("done")
     FrontendWebsocket.updateInventory(...FrontendWebsocket.websockets)
+  }
+
+
+
+  @GET("/location")
+  async getLocations(req: HttpRequest, res: HttpResponse) {
+    const locaitons = await load(Location, SqlCondition.ALL, undefined, {
+      db: pool
+    });
+    res.send(locaitons)
+  }
+
+
+  @POST("/location")
+  async setLocation(req: HttpRequest, res: HttpResponse) {
+    const body = req.body
+    const [location, item] = await Promise.all([
+      load(Location, {
+        filter: l => l.id = +body.locationId,
+        options: {
+          first: true
+        }
+      }),
+      load(Item, {
+        filter: l => l.id = +body.itemid,
+        options: {
+          first: true,
+          db: pool
+        },
+      })
+    ])
+    debugger;
+    item.location = location
+    await queries(item)
+    res.send("ok")
   }
 }

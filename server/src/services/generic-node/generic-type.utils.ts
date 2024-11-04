@@ -240,7 +240,7 @@ export async function updateTypeSchema(node: ElementNode, nodeData: PreparedNode
 
   }, 1000)
   if (!nodeTypeImplemenations) {
-    debugger
+    throw new Error("missing type implemenation for " + node.type)
   }
   await nodeTypeImplemenations.connectionTypeChanged?.(node, schema);
   clearTimeout(conChangeTimeout)

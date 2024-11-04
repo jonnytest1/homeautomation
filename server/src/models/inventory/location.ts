@@ -2,9 +2,9 @@ import { column, primary, table } from 'hibernatets';
 
 @table()
 export class Location {
-    @primary()
-    id
+  @primary()
+  id: number
 
-    @column()
-    description: string
+  @column()
+  description: string
 }

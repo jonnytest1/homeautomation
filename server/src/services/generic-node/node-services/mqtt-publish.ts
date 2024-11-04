@@ -219,8 +219,8 @@ addTypeImpl({
             if (!isSingleArgument) {
               inputSchema.type = "object"
             }
-
-
+            // ont move this
+            // @ts-ignore 2590
             const nodeCp = node as ElementNode<Record<string, unknown>, Record<string, Select>>
             for (const commandArgument of args) {
               if (commandArgument.type == "select") {
@@ -289,7 +289,7 @@ addTypeImpl({
           type: "string"
         }
         if (node.parameters.command) {
-          //@ts-expect-error 2590
+          //@ts-ignore 2590
           const command = device.commands.find(c => c.name == node.parameters?.command)
           if (command?.responses) {
             responseType.enum = command.responses

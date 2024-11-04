@@ -1,0 +1,11 @@
+<ng-container *ngIf="item$|async;let item">
+  {{item.id}} {{item.description}}
+
+  <img [src]="item.orderImageSrc">
+
+
+  <br>
+  location:
+  <app-location [item]="item"></app-location>
+
+</ng-container>
