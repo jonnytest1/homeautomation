@@ -36,7 +36,6 @@ addTypeImpl({
       console.error("missing global")
       return
     }
-    const client = mqttClient
     const config = mqttConnection.getDevice(topic)
     const commandObj = config.commands.find(cmd => cmd.name === command)
 
@@ -76,14 +75,14 @@ addTypeImpl({
 
 
 
-      client.subscribe(responseTopic, (e, grants) => {
+      mqttClient.subscribe(responseTopic, (e, grants) => {
         if (e) {
           console.error(e)
         }
       })
       const messageHandler = (topic, msg) => {
         if (topic === responseTopic) {
-          client.off("message", messageHandler)
+          mqttClient.off("message", messageHandler)
           const payload = {
             response: `${msg.toString()}`
           }
@@ -103,11 +102,8 @@ addTypeImpl({
         }
       }
 
-      client.on("message", messageHandler)
+      mqttClient.on("message", messageHandler)
     }
-
-
-
     const finalTopic = `${topic}${command}`
     const finalArgStr = argStr
     if (finalArgStr === undefined) {
@@ -116,7 +112,7 @@ addTypeImpl({
     connectedPr.prRef.then(() => {
       console.log(`sending ${finalArgStr} to ${finalTopic}`)
 
-      client.publish(finalTopic, finalArgStr, {
+      mqttClient.publish(finalTopic, finalArgStr, {
         retain: commandObj?.asyncRetained || false
       }, async (err, msg) => {
 

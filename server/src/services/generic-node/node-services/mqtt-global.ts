@@ -15,6 +15,7 @@ export function getClient(global: NodeDefToType<typeof globalMqttConfig>) {
     return connect(global.mqtt_server)
   }
 
+
   return connect({
     host: global.mqtt_server,
     port: global.mqtt_port ? +global.mqtt_port : 1883,
