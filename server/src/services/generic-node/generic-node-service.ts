@@ -484,7 +484,7 @@ export function emitEvent(type: string, data: NodeEventData) {
       const end = Date.now()
 
       const duration = end - start;
-      if (duration > 1000 || trace.logIt) {
+      if (duration > 2000 || trace.logIt) {
         logKibana("ERROR", {
           message: "handled event",
           type,
