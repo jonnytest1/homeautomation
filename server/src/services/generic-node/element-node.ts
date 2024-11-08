@@ -11,7 +11,7 @@ export class ElementNodeImpl<T = { [optinoskey: string]: string }, P = Partial<N
   runtimeContext: ElementNode<T, P>["runtimeContext"]
   globalContext?: NodeDefOptinos | undefined;
 
-
+  trace
 
   constructor(node: ElementNode<T, P>, callbacks: Callbacks) {
     Object.assign(this, node)
