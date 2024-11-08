@@ -312,12 +312,16 @@ addTypeImpl({
   },
   initializeServer(nodes, globals) {
     mqttClient = getClient(globals)
+
     mqttClient.once("connect", () => {
       connectedPr.resolve(true)
     })
+    mqttClient.on("error", e => {
+      logKibana("ERROR", "error from mqtt client", e)
+    })
   },
   unload(nodeas, globals) {
-    mqttClient.endAsync()
+    mqttClient?.endAsync()
   },
 })
 

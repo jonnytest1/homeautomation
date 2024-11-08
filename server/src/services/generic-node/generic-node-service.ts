@@ -406,7 +406,8 @@ function createCallbacks(node: ElementNode, trace: CallTrace) {
         newNode: { ...node }
       }))
       setSkip(false)
-    }
+    },
+    trace
   } satisfies Callbacks
 }
 
@@ -455,22 +456,24 @@ export function emitEvent(type: string, data: NodeEventData) {
 
     const start = Date.now()
 
+    const trace = defaultCallTrace(node, "emitEvent call");
     processInput({
       node: node,
       nodeinput: 0,
       data: event
-    }, defaultCallTrace(node, "emitEvent call")).then(() => {
+    }, trace).then(() => {
       const end = Date.now()
 
       const duration = end - start;
-      if (duration > 1000) {
+      if (duration > 1000 || trace.logIt) {
         logKibana("ERROR", {
           message: "handled event",
           type,
           context: JSON.stringify(data.context),
           start,
           end,
-          duration: duration
+          duration: duration,
+          trace
         })
       }
 

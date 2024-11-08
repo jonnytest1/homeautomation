@@ -331,8 +331,12 @@ type InputType=${connectionSchema.mainTypeName ??= mainTypeName}
   }
 })
 function addOutputHistoryEvent(node: EvalNode<{ additional: { type: "number"; min: number; }; additional_output: { type: "number"; min: number; }; outputhistory: { type: "number"; title: string; }; inputhistory: { type: "number"; title: string; }; code: { type: "monaco"; default: string; order: number; }; }, { inputs: { [index: number]: InputContext; }; inputhistory?: Array<{ timestamp: number; evt: unknown; index: number; }>; outputhistory?: Array<{ timestamp: number; evt: unknown; index: number; }>; }>, data: NodeEvent<unknown, unknown, NodeDefOptinos>, emitIndex: number) {
-  if (node.parameters?.outputhistory?.length) {
-    const outputHistoryNum = +node.parameters?.outputhistory;
+
+  const key = `outputhistory${emitIndex || ''}`
+
+
+  if (node.parameters?.[key]?.length) {
+    const outputHistoryNum = +node.parameters?.[key];
     if (!isNaN(outputHistoryNum) && outputHistoryNum > 0) {
       const outputHistoryDays = outputHistoryNum * HOUR * 24;
 
