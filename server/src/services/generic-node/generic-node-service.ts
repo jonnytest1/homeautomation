@@ -235,7 +235,7 @@ forNodes({
                 genericNodeDataStore.dispatch(backendToFrontendStoreActions.updateNode({
                   newNode: passedNode
                 }))
-              } else if (JSON.stringify(nodeCpy) !== JSON.stringify(passedNode)) {
+              } else if (JSON.stringify({ ...nodeCpy, trace: null }) !== JSON.stringify({ ...passedNode, trace: null })) {
                 debugger;
                 logKibana("ERROR", "node changed with store update")
               }
