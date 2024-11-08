@@ -9,6 +9,7 @@ export const genericNodeDataStore = new DataStore<DataState>({
     nodes: {},
     globals: {},
   },
+  initialized: false,
   connectorMap: {},
   targetConnectorMap: {}
 })

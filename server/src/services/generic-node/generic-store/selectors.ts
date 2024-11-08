@@ -12,6 +12,9 @@ export const selectConnectionsFromNodeUuid = (uuid: string) => selectConnectorMa
 })
 
 
+export const selectInitialized = genericNodeDataStore.createSelector(s => s.initialized)
+
+
 export const selectTargetConnectorMap = genericNodeDataStore.createSelector(nodeData => {
   return nodeData.targetConnectorMap
 })

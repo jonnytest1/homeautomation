@@ -30,6 +30,7 @@ genericNodeDataStore.addReducer(initializeStore, (st, a) => {
   }
   return {
     ...st,
+    initialized: true,
     nodeData: {
       connections: Object.fromEntries(a.data.connections.map(c => [c.uuid, c])),
       globals: a.data.globals,

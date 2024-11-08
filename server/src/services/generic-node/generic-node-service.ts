@@ -13,7 +13,7 @@ import { ElementNodeImpl } from './element-node';
 import { init } from './validation/watcher';
 import { genericNodeDataStore } from './generic-store/reference';
 import { backendToFrontendStoreActions, initializeStore } from './generic-store/actions';
-import { nodeDataSelector, nodeglobalsSelector, selectGlobals, selectNodeByUuid, selectNodesOfType, selectTargetConnectorForNodeUuid } from './generic-store/selectors';
+import { nodeDataSelector, nodeglobalsSelector, selectGlobals, selectInitialized, selectNodeByUuid, selectNodesOfType, selectTargetConnectorForNodeUuid } from './generic-store/selectors';
 import { forNodes, selectConnectionsFromContinue } from './generic-store/flow-selectors';
 import { loadNodeData } from './generic-node-data-loader';
 import { getLaodingFile, startHotRelaodingWatcher } from './hot-reloading';
@@ -31,7 +31,7 @@ import { environment } from '../../environment';
 import { jsonClone } from '../../util/json-clone';
 import type { Action } from '../../util/data-store/action';
 import { BehaviorSubject, combineLatest, Subject, type Subscription } from "rxjs"
-import { filter, skip } from "rxjs/operators"
+import { filter, first, skip } from "rxjs/operators"
 import { load, PsqlBase, save, updateDatabase } from 'hibernatets';
 
 
@@ -324,51 +324,61 @@ updateDatabase(__dirname + '/models', {
 
 export function addTypeImpl<C, G extends NodeDefOptinos, O extends NodeDefOptinos, P, S, TS extends NullTypeSubject>(typeImpl: TypeImplementaiton<C, G, O, P, S, TS>) {
 
-  const currerntTypeImpls = typeImplementations.value
-  const implementationType = typeImpl.nodeDefinition().type;
-  typeImpl._file = getLaodingFile()
+
+  genericNodeDataStore.select(selectInitialized)
+    .pipe(
+      filter(init => init),
+      first()
+    ).subscribe(() => {
+      const currerntTypeImpls = typeImplementations.value
+      const implementationType = typeImpl.nodeDefinition().type;
+      typeImpl._file = getLaodingFile()
 
 
 
-  if (typeImpl.messageSocket) {
-    typeImpl._socket = new Subject()
-    typeImpl.messageSocket(typeImpl._socket)
-  }
+      if (typeImpl.messageSocket) {
+        typeImpl._socket = new Subject()
+        typeImpl.messageSocket(typeImpl._socket)
+      }
 
 
-  let elementNodes: Array<ElementNodeImpl<never>> | null = null
+      let elementNodes: Array<ElementNodeImpl<never>> | null = null
 
 
 
 
-  const typeImplUpdate = currerntTypeImpls[implementationType];
-  if (typeImplUpdate?.unload) {
-    if (!elementNodes) {
-      elementNodes = getElementNodes(implementationType);
-    }
-    const globals = genericNodeDataStore.getOnce(selectGlobals)
-    currerntTypeImpls[implementationType]?.unload?.(elementNodes, globals as never)
+      const typeImplUpdate = currerntTypeImpls[implementationType];
+      if (typeImplUpdate?.unload) {
+        if (!elementNodes) {
+          elementNodes = getElementNodes(implementationType);
+        }
+        const globals = genericNodeDataStore.getOnce(selectGlobals)
+        currerntTypeImpls[implementationType]?.unload?.(elementNodes, globals as never)
 
-  }
-  currerntTypeImpls[implementationType] = typeImpl as never
-  typeImplementations.next(currerntTypeImpls)
+      }
+      currerntTypeImpls[implementationType] = typeImpl as never
+      typeImplementations.next(currerntTypeImpls)
 
 
-  if (typeImpl.initializeServer) {
-    if (!elementNodes) {
-      elementNodes = getElementNodes(implementationType);
+      if (typeImpl.initializeServer) {
+        if (!elementNodes) {
+          elementNodes = getElementNodes(implementationType);
 
-    }
-    const globals = genericNodeDataStore.getOnce(selectGlobals)
-    typeImpl.initializeServer(elementNodes, globals as never)
+        }
+        const globals = genericNodeDataStore.getOnce(selectGlobals)
+        typeImpl.initializeServer(elementNodes, globals as never)
 
-  }
+      }
 
-  if (typeImplUpdate) {
-    reloadNodes(elementNodes, implementationType, currerntTypeImpls);
-  }
+      if (typeImplUpdate) {
+        reloadNodes(elementNodes, implementationType, currerntTypeImpls);
+      }
 
-  console.log(`added type implementaiton for ${implementationType}`)
+      console.log(`added type implementaiton for ${implementationType}`)
+
+    })
+
+  // just for typing
   return {} as {
     server_context: S,
     opts: O

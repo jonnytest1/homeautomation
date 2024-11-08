@@ -4,7 +4,7 @@ import type { NodeDefOptinos, NodeDefToType } from '../typing/node-options'
 
 export interface DataState {
   lastEventTimes: NodeEventTimes
-
+  initialized: boolean
 
   nodeData: {
 
