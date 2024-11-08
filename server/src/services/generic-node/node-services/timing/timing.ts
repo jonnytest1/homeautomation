@@ -85,6 +85,11 @@ export async function handleTimedEvent(data: EventData) {
     payload: data.data,
     context: data.context as NodeEventData["context"]
   }), 0, defaultCallTrace(node, "timed event"))
+
+    .then(() => {
+
+      //debugger
+    })
 }
 
 addTypeImpl({

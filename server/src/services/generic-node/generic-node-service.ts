@@ -86,7 +86,7 @@ globalThis.debugNextCall = (uuid: string) => {
 }
 
 
-export function emitFromNode(nodeUuid: string, evt: NodeEvent, index: number, trace: CallTrace) {
+export async function emitFromNode(nodeUuid: string, evt: NodeEvent, index: number, trace: CallTrace) {
   setLastEventOutputTime(nodeUuid, index ?? 0, Date.now())
   const emittingConnections = genericNodeDataStore.getOnce(selectConnectionsFromContinue({
     fromIndex: index,
@@ -94,7 +94,8 @@ export function emitFromNode(nodeUuid: string, evt: NodeEvent, index: number, tr
   }))
 
   trace.callTrace[nodeUuid] ??= []
-  for (const emittingCon of emittingConnections) {
+
+  await Promise.all(emittingConnections.map(async emittingCon => {
     const nextNode = genericNodeDataStore.getOnce(selectNodeByUuid(emittingCon.uuid))
     if (!nextNode) {
       logKibana("WARN", { message: "node not found", uuid: emittingCon.uuid })
@@ -102,7 +103,7 @@ export function emitFromNode(nodeUuid: string, evt: NodeEvent, index: number, tr
     }
     const connectionTrace: RecursiveCallTrace = {}
     trace.callTrace[nodeUuid].push(connectionTrace)
-    processInput({
+    await processInput({
       node: nextNode,
       nodeinput: emittingCon.index,
       data: evt.clone()
@@ -110,7 +111,8 @@ export function emitFromNode(nodeUuid: string, evt: NodeEvent, index: number, tr
       ...trace,
       callTrace: connectionTrace
     })
-  }
+  }))
+
 }
 
 
@@ -395,10 +397,12 @@ function getElementNodes(implementationType: string): ElementNodeImpl<never>[] {
 
 function createCallbacks(node: ElementNode, trace: CallTrace) {
   const nodeUuid = node.uuid
+
+  const emitPromises: Array<Promise<void>> = []
   return {
     continue: (evt, index) => {
+      emitPromises.push(emitFromNode(nodeUuid, evt.clone(), index ?? 0, trace))
 
-      emitFromNode(nodeUuid, evt.clone(), index ?? 0, trace)
     },
     updateNode(frontendEmit = true) {
       setSkip(!frontendEmit)
@@ -407,7 +411,8 @@ function createCallbacks(node: ElementNode, trace: CallTrace) {
       }))
       setSkip(false)
     },
-    trace
+    trace,
+    emitPromises
   } satisfies Callbacks
 }
 
@@ -425,10 +430,16 @@ async function processInput(data: { node: ElementNode, nodeinput: number, data: 
         debugger
       }
       trace.nodes.push(data.node.uuid)
-      await typeimpl.process(data.node as ElementNode<never>, data.data, createCallbacks(data.node, trace))
-
+      const callbacks = createCallbacks(data.node, trace);
+      await typeimpl.process(data.node as ElementNode<never>, data.data, callbacks)
 
       setLastEvent(data.node, eventCopy)
+
+      await Promise.all(callbacks.emitPromises).then(() => {
+
+      })
+
+
     } catch (e) {
       logKibana("ERROR", {
         message: "error during process of node",

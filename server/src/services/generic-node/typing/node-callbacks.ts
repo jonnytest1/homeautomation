@@ -6,4 +6,6 @@ export type Callbacks = {
   continue: (evt: NodeEvent, index?: number) => void
   updateNode(frontendEmit?: boolean),
   trace: CallTrace
+
+  emitPromises?: Array<Promise<void>>
 }

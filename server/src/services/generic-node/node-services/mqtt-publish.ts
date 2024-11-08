@@ -311,13 +311,17 @@ addTypeImpl({
     }
   },
   initializeServer(nodes, globals) {
+    const globalCopy = { ...globals }
     mqttClient = getClient(globals)
 
     mqttClient.once("connect", () => {
       connectedPr.resolve(true)
     })
     mqttClient.on("error", e => {
-      logKibana("ERROR", "error from mqtt client", e)
+      logKibana("ERROR", {
+        message: "error from mqtt client",
+        globals: globalCopy
+      }, e)
     })
   },
   unload(nodeas, globals) {

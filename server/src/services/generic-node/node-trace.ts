@@ -6,7 +6,7 @@ export type CallTrace = {
   callTrace: RecursiveCallTrace,
   callTraceRoot: RecursiveCallTrace,
   initContext: string,
-  logIt?: boolean
+  logIt: boolean
 }
 export function defaultCallTrace(node: ElementNode, initContext: string): CallTrace {
   const tr: RecursiveCallTrace = {}
@@ -20,6 +20,7 @@ export function defaultCallTrace(node: ElementNode, initContext: string): CallTr
     nodes: nodes,
     callTrace: tr,
     callTraceRoot: tr,
-    initContext
+    initContext,
+    logIt: false
   }
 }
