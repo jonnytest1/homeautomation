@@ -434,10 +434,8 @@ async function processInput(data: { node: ElementNode, nodeinput: number, data: 
       await typeimpl.process(data.node as ElementNode<never>, data.data, callbacks)
 
       setLastEvent(data.node, eventCopy)
-
-      await Promise.all(callbacks.emitPromises).then(() => {
-
-      })
+      // only awaiting promises until  process is finished
+      await Promise.all(callbacks.emitPromises)
 
 
     } catch (e) {
