@@ -35,7 +35,7 @@ ControlKeysWebsocket.key_cache = {
 
 if (hookKeys) {
   const oscket = new ReconnectingSocket({ tlsOptions: { agent: false, rejectUnauthorized: false } })
-  oscket.on("connect", c => {
+  oscket.once("connect", c => {
     const socketPRoxy = new EventEmitter() as EventEmitter & { send?: Function }
     socketPRoxy.send = (...args) => {
       //

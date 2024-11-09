@@ -16,7 +16,7 @@ import { backendToFrontendStoreActions, initializeStore } from './generic-store/
 import { nodeDataSelector, nodeglobalsSelector, selectGlobals, selectInitialized, selectNodeByUuid, selectNodesOfType, selectTargetConnectorForNodeUuid } from './generic-store/selectors';
 import { forNodes, selectConnectionsFromContinue } from './generic-store/flow-selectors';
 import { loadNodeData } from './generic-node-data-loader';
-import { getLaodingFile, startHotRelaodingWatcher } from './hot-reloading';
+import { getLaodingFile as getCurrentlyLaodingFile, startHotRelaodingWatcher } from './hot-reloading';
 import { createNodeEvent } from './generic-store/node-event-factory';
 import { checkInvalidations } from './element-node-fnc';
 import { registerGenericSocketHandler } from './socket/generic-node-socket-handler';
@@ -93,16 +93,16 @@ export async function emitFromNode(nodeUuid: string, evt: NodeEvent, index: numb
     fromNode: nodeUuid
   }))
 
-  trace.callTrace[nodeUuid] ??= []
-
   await Promise.all(emittingConnections.map(async emittingCon => {
     const nextNode = genericNodeDataStore.getOnce(selectNodeByUuid(emittingCon.uuid))
     if (!nextNode) {
       logKibana("WARN", { message: "node not found", uuid: emittingCon.uuid })
       return
     }
+
+    trace.callTrace[`Connection:${emittingCon.connectionUuid}`] ??= {}
     const connectionTrace: RecursiveCallTrace = {}
-    trace.callTrace[nodeUuid].push(connectionTrace)
+    trace.callTrace[`Connection:${emittingCon.connectionUuid}`][`Node:${nextNode.type}:${nextNode.parameters?.name}__${nextNode.uuid}`] = connectionTrace
     await processInput({
       node: nextNode,
       nodeinput: emittingCon.index,
@@ -324,7 +324,7 @@ updateDatabase(__dirname + '/models', {
 
 export function addTypeImpl<C, G extends NodeDefOptinos, O extends NodeDefOptinos, P, S, TS extends NullTypeSubject>(typeImpl: TypeImplementaiton<C, G, O, P, S, TS>) {
 
-
+  typeImpl._file = getCurrentlyLaodingFile()
   genericNodeDataStore.select(selectInitialized)
     .pipe(
       filter(init => init),
@@ -332,9 +332,6 @@ export function addTypeImpl<C, G extends NodeDefOptinos, O extends NodeDefOptino
     ).subscribe(() => {
       const currerntTypeImpls = typeImplementations.value
       const implementationType = typeImpl.nodeDefinition().type;
-      typeImpl._file = getLaodingFile()
-
-
 
       if (typeImpl.messageSocket) {
         typeImpl._socket = new Subject()
@@ -411,8 +408,11 @@ function createCallbacks(node: ElementNode, trace: CallTrace) {
   const emitPromises: Array<Promise<void>> = []
   return {
     continue: (evt, index) => {
-      emitPromises.push(emitFromNode(nodeUuid, evt.clone(), index ?? 0, trace))
-
+      const emitPromise = emitFromNode(nodeUuid, evt.clone(), index ?? 0, trace);
+      emitPromises.push(emitPromise)
+      return emitPromise.then(() => {
+        return trace
+      })
     },
     updateNode(frontendEmit = true) {
       setSkip(!frontendEmit)
@@ -484,8 +484,8 @@ export function emitEvent(type: string, data: NodeEventData) {
       const end = Date.now()
 
       const duration = end - start;
-      if (duration > 2000 || trace.logIt) {
-        logKibana("ERROR", {
+      if (duration > 4000 || trace.logIt) {
+        logKibana(trace.logIt ? "ERROR" : "WARN", {
           message: "handled event",
           type,
           context: JSON.stringify(data.context),
@@ -501,3 +501,4 @@ export function emitEvent(type: string, data: NodeEventData) {
 }
 
 export const withSideEffects = true
+

@@ -48,7 +48,7 @@
       ],
       "env": {
         "setup": "true",
-        "setup_mqtt_clone": "true",
+        "setup_mqtt_clone": "false",
         "WATCH_SERVICES": "true",
         "LOG_SUFFIX": "local",
         // "SMARTHOME_DISABLED": "true"

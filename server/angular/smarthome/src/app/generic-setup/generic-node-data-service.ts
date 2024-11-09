@@ -174,7 +174,8 @@ export class GenericNodesDataService {
   addConnection(uuid: string, indx: number) {
     this.pendingConnection.next({
       source: {
-        index: indx, uuid
+        index: indx,
+        uuid,
       }
     })
   }

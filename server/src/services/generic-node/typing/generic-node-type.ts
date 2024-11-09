@@ -56,6 +56,8 @@ export interface ConnectorDefintion {
   uuid: string;
   index: number;
   error?: string
+
+  connectionUuid?: string
 }
 
 export type Connection = {

@@ -8,6 +8,8 @@ import type { TypeImplSocket } from '../../typing/generic-node-type'
 import { getClient, globalMqttConfig } from '../mqtt-global'
 import { updateRuntimeParameter } from '../../element-node-fnc'
 import { createNodeEvent } from '../../generic-store/node-event-factory'
+import { genericNodeDataStore } from '../../generic-store/reference'
+import { backendToFrontendStoreActions } from '../../generic-store/actions'
 import { z } from 'zod'
 import { BehaviorSubject, firstValueFrom } from 'rxjs'
 import type { MqttClient } from 'mqtt'
@@ -176,6 +178,9 @@ addTypeImpl({
         debugger
         throw new Error("new case ?")
       }
+
+
+
       node.runtimeContext.outputSchema = {
         jsonSchema: jsonSchema,
         mainTypeName: mainTypeName,
@@ -189,20 +194,28 @@ addTypeImpl({
       node.parameters.key = node.parameters.key.toUpperCase()
     }
 
+    const startInfo = node.runtimeContext.info
+    let newInfo: string | undefined = undefined
     if (node.parameters?.board) {
-      node.runtimeContext.info = node.parameters?.board
+      newInfo = node.parameters?.board
 
       const fileContent = await readFile(join(__dirname, "key-binding-property.html"), { encoding: "utf8" })
 
-      node.runtimeContext.parameters.key = {
+      updateRuntimeParameter(node, "key", {
         type: "iframe",
         document: fileContent,
         data: layouts[node.parameters?.board]
-      }
-
+      })
       if (node.parameters.key) {
-        node.runtimeContext.info = `${node.parameters?.board} - ${node.parameters?.key}`
+        newInfo = `${node.parameters?.board} - ${node.parameters?.key}`
       }
+    }
+
+    if (newInfo && newInfo !== startInfo) {
+      genericNodeDataStore.dispatch(backendToFrontendStoreActions.updateRuntimeInfo({
+        nodeUuid: node.uuid,
+        info: newInfo
+      }))
     }
 
   },

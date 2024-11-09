@@ -256,7 +256,9 @@ export async function updateTypeSchema(node: ElementNode, nodeData: PreparedNode
         for (const connector of outConnections[connectorIndex] ?? []) {
           try {
             const nextNode = genericNodeDataStore.getOnce(selectNodeByUuid(connector.uuid))
-
+            if (!nextNode) {
+              throw new Error(`no node found for ${connector.uuid} from Connection ${connector.connectionUuid} from Node:${node.type}:${node.uuid}`)
+            }
             const logTimeout = setTimeout(() => {
               console.warn("type schema update for " + nextNode.uuid + " took long")
 

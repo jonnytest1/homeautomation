@@ -1,6 +1,10 @@
 import type { ElementNode } from './typing/element-node';
 
-export type RecursiveCallTrace = Record<string, Array<RecursiveCallTrace>>
+export type RecursiveCallTrace = {
+  [connid: `Connection:${string}`]: {
+    [typeanduuid: `Node:${string}`]: RecursiveCallTrace
+  }
+}
 export type CallTrace = {
   nodes: Array<string>,
   callTrace: RecursiveCallTrace,
@@ -9,17 +13,26 @@ export type CallTrace = {
   logIt: boolean
 }
 export function defaultCallTrace(node: ElementNode, initContext: string): CallTrace {
-  const tr: RecursiveCallTrace = {}
+  let tr: RecursiveCallTrace = {}
+  const root = tr;
   const nodes: Array<string> = [];
 
+
   if (node) {
-    nodes.push(node.uuid)
-    tr[node.uuid] = []
+    nodes.push(`type:${node.type}:${node.uuid}`)
+    const subCalls = {
+
+    }
+    tr[`type:${node.type}:${node.parameters?.name}__:${node.uuid}`] = subCalls
+
+    tr = subCalls
+
+
   }
   return {
     nodes: nodes,
     callTrace: tr,
-    callTraceRoot: tr,
+    callTraceRoot: root,
     initContext,
     logIt: false
   }

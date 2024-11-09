@@ -2,6 +2,7 @@ import type { NodeDefOptinos } from './typing/node-options';
 import type { Callbacks } from './typing/node-callbacks';
 import type { ElementNode } from './typing/element-node';
 import type { NodeEvent } from './node-event';
+import type { CallTrace } from './node-trace';
 export class ElementNodeImpl<T = { [optinoskey: string]: string }, P = Partial<NodeDefOptinos>> implements ElementNode<T, P>, Callbacks {
 
   parameters?: Partial<T & { name?: string }> | undefined;
@@ -18,7 +19,7 @@ export class ElementNodeImpl<T = { [optinoskey: string]: string }, P = Partial<N
     Object.assign(this, callbacks)
   }
 
-  declare continue: (evt: NodeEvent<unknown, unknown, NodeDefOptinos>, index?: number | undefined) => void;
+  declare continue: (evt: NodeEvent<unknown, unknown, NodeDefOptinos>, index?: number | undefined) => Promise<CallTrace>;
   declare updateNode: () => void;
 }
 

@@ -4,6 +4,7 @@ import { backendToFrontendStoreActions } from '../../generic-store/actions';
 import { generateDtsFromSchema, mainTypeName } from '../../json-schema-type-util';
 import { updateRuntimeParameter } from '../../element-node-fnc';
 import { createNodeEvent } from '../../generic-store/node-event-factory';
+import { logKibana } from '../../../../util/log';
 import type { ExtendedJsonSchema } from 'json-schema-merger';
 import { join } from "path"
 import { readFile } from 'fs/promises'
@@ -34,7 +35,15 @@ addTypeImpl({
               triggernode: node.uuid,
             },
             payload: {}
-          }))
+          })).then((trace) => {
+            if (trace.logIt) {
+              logKibana("ERROR", {
+                message: "logged call trace",
+                trace
+              })
+            }
+
+          })
         } catch (e) {
           debugger;
         }

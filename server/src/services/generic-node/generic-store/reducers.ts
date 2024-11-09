@@ -13,11 +13,17 @@ genericNodeDataStore.addReducer(backendToFrontendStoreActions.updateNode, (st, a
 genericNodeDataStore.addReducer(initializeStore, (st, a) => {
   const connectorMap: DataState["connectorMap"] = {}
   const targetConnectorMap: DataState["targetConnectorMap"] = {}
+
+
+
   for (const connector of a.data.connections) {
     if (connector.target) {
       connectorMap[connector.source.uuid] ??= []
       connectorMap[connector.source.uuid][connector.source.index] ??= []
-      connectorMap[connector.source.uuid][connector.source.index].push(connector.target)
+      connectorMap[connector.source.uuid][connector.source.index].push({
+        ...connector.target,
+        connectionUuid: connector.uuid
+      })
 
       targetConnectorMap[connector.target?.uuid] ??= []
       targetConnectorMap[connector.target.uuid][connector.target.index] ??= []
