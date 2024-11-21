@@ -9,7 +9,7 @@ from hx711 import HX711
 import RPi.GPIO as GPIO
 
 from weight_entry import WeightEntry
-
+from calibration import offsetA, offsetB, scaleA, scaleB
 dout = 5
 pd_sck = 6
 
@@ -34,11 +34,11 @@ hx.set_reading_format("MSB", "MSB")
 ref_unit_a = 14.4
 # if diff is too big make it bigger cause it gets divided
 ref_unit_b = 4
-hx.set_reference_unit_A(ref_unit_a)
-hx.set_reference_unit_B(ref_unit_b)
-hx.set_offset_A(3500*ref_unit_a)
+hx.set_reference_unit_A(scaleA)
+hx.set_reference_unit_B(scaleB)
+hx.set_offset_A(offsetA)
 # offset gets subtracted
-hx.set_offset_B(2200*ref_unit_b)
+hx.set_offset_B(offsetB)
 
 
 def clean_and_exit():

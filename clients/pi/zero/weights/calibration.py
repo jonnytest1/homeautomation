@@ -1,0 +1,6 @@
+
+# written by calibrate.py
+scaleA = 14.690599999999996
+scaleB = 3.638733333333335
+offsetA = 48672.895919999995
+offsetB = 12924.780800000006
