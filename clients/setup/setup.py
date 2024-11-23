@@ -1,3 +1,4 @@
+from time import sleep
 from typing import Callable
 
 import debugpy
@@ -16,8 +17,6 @@ except:
     debugpy.listen(("0.0.0.0", 5679))
     print("Waiting for debugger attach on fallback port 5679")
 
-debugpy.wait_for_client()
-
 
 adapter = "WLAN 3"
 disconnect(adapter)
@@ -25,10 +24,39 @@ disconnect(adapter)
 
 matched = False
 
+debugpy.wait_for_client()
+
 
 def tasmotaplug(ip: str):
-    url = f"http://{ip}/wi?s1={wifissid}&p1={wifipwd}&save="
-    requests.get(url)
+
+    devicename = "test"
+    sleep(5)
+
+    info = requests.get(f"http://{ip}/in")
+    resptext = info.text
+
+    #
+    "1Hostname}2tasmota-F96DEC-3564}1}2"
+    hostname = resptext.split("Hostname}2")[1].split("}1}2")[0]
+
+    print(f"set devicename to tasmota-{devicename}")
+    url = f"http://{ip}/wi?s1={wifissid}&p1={wifipwd}&save=&h=tasmota-{devicename}"
+    requests.get(url, allow_redirects=False,)
+
+    # => http://192.168.4.1/in? works pre wifi
+    wifiworked = False
+    while not wifiworked:
+        sleep(1)
+        print("wifi check")
+        resp = requests.get(f"http://{hostname}", allow_redirects=False,)
+        if resp.status_code == 200:
+            wifiworked = True
+    print("setting friendlyname (Other)")
+    requests.get(
+        f"http://{hostname}/co?b3=on&b1=on&dn=Tasmota&a0=mqtt_{devicename}&b2=0&save=")
+
+    sleep(2)
+
     pass
 
 
