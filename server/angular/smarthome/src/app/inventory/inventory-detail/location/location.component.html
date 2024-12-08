@@ -10,6 +10,17 @@
 <button (click)="newLocation(newloc)">
   <mat-icon>add</mat-icon>
 </button>
+<a href="/inventory/location/{{item?.location?.id}}">
+  go to location ({{item?.location?.id}})
+</a>
+
+<video #videoRef
+       style="display: none;"></video>
+
+<button (click)="scan_qr(videoRef)">
+  <mat-icon>camera_alt</mat-icon>
+</button>
+
 
 <ng-template #newloc>
   <form (submit)="createNewLcoation($event)">

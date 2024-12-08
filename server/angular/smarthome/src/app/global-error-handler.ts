@@ -32,7 +32,7 @@ export function getDeviceData() {
     device: navigator.userAgent,
     screenHeight: window.outerHeight + "px",
     screenWidth: window.outerWidth + "px",
-    userAgentData: JSON.stringify(navigator["userAgentData"]?.toJSON()),
+    userAgentData: JSON.stringify((navigator["userAgentData"] as any)?.toJSON()),
     touchPoints: navigator.maxTouchPoints + "",
     webdriver: navigator.webdriver + "",
     url: location.href

@@ -8,6 +8,7 @@ import { TimersComponent } from './timers/timers.component';
 import { TodoComponent } from './todo/todo.component';
 import { InputsComponent } from './inputs/inputs.component';
 import { InventoryDetailComponent } from './inventory/inventory-detail/inventory-detail.component';
+import { InventoryLocationComponent } from './inventory/inventory-location/inventory-location.component';
 
 
 const routes: Routes = [
@@ -43,6 +44,9 @@ const routes: Routes = [
   }, {
     path: 'inventory/item/:itemid',
     component: InventoryDetailComponent
+  }, {
+    path: 'inventory/location/:locationid',
+    component: InventoryLocationComponent
   }, {
     path: 'todo',
     component: TodoComponent

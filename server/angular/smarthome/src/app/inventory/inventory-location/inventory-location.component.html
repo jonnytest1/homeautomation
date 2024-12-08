@@ -1,0 +1,14 @@
+<div *ngIf="location$|async ;let location">
+  <h1>{{location.id}}</h1>
+  <p>{{location.description}}</p>
+</div>
+
+
+
+<div *ngIf="items$|async;let items">
+  <div *ngFor="let item of items">
+    <img class="orderImage"
+         [src]="item.orderImageSrc" />
+    <a href="/inventory/item/{{item.id}}">{{item.description}}</a>
+  </div>
+</div>
