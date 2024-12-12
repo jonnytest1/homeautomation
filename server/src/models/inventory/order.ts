@@ -11,7 +11,7 @@ export class Order {
 
   @settable
   @column()
-  type: "amazon" | "custom" = "amazon"
+  type: "amazon" | "custom" | "aliexpress" = "amazon"
 
   @column()
   @settable

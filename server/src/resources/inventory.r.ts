@@ -63,6 +63,10 @@ export class INventoryResource {
       }
 
       await assign(existing, order, { onlyWhenFalsy: true });
+      if (order.type) {
+        existing.type = order.type
+
+      }
       if (order.orderStatus) {
         existing.orderStatus = order.orderStatus
       }
