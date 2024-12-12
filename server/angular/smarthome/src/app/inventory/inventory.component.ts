@@ -1,12 +1,23 @@
-import type { AfterViewInit, OnInit } from '@angular/core';
-import { Component, ViewChild, ChangeDetectorRef } from '@angular/core';
-import { MatSort } from '@angular/material/sort';
-import { MatTableDataSource } from '@angular/material/table';
+import type { AfterViewInit, OnInit, TemplateRef } from '@angular/core';
+import { Component, ViewChild, ChangeDetectorRef, inject } from '@angular/core';
+import { MatSort, MatSortModule } from '@angular/material/sort';
+import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import type { Observable } from 'rxjs';
 import { BehaviorSubject } from 'rxjs';
 import { tap } from 'rxjs/operators';
 import { SettingsService } from '../settings.service';
 import type { ItemFe } from '../settings/interfaces';
+import { MatButtonModule } from '@angular/material/button';
+import { CommonModule } from '@angular/common';
+import { MatFormField, MatFormFieldModule } from '@angular/material/form-field';
+import { MatIconModule } from '@angular/material/icon';
+import { RegexHighlightedComponent } from './regex-highlighted/regex-highlighted.component';
+import { RouterModule } from '@angular/router';
+import { MatInputModule } from '@angular/material/input';
+import { MatBottomSheet } from '@angular/material/bottom-sheet';
+import type { FrontendOrder } from '../../../../../src/models/inventory/item';
+import { environment } from '../../environments/environment';
+import { getBackendBaseUrl } from '../backend';
 
 export type TableItemFe = ItemFe & {
   highlightInfo?: BehaviorSubject<null | {
@@ -19,7 +30,11 @@ export type TableItemFe = ItemFe & {
 @Component({
   selector: 'app-inventory',
   templateUrl: './inventory.component.html',
-  styleUrls: ['./inventory.component.scss']
+  styleUrls: ['./inventory.component.scss'],
+  standalone: true,
+  imports: [CommonModule, MatButtonModule, MatTableModule, MatSortModule, MatFormFieldModule, MatIconModule, RegexHighlightedComponent,
+    RouterModule, MatInputModule
+  ]
 })
 export class InventoryComponent implements OnInit, AfterViewInit {
   inventory$: Observable<Array<TableItemFe>>;
@@ -28,6 +43,8 @@ export class InventoryComponent implements OnInit, AfterViewInit {
 
   @ViewChild(MatSort)
   sort: MatSort;
+
+  matBottomSheet = inject(MatBottomSheet)
 
   filter: string
   dataSource = new MatTableDataSource<TableItemFe>();
@@ -154,5 +171,53 @@ export class InventoryComponent implements OnInit, AfterViewInit {
       })
     }
     this.cdr.markForCheck()
+  }
+
+
+  addItem(addItemTemplate: TemplateRef<unknown>) {
+    this.matBottomSheet.open(addItemTemplate)
+  }
+
+  async imageDrop(ev: DragEvent, target: HTMLInputElement, img: HTMLImageElement) {
+    const file = ev.dataTransfer.files[0];
+    ev.preventDefault();
+    const buffer = await file?.arrayBuffer()
+    const uint8Array = new Uint8Array(buffer);
+
+    let binaryString = '';
+    uint8Array.forEach(byte => {
+      binaryString += String.fromCharCode(byte);
+    });
+
+    const base64String = btoa(binaryString);
+
+    img.src = `data:${file.type};base64,${base64String}`
+    target.value = `data:${file.type};base64,${base64String}`
+  }
+
+  submitNewItem(form: HTMLFormElement) {
+    const obj = Object.fromEntries(new FormData(form).entries())
+
+
+
+    const order = {
+      orderStatus: obj.status === "delivered" ? "received" : "pending",
+      type: "custom",
+      items: [{
+        amount: +obj.amount,
+        description: obj.description as string,
+        orderImageSrc: obj.image as string,
+      }]
+    }
+    const url = new URL(`rest/inventory`, getBackendBaseUrl())
+    fetch(url, {
+      method: "POST",
+      body: JSON.stringify(order),
+      headers: {
+        "content-type": "application/json"
+      }
+    })
+
+    debugger
   }
 }

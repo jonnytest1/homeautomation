@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "scripts": {
     "ng": "ng",
-    "start": "ng serve --open --host 0.0.0.0 --port 4201",
+    "start": "ng serve --open --host 0.0.0.0 --port 4202",
     "start-fe": "ng serve --open --host 0.0.0.0 --port 4201 --configuration fe",
     "build": "ng build --configuration production",
     "test": "ng test",
@@ -37,6 +37,7 @@
     "jspython-interpreter": "^2.1.15",
     "mqtt": "^5.10.1",
     "ng-circle-progress": "^1.6.0",
+    "qr-scanner": "^1.4.2",
     "quicktype-core": "^23.0.81",
     "rxjs": "^7.8.1",
     "uuid": "^8.3.1",

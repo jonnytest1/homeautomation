@@ -82,7 +82,7 @@ export class INventoryResource {
         }
         const storedItem = productLinkMap[item.productLink]
 
-        if (storedItem) {
+        if (item.productLink && storedItem) {
           await assign(storedItem, item, { onlyWhenFalsy: false })
           await queries(storedItem)
         } else {

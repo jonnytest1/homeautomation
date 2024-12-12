@@ -43,17 +43,15 @@ export class MyHammerConfig extends HammerGestureConfig {
     CameraComponent,
     TimersComponent,
     TodoComponent,
-    InventoryComponent,
-    RegexHighlightedComponent,
     IframeComponent,
     InputsComponent
   ],
   imports: [
     BrowserModule, HammerModule,
-    AppRoutingModule, SettingsModule, FormsModule, MatInputModule, MatTableModule,
-    MatSidenavModule, MatListModule, MatIconModule, MatGridListModule, MatSortModule,
+    AppRoutingModule, SettingsModule, FormsModule, MatInputModule,
+    MatSidenavModule, MatListModule, MatIconModule, MatGridListModule,
     BrowserAnimationsModule, NgCircleProgressModule.forRoot(),
-    EffectsModule.forRoot(), InventoryDetailComponent,
+    EffectsModule.forRoot(), InventoryDetailComponent, InventoryComponent,
     StoreModule.forRoot({}, {
       runtimeChecks: {
         // temporary until generic node is refactored for state usage

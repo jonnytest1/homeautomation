@@ -9,8 +9,9 @@ export class Order {
   id: number
 
 
+  @settable
   @column()
-  type: "amazon" = "amazon"
+  type: "amazon" | "custom" = "amazon"
 
   @column()
   @settable

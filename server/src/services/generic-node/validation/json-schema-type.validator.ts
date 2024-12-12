@@ -16,7 +16,7 @@ export class SchemaMatchingError extends Error {
 
   constructor(public context: ValidationContext, message: string) {
     super(message)
-    console.warn(message)
+    //console.warn(message)
   }
 
 

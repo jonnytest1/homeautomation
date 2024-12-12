@@ -103,3 +103,36 @@
         *matRowDef="let row; columns: keys;"></tr>
   </table>
 </div>
+
+<button mat-fab
+        (click)="addItem(additemT)"
+        class="add-item">
+  <mat-icon>add</mat-icon>
+</button>
+
+<ng-template #additemT>
+  <form #form>
+    name: <input name="description"><br>
+    image: <span (drop)="$event.preventDefault(); imageDrop($event,imageInpt,img)"
+          (dragover)="$event.preventDefault()">drop here</span>
+    <input type="hidden"
+           #imageInpt
+           name="image">
+    <img #img><br>
+    amount: <input #amount
+           (change)="amtdisplay.textContent=amount.value"
+           name="amount"
+           type="range"
+           value="1"
+           min="1" /><span #amtdisplay>{{amount.value}}</span><br>
+
+    status: <select name="status">
+      <option>delivered</option>
+      <option>pending</option>
+    </select>
+
+
+    <button (click)="submitNewItem(form)">submit</button>
+  </form>
+
+</ng-template>

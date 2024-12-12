@@ -2,10 +2,15 @@
 const fetch = require('node-fetch');
 export async function imageLaoder(url: string | HTMLImageElement) {
 
+
   if (typeof url == "object" && "tagName" in url) {
 
     url = url.src
 
+  }
+
+  if (url.startsWith("data:")) {
+    return url;
   }
 
   const reqUrl = new URL(url)

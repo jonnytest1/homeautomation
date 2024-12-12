@@ -2,11 +2,14 @@ import type { OnChanges, OnInit } from '@angular/core';
 import { Component, Input, ChangeDetectorRef } from '@angular/core';
 import { MatColumnDef } from '@angular/material/table';
 import { TableItemFe } from '../inventory.component';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-regex-highlighted',
   templateUrl: './regex-highlighted.component.html',
-  styleUrls: ['./regex-highlighted.component.less']
+  styleUrls: ['./regex-highlighted.component.less'],
+  standalone: true,
+  imports: [CommonModule]
 })
 export class RegexHighlightedComponent implements OnInit, OnChanges {
 

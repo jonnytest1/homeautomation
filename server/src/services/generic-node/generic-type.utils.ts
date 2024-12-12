@@ -208,7 +208,7 @@ export async function updateTypeSchema(node: ElementNode, nodeData: PreparedNode
           schema = {
             jsonSchema: mergedSchema,
             mainTypeName: mainTypeName,
-            dts: await generateDtsFromSchema(mergedSchema)
+            dts: await generateDtsFromSchema(mergedSchema, `schema-merge-${node.uuid}-dts`)
           }
         } catch (e) {
           const err = new Error("error getting merged type for " + filteredSchemas.length + " connections on node " + nodeDescriptor(node), { cause: e, });
