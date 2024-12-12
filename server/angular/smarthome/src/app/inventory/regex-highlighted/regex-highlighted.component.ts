@@ -1,8 +1,8 @@
 import type { OnChanges, OnInit } from '@angular/core';
 import { Component, Input, ChangeDetectorRef } from '@angular/core';
 import { MatColumnDef } from '@angular/material/table';
-import { TableItemFe } from '../inventory.component';
 import { CommonModule } from '@angular/common';
+import type { TableItemFe } from '../inventory-type';
 
 @Component({
   selector: 'app-regex-highlighted',

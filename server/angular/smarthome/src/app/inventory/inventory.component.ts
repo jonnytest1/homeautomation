@@ -9,23 +9,14 @@ import { SettingsService } from '../settings.service';
 import type { ItemFe } from '../settings/interfaces';
 import { MatButtonModule } from '@angular/material/button';
 import { CommonModule } from '@angular/common';
-import { MatFormField, MatFormFieldModule } from '@angular/material/form-field';
+import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { RegexHighlightedComponent } from './regex-highlighted/regex-highlighted.component';
 import { RouterModule } from '@angular/router';
 import { MatInputModule } from '@angular/material/input';
 import { MatBottomSheet } from '@angular/material/bottom-sheet';
-import type { FrontendOrder } from '../../../../../src/models/inventory/item';
-import { environment } from '../../environments/environment';
 import { getBackendBaseUrl } from '../backend';
-
-export type TableItemFe = ItemFe & {
-  highlightInfo?: BehaviorSubject<null | {
-    regexMatch?: RegExpExecArray,
-    columnName?: string
-  }>
-}
-
+import type { TableItemFe } from './inventory-type';
 
 @Component({
   selector: 'app-inventory',
