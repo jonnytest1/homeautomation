@@ -52,6 +52,7 @@
       <td mat-cell
           *matCellDef="let element">
         <a [href]="element.productLink">
+          {{element.order?.type??''}}<br>
           <app-regex-highlighted [data]="element"
                                  [highlightInfo]="element?.highlightInfo|async"
                                  [text]="getProductId(element)">
@@ -81,10 +82,13 @@
              target="_blank">(pending)</a>
         </ng-container>
         <ng-template #dsiplay>
-          <app-regex-highlighted [data]="element"
-                                 [highlightInfo]="element?.highlightInfo|async"
-                                 [text]="getLocation(element)">
-          </app-regex-highlighted>
+          <a [routerLink]="'location/'+element.location?.id">
+            <app-regex-highlighted [data]="element"
+                                   [highlightInfo]="element?.highlightInfo|async"
+                                   [text]="getLocation(element)">
+            </app-regex-highlighted>
+          </a>
+
         </ng-template>
 
       </td>

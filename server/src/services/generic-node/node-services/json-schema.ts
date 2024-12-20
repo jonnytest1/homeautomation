@@ -108,6 +108,7 @@ addTypeImpl({
       debugger
     }
     if (node.runtimeContext?.outputSchema?.jsonSchema) {
+
       try {
         if (!zodMap[node.uuid]) {
           zodMap[node.uuid] = generateZodTypeFromSchema(node.runtimeContext?.outputSchema?.jsonSchema, `${node.type}-${node.uuid}-process fallback`)
@@ -118,6 +119,7 @@ addTypeImpl({
         debugger
         throw e;
       }
+
     }
     //const newSchema = json2dts.getCode()
     //node.runtimeContext.schema = newSchema

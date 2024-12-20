@@ -23,7 +23,7 @@
     "generic-type-guard": "^3.5.0",
     "hibernatets": "^2.0.105",
     "jsdom": "^24.0.0",
-    "json-schema-merger": "^0.1.4",
+    "json-schema-merger": "^0.1.10",
     "json2dts": "^0.0.2",
     "mariadb": "^3.2.0",
     "mkdirp": "^1.0.4",

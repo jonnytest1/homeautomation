@@ -138,6 +138,8 @@ export class InventoryComponent implements OnInit, AfterViewInit {
 
     } else if (item.productLink?.includes("/dp/")) {
       return item.productLink?.split("/dp/")?.[1] ?? ''
+    } else if (item.productLink?.includes("/item/")) {
+      return item.productLink?.split("/item/")?.[1].split(".html")[0] ?? ''
     }
 
   }

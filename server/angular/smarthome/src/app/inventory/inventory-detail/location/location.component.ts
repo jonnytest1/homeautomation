@@ -28,6 +28,7 @@ export class LocationComponent implements OnInit {
     if (!newLocId) {
       return
     }
+    this.item.location ??= {}
     this.item.location.id = +newLocId
     this.inventoryService.setLocation(this.item, newLocId)
   }

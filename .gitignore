@@ -64,3 +64,5 @@ clients/arduino/8x8/8x8/src/mqtt.h
 clients/arduino/8x8/8x8/arduinoide/8x8/mqtt.h
 clients/arduino/8x8/8x8/arduinoide/8x8/mqtt_cred.h
 server/angular/smarthome/src/app/wiring/devices/matrix/creds.ts
+clients/drone/4drc/MyApplication
+clients/drone/4drc/drmirror
