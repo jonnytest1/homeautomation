@@ -24,13 +24,13 @@ export class TimerFactory {
   }
 
 
-  static createCallback<T extends EventTypes, S>(callbackClassName: T, timerData: Delayed<S>) {
+  static createCallback<T extends EventTypes, S>(callbackClassName: T, timerData: Delayed<S>, classId: "shown" | "hidden" = "hidden") {
 
     const timer = new Timer({
       startTimestamp: Date.now(),
       endtimestamp: Date.now() + timerData.time,
       args: ["-", timerData.nestedObject],
-      classId: -1,
+      classId: classId === "shown" ? -2 : -1,
       className: callbackClassName,
       data: timerData.sentData
     })

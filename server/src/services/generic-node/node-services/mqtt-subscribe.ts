@@ -4,6 +4,8 @@ import type { ElementNode } from '../typing/element-node'
 import type { NodeEvent } from '../node-event'
 import { addTypeImpl } from '../generic-node-service'
 import { updateRuntimeParameter } from '../element-node-fnc'
+import { genericNodeDataStore } from '../generic-store/reference'
+import { backendToFrontendStoreActions } from '../generic-store/actions'
 
 
 
@@ -47,7 +49,10 @@ addTypeImpl({
 
       if (device) {
 
-        node.runtimeContext.info = device.friendlyName
+        genericNodeDataStore.dispatch(backendToFrontendStoreActions.updateRuntimeInfo({
+          info: `${device.friendlyName}`,
+          nodeUuid: node.uuid
+        }))
       }
     }
   },

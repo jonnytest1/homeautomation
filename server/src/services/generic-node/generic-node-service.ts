@@ -239,7 +239,11 @@ forNodes({
                 }))
               } else if (JSON.stringify({ ...nodeCpy, trace: null }) !== JSON.stringify({ ...passedNode, trace: null })) {
                 debugger;
-                logKibana("ERROR", "node changed with store update")
+                logKibana("ERROR", {
+                  message: "node changed with store update",
+                  node: nodeCpy.uuid,
+                  node_type: nodeCpy.type
+                })
               }
               const preTypeEmmit = lastEmit;
               updateTypeSchema(nodeChanged, {

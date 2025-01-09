@@ -119,6 +119,11 @@ addTypeImpl({
       schedule: {
         type: "placeholder",
         of: "iframe"
+      },
+      display: {
+        type: "boolean",
+        title: "display in timers view",
+        order: 2
       }
     }
   }),
@@ -186,7 +191,7 @@ addTypeImpl({
           time: durationMillis,
           nestedObject: evtData,
           sentData: evt.payload
-        })
+        }, node.parameters.display ? "shown" : undefined)
         startRuntimeInterval(timer)
       }
 
