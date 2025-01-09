@@ -74,7 +74,7 @@ export class MQTTIntegration {
             const commandEvent = this.commandMap[configDiscovery.groups?.deviceid]
             const evtData = new DeviceConfig(configDiscovery.groups?.deviceid, evt as DiscoveryConfigEvent, commandEvent)
             this.deviceMap[evtData.mqttDeviceName] = evtData
-            console.log(this.deviceMap)
+            console.log(evtData)
 
             if (configDiscovery?.groups?.factory === "tasmota") {
               setTimeout(() => {
