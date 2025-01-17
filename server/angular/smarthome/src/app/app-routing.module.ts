@@ -40,13 +40,7 @@ const routes: Routes = [
     component: TimersComponent
   }, {
     path: 'inventory',
-    component: InventoryComponent
-  }, {
-    path: 'inventory/item/:itemid',
-    component: InventoryDetailComponent
-  }, {
-    path: 'inventory/location/:locationid',
-    component: InventoryLocationComponent
+    loadChildren: () => import('./inventory/inventory-module').then(m => m.InventoryModule)
   }, {
     path: 'todo',
     component: TodoComponent

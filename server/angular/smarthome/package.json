@@ -40,6 +40,7 @@
     "qr-scanner": "^1.4.2",
     "quicktype-core": "^23.0.81",
     "rxjs": "^7.8.1",
+    "three": "^0.172.0",
     "uuid": "^8.3.1",
     "webpack": "^5.90.1",
     "zone.js": "~0.13.3"
@@ -64,6 +65,7 @@
     "@types/jasminewd2": "~2.0.3",
     "@types/jest": "^29",
     "@types/node": "^20",
+    "@types/three": "^0.172.0",
     "babel-jest": "^29",
     "codelyzer": "^6.0.2",
     "css-loader": "^6.7.3",

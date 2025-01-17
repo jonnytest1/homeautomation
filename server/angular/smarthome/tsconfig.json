@@ -28,9 +28,15 @@
       "DOM.Iterable",
       "ES2022"
     ],
+    "paths": {
+      "three/webgpu": [
+        "./node_modules/three/build/three.webgpu.min.js"
+      ]
+    },
   },
   "exclude": [
     "**/*.test.ts",
-    "**/*.spec.ts"
+    "**/*.spec.ts",
+    "node_modules/**"
   ]
 }

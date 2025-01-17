@@ -1,6 +1,11 @@
 <div *ngIf="location$|async ;let location">
   <h1>{{location.id}}</h1>
   <p>{{location.description}}</p>
+  <div (drop)="onDrop($event)"
+       (dragover)="$event.preventDefault()"
+       style="min-width: 200px;min-height: 40px;background-color: red;"></div>
+  <app-3ddisplay *ngIf="model"
+                 [model]="model"></app-3ddisplay>
 </div>
 
 

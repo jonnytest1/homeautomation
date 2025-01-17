@@ -4,13 +4,14 @@ import { map, switchMap } from 'rxjs/operators';
 import { SettingsService } from '../../settings.service';
 import { InventoryService } from '../inventory.service';
 import { CommonModule } from '@angular/common';
+import { ThreeDdisplayComponent } from '../3ddisplay/3ddisplay.component';
 
 @Component({
   selector: 'app-inventory-location',
   templateUrl: './inventory-location.component.html',
   styleUrls: ['./inventory-location.component.scss'],
   standalone: true,
-  imports: [CommonModule]
+  imports: [CommonModule, ThreeDdisplayComponent]
 })
 export class InventoryLocationComponent implements OnInit {
 
@@ -25,6 +26,7 @@ export class InventoryLocationComponent implements OnInit {
     );
 
 
+
   location$ = this.inventoryService.locations$.pipe(
     switchMap(locs => this.activeRoute.params.pipe(map(param => {
       const item = locs.find(loc => loc?.id === +param.locationid);
@@ -33,6 +35,9 @@ export class InventoryLocationComponent implements OnInit {
     })))
 
   )
+
+
+  model: File
 
   constructor(public activeRoute: ActivatedRoute,
     private readonly dataService: SettingsService,
@@ -43,4 +48,10 @@ export class InventoryLocationComponent implements OnInit {
   ngOnInit() {
   }
 
+
+  onDrop(evt: DragEvent) {
+    this.model = evt.dataTransfer.files[0]
+
+    evt.preventDefault()
+  }
 }
