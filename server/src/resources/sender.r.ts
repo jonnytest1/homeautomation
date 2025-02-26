@@ -135,15 +135,18 @@ export class SenderResource {
     path: ':senderid/transformation'
   })
   async addTransformation(req: HttpRequest, res: HttpResponse) {
+    const base = new MariaDbBase();
     const sender = await load(Sender, s => s.id = +req.params.senderid, undefined, {
       first: true,
-      interceptArrayFunctions: true
+      interceptArrayFunctions: true,
+      db: base
     });
     const transform = new Transformation()
     await assign(transform, req.body);
     sender.transformation.push(transform);
     await queries(sender);
     res.send(transform);
+    base?.end()
     FrontendWebsocket.updateSenders()
   }
 
