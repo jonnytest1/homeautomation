@@ -3,7 +3,7 @@ import { FrontendWebsocket } from './frontend-update';
 import { Connection } from '../models/connection';
 import { Receiver } from '../models/receiver';
 import { Sender } from '../models/sender';
-import { load, queries } from 'hibernatets';
+import { load, MariaDbBase, queries } from 'hibernatets';
 import { Path, POST, GET, HttpRequest, HttpResponse } from 'express-hibernate-wrapper';
 
 @Path('connection')
@@ -15,15 +15,20 @@ export class ConnectionResource {
       return res.status(400)
         .send();
     }
-    const [sender, receiver] = await Promise.all([
-      load(Sender, s => s.deviceKey = req.body.senderId, [], { first: true, interceptArrayFunctions: true }),
-      load(Receiver, +req.body.receiverId, [], { first: true })
-    ]);
-    const connection = new Connection(receiver);
-    sender.connections.push(connection);
-    await queries(sender);
-    res.send(connection);
-    FrontendWebsocket.updateSenders()
+    const pool = new MariaDbBase()
+    try {
+      const [sender, receiver] = await Promise.all([
+        load(Sender, s => s.deviceKey = req.body.senderId, [], { first: true, interceptArrayFunctions: true, db: pool }),
+        load(Receiver, +req.body.receiverId, [], { first: true, db: pool })
+      ]);
+      const connection = new Connection(receiver);
+      sender.connections.push(connection);
+      await queries(sender);
+      res.send(connection);
+      FrontendWebsocket.updateSenders()
+    } finally {
+      pool.end()
+    }
   }
 
   @GET({

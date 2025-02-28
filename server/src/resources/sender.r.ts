@@ -10,6 +10,8 @@ import { senderLoader } from '../services/sender-loader';
 import { SenderTriggerService } from '../services/sender-trigger-service';
 import { mqttConnection } from '../services/mqtt-api';
 import { emitEvent } from '../services/generic-node/generic-node-service';
+import { TscCompiler } from '../util/tsc-compiler';
+import { Sound } from '../models/sound';
 import { assign, loadOne, ResponseCodeError } from 'express-hibernate-wrapper';
 import { MariaDbBase } from 'hibernatets/dbs/mariadb-base';
 import { load, queries, save } from 'hibernatets';
@@ -145,6 +147,17 @@ export class SenderResource {
     await assign(transform, req.body);
     sender.transformation.push(transform);
     await queries(sender);
+
+    const sounds = await load(Sound, 'true=true')
+
+    const definitionFile = TscCompiler.responseINterface
+      ?.replace(
+        "type soundListRuntime = string",
+        `type soundListRuntime = ${sounds.map(s => `'${s.key}'`).join(' | ')}`)
+
+
+    transform.definitionFile = definitionFile
+
     res.send(transform);
     base?.end()
     FrontendWebsocket.updateSenders()
