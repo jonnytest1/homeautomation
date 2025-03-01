@@ -34,6 +34,7 @@ updateDatabase(__dirname + '/src/models')
       prereesources: app => {
         app.use((req, res, next) => {
           res.header('Access-Control-Allow-Methods', '*');
+          res.header("Service-Worker-Allowed", "/")
           next();
         });
         app.use((req, res, next) => {
