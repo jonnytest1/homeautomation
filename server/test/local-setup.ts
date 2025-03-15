@@ -9,7 +9,6 @@ import { genericNodeDataStore } from '../src/services/generic-node/generic-store
 import { backendToFrontendStoreActions } from '../src/services/generic-node/generic-store/actions';
 import { MariaDbBase } from 'hibernatets/dbs/mariadb-base';
 import { EventEmitter } from "events"
-
 const hookKeys = true;
 const copyDatabase = true
 const eventReplay = false
@@ -88,24 +87,59 @@ if (eventReplay) {
 
 
 if (copyDatabase) {
-  /* const db = new DataBaseBase()
-   db.selectQuery<{ TABLE_NAME: string }>("SELECT DISTINCT TABLE_NAME FROM `information_schema`.`COLUMNS` WHERE TABLE_SCHEMA='smarthome'", [], "information_schema")
-     .then(async infoSchema => {
-  
-       for (const tableResult of infoSchema) {
-         const tableName = tableResult.TABLE_NAME
-  
-         const data = await db.selectQuery<any>(`SELECT * FROM \`${tableName}\``)
-  
-  
-       }
-  
-  
-       debugger
-     }).catch(e => {
-       debugger
-     })
-  */
+  const schemaDb = new MariaDbBase("information_schema")
+  const dataSelectDb = new MariaDbBase("smarthome")
+  const dataInsertDb = new MariaDbBase("random")
+
+  const tables = ["receiver"]
+  schemaDb.selectQuery<{ TABLE_NAME: string }>("SELECT DISTINCT TABLE_NAME FROM `information_schema`.`COLUMNS` WHERE TABLE_SCHEMA='smarthome'",
+    [])
+    .then(async infoSchema => {
+
+      for (const tableResult of infoSchema) {
+        const tableName = tableResult.TABLE_NAME
+
+        if (tables.includes(tableName)) {
+          const data = await dataSelectDb.selectQuery<any>(`SELECT * FROM \`${tableName}\``)
+
+          const meta = data["meta"] as Array<{ name: () => string, flags: number }>
+
+          const columns = meta.map(c => `\`${c.name()}\``).join(",")
+
+          const params: Array<unknown> = []
+          const entrySql = data.map(d => {
+            meta.forEach(c => {
+              params.push(d[c.name()]);
+            })
+
+            return `(${meta.map(c => `?`).join(",")})`
+          }).join(", ")
+          const primaryFlag = 2
+          const nonPrimary = meta.filter(c => ((c.flags & primaryFlag) != primaryFlag))
+
+
+          const updateSql = nonPrimary.map(c => `\`${c.name()}\`=VALUES(\`${c.name()}\`)`).join(", ")
+
+
+          const sql = `INSERT INTO \`${tableName}\` (${columns}) VALUES ${entrySql} ON DUPLICATE KEY UPDATE ${updateSql}`
+
+          try {
+            await dataInsertDb.sqlquery(sql, params)
+
+          } catch (e) {
+            debugger
+          }
+        }
+
+
+
+      }
+
+
+    }).catch(e => {
+      debugger
+    })
+
 }
 
 if (setMqttGlobals) {

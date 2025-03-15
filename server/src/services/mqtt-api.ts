@@ -30,7 +30,9 @@ export class MQTTIntegration {
       mqtt_user: environment.MQTT_USER
     })
     this.connection.on("error", e => {
-      console.error(e)
+      if (!environment.IGNORE_MQTT_ERROR) {
+        console.error(e)
+      }
     })
     this.connection.on("close", () => {
       console.error("mqtt closed")

@@ -24,7 +24,7 @@ export type Select<T extends string = string> = {
   type: "select",
   readonly options: ReadonlyArray<T> //  Array<T> | 
   optionDisplayNames?: Array<string>
-  initial?: string
+  multiple?: boolean
 }
 export type PlaceHolder = {
   type: "placeholder",

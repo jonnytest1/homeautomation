@@ -8,6 +8,7 @@ import type { ElementNodeImpl } from '../element-node'
 import { genericNodeDataStore } from '../generic-store/reference'
 import { backendToFrontendStoreActions } from '../generic-store/actions'
 import { updateRuntimeParameter } from '../element-node-fnc'
+import { logKibana } from '../../../util/log'
 import { SqlCondition, load } from 'hibernatets'
 import type { ZodType } from 'zod'
 import * as z from "zod";
@@ -56,6 +57,8 @@ const schemaMap: Record<string, {
   zodSchema: ZodType,
 }> = {}
 
+const deviceKeyArraySchema = z.array(z.string())
+
 
 
 addTypeImpl({
@@ -71,6 +74,23 @@ addTypeImpl({
 
       const data = ConnectionSchema.parse(evt.payload)
       await receiver.send(new ReceiverData(data as ConnectionResponse))
+    } else if (params?.deviceList?.length) {
+      const devices = deviceKeyArraySchema.parse(JSON.parse(params?.deviceList))
+      const receivers = await load(Receiver, SqlCondition.ALL, [], {
+        deep: ["actions", "events"]
+      });
+
+      const selected = receivers.filter(rec => devices.includes(rec.deviceKey))
+      const data = ConnectionSchema.parse(evt.payload)
+      const receiverData = new ReceiverData(data as ConnectionResponse)
+      await Promise.all(selected.map(async rec => {
+        try {
+          await rec.send(receiverData)
+        } catch (e) {
+          logKibana("ERROR", "exception sending data to receiver", e)
+        }
+      }))
+
     }
 
     callbacks.continue(evt)
@@ -87,6 +107,10 @@ addTypeImpl({
       action: {
         type: "placeholder",
         of: "select"
+      },
+      deviceList: {
+        type: "placeholder",
+        of: "select"
       }
     }
   }),
@@ -96,7 +120,7 @@ addTypeImpl({
       deep: ["actions", "events"]
     });
     const deviceKeys = receivers.map(dev => dev.deviceKey)
-
+    deviceKeys.unshift("")
 
     updateRuntimeParameter(node, "deviceKey", {
       type: "select",
@@ -105,6 +129,19 @@ addTypeImpl({
 
     if (!node.runtimeContext.inputSchema) {
       computeTypeSchema(node)
+    }
+
+    if (!node.parameters.deviceKey) {
+      updateRuntimeParameter(node, "deviceList", {
+        type: "select",
+        options: receivers.map(dev => dev.deviceKey),
+        multiple: true
+      }, receivers.map(dev => dev.deviceKey))
+    } else {
+      updateRuntimeParameter(node, "deviceList", {
+        type: "placeholder",
+        of: "select"
+      }, deviceKeys)
     }
 
   }

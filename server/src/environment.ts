@@ -34,4 +34,5 @@ export const environment = process.env as {
 
   DOCKER_CONTAINER_NAME: string
   SMARTHOME_DISABLED: string
+  IGNORE_MQTT_ERROR: string
 }

@@ -2,7 +2,7 @@ import { backendToFrontendStoreActions, setServerContext } from './generic-store
 import { genericNodeDataStore } from './generic-store/reference';
 import type { EvalNode, TypeImplementaiton } from './typing/generic-node-type';
 import type { ElementNode } from './typing/element-node';
-import type { MapTypeToParam, NodeDefOptinos, NodeOptionTypes } from './typing/node-options';
+import type { MapTypeToParam, NodeDefOptinos, NodeOptionTypes, PlaceHolder } from './typing/node-options';
 
 export function updateServerContext<T, O extends NodeDefOptinos, K extends (keyof T & string)>(node: EvalNode<O, T>, opts: Partial<T>) {
 
@@ -47,8 +47,8 @@ export function setNodeParameter<T, K extends ((keyof T & string)), V extends T[
 export function updateRuntimeParameter<T, P, K extends ((keyof P & keyof T & string)), V extends NodeOptionTypes & P[K]>(
   node: ElementNode<T, P>,
   key: K,
-  param: V,
-  inital: number | string | false = 0): asserts node is ElementNode<T, P> & {
+  param: V | PlaceHolder,
+  inital: number | string | false | Array<string> = 0): asserts node is ElementNode<T, P> & {
     parameters: SetNodeParamVAlue<K, V>,
     runtimeContext: {
       parameters: SetNodeOption<K>
@@ -60,7 +60,7 @@ export function updateRuntimeParameter<T, P, K extends ((keyof P & keyof T & str
 
   if (JSON.stringify(node.runtimeContext.parameters[key]) !== JSON.stringify(param)) {
 
-    node.runtimeContext.parameters[key] = param
+    node.runtimeContext.parameters[key] = param as P[K]
 
     genericNodeDataStore.dispatch(backendToFrontendStoreActions.updateParamDefinition({
       nodeUuid: node.uuid,
@@ -86,6 +86,10 @@ export function updateRuntimeParameter<T, P, K extends ((keyof P & keyof T & str
       } else if (inital) {
 
         value = `${inital}` as T[K]
+      }
+    } else if (inital instanceof Array) {
+      if (param.type == "select") {
+        value = JSON.stringify(inital) as T[K]
       }
     }
     genericNodeDataStore.dispatch(backendToFrontendStoreActions.updateParam({

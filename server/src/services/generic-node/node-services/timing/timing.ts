@@ -34,6 +34,7 @@ export type EventData = {
   node: string,
   data: unknown
   context: unknown
+  params?: Record<string, unknown>
 }
 
 const timerUpdateMap: Record<string, {
@@ -177,7 +178,8 @@ addTypeImpl({
       const evtData = {
         node: node.uuid,
         data,
-        context: evt.context
+        context: evt.context,
+        params: node.parameters
       } satisfies EventData
 
 

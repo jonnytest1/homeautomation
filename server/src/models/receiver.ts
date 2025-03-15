@@ -7,7 +7,7 @@ import ws, { WebsocketError } from '../services/websocketmessaging';
 import { logKibana } from '../util/log';
 import { autosaveable, settable } from 'express-hibernate-wrapper';
 import { column, mapping, Mappings, primary, table } from 'hibernatets';
-
+import { randomUUID } from "crypto"
 const fetch = require('node-fetch');
 @table()
 @autosaveable
@@ -117,6 +117,7 @@ export class Receiver {
       .then(response => {
         if (response === "dismissed") {
           if (evaluatedData.attributes && evaluatedData.attributes.messageId) {
+
             firebasemessageing.sendNotification(this.firebaseToken, {
               type: "removeNotification",
               id: evaluatedData.attributes.messageId
@@ -140,6 +141,9 @@ export class Receiver {
     const evaluatedData = evaluatedDataObj.data
     const firebaseData = evaluatedData as FireBaseMessagingPayload
 
+    if (firebaseData.notification && !firebaseData.notification.tag) {
+      firebaseData.notification.tag = randomUUID()
+    }
     console.log(`sending push notification for ${this.name}`);
     const response = await firebasemessageing.sendNotification(this.firebaseToken, firebaseData);
     /*if (!response) {

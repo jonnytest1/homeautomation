@@ -31,7 +31,8 @@ class FireBAseMessaging {
         notification: {
           body: payload.notification?.body,
           title: payload.notification?.title,
-          imageUrl: payload.notification?.icon
+          imageUrl: payload.notification?.icon,
+
         }
       });
   }
