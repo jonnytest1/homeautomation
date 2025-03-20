@@ -9,6 +9,7 @@ import { genericNodeDataStore } from '../generic-store/reference'
 import { backendToFrontendStoreActions } from '../generic-store/actions'
 import { updateRuntimeParameter } from '../element-node-fnc'
 import { logKibana } from '../../../util/log'
+import { sharedPool } from '../../../models/db-state'
 import { SqlCondition, load } from 'hibernatets'
 import type { ZodType } from 'zod'
 import * as z from "zod";
@@ -69,7 +70,9 @@ addTypeImpl({
     if (deviceKey?.length) {
       const receiver = await load(Receiver, r => r.deviceKey = deviceKey, [], {
         first: true,
-        deep: ["actions", "events"]
+        deep: ["actions", "events"],
+        db: sharedPool
+
       });
 
       const data = ConnectionSchema.parse(evt.payload)
@@ -77,7 +80,8 @@ addTypeImpl({
     } else if (params?.deviceList?.length) {
       const devices = deviceKeyArraySchema.parse(JSON.parse(params?.deviceList))
       const receivers = await load(Receiver, SqlCondition.ALL, [], {
-        deep: ["actions", "events"]
+        deep: ["actions", "events"],
+        db: sharedPool
       });
 
       const selected = receivers.filter(rec => devices.includes(rec.deviceKey))

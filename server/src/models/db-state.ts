@@ -1,4 +1,6 @@
-import { setMariaDbPoolDefaults } from 'hibernatets/dbs/mariadb-base';
+import { MariaDbBase, setMariaDbPoolDefaults } from 'hibernatets/dbs/mariadb-base';
+
+
 
 export let dbInitialited = false;
 setMariaDbPoolDefaults({
@@ -10,3 +12,7 @@ setMariaDbPoolDefaults({
 export function setDbInit() {
   dbInitialited = true
 }
+export const sharedPool = new MariaDbBase(undefined, {
+  connectionLimit: 30,
+
+})

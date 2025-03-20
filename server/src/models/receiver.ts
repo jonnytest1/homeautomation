@@ -19,7 +19,7 @@ export class Receiver {
 
   @settable
   @column()
-  firebaseToken: string;
+  firebaseToken: string | null;
 
   @primary()
   id;
@@ -145,27 +145,42 @@ export class Receiver {
       firebaseData.notification.tag = randomUUID()
     }
     console.log(`sending push notification for ${this.name}`);
-    const response = await firebasemessageing.sendNotification(this.firebaseToken, firebaseData);
-    /*if (!response) {
-      logKibana('ERROR', {
-        token: this.firebaseToken,
-        name: this.name,
-        message: 'error sending firebase to receiver',
-        reason: JSON.stringify(response.results)
-      });
-    }*/
-
-    //if (response.results[0]) {
-    /* if (response.results[0].canonicalRegistrationToken) {
-       logKibana("ERROR", {
-         message: "this time there was a token in the response",
-         token: response.results[0].canonicalRegistrationToken
-       });
-     }*/
-    if (response) {
-      evaluatedData.attributes = { ...evaluatedData.attributes, messageId: response };
+    if (this.firebaseToken == null) {
+      console.debug("no firebase token")
+      return 0
     }
-    //}
-    return response ? 0 : 1;
+    try {
+
+      const response = await firebasemessageing.sendNotification(this.firebaseToken, firebaseData);
+      /*if (!response) {
+        logKibana('ERROR', {
+          token: this.firebaseToken,
+          name: this.name,
+          message: 'error sending firebase to receiver',
+          reason: JSON.stringify(response.results)
+        });
+      }*/
+
+      //if (response.results[0]) {
+      /* if (response.results[0].canonicalRegistrationToken) {
+         logKibana("ERROR", {
+           message: "this time there was a token in the response",
+           token: response.results[0].canonicalRegistrationToken
+         });
+       }*/
+      if (response) {
+        evaluatedData.attributes = { ...evaluatedData.attributes, messageId: response };
+      }
+      //}
+      return response ? 0 : 1;
+
+
+    } catch (e) {
+      if (e.code == 'messaging/registration-token-not-registered') {
+        this.firebaseToken = null
+        return 0
+      }
+      throw e;
+    }
   }
 }

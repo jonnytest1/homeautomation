@@ -12,6 +12,7 @@ import { mqttConnection } from '../services/mqtt-api';
 import { emitEvent } from '../services/generic-node/generic-node-service';
 import { TscCompiler } from '../util/tsc-compiler';
 import { Sound } from '../models/sound';
+import { sharedPool } from '../models/db-state';
 import { assign, loadOne, ResponseCodeError } from 'express-hibernate-wrapper';
 import { MariaDbBase } from 'hibernatets/dbs/mariadb-base';
 import { load, queries, save } from 'hibernatets';
@@ -36,7 +37,8 @@ export class SenderResource {
 
     const sender = await loadOne(Sender, s => s.deviceKey = req.body.deviceKey, [], {
       deep: ['connections', 'receiver', "transformer", "transformation"],
-      interceptArrayFunctions: true
+      interceptArrayFunctions: true,
+      db: sharedPool
     });
     try {
       const responses = await new SenderTriggerService(sender).trigger(req.body);
