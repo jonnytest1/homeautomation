@@ -37,7 +37,7 @@ export class SenderResource {
       payload: req.body,
       context: {
         deviceKey: req.body.deviceKey,
-        transformationCount:sender.transformation?.length
+        transformationCount:sender.transformation?.filter(t=>t.transformation?.length)?.length
       }
     })
     try {
