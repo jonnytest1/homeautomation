@@ -27,19 +27,19 @@ export class SenderResource {
   async trigger(req: HttpRequest, res: HttpResponse) {
     console.log(`trigger request ${JSON.stringify(req.body)}`);
 
-    emitEvent("sender", {
-      payload: req.body,
-      context: {
-        deviceKey: req.body.deviceKey
-      }
-    })
-
-
     const sender = await loadOne(Sender, s => s.deviceKey = req.body.deviceKey, [], {
       deep: ['connections', 'receiver', "transformer", "transformation"],
       interceptArrayFunctions: true,
       db: sharedPool
     });
+
+    emitEvent("sender", {
+      payload: req.body,
+      context: {
+        deviceKey: req.body.deviceKey,
+        transformationCount:sender.transformation?.length
+      }
+    })
     try {
       const responses = await new SenderTriggerService(sender).trigger(req.body);
       if (responses.reduce<number>((a, b) => b.error ? b.error + a : a, 0) > 0) {

@@ -1,4 +1,5 @@
 import { serviceFolder } from './generic-node-constants'
+import { logKibana } from '../../util/log'
 import { watch } from 'chokidar'
 import { join, dirname } from "path"
 
@@ -17,7 +18,13 @@ export function startHotRelaodingWatcher() {
         }
       })
       .on("change", path => {
-        reload(path)
+        try {
+          reload(path)
+        } catch (e) {
+          logKibana("ERROR", {
+            message: "Error during hot reload",
+          }, e)
+        }
       }).on("ready", () => {
 
         setTimeout(() => {
@@ -42,12 +49,17 @@ function reload(path: string) {
       if ("diagnosticText" in e) {
         const diagnostic = e.diagnosticText
         if (typeof diagnostic === "string") {
-          let match = diagnostic.match(/^(?<path>.*?)(?<linenr>\(\d+,\d+\)): error TS2305: Module '"(?<moduleRef>.*?)"' has no exported member/)
+          // eslint-disable-next-line no-control-regex
+          const wihoutAnsi = diagnostic.replace(/\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])/g, '')
+          let match = wihoutAnsi.match(/^(?<path>.*?)(?<linenr>\(\d+,\d+\)): error TS2305: Module '"(?<moduleRef>.*?)"' has no exported member/)
           if (!match?.groups) {
-            match = diagnostic.match(/^(?<path>.*?)(?<linenr>\(\d+,\d+\)): error TS2724: '"(?<moduleRef>.*?)"' has no exported member/)
+            match = wihoutAnsi.match(/^(?<path>.*?)(?<linenr>\(\d+,\d+\)): error TS2724: '"(?<moduleRef>.*?)"' has no exported member/)
           }
-
+          if (!match?.groups) {
+            match = wihoutAnsi.match(/^(?<path>.*?)(?<linenr>\d+:\d+) - error TS2305: Module '"(?<moduleRef>.*?)"' has no exported member/)
+          }
           if (match?.groups) {
+            console.warn("matched for " + match.groups.moduleRef)
             let missingExportFile = join(dirname(path), match.groups.moduleRef)
 
             if (!require.cache[missingExportFile] && require.cache[missingExportFile + ".ts"]) {
@@ -55,6 +67,11 @@ function reload(path: string) {
             }
             const moduleRef = require.cache[missingExportFile]
             if (!moduleRef?.exports["withSideEffects"]) {
+              logKibana("WARN", {
+                message: "hot relaoding module",
+                module: missingExportFile,
+                path
+              })
               reload(missingExportFile)
               reload(path)
               return
