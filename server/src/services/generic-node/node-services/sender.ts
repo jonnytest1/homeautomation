@@ -2,7 +2,7 @@ import { addTypeImpl } from '../generic-node-service'
 import { Sender } from '../../../models/sender';
 import type { Transformation } from '../../../models/transformation';
 import { updateRuntimeParameter } from '../element-node-fnc';
-import { SqlCondition, load } from 'hibernatets';
+import { senderLoader } from '../../sender-loader';
 
 
 function getHistoryCount(transformer: Transformation & { historyCount?: number }, events: Sender['events']) {
@@ -18,33 +18,33 @@ function getHistoryCount(transformer: Transformation & { historyCount?: number }
 }
 
 addTypeImpl({
-  context_type: (t: { deviceKey: string, transformation?: string,transformationCount:number }) => t,
+  context_type: (t: { deviceKey: string, transformation?: string, transformationCount: number }) => t,
   payload_type: (p: { message?: string }) => p,
   async process(node, evt, callbacks) {
-  
+
     if (!node.parameters?.deviceKey) {
       return
-    }  
-    
-    const needsTransformation=!!evt.context.transformationCount
-    
+    }
 
-    
+    const needsTransformation = !!evt.context.transformationCount
+
+
+
     if (!evt.payload.message) {
       return
     }
     if (node.parameters?.deviceKey != evt.context.deviceKey) {
       return
     }
-    if(needsTransformation){
-      if(!node.parameters.transformation){
+    if (needsTransformation) {
+      if (!node.parameters.transformation) {
         return
       }
       if (!node.parameters?.transformation.includes(` (${evt.payload.message})`)) {
         return
       }
     }
-   
+
     evt.context.transformation = node.parameters?.transformation?.replace(` (${evt.payload.message})`, "")
     callbacks.continue(evt)
   },
@@ -65,9 +65,7 @@ addTypeImpl({
   }),
   async nodeChanged(node, prev) {
 
-    const senders = await load(Sender, SqlCondition.ALL, [], {
-      deep: ["transformation", "events"]
-    });
+    const senders = await senderLoader.loadSenders()
     const deviceKeys = senders.map(dev => dev.deviceKey)
 
     updateRuntimeParameter(node, "deviceKey", {

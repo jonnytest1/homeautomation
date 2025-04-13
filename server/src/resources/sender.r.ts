@@ -12,9 +12,7 @@ import { mqttConnection } from '../services/mqtt-api';
 import { emitEvent } from '../services/generic-node/generic-node-service';
 import { TscCompiler } from '../util/tsc-compiler';
 import { Sound } from '../models/sound';
-import { sharedPool } from '../models/db-state';
-import { memoryCache } from '../util/memory-cache';
-import { assign, loadOne, ResponseCodeError } from 'express-hibernate-wrapper';
+import { assign, ResponseCodeError } from 'express-hibernate-wrapper';
 import { MariaDbBase } from 'hibernatets/dbs/mariadb-base';
 import { load, queries, save } from 'hibernatets';
 import { Path, POST, HttpRequest, HttpResponse, GET } from 'express-hibernate-wrapper';
@@ -34,12 +32,7 @@ export class SenderResource {
       return
     }
 
-    const sender = await memoryCache(`sender_${req.body.deviceKey}`,
-      () => loadOne(Sender, s => s.deviceKey = req.body.deviceKey, [], {
-        deep: ['connections', 'receiver', "transformer", "transformation"],
-        interceptArrayFunctions: true,
-        db: sharedPool
-      }));
+    const sender = await senderLoader.loadSender(req.body.deviceKey)
 
     emitEvent("sender", {
       payload: req.body,
@@ -147,12 +140,7 @@ export class SenderResource {
     path: ':senderid/transformation'
   })
   async addTransformation(req: HttpRequest, res: HttpResponse) {
-    const sender = await memoryCache(`sender_${req.body.deviceKey}`,
-      () => loadOne(Sender, s => s.deviceKey = req.body.deviceKey, [], {
-        deep: ['connections', 'receiver', "transformer", "transformation"],
-        interceptArrayFunctions: true,
-        db: sharedPool
-      }));
+    const sender = await senderLoader.loadSender(req.body.deviceKey)
     const transform = new Transformation()
     await assign(transform, req.body);
     sender.transformation.push(transform);
@@ -181,12 +169,7 @@ export class SenderResource {
     if (!req.query.itemRef) {
       return
     }
-    const sender = await memoryCache(`sender_${req.body.deviceKey}`,
-      () => loadOne(Sender, s => s.deviceKey = req.body.deviceKey, [], {
-        deep: ['connections', 'receiver', "transformer", "transformation"],
-        interceptArrayFunctions: true,
-        db: sharedPool
-      }));
+    const sender = await senderLoader.loadSender(req.body.deviceKey)
     res.send(sender.getContextKeys());
   }
 

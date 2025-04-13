@@ -2,7 +2,7 @@
 import { FrontendWebsocket } from './frontend-update';
 import { Connection } from '../models/connection';
 import { Receiver } from '../models/receiver';
-import { Sender } from '../models/sender';
+import { senderLoader } from '../services/sender-loader';
 import { load, MariaDbBase, queries } from 'hibernatets';
 import { Path, POST, GET, HttpRequest, HttpResponse } from 'express-hibernate-wrapper';
 
@@ -18,7 +18,7 @@ export class ConnectionResource {
     const pool = new MariaDbBase()
     try {
       const [sender, receiver] = await Promise.all([
-        load(Sender, s => s.deviceKey = req.body.senderId, [], { first: true, interceptArrayFunctions: true, db: pool }),
+        senderLoader.loadSender(req.body.deviceKey),
         load(Receiver, +req.body.receiverId, [], { first: true, db: pool })
       ]);
       const connection = new Connection(receiver);
