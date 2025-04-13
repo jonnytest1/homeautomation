@@ -1,5 +1,5 @@
 import { addTypeImpl } from '../generic-node-service'
-import { Sender } from '../../../models/sender';
+import type { Sender } from '../../../models/sender';
 import type { Transformation } from '../../../models/transformation';
 import { updateRuntimeParameter } from '../element-node-fnc';
 import { senderLoader } from '../../sender-loader';

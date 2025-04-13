@@ -57,7 +57,8 @@ class SenderLoader {
             batteryEntries: "`timestamp` > " + twoMonthsAgo,
             transformation: "TRUE = TRUE",
             receiver: "TRUE = TRUE",
-          }
+          },
+          db: sharedPool
         })
         this.lastAllLoaded = Date.now()
         for (const sender of senders) {
