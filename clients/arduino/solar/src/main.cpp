@@ -18,6 +18,7 @@
 #include <BLEServer.h>
 #include <BLEUtils.h>
 #include <BLE2902.h>
+#include "creds.h"
 
 SSD1306Wire display(0x3c, SDA_OLED, SCL_OLED, RST_OLED);
 
@@ -61,10 +62,11 @@ void printScreen()
 
 SmartHome smarthome(onAction);
 const uint8_t notificationOn[] = {0x1, 0x0};
-BLEAddress r600Address = BLEAddress("2A:02:01:2B:07:45");
+BLEAddress r600Address = BLEAddress(mac_address);
 BLEUUID serviceAddress = BLEUUID("0000fff0-0000-1000-8000-00805f9b34fb");
 BLEUUID characteristic = BLEUUID("0000fff1-0000-1000-8000-00805f9b34fb");
 BLEClient *pClient;
+long lastUpdate = 0;
 
 int bitValue(uint8_t bitmask, uint8_t index)
 {
@@ -84,6 +86,11 @@ void command1(std::vector<uint8_t> data)
     Serial.println(updateText);
 
     updateStatus(updateText);
+
+    if((millis()-lastUpdate)<10000){
+      return;
+    }
+    lastUpdate = millis();
 
     smarthome.triggerSenderEvent("command1", JsonFactory::obj({
                                                 {"powerAmount", JsonFactory::num(data[8])},
