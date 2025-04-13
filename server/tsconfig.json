@@ -28,7 +28,8 @@
   },
   "include": [
     "./**/*.ts",
-    "./index.ts"
+    "./index.ts",
+    "angular/smarthome/src/worker/firebase-messaging-sw.ts"
   ],
   "exclude": [
     "angular/"

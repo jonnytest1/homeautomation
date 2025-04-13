@@ -13,6 +13,7 @@ import { emitEvent } from '../services/generic-node/generic-node-service';
 import { TscCompiler } from '../util/tsc-compiler';
 import { Sound } from '../models/sound';
 import { sharedPool } from '../models/db-state';
+import { memoryCache } from '../util/memory-cache';
 import { assign, loadOne, ResponseCodeError } from 'express-hibernate-wrapper';
 import { MariaDbBase } from 'hibernatets/dbs/mariadb-base';
 import { load, queries, save } from 'hibernatets';
@@ -27,17 +28,24 @@ export class SenderResource {
   async trigger(req: HttpRequest, res: HttpResponse) {
     console.log(`trigger request ${JSON.stringify(req.body)}`);
 
-    const sender = await loadOne(Sender, s => s.deviceKey = req.body.deviceKey, [], {
-      deep: ['connections', 'receiver', "transformer", "transformation"],
-      interceptArrayFunctions: true,
-      db: sharedPool
-    });
+    if (!req.body.deviceKey?.length) {
+      res.status(400)
+        .send();
+      return
+    }
+
+    const sender = await memoryCache(`sender_${req.body.deviceKey}`,
+      () => loadOne(Sender, s => s.deviceKey = req.body.deviceKey, [], {
+        deep: ['connections', 'receiver', "transformer", "transformation"],
+        interceptArrayFunctions: true,
+        db: sharedPool
+      }));
 
     emitEvent("sender", {
       payload: req.body,
       context: {
         deviceKey: req.body.deviceKey,
-        transformationCount:sender.transformation?.filter(t=>t.transformation?.length)?.length
+        transformationCount: sender.transformation?.filter(t => t.transformation?.length)?.length
       }
     })
     try {
@@ -139,12 +147,12 @@ export class SenderResource {
     path: ':senderid/transformation'
   })
   async addTransformation(req: HttpRequest, res: HttpResponse) {
-    const base = new MariaDbBase();
-    const sender = await load(Sender, s => s.id = +req.params.senderid, undefined, {
-      first: true,
-      interceptArrayFunctions: true,
-      db: base
-    });
+    const sender = await memoryCache(`sender_${req.body.deviceKey}`,
+      () => loadOne(Sender, s => s.deviceKey = req.body.deviceKey, [], {
+        deep: ['connections', 'receiver', "transformer", "transformation"],
+        interceptArrayFunctions: true,
+        db: sharedPool
+      }));
     const transform = new Transformation()
     await assign(transform, req.body);
     sender.transformation.push(transform);
@@ -161,7 +169,7 @@ export class SenderResource {
     transform.definitionFile = definitionFile
 
     res.send(transform);
-    base?.end()
+
     FrontendWebsocket.updateSenders()
   }
 
@@ -173,7 +181,12 @@ export class SenderResource {
     if (!req.query.itemRef) {
       return
     }
-    const sender = await load(Sender, +req.query.itemRef, [], { first: true });
+    const sender = await memoryCache(`sender_${req.body.deviceKey}`,
+      () => loadOne(Sender, s => s.deviceKey = req.body.deviceKey, [], {
+        deep: ['connections', 'receiver', "transformer", "transformation"],
+        interceptArrayFunctions: true,
+        db: sharedPool
+      }));
     res.send(sender.getContextKeys());
   }
 

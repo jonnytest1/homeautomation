@@ -18,22 +18,34 @@ function getHistoryCount(transformer: Transformation & { historyCount?: number }
 }
 
 addTypeImpl({
-  context_type: (t: { deviceKey: string, transformation?: string }) => t,
+  context_type: (t: { deviceKey: string, transformation?: string,transformationCount:number }) => t,
   payload_type: (p: { message?: string }) => p,
   async process(node, evt, callbacks) {
-    if (!node.parameters?.deviceKey || !node.parameters.transformation) {
+  
+    if (!node.parameters?.deviceKey) {
       return
-    }
+    }  
+    
+    const needsTransformation=!!evt.context.transformationCount
+    
+
+    
     if (!evt.payload.message) {
       return
     }
     if (node.parameters?.deviceKey != evt.context.deviceKey) {
       return
     }
-    if (!node.parameters?.transformation.includes(` (${evt.payload.message})`)) {
-      return
+    if(needsTransformation){
+      if(!node.parameters.transformation){
+        return
+      }
+      if (!node.parameters?.transformation.includes(` (${evt.payload.message})`)) {
+        return
+      }
     }
-    evt.context.transformation = node.parameters?.transformation.replace(` (${evt.payload.message})`, "")
+   
+    evt.context.transformation = node.parameters?.transformation?.replace(` (${evt.payload.message})`, "")
     callbacks.continue(evt)
   },
   nodeDefinition: () => ({
