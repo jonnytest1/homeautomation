@@ -58,6 +58,7 @@ class SenderLoader {
             transformation: "TRUE = TRUE",
             receiver: "TRUE = TRUE",
           },
+          interceptArrayFunctions: true,
           db: sharedPool
         })
         this.lastAllLoaded = Date.now()
