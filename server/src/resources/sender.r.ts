@@ -166,11 +166,10 @@ export class SenderResource {
   })
 
   async getKeys(req: HttpRequest, res: HttpResponse) {
-    const itemRef = req.query.itemRef;
-    if (!itemRef || typeof itemRef != "string") {
+    if (!req.query.itemRef) {
       return
     }
-    const sender = await senderLoader.loadSender(itemRef)
+    const sender = await load(Sender, +req.query.itemRef, [], { first: true });
     res.send(sender.getContextKeys());
   }
 
