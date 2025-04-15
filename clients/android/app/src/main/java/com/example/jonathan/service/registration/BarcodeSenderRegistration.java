@@ -12,6 +12,7 @@ import com.fasterxml.jackson.databind.node.TextNode;
 import java.util.Map;
 import java.util.concurrent.Callable;
 
+import static com.example.jonathan.props.Environment.BACKEND_URL;
 import static com.example.jonathan.service.registration.Registration.BARCODE_SENDER_DEVICE_KEY;
 
 public class BarcodeSenderRegistration implements Callable<Void> {
@@ -30,7 +31,7 @@ public class BarcodeSenderRegistration implements Callable<Void> {
         jsonNode.set("name",new TextNode("Mobile Sender"));
         jsonNode.put("connectionKey","message");
         jsonNode.set("description",new TextNode("Sender auf dem Smartphone"));
-        CustomResponse postResponse=new CustomHttp().target("https://192.168.178.54/nodets/rest/sender")
+        CustomResponse postResponse=new CustomHttp().target(BACKEND_URL+"/rest/sender")
                 .request() //
                 .post(jsonNode.toString(),"application/json");
         if (postResponse.getResponseCode() == 200||postResponse.getResponseCode() == 409) {

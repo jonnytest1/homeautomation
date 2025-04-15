@@ -12,6 +12,8 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.io.IOException;
 import java.time.Instant;
 
+import static com.example.jonathan.props.Environment.BACKEND_URL;
+
 public abstract class Sender  {
     protected final Context applicationContext;
     protected ObjectNode content;
@@ -33,7 +35,7 @@ public abstract class Sender  {
         jsonNode.put("timestamp", Instant.now().toString());
         this.prepareSendMessage(jsonNode);
 
-        response = new CustomHttp().target("https://192.168.178.54/nodets/rest/sender/trigger")
+        response = new CustomHttp().target(BACKEND_URL+"/rest/sender/trigger")
                 .request().post(content.toString(), "application/json");
         responseNode=response.getJsonContent();
     }

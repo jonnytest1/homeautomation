@@ -16,6 +16,7 @@ import com.google.zxing.Result;
 import java.io.IOException;
 import java.time.Instant;
 
+import static com.example.jonathan.props.Environment.BACKEND_URL;
 import static com.example.jonathan.service.registration.Registration.BARCODE_SENDER_DEVICE_KEY;
 
 public class BarcodeSender implements Runnable {
@@ -46,7 +47,7 @@ public class BarcodeSender implements Runnable {
         Looper.prepare();
         //String decoded = Base64.getEncoder().encodeToString(jsonObject.toString().getBytes());
         try {
-            CustomResponse response = new CustomHttp().target("https://192.168.178.54/nodets/rest/sender/trigger")
+            CustomResponse response = new CustomHttp().target(BACKEND_URL+"/rest/sender/trigger")
                     .request().post(content.toString(), "application/json");
             final JsonNode responseNode=response.getJsonContent();
             if (response.getResponseCode() == 200) {

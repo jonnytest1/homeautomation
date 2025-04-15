@@ -46,29 +46,28 @@ public class DebugFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.debug_view, container, false);
-        view.findViewById(R.id.firebaseupdate).setOnClickListener((e)->{
-
+        view.findViewById(R.id.firebaseupdate).setOnClickListener((e) -> {
 
             FirebaseMessaging.getInstance().deleteToken().onSuccessTask(runnable -> {
                 return FirebaseMessaging.getInstance().getToken();
-            }).addOnCompleteListener(str->{
-                new Thread(()->{
+            }).addOnCompleteListener(str -> {
+                new Thread(() -> {
                     try {
                         ReceiverRegistration rReg = new ReceiverRegistration();
-                        rReg.token=str.getResult();
+                        rReg.token = str.getResult();
                         rReg.call();
                     } catch (Exception ex) {
-                        Log.e("exception","exception updating token",ex);
+                        Log.e("exception", "exception updating token", ex);
                         ex.printStackTrace();
                     }
                 }).start();
-            }).addOnFailureListener(failure->{
-                Log.e("exception","exception updating token",failure);
+            }).addOnFailureListener(failure -> {
+                Log.e("exception", "exception updating token", failure);
             });
         });
-        view.findViewById(R.id.logtest).setOnClickListener((e)->{
+        view.findViewById(R.id.logtest).setOnClickListener((e) -> {
 
-            CLogging.log(CLogging.LogLevel.ERROR,"test error log");
+            CLogging.log(CLogging.LogLevel.ERROR, "test error log");
         });
         return view;
     }

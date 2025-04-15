@@ -8,19 +8,14 @@ import android.content.Intent;
 import android.media.AudioAttributes;
 import android.media.RingtoneManager;
 import android.net.Uri;
-import android.os.Build;
 import android.util.Log;
 
 import com.example.jonathan.http.CustomHttp;
 import com.example.jonathan.http.CustomResponse;
 import com.example.jonathan.service.registration.ReceiverRegistration;
-import com.example.jonathan.service.registration.Registration;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.IntNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.fasterxml.jackson.databind.node.TextNode;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
 
@@ -33,10 +28,11 @@ import java.net.MalformedURLException;
 
 import androidx.core.app.NotificationCompat;
 
+import static com.example.jonathan.props.Environment.BACKEND_URL;
 import static com.example.jonathan.service.registration.ReceiverRegistration.RECEIVER_ID;
 import static com.example.jonathan.service.registration.Registration.getReceiverDeviceName;
 
-public class MessagingService extends FirebaseMessagingService  {
+public class MessagingService extends FirebaseMessagingService {
     private static final String TAG = "MyFirebaseMsgService";
 
 
@@ -68,11 +64,11 @@ public class MessagingService extends FirebaseMessagingService  {
 
     private void sendRegistrationToServer(String token) {
         try {
-            if(RECEIVER_ID==null) {
-                CustomResponse  response=new CustomHttp().target("https://192.168.178.54/nodets/rest/receiver").request().get();
-                String content=response.getContent();
+            if (RECEIVER_ID == null) {
+                CustomResponse response = new CustomHttp().target(BACKEND_URL + "/rest/receiver").request().get();
+                String content = response.getContent();
 
-                ArrayNode node =(ArrayNode) new ObjectMapper().readTree(content);
+                ArrayNode node = (ArrayNode) new ObjectMapper().readTree(content);
                 for (JsonNode item : node) {
                     if (item.get("deviceKey").asText().equals(getReceiverDeviceName())) {
                         RECEIVER_ID = item.get("id").asInt();
@@ -80,8 +76,8 @@ public class MessagingService extends FirebaseMessagingService  {
                 }
             }
             ReceiverRegistration rReg = new ReceiverRegistration();
-            rReg.token=token;
-            Log.d(TAG,"updating token");
+            rReg.token = token;
+            Log.d(TAG, "updating token");
             try {
                 rReg.call();
             } catch (Exception ex) {
@@ -96,35 +92,35 @@ public class MessagingService extends FirebaseMessagingService  {
         Intent intent = new Intent(this, MainActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0 /* Request code */, intent,
-                PendingIntent.FLAG_ONE_SHOT);
+                PendingIntent.FLAG_ONE_SHOT | PendingIntent.FLAG_IMMUTABLE);
 
 
-        String cahnnelId="123channelidsmarthome";
+        String cahnnelId = "123channelidsmarthome";
         NotificationCompat.Builder notificationBuilder =
-                new NotificationCompat.Builder(this,cahnnelId);
+                new NotificationCompat.Builder(this, cahnnelId);
 
         int importance = NotificationManager.IMPORTANCE_DEFAULT;
         NotificationChannel channel = new NotificationChannel(cahnnelId, "alert cahnnel", importance);
 
-        String sound=messageBody.getSound();
-        if(sound!=null){
+        String sound = messageBody.getSound();
+        if (sound != null) {
             final String packageName = this.getPackageName();
-            Uri target= Uri.parse("android.resource://" + packageName + "/R.raw." +sound);
+            Uri target = Uri.parse("android.resource://" + packageName + "/R.raw." + sound);
             try {
-                InputStream is =   new CustomHttp().target("https://192.168.178.54/nodets/rest/auto/sound/bykey/"+sound).request().getStream();
+                InputStream is = new CustomHttp().target(BACKEND_URL + "/rest/auto/sound/bykey/" + sound).request().getStream();
                 DataInputStream dis = new DataInputStream(is);
 
                 byte[] buffer = new byte[1024];
                 int length;
 
-                File sounds=new File(getFilesDir()+"/sounds");
-                if(!sounds.exists()){
+                File sounds = new File(getFilesDir() + "/sounds");
+                if (!sounds.exists()) {
                     sounds.mkdir();
                 }
 
-                File f=new File(sounds,sound+".mp3");
-                target=Uri.fromFile(f);
-                if(!f.exists()){
+                File f = new File(sounds, sound + ".mp3");
+                target = Uri.fromFile(f);
+                if (!f.exists()) {
                     f.createNewFile();
                 }
                 FileOutputStream fos = new FileOutputStream(f);
@@ -138,29 +134,29 @@ public class MessagingService extends FirebaseMessagingService  {
             } catch (SecurityException se) {
                 Log.e("SYNC getUpdate", "security error", se);
             }
-            Uri uri = Uri.parse("https://192.168.178.54/nodets/rest/auto/sound/bykey/"+sound);
+            Uri uri = Uri.parse(BACKEND_URL + "/rest/auto/sound/bykey/" + sound);
 
             AudioAttributes att = new AudioAttributes.Builder()
                     .setUsage(AudioAttributes.USAGE_NOTIFICATION)
                     .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
                     .build();
-            channel.setSound(target,att);
-        }else{
+            channel.setSound(target, att);
+        } else {
             Uri defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
             notificationBuilder.setSound(defaultSoundUri);
         }
 
-        if(messageBody.getTitle()!=null){
+        if (messageBody.getTitle() != null) {
             notificationBuilder.setContentTitle(messageBody.getTitle());
         }
-        if(messageBody.getBody()!=null){
+        if (messageBody.getBody() != null) {
             notificationBuilder.setContentText(messageBody.getBody());
         }
-        String icon=messageBody.getIcon();
-        if(icon!=null){
+        String icon = messageBody.getIcon();
+        if (icon != null) {
             //TODO
             notificationBuilder.setSmallIcon(R.drawable.common_full_open_on_phone);
-        }else{
+        } else {
             notificationBuilder.setSmallIcon(R.drawable.common_full_open_on_phone);
         }
 
@@ -169,7 +165,6 @@ public class MessagingService extends FirebaseMessagingService  {
 
         NotificationManager notificationManager =
                 (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-
 
 
         notificationManager.createNotificationChannel(channel);

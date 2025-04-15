@@ -14,6 +14,7 @@ import com.fasterxml.jackson.databind.node.TextNode;
 import java.util.Map;
 import java.util.concurrent.Callable;
 
+import static com.example.jonathan.props.Environment.BACKEND_URL;
 import static com.example.jonathan.service.registration.Registration.getReceiverDeviceName;
 
 public class ReceiverRegistration implements Callable<Void> {
@@ -39,7 +40,7 @@ public class ReceiverRegistration implements Callable<Void> {
         jsonNode.set("description",new TextNode(description));
         jsonNode.set("type",new TextNode("firebase"));
         jsonNode.set("firebaseToken",this.token==null?NullNode.getInstance(): new TextNode(this.token));
-        CustomResponse postResponse=new CustomHttp().target("https://192.168.178.54/nodets/rest/receiver")
+        CustomResponse postResponse=new CustomHttp().target(BACKEND_URL+"/rest/receiver")
                 .request() //
                 .post(jsonNode.toString(),"application/json");
         if (postResponse.getResponseCode() == 200 ||postResponse.getResponseCode() == 409) {

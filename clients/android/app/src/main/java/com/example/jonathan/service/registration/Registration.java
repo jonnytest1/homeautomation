@@ -12,6 +12,8 @@ public class Registration {
 
     public static final String BARCODE_SENDER_DEVICE_KEY ="mobile-device";
     public static final String SHARE_URL_SENDER_DEVICE_KEY ="mobile-device-share-url";
+
+
     private final Context context;
 
     public Registration(Context context){
