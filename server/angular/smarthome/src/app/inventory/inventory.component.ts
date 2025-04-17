@@ -17,6 +17,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatBottomSheet } from '@angular/material/bottom-sheet';
 import { getBackendBaseUrl } from '../backend';
 import type { TableItemFe } from './inventory-type';
+import { getProductId } from './inventory-util';
 
 @Component({
   selector: 'app-inventory',
@@ -41,6 +42,7 @@ export class InventoryComponent implements OnInit, AfterViewInit {
   dataSource = new MatTableDataSource<TableItemFe>();
 
   applySort = false
+  getProductId = getProductId;
 
   constructor(private dataService: SettingsService, private cdr: ChangeDetectorRef) {
     this.dataSource.sortingDataAccessor = (data: TableItemFe, sortHeaderId: string): string => {
@@ -84,7 +86,7 @@ export class InventoryComponent implements OnInit, AfterViewInit {
       try {
         const regex = new RegExp(`(.*)${filter.split("").map(c => `(${c})`).join("(.*?)")}(.*)`)
 
-        const pId = this.getProductId(data)
+        const pId = getProductId(data)
         const strs: Array<string | { value: string, column?: string }> = ["description", { column: "productLink", value: pId }]
         if (data.location) {
           strs.push({
@@ -132,17 +134,7 @@ export class InventoryComponent implements OnInit, AfterViewInit {
       this.applySort = false
     }
   }
-  getProductId(item: ItemFe) {
-    if (item.productLink?.includes("/product/")) {
-      return item.productLink?.split("/product/")?.[1] ?? ''
 
-    } else if (item.productLink?.includes("/dp/")) {
-      return item.productLink?.split("/dp/")?.[1] ?? ''
-    } else if (item.productLink?.includes("/item/")) {
-      return item.productLink?.split("/item/")?.[1].split(".html")[0] ?? ''
-    }
-
-  }
 
   getLocation(item: ItemFe) {
     return item.location?.description || item.location as string || (item.order.orderStatus == "pending" ? "(pending)" : undefined) || '-'

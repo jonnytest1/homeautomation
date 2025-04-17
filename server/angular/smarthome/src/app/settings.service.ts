@@ -144,7 +144,7 @@ export class SettingsService extends AbstractHttpService {
   }
 
 
-  updateReceiver(receiver: ReceiverFe) {
+  private updateReceiver(receiver: ReceiverFe) {
     const currentReceivers = { ...this._receivers$.value };
     currentReceivers[receiver.deviceKey] = receiver;
     this._receivers$.next(currentReceivers)
@@ -212,6 +212,12 @@ export class SettingsService extends AbstractHttpService {
     });
   }
 
+  registerReceiver(rec: Omit<ReceiverFe, "events" | "actions" | "id">) {
+
+    return this.post<SenderFe>(`${environment.prefixPath}rest/receiver`, {
+      ...rec
+    });
+  }
 
   deleteSender(id: number) {
     return this.delete<SenderFe>(`${environment.prefixPath}rest/auto/sender?itemRef=${id}`);

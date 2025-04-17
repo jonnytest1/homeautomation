@@ -20,8 +20,6 @@ export class InventoryService {
   httpClient = inject(HttpClient)
 
 
-
-
   loadLocations() {
     this.httpClient.get<Array<LocationFe>>(`${environment.prefixPath}rest/inventory/location`).subscribe(locs => {
 

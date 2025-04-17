@@ -2,6 +2,10 @@ import type { AfterViewInit, OnDestroy, OnInit } from '@angular/core';
 import { Component, ElementRef, ViewChild } from '@angular/core';
 import type flv from 'flv.js';
 import { v4 as uuid } from 'uuid';
+import { BrowserToRtmpClient } from "@api.video/browser-to-rtmp-client"
+
+
+
 @Component({
   selector: 'app-camera',
   templateUrl: './camera.component.html',
@@ -9,14 +13,22 @@ import { v4 as uuid } from 'uuid';
 })
 export class CameraComponent implements AfterViewInit, OnInit, OnDestroy {
 
+
   videoId;
   streamName = 'test';
+
+  serverHost = "smarthome"
+
+  serverPort = 11935
+  rtmpServerUrl = `rtmp://${this.serverHost}:${this.serverPort}/live`
 
   @ViewChild('videoElement')
   videoElement: ElementRef<HTMLVideoElement>;
 
 
   player: flv.Player;
+
+
   constructor() {
     //
   }
@@ -24,6 +36,8 @@ export class CameraComponent implements AfterViewInit, OnInit, OnDestroy {
 
   ngOnInit() {
     this.videoId = 'video_' + uuid().replace(/-/g, '');
+
+
   }
   ngAfterViewInit(): void {
     /* this.player = flv.createPlayer({
@@ -48,6 +62,24 @@ export class CameraComponent implements AfterViewInit, OnInit, OnDestroy {
             flvPlayer.play();
           }
         }*/
+  }
+
+  startStream() {
+
+    navigator.mediaDevices.getUserMedia({
+      audio: true,
+      video: true
+    }).then((stream) => {
+      this.videoElement.nativeElement.srcObject = stream
+      const client = new BrowserToRtmpClient(stream, {
+        host: "localhost",
+        rtmp: "rtmp://localhost:11935/live/abcd", // RTMP endpoint
+        port: 21101
+      });
+
+      client.start();
+    });
+
   }
 
   ngOnDestroy(): void {

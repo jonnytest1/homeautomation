@@ -50,4 +50,20 @@
       Your browser does not support the audio element.
     </audio>
   </form>
+
+
+  <h2>Service Worker</h2>
+  <button (click)="registerServiceWorker()">
+    <span *ngIf="firebase.registration$|async;else:register">
+      update
+    </span>
+    <ng-template #register>
+      register
+    </ng-template>
+  </button>
+
+
+  <button *ngIf="firebase.registration$|async"
+          (click)="firebase.unregister()">unregister</button>
+
 </div>

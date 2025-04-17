@@ -53,7 +53,9 @@
             "styles": [
               "src/styles.less",
               "@angular/material/prebuilt-themes/deeppurple-amber.css"
-            ]
+            ],
+            "serviceWorker": true,
+            "ngswConfigPath": "ngsw-config.json"
           },
           "configurations": {
             "production": {
@@ -116,6 +118,7 @@
             "assets": [
               "src/favicon.ico",
               "src/assets",
+              "src/manifest.webmanifest",
               "src/manifest.webmanifest"
             ]
           }

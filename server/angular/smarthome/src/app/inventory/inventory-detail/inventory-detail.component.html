@@ -1,9 +1,14 @@
 <ng-container *ngIf="item$|async;let item">
-  {{item.id}} {{item.description}}
+  <h3>{{item.id}}</h3><br> {{item.description}}<br>
+
+
 
   <img [src]="item.orderImageSrc">
 
-
+  <br>
+  <a [href]="item.productLink">
+    {{item.order?.type??''}} {{getProductId(item)}}
+  </a>
   <br>
   location:
   <app-location [item]="item"></app-location>

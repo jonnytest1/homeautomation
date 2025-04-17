@@ -1,5 +1,5 @@
-import type { OnDestroy, OnInit } from '@angular/core';
-import { ChangeDetectorRef, Component } from '@angular/core';
+import type { AfterViewChecked, ElementRef, OnDestroy, OnInit, QueryList } from '@angular/core';
+import { ChangeDetectorRef, Component, HostListener, ViewChildren } from '@angular/core';
 import { combineLatest, Subscription, timer } from 'rxjs';
 import type { SenderFe, TimerFe } from '../settings/interfaces';
 import { SettingsService } from '../settings.service';
@@ -10,7 +10,7 @@ import { TimerParser } from '../utils/time-parser';
   templateUrl: './timers.component.html',
   styleUrls: ['./timers.component.scss']
 })
-export class TimersComponent implements OnInit, OnDestroy {
+export class TimersComponent implements OnInit, OnDestroy,AfterViewChecked {
 
   timers: Array<TimerFe> = [];
 
@@ -26,8 +26,25 @@ export class TimersComponent implements OnInit, OnDestroy {
 
   senders: Array<SenderFe>;
 
+  @ViewChildren("timerWrapper")
+  items:QueryList<ElementRef<HTMLElement>>
+
   constructor(private service: SettingsService,
     private cdr: ChangeDetectorRef) {}
+
+     @HostListener('window:resize')
+  ngAfterViewChecked(): void {
+    let smallest=Infinity
+
+    for(const item of this.items){
+      smallest= Math.min(item.nativeElement.getBoundingClientRect().width,smallest)
+    }
+  
+    for(const item of this.items){
+      item.nativeElement.style.maxWidth=Math.floor(smallest)+"px"
+    }
+
+  }
 
   ngOnInit() {
     this.subscription.add(combineLatest([
@@ -54,8 +71,8 @@ export class TimersComponent implements OnInit, OnDestroy {
     const newTimers = timers.filter(potentiallyNewTimer => {
       return !this.timers.some(tm => tm.id === potentiallyNewTimer.id);
     });
-    this.timers = this.timers.filter(currentTimer => currentTimer.endtimestamp >= (Date.now() - (1000 * 60 * 60 * 24)));
-    this.timers.push(...newTimers);
+
+    this.timers = [...this.timers, ...newTimers].filter(currentTimer => currentTimer.endtimestamp >= (Date.now() - (1000 * 60 * 60 * 24)));
     this.recalc();
   }
 
@@ -98,27 +115,7 @@ export class TimersComponent implements OnInit, OnDestroy {
 
   getSubtitle(timerData: TimerFe) {
     const remaining = this.getRemainingMillis(timerData);
-    if (!timerData.parsedData) {
-      timerData.parsedData = JSON.parse(timerData.data ?? '');
-    }
-    if (!timerData.parsedArguments) {
-      timerData.parsedArguments = JSON.parse(timerData.arguments ?? '');
-    }
-    const transofrmaionResult = timerData.parsedArguments?.[1];
-    const transformer = timerData.parsedArguments[2];
-
-    const subTitleArray = [
-      `${TimerParser.msToTime(Math.max(remaining, 0))}`,
-      `${TimerParser.msToTime(this.getDuration(timerData))}`,
-      `ends at ${new Date(timerData.endtimestamp ?? 0).toTimeString().split(' ')[0]}`,
-    ];
-    if (transformer.transformation.includes('promise:')) {
-      subTitleArray.push(`${transofrmaionResult?.notification?.body || transofrmaionResult?.notification?.title || ''}`);
-    }
-    subTitleArray.push(
-      `${transformer?.name ?? ''}`
-    );
-    return subTitleArray;
+    return TimerParser.getSubtitles(timerData, remaining)
   }
 
   getDuration(timerData: TimerFe) {

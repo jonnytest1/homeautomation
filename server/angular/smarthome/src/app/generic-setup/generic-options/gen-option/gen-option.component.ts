@@ -13,13 +13,14 @@ import { StoreService } from '../../store/store-service';
 import { first } from 'rxjs';
 import { selectGlobals } from '../../store/selectors';
 import { MonacoHtmlComponent } from "../../../monaco-html/monaco-html.component"
+import { SelectOptionComponent } from './select-option/select-option.component';
 
 
 @Component({
   selector: 'app-gen-option',
   templateUrl: './gen-option.component.html',
   styleUrls: ['./gen-option.component.scss'],
-  imports: [CommonModule, FormsModule, FrameOptionComponent, MonacoOptionComponent, MonacoHtmlComponent],
+  imports: [CommonModule, FormsModule, FrameOptionComponent, MonacoOptionComponent, MonacoHtmlComponent, SelectOptionComponent],
   standalone: true
 })
 export class GenOptionComponent implements OnChanges {

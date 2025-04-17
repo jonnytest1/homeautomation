@@ -59,12 +59,12 @@ export class TimersComponent implements OnInit, OnDestroy {
 
   }
   private updateTimers(timers: TimerFe[]) {
-
     const newTimers = timers.filter(potentiallyNewTimer => {
       return !this.timers.some(tm => tm.id === potentiallyNewTimer.id);
     });
-    this.timers = this.timers.filter(currentTimer => currentTimer.endtimestamp >= (Date.now() - (1000 * 60 * 60 * 24)));
-    this.timers.push(...newTimers);
+
+    this.timers = [...this.timers, ...newTimers].filter(currentTimer => currentTimer.endtimestamp >= (Date.now() - (1000 * 60 * 60 * 24)));
+
     this.recalc();
   }
 
@@ -111,14 +111,7 @@ export class TimersComponent implements OnInit, OnDestroy {
 
   getSubtitle(timerData: TimerFe) {
     const remaining = this.getRemainingMillis(timerData);
-    if (!timerData.parsedData) {
-      timerData.parsedData = JSON.parse(timerData.data);
-    }
-    return [
-      `${TimerParser.msToTime(Math.max(remaining, 0))}`,
-      `${TimerParser.msToTime(this.getDuration(timerData))}`,
-      `ends at ${new Date(timerData.endtimestamp).toTimeString().split(' ')[0]}`,
-      `${this.sender.transformation.find(tr => tr.transformationKey === timerData.parsedData.message)?.name || this.sender.name || ''}`];
+    return TimerParser.getSubtitles(timerData, remaining)
   }
 
   getDuration(timerData: TimerFe) {

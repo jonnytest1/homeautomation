@@ -1,6 +1,10 @@
 run this: ffmpeg -framerate 30 -input_format mjpeg -re -i /dev/video0 -c:v libx264 -preset veryfast -f flv -tune
-zerolatency rtmp://smarthome:11935/live/{{streamName}}
-http://smarthome:8000/admin/
+zerolatency {{rtmpServerUrl}}/{{streamName}}
+http://smarthome:8000/admin/<br>
+<button (click)="startStream()">stream</button><br>
+
+
+
 <video #videoElement
        width="auto"
        height="auto">

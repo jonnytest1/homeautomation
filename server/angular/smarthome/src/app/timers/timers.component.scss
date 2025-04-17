@@ -1,10 +1,17 @@
 .container{
-    width: 1200px;
-    height: 700px;
+    //width: 1200px;
+    //height: 700px;
     //width: calc(94vw - 48px);
    // height: calc(56vw - 48px);
+    display: flex;
+    flex-direction: row;
+    max-width: 100%;
+    flex-wrap: wrap;
 
-    mat-grid-list{
-        height:100%
-    }
+   .timer-wrapper{
+      min-width: 200px;
+      flex-basis: 20%;
+      flex-grow: 1;
+      flex-shrink: 0;
+   }
 }

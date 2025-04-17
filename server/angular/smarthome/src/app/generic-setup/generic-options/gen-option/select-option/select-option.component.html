@@ -1,0 +1,17 @@
+<textarea hidden
+          [minLength]="1"
+          #hiddenValue
+          name="{{name}}"></textarea>
+
+<div #wrapper>
+  <select name="{{name}}"
+          (change)="onChange($event,hiddenValue)"
+          [multiple]="definition.multiple"
+          [size]="getSize()">
+    <option *ngFor="let opt of definition.options;let index=index"
+            [value]="opt"
+            [attr.selected]="isSelected(opt)?true:null">
+      {{definition.optionDisplayNames?definition.optionDisplayNames[index] :opt}}
+    </option>
+  </select>
+</div>

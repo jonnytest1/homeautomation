@@ -3,7 +3,7 @@ import { AppComponent } from './app.component';
 import { SettingsModule } from './settings/settings.module';
 import { CameraComponent } from './camera/camera.component';
 import { CustomErrorHandler, CustomGlobalErrorHandler } from './global-error-handler';
-import { ErrorHandler, NgModule } from '@angular/core';
+import { ErrorHandler, NgModule, isDevMode } from '@angular/core';
 
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
@@ -30,6 +30,10 @@ import { InputsComponent } from './inputs/inputs.component';
 import { StoreModule } from '@ngrx/store';
 import { EffectsModule } from '@ngrx/effects';
 import { InventoryDetailComponent } from './inventory/inventory-detail/inventory-detail.component';
+import { ServiceWorkerModule } from '@angular/service-worker';
+import { environment } from '../environments/environment';
+import { provideFirebaseApp, getApp, initializeApp } from '@angular/fire/app';
+import { provideMessaging, getMessaging } from '@angular/fire/messaging';
 
 export class MyHammerConfig extends HammerGestureConfig {
   overrides = <any>{
@@ -58,7 +62,15 @@ export class MyHammerConfig extends HammerGestureConfig {
         strictStateImmutability: true,
         strictActionImmutability: true
       }
-    })
+    }),
+    ServiceWorkerModule.register('ngsw-worker.js', {
+      enabled: !isDevMode(),
+      // Register the ServiceWorker as soon as the application is stable
+      // or after 30 seconds (whichever comes first).
+      registrationStrategy: 'registerWhenStable:30000'
+    }),
+    provideFirebaseApp(() => initializeApp(environment.firebaseConfig)),
+    provideMessaging(() => getMessaging())
   ],
   providers: [
     SettingsService,
@@ -76,7 +88,8 @@ export class MyHammerConfig extends HammerGestureConfig {
     {
       provide: HAMMER_GESTURE_CONFIG,
       useClass: MyHammerConfig
-    }
+    },
+
   ],
   bootstrap: [AppComponent]
 })

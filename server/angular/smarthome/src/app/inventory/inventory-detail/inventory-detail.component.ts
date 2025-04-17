@@ -5,6 +5,7 @@ import { map, switchMap } from 'rxjs';
 import { CommonModule } from '@angular/common';
 import { InventoryService } from '../inventory.service';
 import { LocationComponent } from './location/location.component';
+import { getProductId } from '../inventory-util';
 
 @Component({
   selector: 'app-inventory-detail',
@@ -15,6 +16,7 @@ import { LocationComponent } from './location/location.component';
 })
 export class InventoryDetailComponent implements OnInit {
 
+  getProductId = getProductId
 
   item$ = this.dataService.inventory$
     .pipe(

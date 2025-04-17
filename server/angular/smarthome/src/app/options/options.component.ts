@@ -1,8 +1,9 @@
 import type { Sound } from './interface ';
 import { OptionsService } from './options.service';
 import type { OnInit } from '@angular/core';
-import { ChangeDetectorRef, Component } from '@angular/core';
+import { ChangeDetectorRef, Component, inject } from '@angular/core';
 import { DomSanitizer } from '@angular/platform-browser';
+import { FireBaseService } from '../foreground-firebase-service';
 @Component({
   selector: 'app-options',
   templateUrl: './options.component.html',
@@ -17,6 +18,8 @@ export class OptionsComponent implements OnInit {
   soundName: string;
 
   error: string;
+
+  firebase = inject(FireBaseService)
   constructor(private optionsService: OptionsService,
     private cdr: ChangeDetectorRef,
     private domSanitizer: DomSanitizer) {
@@ -24,6 +27,7 @@ export class OptionsComponent implements OnInit {
   }
 
   ngOnInit() {
+
     this.optionsService.getSounds().toPromise().then(sounds => {
       this.sounds = sounds.map(sound => {
         const charCodeArray = sound.bytes.split(',')
@@ -107,4 +111,10 @@ export class OptionsComponent implements OnInit {
       r.readAsArrayBuffer(fl);
     });
   }
+
+
+  registerServiceWorker() {
+    this.firebase.register();
+  }
+
 }
