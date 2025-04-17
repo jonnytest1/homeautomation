@@ -68,3 +68,4 @@ clients/drone/4drc/MyApplication
 clients/drone/4drc/drmirror
 server/angular/smarthome/src/worker/dist
 server/firebase.json
+server/media/

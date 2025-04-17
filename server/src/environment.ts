@@ -19,11 +19,14 @@ function preloadEnv() {
 }
 preloadEnv();
 export const environment = process.env as {
+  FFMPEG?: string;
+  MEDIA_ROOT: string;
   SKIP_NPM: string | number;
   TEMPORARY_DEPLOYMENT_NAME: string | number;
   WATCH_SERVICES: string;
   MQTT_SERVER: string
   MQTT_USER?: string;
+  MQTT_PORT?: string;
   MQTT_PASSWORD?: string;
   REDIRECT: string
   DEBUG: string

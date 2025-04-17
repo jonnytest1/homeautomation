@@ -27,7 +27,8 @@ export class MQTTIntegration {
     this.connection = getClient({
       mqtt_password: environment.MQTT_PASSWORD,
       mqtt_server: mqttUrl,
-      mqtt_user: environment.MQTT_USER
+      mqtt_user: environment.MQTT_USER,
+      mqtt_port: environment.MQTT_PORT
     })
     this.connection.on("error", e => {
       if (!environment.IGNORE_MQTT_ERROR) {
