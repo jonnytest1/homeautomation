@@ -1,8 +1,8 @@
 import { environment } from './environment'
 import { logKibana } from './util/log'
 import { Session } from "inspector"
-import { closeSync, existsSync, openSync, writeSync } from "fs"
-import { mkdir, rename } from "fs/promises"
+import { existsSync } from "fs"
+import { mkdir, rename, open } from "fs/promises"
 import { join } from 'path'
 
 
@@ -23,23 +23,21 @@ async function heapSnapshot() {
   const file = join(folder, filename)
 
 
-  const fd = openSync(file, "w")
+  const fd = await open(file, "w")
 
   session.addListener("HeapProfiler.addHeapSnapshotChunk", m => {
-    writeSync(fd, m.params.chunk)
+    fd.write(m.params.chunk)
   })
-  session.post("HeapProfiler.takeHeapSnapshot", undefined, (err) => {
+  session.post("HeapProfiler.takeHeapSnapshot", undefined, async (err) => {
     if (err) {
       logKibana("ERROR", "failed taking snapshot", err)
     }
     session.disconnect()
     console.log("snapshot " + file + " done")
-    closeSync(fd)
+    await fd.close()
     rename(file, join(folder, filename + ".done"))
 
   })
-
-
 }
 
 if (environment.PROFILER_ENABLED) {
