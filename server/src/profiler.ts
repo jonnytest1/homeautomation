@@ -6,6 +6,8 @@ import { mkdir, rename, open } from "fs/promises"
 import { join } from 'path'
 
 
+const start = `profile_${encodeURIComponent(new Date().toISOString())}`
+let ct = 0
 async function heapSnapshot() {
 
   console.log("snapshotting")
@@ -19,7 +21,7 @@ async function heapSnapshot() {
   if (!existsSync(folder)) {
     await mkdir(folder, { recursive: true })
   }
-  const filename = `profile_${encodeURIComponent(new Date().toISOString())}.heapsnapshot`
+  const filename = `${start}_${ct++}.heapsnapshot`
   const file = join(folder, filename)
 
 
