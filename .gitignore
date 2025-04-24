@@ -69,3 +69,4 @@ clients/drone/4drc/drmirror
 server/angular/smarthome/src/worker/dist
 server/firebase.json
 server/media/
+server/profiler

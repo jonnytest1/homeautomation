@@ -9,6 +9,8 @@ import { HttpRequest, initialize, ResponseCodeError } from 'express-hibernate-wr
 import NodeMediaServer from "node-media-server"
 import BrowserToRtmpServer from "@api.video/browser-to-rtmp-server"
 import http from 'http';
+
+import "./src/profiler"
 Error.stackTraceLimit = Infinity;
 const fetch = require('node-fetch');
 const https = require('https');
