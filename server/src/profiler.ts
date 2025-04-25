@@ -25,7 +25,8 @@ async function heapSnapshot() {
   const file = join(folder, filename)
 
 
-  const fd = await open(file, "w")
+  const pendingFile = join(folder, filename + ".pending")
+  const fd = await open(pendingFile, "w")
 
   session.addListener("HeapProfiler.addHeapSnapshotChunk", m => {
     fd.write(m.params.chunk)
@@ -37,7 +38,7 @@ async function heapSnapshot() {
     session.disconnect()
     console.log("snapshot " + file + " done")
     await fd.close()
-    rename(file, join(folder, filename + ".done"))
+    rename(pendingFile, file)
 
   })
 }
