@@ -8,7 +8,7 @@ import { nodeDataWithNodesArray, selectNodesOfType } from '../generic-store/sele
 import { dispatchAction } from '../generic-store/socket-action-dispatcher'
 import { lastEventTimes, lastEventTimesForNodes } from '../last-event-service'
 import { jsonEqual } from '../../../util/json-clone'
-import { distinctUntilChanged, switchMap, takeWhile } from 'rxjs'
+import { distinctUntilChanged, map, switchMap, takeWhile } from 'rxjs'
 
 export function registerGenericSocketHandler() {
 
@@ -65,8 +65,10 @@ export function registerGenericSocketHandler() {
         genericNodeDataStore.select(selectNodesOfType(genEvt.forType))
           .pipe(
             takeWhile(() => evt.socket.readyState === evt.socket.OPEN),
-            switchMap(nodes => {
-              return genericNodeDataStore.select(lastEventTimesForNodes(new Set(nodes.map(n => n.uuid))))
+            map(nodes => nodes.map(n => n.uuid)),
+            distinctUntilChanged(jsonEqual),
+            switchMap(nodeUuids => {
+              return genericNodeDataStore.select(lastEventTimesForNodes(new Set(nodeUuids)))
             }),
             distinctUntilChanged(jsonEqual)
           ).subscribe(times => {
