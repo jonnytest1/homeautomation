@@ -60,6 +60,12 @@ export const lastEventTimes = genericNodeDataStore.createSelector(st => st.lastE
 export const lastEventTimesForNode = (nodeUuid: string) => {
   return lastEventTimes.chain(times => times[nodeUuid])
 }
+export const lastEventTimesForNodes = (nodeUuids: Set<string>) => {
+  return lastEventTimes.chain(times => {
+    return Object.fromEntries(Object.entries(times)
+      .filter(([key]) => nodeUuids.has(key))) as NodeEventTimes
+  })
+}
 
 
 const eventTimesPool = new PsqlBase({

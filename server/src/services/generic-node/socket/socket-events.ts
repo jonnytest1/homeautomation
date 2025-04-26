@@ -1,7 +1,6 @@
 import type { ExtendedSocket } from './generic-node-socket'
 import { FrontendWebsocket } from '../../../resources/frontend-update'
 import { genericNodeDataStore } from '../generic-store/reference'
-import { lastEventTimes } from '../last-event-service'
 import { backendToFrontendStoreActions } from '../generic-store/actions'
 import type { Action, ActionCreator } from '../../../util/data-store/action'
 import type { StoreEvents } from '../typing/frontend-events'
@@ -12,24 +11,6 @@ import type { Websocket } from 'express-hibernate-wrapper'
 
 
 export function registerSocketEvents() {
-
-  genericNodeDataStore.select(lastEventTimes).subscribe(times => {
-    if (!FrontendWebsocket?.websockets) {
-      return
-    }
-    FrontendWebsocket.forSockets(async (socket: Websocket, props: ExtendedSocket) => {
-      if (!props.receiveChanges) {
-        return
-      }
-      FrontendWebsocket.sendToWebsocket(socket, {
-        type: "genericNode",
-        data: {
-          type: "lastEventTimes",
-          data: times
-        }
-      })
-    })
-  })
 
   Object.values(backendToFrontendStoreActions).forEach((actionCreator: ActionCreator<StoreEvents["type"], any>) => {
     genericNodeDataStore.addEffect(actionCreator, (st, a: Action<StoreEvents["type"], any> & { fromFrontendSocket?: boolean }) => {

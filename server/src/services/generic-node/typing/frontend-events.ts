@@ -45,6 +45,7 @@ export type UpdateGlobals = {
 }
 export type SubscribeGenericNode = {
   type: "subscribe generic node"
+  forType?: string
 }
 
 export type UpdateParam = {

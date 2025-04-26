@@ -78,12 +78,14 @@ export class GenericNodesDataService {
       }
     })
   }
-  loadGenericData() {
+  loadGenericData(type?: string) {
     this.service.onSocketOpen.genericData = (ws) => {
+
       this.service.genericNodeSendingEvents.next({
         type: "generic-node-event",
         data: {
-          type: "subscribe generic node"
+          type: "subscribe generic node",
+          forType: type
         }
       })
     }

@@ -48,7 +48,14 @@ export class GenericTypeComponent implements OnInit {
     private store: Store,
     private domSanitizer: DomSanitizer
   ) {
-    dataService.loadGenericData()
+    this.nodeDefType$.pipe(
+      first()
+    ).subscribe(type => {
+      if (typeof type === "number") {
+        return
+      }
+      dataService.loadGenericData(type)
+    })
     this.nodeDef$ = this.nodeDefType$.pipe(
       switchMap(type => {
         if (typeof type === "number") {

@@ -6,7 +6,9 @@ import { typeImplementations } from '../type-implementations'
 import { genericNodeDataStore } from '../generic-store/reference'
 import { nodeDataWithNodesArray, selectNodesOfType } from '../generic-store/selectors'
 import { dispatchAction } from '../generic-store/socket-action-dispatcher'
-import { lastEventTimes } from '../last-event-service'
+import { lastEventTimes, lastEventTimesForNodes } from '../last-event-service'
+import { jsonEqual } from '../../../util/json-clone'
+import { distinctUntilChanged, switchMap, takeWhile } from 'rxjs'
 
 export function registerGenericSocketHandler() {
 
@@ -56,7 +58,36 @@ export function registerGenericSocketHandler() {
         }
       })
     } else if (genEvt.type == "subscribe generic node") {
-      evt.socketInstanceProperties.receiveChanges = true
+      evt.socketInstanceProperties.receiveChanges = genEvt.forType ?? true
+
+      if (typeof genEvt.forType == "string") {
+
+        genericNodeDataStore.select(selectNodesOfType(genEvt.forType))
+          .pipe(
+            takeWhile(() => evt.socket.readyState === evt.socket.OPEN),
+            switchMap(nodes => {
+              return genericNodeDataStore.select(lastEventTimesForNodes(new Set(nodes.map(n => n.uuid))))
+            }),
+            distinctUntilChanged(jsonEqual)
+          ).subscribe(times => {
+
+            evt.reply({
+              type: "lastEventTimes",
+              data: times
+            })
+          })
+      } else {
+        genericNodeDataStore.select(lastEventTimes)
+          .pipe(
+            takeWhile(() => evt.socket.readyState === evt.socket.OPEN)
+          )
+          .subscribe(times => {
+            evt.reply({
+              type: "lastEventTimes",
+              data: times
+            })
+          })
+      }
     } else if (genEvt.type == "update position") {
       dispatchAction(genEvt)
       evt.pass(genEvt)

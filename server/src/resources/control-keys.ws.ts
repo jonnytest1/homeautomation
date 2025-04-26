@@ -51,9 +51,6 @@ export class ControlKeysWebsocket {
           }));
         }
         listener.enabled = hasKey
-
-
-
       }
     } else {
       websocket.send(JSON.stringify({ type: "keys", data: keyData }));

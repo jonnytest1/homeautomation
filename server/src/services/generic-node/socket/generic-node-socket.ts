@@ -5,7 +5,7 @@ import type { Websocket } from 'express-hibernate-wrapper'
 import { Subject } from 'rxjs'
 
 export type ExtendedSocket = {
-  receiveChanges?: boolean
+  receiveChanges?: boolean | string
 }
 
 interface GenericNodeEvent<T = object> {
