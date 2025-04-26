@@ -8,6 +8,7 @@ import { nodeDataWithNodesArray, selectNodesOfType } from '../generic-store/sele
 import { dispatchAction } from '../generic-store/socket-action-dispatcher'
 import { lastEventTimes, lastEventTimesForNodes } from '../last-event-service'
 import { jsonEqual } from '../../../util/json-clone'
+import { limitedDebounce } from '../../../util/limited-debounce'
 import { distinctUntilChanged, map, switchMap, takeWhile } from 'rxjs'
 
 export function registerGenericSocketHandler() {
@@ -70,9 +71,9 @@ export function registerGenericSocketHandler() {
             switchMap(nodeUuids => {
               return genericNodeDataStore.select(lastEventTimesForNodes(new Set(nodeUuids)))
             }),
-            distinctUntilChanged(jsonEqual)
+            distinctUntilChanged(jsonEqual),
+            limitedDebounce(500, 2000)
           ).subscribe(times => {
-
             evt.reply({
               type: "lastEventTimes",
               data: times
