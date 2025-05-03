@@ -9,14 +9,18 @@ import type { ZodType } from 'zod'
 import { createSchema, mergeSchema, type ExtendedJsonSchema, type MergeSchemaOptions } from "json-schema-merger"
 
 function updateSchema(newObject: unknown, oldSchema: ExtendedJsonSchema | null, enumKeyList: Array<string>, params: MergeSchemaOptions["params"]) {
-  const newSchema = createSchema(newObject)
+  const dateFnc = (date: string) => date !== "0" && !isNaN(+new Date(date))
+  const newSchema = createSchema(newObject, {
+    isDate: dateFnc
+  })
   if (oldSchema) {
     const merged = mergeSchema({
       old: oldSchema,
       new: newSchema,
       enumKeyList: enumKeyList,
       path: [],
-      params
+      params,
+      isDate: dateFnc
     })
     return merged
   }
