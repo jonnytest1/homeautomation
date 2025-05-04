@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "node",
   "dependencies": {
+    "@types/node": "^22.13.4",
     "@types/node-notifier": "^8.0.5",
     "atob": "^2.1.2",
     "clap-detector": "^0.5.3",

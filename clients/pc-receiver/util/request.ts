@@ -12,5 +12,9 @@ export function fetchHttps<T = any>(url: string, opts: import("node-fetch").Requ
     rejectUnauthorized: false,
   });
 
-  return fetch(url, { ...opts, agent: url.startsWith("https") ? httpsAgent : undefined }, ...args)
+  return fetch(url, {
+    ...opts,
+    agent: url.startsWith("https") ? httpsAgent : undefined
+  },
+    ...args)
 }

@@ -28,7 +28,8 @@ export class TextReader {
   constructor(private data: TransformationRes["read"]) {
     this.sanitized_text = this.data!.text
       .replace(/([\u2700-\u27BF]|[\uE000-\uF8FF]|\uD83C[\uDC00-\uDFFF]|\uD83D[\uDC00-\uDFFF]|[\u2011-\u26FF]|\uD83E[\uDD10-\uDDFF])/g, '')
-      .replace(/[^a-zA-Z 0-9]/g, '');
+      .replace(/[^a-zA-Z 0-9]/g, '')
+      .trim();
 
 
     this.speechPromise = this.generate_sound()
@@ -58,7 +59,7 @@ export class TextReader {
     return voiceList.filter(v => v.toLowerCase().includes("zira"))[0]
   }
 
-  async read() {
+  async read(abort?: AbortSignal) {
     /**
      *  await this.speechPromise
     return new Promise(res => {
@@ -78,6 +79,10 @@ export class TextReader {
 
      */
     const voice = await this.getVoice()
+    abort?.addEventListener("abort", () => {
+      say.stop()
+    })
+
     return new Promise<void>(res => {
 
       say.speak(this.sanitized_text, voice, undefined, (e) => {
@@ -88,3 +93,6 @@ export class TextReader {
 
   }
 }
+
+
+

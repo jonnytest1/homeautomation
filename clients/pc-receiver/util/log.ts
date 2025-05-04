@@ -1,4 +1,4 @@
-
+import { Agent } from "https"
 export function btoa(str) {
   return Buffer.from(str)
     .toString('base64');
@@ -8,6 +8,7 @@ export function btoa(str) {
 type Primitive = string | number | boolean
 
 const fetch = require('node-fetch');
+
 export async function logKibana(level: 'INFO' | 'ERROR' | 'DEBUG' | "WARN", message: string | { message: string, [key: string]: Primitive }, error?, ct = 0) {
 
 
@@ -54,14 +55,19 @@ export async function logKibana(level: 'INFO' | 'ERROR' | 'DEBUG' | "WARN", mess
   console.log(jsonData);
   try {
 
-    await fetch(process.env.log_endpoint, {
+    const httpsAgent = new Agent({
+
+      family: 4
+
+    });
+    const repsonse = await fetch(process.env.log_endpoint, {
       method: 'POST',
       headers: {
         'Content-Type': 'text/plain'
       },
-      body: btoa(JSON.stringify(jsonData))
+      body: btoa(JSON.stringify(jsonData)),
+      agent: httpsAgent
     });
-
   } catch (e) {
     if (ct < 5) {
       setTimeout(() => {

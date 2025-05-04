@@ -16,6 +16,10 @@ import { uidBlackList } from './services/calendar-uid-blacklist';
 import { interceptLogs } from './util/log-intercept';
 import { logKibana } from './util/log';
 import { FritzBoxClient } from './services/virtual-clients/fritz-box-client';
+import { WindowService } from './services/window-service';
+import { environment } from './environment';
+import { pick } from './util/pick';
+import { execSync } from 'child_process';
 parseArgsToEnv()
 
 config({
@@ -39,6 +43,8 @@ service.load(uidBlackList).then(() => {
 
 RepeatingAudio.check()
 const timerService = new TimerService(serverIp);
+const windowService = new WindowService()
+windowService.start()
 registration.register(serverIp, +listenOnPort)
   .then(() => {
     const fritzBoxClient = new FritzBoxClient()
@@ -71,24 +77,74 @@ registration.register(serverIp, +listenOnPort)
         console.error(e);
       }
     });
+
+    app.post("/giteastatus", (req, res) => {
+      const body = req.body as {
+        state: "pending" | "failure",
+        context: string
+        description: string
+        target_url: string
+      }
+
+      if (req.headers.authorization !== environment.STATUS_SECRET) {
+        res.status(401).send()
+        return
+      }
+
+      if (req.headers["x-gitea-event-type"] !== "status") {
+        res.status(201).send()
+        return
+      }
+      console.log("got new gitea pipeline status: " + body.state)
+
+      if (body.state !== "failure") {
+        res.status(200).send()
+        return
+      }
+
+      new NotificationHandler({
+        notification: {
+          title: `pipeline failure`,
+          body: `${body.context} failed`,
+          sound: "wronganswer"
+        }
+      }, environment.serverip)
+        .show({ send: console.log, close: () => { } } as any);
+
+      res.status(200).send()
+
+
+      const url = new URL(body.target_url)
+      execSync("start " + url.href)
+
+    })
+
     app.post('/log', async (req, res) => {
       try {
+        const url = new URL(req.url, "http://www.invalid.com")
+        const sha = url.searchParams.get("sha")
+        const app = url.searchParams.get("application")
+
+
         const str = req.body as string;
         const now = new Date().toISOString();
 
         if (typeof str !== "string") {
-          return res.send();
+          return res.status(400).send();
         }
 
-        const transformed = await traceTransform(str);
+        const transformed = await traceTransform(str, { app: app ?? undefined, elf: sha ?? undefined });
         const indented = transformed.split("\n").map(l => new Array(now.length).fill(" ").join("") + l).join("\n")
 
         console.log(now + ": \n" + indented);
-        res.send()
+        res.send(indented)
       } catch (e) {
         console.error(e);
+        res.status(500).send()
       }
     });
+
+
     app.post('/action', (req, res) => {
       try {
         const evt = JSON.parse(req.body);

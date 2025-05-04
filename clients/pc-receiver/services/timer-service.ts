@@ -8,7 +8,8 @@ import { getLatestPowerOnEvent } from './event-service';
 import moment from 'moment';
 import { heaterOff } from './mqtt';
 import { logKibana } from '../util/log';
-import { abortable } from '../util/abortable';
+import { Abortable, abortable, type AbortRef } from '../util/abortable';
+import { AbortError } from 'node-fetch';
 type ISODay = `${number}${number}${number}${number}-${number}${number}-${number}${number}`
 
 
@@ -38,6 +39,7 @@ export class TimerService {
     }
   }
   async write(data: Data) {
+    console.log("writing run file")
     await writeFile(lastRun, JSON.stringify(data))
   }
 
@@ -113,63 +115,79 @@ export class TimerService {
 
 
   async run(data: Data) {
+    console.log("run called");
     try {
       let abortDisabled = false;
       if (data.lastSuccessFullRun) {
         const lastRun = new Date(data.lastSuccessFullRun)
-        const minLAstRun = Date.now() - (DAY * 3)
+        const minLAstRun = Date.now() - (DAY * 2)
         abortDisabled = +lastRun < minLAstRun
       }
 
-      const promiseList = [
-        () => new TextReader({ text: `${abortDisabled ? "really" : ""} get off your ass and put your shoes on` }).read(),
+      const promiseList: Array<AbortRef> = [
+        (a) => new TextReader({ text: `${abortDisabled ? "really " : ""}get up and put your shoes on` }).read(a),
         ...this.countdown(6),
         () => {
           console.log("run");
           return new Promise(res => setTimeout(res, 500));
         },
-        () => new TextReader({ text: "starting treadmill" }).read(),
-        () => {
+        (a) => new TextReader({ text: "starting treadmill" }).read(a),
+        (s) => {
           console.log("run request")
-          return fetchHttps(this.runUrl);
+          return fetchHttps(this.runUrl, { signal: s });
         },
-        () => new Promise(res => setTimeout(res, 550)),
-        () => {
+        Abortable.wait(0.55),
+        (s) => {
           console.log("run request")
-          return fetchHttps(this.runUrl);
+          return fetchHttps(this.runUrl, { signal: s });
         },
-        () => {
-          data.lastSuccessFullRun = new Date().toISOString()
-          return Promise.resolve()
-        },
+        Abortable.wait(1),
       ];
       for (let i = 0; i < 43; i++) {
-        promiseList.push(() => fetchHttps(this.fasterUrl))
+        promiseList.push((s) => fetchHttps(this.fasterUrl, { signal: s }))
         promiseList.push(() => new Promise(res => setTimeout(res, 160)))
       }
       promiseList.push(async () => {
         console.log("reached peak")
       })
-      promiseList.push(() => new Promise(res => setTimeout(res, 1000 * 60 * 2)))
+      promiseList.push(Abortable.wait(60 * 1))
       promiseList.push(async () => {
         heaterOff()
       })
-      promiseList.push(() => new Promise(res => setTimeout(res, 1000 * 60 * 3)))
-      promiseList.push(async () => {
+      promiseList.push(Abortable.wait(60 * 1))
+      promiseList.push(async (abort) => {
+        let aborted = false
+
+        abort.addEventListener("abort", () => {
+          aborted = true
+        })
+
         for (let i = 0; i < 10; i++) {
+          if (aborted) {
+            throw new AbortError("")
+          }
           await fetchHttps(this.fasterUrl)
+          if (aborted) {
+            throw new AbortError("")
+          }
           await new Promise(res => setTimeout(res, 160));
         }
       })
-
+      promiseList.push((abort) => {
+        data.lastSuccessFullRun = new Date().toISOString()
+        console.log("set run")
+        return Abortable.wait(60 * 10)(abort);
+      })
 
       await abortable(promiseList, {
         onAbort: () => new TextReader({ text: "aborted" }).read(),
         onAbortAttempt: () => new TextReader({ text: "not this time" }).read(),
         abortDisabled: abortDisabled
       })
+      console.log("finished run timer")
     } catch (e) {
       logKibana("ERROR", "error during run", e)
+      await new Promise(res => setTimeout(res, 5000));
       console.log("error", e)
       debugger;
     }
@@ -177,10 +195,10 @@ export class TimerService {
 
 
   countdown(ct: number) {
-    const countdownCallbacks: Array<() => Promise<any>> = []
+    const countdownCallbacks: Array<AbortRef> = []
     for (let i = ct; i >= 0; i -= 2) {
-      countdownCallbacks.push(() => new TextReader({ text: `${i} left` }).read())
-      countdownCallbacks.push(() => new Promise(res => setTimeout(res, 2000)))
+      countdownCallbacks.push((a) => new TextReader({ text: `${i} left` }).read(a))
+      countdownCallbacks.push(Abortable.wait(2))
     }
     return countdownCallbacks
   }

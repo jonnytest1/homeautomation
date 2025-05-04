@@ -1,5 +1,6 @@
-import { app, BrowserWindow, protocol } from "electron"
+import { app, BrowserWindow, protocol, screen } from "electron"
 import { logKibana } from '../util/log'
+import { WindowService } from './window-service'
 
 let activeWindow: BrowserWindow | undefined = undefined
 let windowShown = false
@@ -75,7 +76,6 @@ export async function popup(data: string, callback: { response: (resp: { ts: num
     return
   }
 
-
   if (!activeWindow) {
     activeWindow = new BrowserWindow({
       title: popupCfg.title,
@@ -90,6 +90,30 @@ export async function popup(data: string, callback: { response: (resp: { ts: num
 
     })
 
+    function updateWindow() {
+      activeWindow?.setAlwaysOnTop(false)
+      activeWindow?.minimize()
+      setTimeout(() => {
+        activeWindow?.setBounds({
+          x: 1760,
+          y: 900,
+          width: 200,
+          height: 100,
+
+        })
+        activeWindow?.setAlwaysOnTop(true)
+        activeWindow?.show()
+      }, 3000)
+
+    }
+    screen.addListener("display-added", () => {
+      updateWindow()
+
+    })
+    screen.addListener("display-removed", () => {
+      updateWindow()
+
+    })
     activeWindow.webContents.on("did-finish-load", () => {
       activeWindow?.show()
       activeWindow?.setAlwaysOnTop(true)
@@ -154,8 +178,8 @@ export async function popup(data: string, callback: { response: (resp: { ts: num
       [k: string]: string;
     }// {timeout:"true"}
 
-    if (+data.ts !== popupCfg.popupStartTime) {
-      debugger
+    if (+data.formts !== popupCfg.popupStartTime) {
+      //debugger
       return
     }
 
@@ -184,6 +208,9 @@ export async function popup(data: string, callback: { response: (resp: { ts: num
 
 
   } catch (e) {
+    if (e.code === "ERR_ABORTED") {
+      return
+    }
     logKibana("ERROR", {
       message: "error loading popup",
       cfg: JSON.stringify(popupCfg)

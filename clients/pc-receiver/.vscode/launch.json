@@ -9,8 +9,10 @@
       "type": "debugpy",
       "request": "launch",
       "program": "${file}",
+      "python": "${workspaceFolder}/.venv/Scripts/python.exe",
+      "cwd": "${workspaceFolder}/services/py",
       "justMyCode": false,
-      "console": "integratedTerminal"
+      "console": "internalConsole"
     },
     {
       "type": "node",
@@ -39,10 +41,14 @@
       "type": "node",
       "request": "launch",
       "name": "prod launch local receiver",
-      "console": "internalConsole",
+      // "console": "internalConsole",
       //"program": "${workspaceFolder}\\index.ts",
       "autoAttachChildProcesses": true,
       "cwd": "${workspaceFolder}",
+      "runtimeExecutable": "${workspaceFolder}/node_modules/.bin/electron",
+      "windows": {
+        "runtimeExecutable": "${workspaceFolder}/node_modules/.bin/electron.cmd"
+      },
       "runtimeArgs": [
         "-r",
         "ts-node/register"

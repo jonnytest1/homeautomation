@@ -44,6 +44,7 @@ class Registration {
     } catch (e) {
       console.error(e);
       await new Promise(res => setTimeout(res, 5000)).then(this.register.bind(this, ip, port));
+      return
     }
 
 
@@ -52,7 +53,7 @@ class Registration {
       debugger;
     })
 
-    this.client.on("connect", () => {
+    this.client.once("connect", () => {
       console.log("mqtt connected")
       const commands: Array<import("../../../server/src/services/mqtt-tasmota").DeviceCommandConfig> = Object.keys(eventHandlerMap).map(key => ({
         name: key

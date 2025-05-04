@@ -3,7 +3,7 @@ import { execSync } from "child_process"
 import { join } from "path"
 import { pythonExe } from '../../constant'
 import { logKibana } from '../../util/log'
-import { setLastAbort } from '../../util/abortable'
+import { abort as abort } from '../../util/abortable'
 import { TimerService } from '../timer-service'
 
 
@@ -26,7 +26,7 @@ export const eventHandlerMap = {
     return "pending_confirmation"
   },
   "abort": () => {
-    setLastAbort()
+    abort()
   },
   "treadmill": () => {
     new TimerService("").run({})

@@ -10,6 +10,7 @@ config({
 });
 
 export const environment = process.env as {
+  STATUS_SECRET: string;
 
   CAL_URL: string
   serverip: string
