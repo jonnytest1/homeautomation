@@ -26,6 +26,7 @@ import { SelectOptionComponent } from './select-option/select-option.component';
 export class GenOptionComponent implements OnChanges {
 
 
+
   @Input()
   name: string
 
@@ -59,7 +60,12 @@ export class GenOptionComponent implements OnChanges {
   ngOnChanges(changes: SimpleChanges): void {
 
   }
+  updateButtonInput(btninpt: HTMLInputElement) {
+    btninpt.value = Date.now() + ""
 
+    const event = new Event('change', { bubbles: true });
+    btninpt.dispatchEvent(event);
+  }
 
   paramChanged(event: Event) {
     event.stopPropagation()

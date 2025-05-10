@@ -72,9 +72,12 @@ export class CameraComponent implements AfterViewInit, OnInit, OnDestroy {
     }).then((stream) => {
       this.videoElement.nativeElement.srcObject = stream
       const client = new BrowserToRtmpClient(stream, {
-        host: "localhost",
+        host: "smarthome",
         rtmp: "rtmp://localhost:11935/live/abcd", // RTMP endpoint
-        port: 21101
+        port: 443,
+        socketio: {
+          path: "/rtmp/socket.io/"
+        }
       });
 
       client.start();

@@ -142,7 +142,11 @@ export class MonacoEditorComponent implements OnInit, OnDestroy, ControlValueAcc
     while (!document.querySelector("#" + sandboxConfig.domID)) {
       await ResolvablePromise.delayed(10);
     }
-    this.sandbox = sandboxFactory.createTypeScriptSandbox(sandboxConfig, main, window['ts']);
+    try {
+      this.sandbox = sandboxFactory.createTypeScriptSandbox(sandboxConfig, main, window['ts']);
+    } catch (e) {
+      return
+    }
 
     this.sandbox.updateCompilerSettings({
       alwaysStrict: false,
@@ -270,8 +274,13 @@ export class MonacoEditorComponent implements OnInit, OnDestroy, ControlValueAcc
       if (!this.sandbox) {
         this.cachedText = obj;
       } else {
-        this.sandbox.getModel().setValue(obj);
-        this.ast = undefined
+        const model = this.sandbox.getModel();
+        try {
+          model.setValue(obj);
+          this.ast = undefined
+        } catch (e) {
+          debugger
+        }
       }
     }
   }

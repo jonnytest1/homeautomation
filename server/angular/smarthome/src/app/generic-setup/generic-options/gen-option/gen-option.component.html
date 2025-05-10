@@ -31,11 +31,22 @@
     </ng-container>
   </ng-template>
   <ng-template #checkTextArea>
-    <ng-container *ngIf="definition.type==='text' && definition.multiline; else inputEl">
+    <ng-container *ngIf="definition.type==='text' && definition.multiline; else checkbtn">
       <textarea name="{{name}}"
                 (keyup)="$event.stopPropagation()">{{value ??''}}</textarea>
     </ng-container>
   </ng-template>
+
+  <ng-template #checkbtn>
+    <ng-container *ngIf="definition.type==='button'; else inputEl">
+
+      <input type="hidden"
+             #btninput
+             name="{{name}}">
+      <button (click)="updateButtonInput(btninput)">{{definition.text??name}}</button>
+    </ng-container>
+  </ng-template>
+
 
   <ng-template #inputEl>
 

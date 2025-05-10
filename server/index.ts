@@ -137,6 +137,7 @@ const nodeMediaServer = new NodeMediaServer({
     ffmpeg: environment.FFMPEG ?? "/usr/bin/ffmpeg",
     tasks: [{
       mp4: true,
+      hls: true,
       app: "live",
 
     }]

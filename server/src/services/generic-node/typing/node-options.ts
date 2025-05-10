@@ -9,6 +9,12 @@ export type NumberCfg = {
   min?: number,
   max?: number
 }
+export type BtnCfg = {
+  type: "button",
+  text?: string
+}
+
+
 export type BooleanCfg = {
   type: "boolean"
   defaultV?: boolean
@@ -56,7 +62,7 @@ type Titled = {
 
 type PlaceholderType<T extends PlaceHolder> = T["of"] extends Array<infer U> ? U : T["of"] extends "unknown" ? unknown : T["of"]
 
-export type NodeOptionTypes<Keys extends string = string> = (Select | Text | Code | PlaceHolder | Frame | NumberCfg | BooleanCfg)
+export type NodeOptionTypes<Keys extends string = string> = (Select | Text | Code | PlaceHolder | Frame | NumberCfg | BooleanCfg | BtnCfg)
   & Order
   & Invalidated<Keys>
   & Titled
@@ -81,7 +87,8 @@ type NodeDefType<T extends NodeOptionTypes<string>> =
   ? T["options"][number]
   : T["type"] extends "monaco"
   ? string
-  : never
+  : T["type"] extends "button"
+  ? string : never
 
 
 export type MapTypeToParam<T extends NodeOptionTypes<string>, Key extends string> =

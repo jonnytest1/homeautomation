@@ -55,7 +55,7 @@ addTypeImpl({
 
       for (const param in node.parameters ?? {}) {
         const paramValue = node.parameters?.[param]
-        if (paramValue !== undefined) {
+        if (paramValue !== undefined && param.startsWith("mergeLength_")) {
           params[param] = +paramValue
         }
       }
@@ -145,6 +145,9 @@ addTypeImpl({
     options: {
       mergeLength: {
         type: "number"
+      },
+      reset: {
+        type: "button"
       }
     }
   }),

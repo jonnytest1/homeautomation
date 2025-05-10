@@ -1,5 +1,8 @@
 run this: ffmpeg -framerate 30 -input_format mjpeg -re -i /dev/video0 -c:v libx264 -preset veryfast -f flv -tune
 zerolatency {{rtmpServerUrl}}/{{streamName}}
+<a href="http://smarthome:8000/admin/streams"
+   target="_blank">http://smarthome:8000/admin/streams</a>
+
 http://smarthome:8000/admin/<br>
 <button (click)="startStream()">stream</button><br>
 

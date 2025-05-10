@@ -79,14 +79,15 @@ export class ReceiverResource {
     }
     const actionName = req.params.actionName + req.params[0]
     const receiver = await load(Receiver, new SqlCondition("deviceKey").equals(req.params.receiverId), [], {
-      first: true, db: pool,
+      first: true,
+      db: pool,
       interceptArrayFunctions: true,
       deep: {
         actions: {
           filter: new SqlCondition("name").equals(actionName),
           depths: 1
         }
-      }
+      },
     })
 
     if (!receiver) {
