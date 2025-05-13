@@ -4,21 +4,13 @@ import { logKibana } from '../util/log';
 import { ReceiverEvent } from '../models/receiver-event';
 import { ReceiverData } from '../models/receiver-data';
 import { emitEvent } from '../services/generic-node/generic-node-service';
+import { sharedPool } from '../models/db-state';
 import { HttpRequest, assign } from 'express-hibernate-wrapper';
 import { SqlCondition, load, save } from 'hibernatets';
-import { MariaDbBase } from 'hibernatets/dbs/mariadb-base';
 import { Path, POST, GET, HttpResponse } from 'express-hibernate-wrapper';
 
 
-const pool = new MariaDbBase(undefined, {
-  connectionLimit: 6,
-  // trace: true, 
-  logPackets: true,
-  keepAliveDelay: 5000,
-  idleTimeout: 560,
-  maxAllowedPacket: 67108864
-
-})
+const pool = sharedPool
 
 @Path('receiver')
 export class ReceiverResource {
@@ -66,7 +58,8 @@ export class ReceiverResource {
   })
   async getReceivers(req, res: HttpResponse) {
     const receivers = await load(Receiver, SqlCondition.ALL, [], {
-      deep: ["actions"]
+      deep: ["actions"],
+      db: sharedPool
     });
     res.send(receivers);
   }
