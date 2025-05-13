@@ -6,7 +6,7 @@ import { ReceiverData } from '../models/receiver-data';
 import { emitEvent } from '../services/generic-node/generic-node-service';
 import { sharedPool } from '../models/db-state';
 import { HttpRequest, assign } from 'express-hibernate-wrapper';
-import { SqlCondition, load, save } from 'hibernatets';
+import { SqlCondition, load, save, } from 'hibernatets';
 import { Path, POST, GET, HttpResponse } from 'express-hibernate-wrapper';
 
 

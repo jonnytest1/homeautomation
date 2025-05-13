@@ -3,7 +3,8 @@ import { FrontendWebsocket } from './frontend-update';
 import { Connection } from '../models/connection';
 import { Receiver } from '../models/receiver';
 import { senderLoader } from '../services/sender-loader';
-import { load, MariaDbBase, queries } from 'hibernatets';
+import { sharedPool } from '../models/db-state';
+import { load, queries } from 'hibernatets';
 import { Path, POST, GET, HttpRequest, HttpResponse } from 'express-hibernate-wrapper';
 
 @Path('connection')
@@ -15,7 +16,7 @@ export class ConnectionResource {
       return res.status(400)
         .send();
     }
-    const pool = new MariaDbBase()
+    const pool = sharedPool
     try {
       const [sender, receiver] = await Promise.all([
         senderLoader.loadSender(req.body.deviceKey),
