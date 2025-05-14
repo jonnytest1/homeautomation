@@ -1,4 +1,5 @@
 import { environment } from './environment'
+import { logKibana } from './util/log'
 import { existsSync, createWriteStream } from "fs"
 import { mkdir, rename } from "fs/promises"
 import { join } from 'path'
@@ -30,11 +31,11 @@ async function heapSnapshot() {
   console.log('Total Heap Size:', formatBytes(heapStats.total_heap_size));
   console.log('Used Heap Size:', formatBytes(heapStats.used_heap_size));
 
-  console.log("snapshotting")
 
   if (toMb(heapStats.used_heap_size) < 18000) {
     return
   }
+  console.log("snapshotting")
 
 
   const folder = environment.PROFILE_FOLDER ?? "/var/profiler"
@@ -54,6 +55,11 @@ async function heapSnapshot() {
   fileStream.on('finish', async () => {
     console.log("snapshot " + file + " done")
     rename(pendingFile, file)
+    logKibana("ERROR", {
+      message: "finished snapshot",
+      ...memoryUsage,
+      ...heapStats
+    })
   });
 
 }

@@ -13,6 +13,9 @@ export function setDbInit() {
   dbInitialited = true
 }
 export const sharedPool = new MariaDbBase(undefined, {
-  connectionLimit: 30,
+  connectionLimit: 40,
+  acquireTimeout: 20 * 1000,
+  connectTimeout: 15 * 1000
+
 
 })

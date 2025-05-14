@@ -23,12 +23,12 @@ let archiveInterV: NodeJS.Timeout
 
 async function archive() {
   const start = Date.now()
-  trackingPool.sqlquery(`
+  trackingPool.sqlquery({} as never, `
         INSERT INTO trackingeventarchive 
           SELECT * from trackingevent 
           where trackingevent.time_col < (NOW() - INTERVAL '20' DAY)`.replace(/\n/g, " "))
     .then(() => {
-      return trackingPool.sqlquery(`
+      return trackingPool.sqlquery({} as never, `
         DELETE FROM trackingevent 
           WHERE EXISTS(
             SELECT * FROM 

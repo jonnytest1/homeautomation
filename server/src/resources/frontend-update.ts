@@ -6,6 +6,7 @@ import { Item } from '../models/inventory/item';
 import { Receiver } from '../models/receiver';
 import { genericNodeEvents } from '../services/generic-node/socket/generic-node-socket';
 import type { StoreEvents } from '../services/generic-node/typing/frontend-events';
+import { sharedPool } from '../models/db-state';
 import { HttpRequest, Websocket, WS } from 'express-hibernate-wrapper';
 import { load, SqlCondition } from 'hibernatets';
 
@@ -25,7 +26,9 @@ export class FrontendWebsocket {
 
   static connectionInstanceProperties: Record<string, {}> = {}
   static async updateTimers() {
-    const timers = await load(Timer, Timer.timerQuery)
+    const timers = await load(Timer, Timer.timerQuery, [], {
+      db: sharedPool
+    })
     this.websockets.forEach(async (socket) => {
       this.sendToWebsocket(socket, {
         type: "timerUpdate",
@@ -58,7 +61,8 @@ export class FrontendWebsocket {
 
   static async updateInventory(...socket: Array<Websocket>) {
     const items = await load(Item, SqlCondition.ALL, [], {
-      deep: true
+      deep: true,
+      db: sharedPool
     })
 
     this.sendWebsocket({
@@ -68,7 +72,9 @@ export class FrontendWebsocket {
   }
 
   static async updateTimersForSocket(socket) {
-    const timers = await load(Timer, Timer.timerQuery)
+    const timers = await load(Timer, Timer.timerQuery, [], {
+      db: sharedPool
+    })
     this.sendToWebsocket(socket, {
       type: "timerUpdate",
       data: timers
@@ -164,7 +170,8 @@ export class FrontendWebsocket {
     this.updateInventory(websocket)
 
     load(Receiver, SqlCondition.ALL, [], {
-      deep: ["actions", "events"]
+      deep: ["actions", "events"],
+      db: sharedPool
     }).then(receviers => {
       receviers.forEach(rec => {
         this.updateState(rec, websocket)
