@@ -14,8 +14,9 @@ import { TscCompiler } from '../util/tsc-compiler';
 import { Sound } from '../models/sound';
 import { sharedPool } from '../models/db-state';
 import { assign, ResponseCodeError } from 'express-hibernate-wrapper';
-import { load, queries, save } from 'hibernatets';
+import { addArrayItem, load, queries, save } from 'hibernatets';
 import { Path, POST, HttpRequest, HttpResponse, GET } from 'express-hibernate-wrapper';
+
 
 @Path('sender')
 export class SenderResource {
@@ -65,11 +66,29 @@ export class SenderResource {
       res.send();
     } finally {
       if (!req.body.testsend) {
-        sender.events.push(new EventHistory(req.body));
+        const newEvent = new EventHistory(req.body);
+
+        addArrayItem(sender, "events", {
+          items: [newEvent],
+          db: sharedPool
+        })
+        if (sender.transformation.length) {
+          sender.events.push(newEvent)
+          const cutoff = senderLoader.getLastEventsTime()
+          while (sender.events[0].timestamp < cutoff) {
+            sender.events.shift()
+          }
+        }
+
+
+
         if (req.body.a_read1) {
           const batteryLevel = new BatteryLevel(req.body.a_read1, req.body.a_read2, req.body.a_read3);
           if (batteryLevel.level !== -1) {
-            sender.batteryEntries.push(batteryLevel);
+            addArrayItem(sender, "batteryEntries", {
+              items: [batteryLevel],
+              db: sharedPool
+            })
           }
         }
         queries(sender).then(() => FrontendWebsocket.updateSenders())
@@ -104,13 +123,16 @@ export class SenderResource {
     }
     const existingSender = await load(Sender, s => s.deviceKey = req.body.deviceKey, [], {
       first: true,
-      interceptArrayFunctions: true
+      db: sharedPool
     });
     if (existingSender) {
       if (req.body.a_read1) {
         const batteryLevel = new BatteryLevel(req.body.a_read1, req.body.a_read2, req.body.a_read3);
         if (batteryLevel.level !== -1) {
-          existingSender.batteryEntries.push(batteryLevel);
+          addArrayItem(existingSender, "batteryEntries", {
+            db: sharedPool,
+            items: [batteryLevel]
+          })
         }
       }
       logKibana('INFO', `sender already exists with id ${req.body.deviceKey}`);
@@ -119,7 +141,10 @@ export class SenderResource {
       return;
     }
     const sender = new Sender();
-    sender.transformation.push(new Transformation())
+    addArrayItem(sender, "transformation", {
+      db: sharedPool,
+      items: [new Transformation()]
+    })
     await assign(sender, req.body);
     await save(sender);
     FrontendWebsocket.updateSenders();
@@ -169,7 +194,7 @@ export class SenderResource {
     if (!req.query.itemRef) {
       return
     }
-    const sender = await load(Sender, +req.query.itemRef, [], { first: true });
+    const sender = await load(Sender, +req.query.itemRef, [], { first: true, db: sharedPool });
     res.send(sender.getContextKeys());
   }
 

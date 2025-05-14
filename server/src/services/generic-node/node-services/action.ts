@@ -6,7 +6,8 @@ import { ReceiverEvent } from '../../../models/receiver-event'
 import { genericNodeDataStore } from '../generic-store/reference'
 import { backendToFrontendStoreActions } from '../generic-store/actions'
 import { updateRuntimeParameter } from '../element-node-fnc'
-import { MariaDbBase, SqlCondition, load } from 'hibernatets'
+import { sharedPool } from '../../../models/db-state'
+import { MariaDbBase, SqlCondition, addArrayItem, load } from 'hibernatets'
 
 const pool = new MariaDbBase(undefined, {
   connectionLimit: 6,
@@ -37,7 +38,6 @@ addTypeImpl({
     const actionName = node.parameters.action
     const receiver = await load(Receiver, new SqlCondition("deviceKey").equals(node.parameters?.receiver), [], {
       first: true,
-      interceptArrayFunctions: true,
       deep: {
         actions: {
           filter: new SqlCondition("name").equals(actionName),
@@ -57,10 +57,12 @@ addTypeImpl({
       logKibana("ERROR", "didnt find action")
       return
     }
-
-    receiver.events.push(new ReceiverEvent({
-      name: actionName
-    }))
+    addArrayItem(receiver, "events", {
+      db: sharedPool,
+      items: [new ReceiverEvent({
+        name: actionName
+      })]
+    })
 
 
 

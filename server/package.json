@@ -23,7 +23,7 @@
     "express-ws": "^4.0.0",
     "firebase-admin": "^12.3.0",
     "generic-type-guard": "^3.5.0",
-    "hibernatets": "^2.0.105",
+    "hibernatets": "^2.0.107",
     "jsdom": "^24.0.0",
     "json-schema-merger": "^0.1.11",
     "json2dts": "^0.0.2",

@@ -6,6 +6,7 @@ import { loadOne } from 'express-hibernate-wrapper';
 import { load } from 'hibernatets';
 
 class SenderLoader {
+
   readonly cacheTime = 1000 * 60 * 5;
 
   lastAllLoaded: number
@@ -15,6 +16,16 @@ class SenderLoader {
   }> = {
 
     }
+
+  getLastEventsTime() {
+    const twoMonthsAgo = Date.now() - (1000 * 60 * 60 * 24 * 60);
+    return twoMonthsAgo
+  }
+
+  async loadSenderById(itemRef: string) {
+    throw new Error('Method not implemented.');
+  }
+
   async loadSender(deviceKey: string) {
     const cacheVal = this.senderCache[deviceKey];
     if (!cacheVal || (cacheVal.loaded + this.cacheTime) < Date.now()) {
@@ -27,7 +38,6 @@ class SenderLoader {
           transformation: "TRUE = TRUE",
           receiver: "TRUE = TRUE",
         },
-        interceptArrayFunctions: true,
         db: sharedPool
       })
       this.senderCache[deviceKey] = {
@@ -44,24 +54,23 @@ class SenderLoader {
 
   async loadSenders() {
 
-    const twoMonthsAgo = Date.now() - (1000 * 60 * 60 * 24 * 60);
+    const oneMonthsAgo = Date.now() - (1000 * 60 * 60 * 24 * 30);
     const [senders, sounds] = await Promise.all([
       (async () => {
         if (this.lastAllLoaded && this.lastAllLoaded + this.cacheTime > Date.now()) {
           return Object.values(this.senderCache).map(c => c.value)
         }
-        const senders = await load(Sender, 'true = true', [twoMonthsAgo], {
+        this.lastAllLoaded = Date.now()
+        const senders = await load(Sender, 'true = true', [oneMonthsAgo], {
           deep: {
             connections: "TRUE = TRUE",
-            events: "`timestamp` > " + twoMonthsAgo,
-            batteryEntries: "`timestamp` > " + twoMonthsAgo,
+            events: "`timestamp` > " + oneMonthsAgo,
+            batteryEntries: "`timestamp` > " + oneMonthsAgo,
             transformation: "TRUE = TRUE",
             receiver: "TRUE = TRUE",
           },
-          interceptArrayFunctions: true,
           db: sharedPool
         })
-        this.lastAllLoaded = Date.now()
         for (const sender of senders) {
           this.senderCache[sender.deviceKey] = {
             loaded: Date.now(),
@@ -70,7 +79,7 @@ class SenderLoader {
         }
         return senders
       })(),
-      load(Sound, 'true=true')
+      load(Sound, 'true=true', [], { db: sharedPool })
     ])
 
 
