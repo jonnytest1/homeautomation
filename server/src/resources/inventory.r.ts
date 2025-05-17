@@ -160,13 +160,22 @@ export class INventoryResource {
 
     const location = new Location()
 
-    if (!rootLoc) {
-      rootLoc = await load(Location, l => l.id = -1, undefined, {
+    if (!req.body.parent || req.body.parent === -1) {
+      if (!rootLoc) {
+        rootLoc = await load(Location, l => l.id = -1, undefined, {
+          db: pool,
+          first: true
+        });
+      }
+      location.parent = rootLoc
+    } else {
+      const parentLoc = await load(Location, l => l.id = req.body.parent, undefined, {
         db: pool,
         first: true
       });
+
+      location.parent = parentLoc
     }
-    location.parent = rootLoc
     await assign(location, { ...req.body });
     await save(location)
     await queries(location)
@@ -219,9 +228,8 @@ export class INventoryResource {
         }
       }),
     ])
-    debugger;
     location.parent = parentlocation
     await queries(location)
-    res.send("ok")
+    res.send("{}")
   }
 }
