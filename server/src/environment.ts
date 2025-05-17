@@ -19,6 +19,7 @@ function preloadEnv() {
 }
 preloadEnv();
 export const environment = process.env as {
+  DB_USER?: string;
   FFMPEG?: string;
   MEDIA_ROOT: string;
   SKIP_NPM: string | number;

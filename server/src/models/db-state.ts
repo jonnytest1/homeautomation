@@ -1,3 +1,4 @@
+import { environment } from '../environment';
 import { MariaDbBase, setMariaDbPoolDefaults } from 'hibernatets/dbs/mariadb-base';
 
 
@@ -12,10 +13,21 @@ setMariaDbPoolDefaults({
 export function setDbInit() {
   dbInitialited = true
 }
-export const sharedPool = new MariaDbBase(undefined, {
-  connectionLimit: 40,
-  acquireTimeout: 20 * 1000,
-  connectTimeout: 15 * 1000
 
+if (!environment.DB_USER) {
+  throw new Error("no database configuration in environment")
+}
+
+export const sharedPool = new MariaDbBase(undefined, {
+  connectionLimit: 80,
+  acquireTimeout: 20 * 1000,
+  connectTimeout: 15 * 1000,
+
+
+
+
+  keepAliveDelay: 5000,
+  idleTimeout: 560,
+  maxAllowedPacket: 67108864
 
 })

@@ -8,7 +8,6 @@ import { Transformation } from '../models/transformation';
 import { logKibana } from '../util/log';
 import { senderLoader } from '../services/sender-loader';
 import { SenderTriggerService } from '../services/sender-trigger-service';
-import { mqttConnection } from '../services/mqtt-api';
 import { emitEvent } from '../services/generic-node/generic-node-service';
 import { TscCompiler } from '../util/tsc-compiler';
 import { Sound } from '../models/sound';
@@ -158,7 +157,7 @@ export class SenderResource {
   async getSenders(req, res: HttpResponse) {
     const senders = await senderLoader.loadSenders()
 
-    const mqttSenders = mqttConnection.getDevices()
+    //const mqttSenders = mqttConnection.getDevices()
     res.send(senders);
   }
   @POST({

@@ -1,5 +1,5 @@
 import { settable } from 'express-hibernate-wrapper';
-import { column, primary, table } from 'hibernatets';
+import { column, mapping, Mappings, primary, table } from 'hibernatets';
 
 @table()
 export class Location {
@@ -9,4 +9,13 @@ export class Location {
   @column()
   @settable
   description: string
+
+
+
+  @mapping(Mappings.OneToOne, Promise.resolve(Location))
+  parent: Location
+
+
+  parentOffset
+
 }

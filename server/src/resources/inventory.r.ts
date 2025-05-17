@@ -4,6 +4,7 @@ import { Order } from '../models/inventory/order';
 import { imageLaoder } from '../services/image-converter';
 import { logKibana } from '../util/log';
 import { Location } from "../models/inventory/location"
+import { sharedPool } from '../models/db-state';
 import { assign, GET, HttpRequest, HttpResponse, Path, POST } from 'express-hibernate-wrapper';
 import { load, queries, save, SqlCondition } from 'hibernatets';
 import { MariaDbBase } from 'hibernatets/dbs/mariadb-base';
@@ -18,6 +19,9 @@ const pool = new MariaDbBase(undefined, {
   maxAllowedPacket: 67108864
 
 })
+
+
+let rootLoc: Location
 
 @Path('inventory')
 export class INventoryResource {
@@ -105,10 +109,35 @@ export class INventoryResource {
 
   @GET("/location")
   async getLocations(req: HttpRequest, res: HttpResponse) {
-    const locaitons = await load(Location, SqlCondition.ALL, undefined, {
-      db: pool
+    const locations = await load(Location, SqlCondition.ALL, undefined, {
+      db: pool,
+      deep: {
+        parent: {
+          filter: SqlCondition.ALL,
+          depths: 1
+        }
+      }
     });
-    res.send(locaitons)
+
+    if (!locations.some(loc => loc.id === -1)) {
+      const rootLoc = new Location()
+      rootLoc.description = "root"
+
+      rootLoc.id = -1
+      const [id] = await save(rootLoc, { db: sharedPool })
+      await sharedPool.sqlquery({} as never, "UPDATE location SET id=-1 WHERE id = ?", [id])
+      rootLoc.id = -1
+
+
+      for (const loc of locations) {
+        if (loc.parent === null) {
+          loc.parent = rootLoc
+        }
+      }
+      locations.unshift(rootLoc)
+    }
+
+    res.send(locations)
   }
 
 
@@ -130,7 +159,15 @@ export class INventoryResource {
     }
 
     const location = new Location()
-    await assign(location, req.body);
+
+    if (!rootLoc) {
+      rootLoc = await load(Location, l => l.id = -1, undefined, {
+        db: pool,
+        first: true
+      });
+    }
+    location.parent = rootLoc
+    await assign(location, { ...req.body });
     await save(location)
     await queries(location)
 
@@ -159,6 +196,32 @@ export class INventoryResource {
     debugger;
     item.location = location
     await queries(item)
+    res.send("ok")
+  }
+
+
+  @POST("/location/parent")
+  async setLocationParent(req: HttpRequest, res: HttpResponse) {
+    const body = req.body
+    const [location, parentlocation] = await Promise.all([
+      load(Location, {
+        filter: l => l.id = +body.locationId,
+        options: {
+          first: true,
+          db: pool,
+        }
+      }),
+      load(Location, {
+        filter: l => l.id = +body.parentLocationId,
+        options: {
+          first: true,
+          db: pool,
+        }
+      }),
+    ])
+    debugger;
+    location.parent = parentlocation
+    await queries(location)
     res.send("ok")
   }
 }
