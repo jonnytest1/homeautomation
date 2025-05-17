@@ -3,6 +3,12 @@
     height: 100%;
     margin-left: 20px;
 
+    .loc{
+      margin-left: 50%;
+      transform: translateX(-50%);
+    }
+
+
     .orderImage{
         max-width: 50px;
     }

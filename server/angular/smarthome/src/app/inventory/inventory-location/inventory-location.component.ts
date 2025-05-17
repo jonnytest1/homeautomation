@@ -1,17 +1,20 @@
 import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 import { map, switchMap } from 'rxjs/operators';
 import { SettingsService } from '../../settings.service';
 import { InventoryService } from '../inventory.service';
 import { CommonModule } from '@angular/common';
 import { ThreeDdisplayComponent } from '../3ddisplay/3ddisplay.component';
+import { MatIcon, MatIconModule } from '@angular/material/icon';
+import { AddLocationComponent } from '../add-location/add-location.component';
+import type { LocationFe } from '../../settings/interfaces';
 
 @Component({
   selector: 'app-inventory-location',
   templateUrl: './inventory-location.component.html',
   styleUrls: ['./inventory-location.component.scss'],
   standalone: true,
-  imports: [CommonModule, ThreeDdisplayComponent]
+  imports: [CommonModule, ThreeDdisplayComponent, RouterLink, MatIconModule, AddLocationComponent]
 })
 export class InventoryLocationComponent implements OnInit {
 
@@ -36,6 +39,14 @@ export class InventoryLocationComponent implements OnInit {
 
   )
 
+  childlocations$ = this.inventoryService.locations$.pipe(
+    switchMap(locs => this.activeRoute.params.pipe(map(param => {
+
+      return locs.filter(loc => loc.parent?.id && loc.parent?.id == +param.locationid)
+    })))
+
+  )
+
 
   model: File
 
@@ -54,4 +65,13 @@ export class InventoryLocationComponent implements OnInit {
 
     evt.preventDefault()
   }
+
+  updateParent(value: string, location: LocationFe, locs: Array<LocationFe>) {
+    const newPArent = locs.find(loc => loc.id == +value)
+    if (!newPArent) {
+      return
+    }
+    this.inventoryService.setParent(location, newPArent)
+  }
+
 }

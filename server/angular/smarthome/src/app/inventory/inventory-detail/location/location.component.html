@@ -7,9 +7,8 @@
     {{loc.description}}
   </option>
 </select>
-<button (click)="newLocation(newloc)">
-  <mat-icon>add</mat-icon>
-</button>
+<app-add-location></app-add-location>
+
 <a href="/inventory/location/{{item?.location?.id}}">
   go to location ({{item?.location?.id}})
 </a>
@@ -20,12 +19,3 @@
 <button (click)="scan_qr(videoRef)">
   <mat-icon>camera_alt</mat-icon>
 </button>
-
-
-<ng-template #newloc>
-  <form (submit)="createNewLcoation($event)">
-    description: <input name="description">
-
-    <button type="submit">submit</button>
-  </form>
-</ng-template>

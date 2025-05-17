@@ -1,6 +1,9 @@
 <div class="wrapper"
      *ngIf="(inventory$|async) ;let inventory">
 
+  <a routerLink="location"
+     class="loc">locations</a>
+
   <table mat-table
          matSort
          [dataSource]="dataSource"

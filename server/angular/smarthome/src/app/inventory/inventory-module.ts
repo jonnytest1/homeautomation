@@ -15,6 +15,9 @@ export const routes: Array<Route> = [
   }, {
     path: 'item/:itemid',
     component: InventoryDetailComponent
+  }, , {
+    path: 'location',
+    redirectTo: "location/-1"
   }, {
     path: 'location/:locationid',
     component: InventoryLocationComponent

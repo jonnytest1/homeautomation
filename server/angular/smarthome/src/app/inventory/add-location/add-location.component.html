@@ -1,0 +1,12 @@
+<button (click)="newLocation(newloc)"
+        title="new location">
+  <mat-icon>add</mat-icon>
+</button>
+
+<ng-template #newloc>
+  <form (submit)="createNewLcoation($event)">
+    description: <input name="description">
+
+    <button type="submit">submit</button>
+  </form>
+</ng-template>

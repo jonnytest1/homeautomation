@@ -32,12 +32,38 @@ export class InventoryService {
     this.httpClient.post(`${environment.prefixPath}rest/inventory/location`, {
       locationId: locId,
       itemid: item.id
+    }, {
+      responseType: "text"
     }).subscribe()
   }
 
-  createLocation(item: LocationFe) {
+  updateLocation(item: LocationFe) {
     return this.httpClient.post<LocationFe>(`${environment.prefixPath}rest/inventory/location/new`, item).subscribe(loc => {
       this.locations$.next([...this.locations$.value, loc])
+      this.loadLocations()
     })
   }
+
+
+  setParent(loc: LocationFe, parent: LocationFe) {
+    this.httpClient.post(`${environment.prefixPath}rest/inventory/location/parent`, {
+      locationId: loc.id,
+      parentLocationId: parent.id
+    }, {
+      responseType: "text"
+    }).subscribe(() => {
+      this.locations$.next(this.locations$.value.map(dataloc => {
+        if (loc.id === dataloc.id) {
+          return {
+            ...loc,
+            parent: parent
+          }
+        }
+        return dataloc
+      }))
+      this.loadLocations()
+    })
+  }
+
+
 }

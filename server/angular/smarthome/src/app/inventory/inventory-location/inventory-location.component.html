@@ -1,19 +1,57 @@
 <div *ngIf="location$|async ;let location">
   <h1>{{location.id}}</h1>
   <p>{{location.description}}</p>
+
   <div (drop)="onDrop($event)"
        (dragover)="$event.preventDefault()"
-       style="min-width: 200px;min-height: 40px;background-color: red;"></div>
+       style="min-width: 200px;min-height: 40px;border: 1px solid black">
+    model drop zone
+  </div>
   <app-3ddisplay *ngIf="model"
                  [model]="model"></app-3ddisplay>
+  <br>
+  <div class="parent"
+       *ngIf="this.inventoryService.locations$|async;let locations">
+    <select #parentSelect
+            (change)="updateParent(parentSelect.value,location,locations)"
+            [value]="null">
+      <option [selected]="!location.parent"></option>
+      <option *ngFor="let sellocation of locations"
+              [value]="sellocation.id"
+              [selected]="location.parent?.id && sellocation.id===location.parent?.id">
+        {{sellocation.id}}
+        {{sellocation.description}}
+      </option>
+    </select>
+    <a *ngIf="location.parent"
+       routerLink="../{{location.parent.id}}"><mat-icon>open_in_new</mat-icon></a>
+    <app-add-location [parentId]="location.id"></app-add-location>
+  </div>
+
+
 </div>
 
 
 
+
+
+
+
 <div *ngIf="items$|async;let items">
+  <h5 *ngIf="items.length">items</h5>
   <div *ngFor="let item of items">
     <img class="orderImage"
          [src]="item.orderImageSrc" />
     <a href="/inventory/item/{{item.id}}">{{item.description}}</a>
+  </div>
+</div>
+
+<h5>children</h5>
+
+<div class="children">
+  <div *ngFor="let child of childlocations$|async">
+    <a routerLink="../{{child.id}}">{{child.id}}
+      {{child.description}}</a>
+
   </div>
 </div>
