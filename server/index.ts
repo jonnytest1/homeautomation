@@ -6,11 +6,9 @@ import { setDbInit } from './src/models/db-state';
 import { hasLoaded$ } from './src/services/generic-node/generic-node-service';
 import { updateDatabase } from 'hibernatets';
 import { HttpRequest, initialize, ResponseCodeError } from 'express-hibernate-wrapper';
-import NodeMediaServer from "node-media-server"
-import BrowserToRtmpServer from "@api.video/browser-to-rtmp-server"
-import http from 'http';
-
+import { Worker } from "worker_threads"
 import "./src/profiler"
+import { join } from 'path';
 Error.stackTraceLimit = Infinity;
 const fetch = require('node-fetch');
 const https = require('https');
@@ -118,67 +116,14 @@ updateDatabase(__dirname + '/src/models')
     }, 500)
   });
 
-const nodeMediaServer = new NodeMediaServer({
-  rtmp: {
-    port: 11935,
-    chunk_size: 60000,
-    gop_cache: true,
-    ping: 30,
-    ping_timeout: 60,
-  },
-
-  http: {
-    port: 8000,
-    allow_origin: '*',
-    mediaroot: environment.MEDIA_ROOT ?? "./media"
-
-  },
-  trans: {
-    ffmpeg: environment.FFMPEG ?? "/usr/bin/ffmpeg",
-    tasks: [{
-      mp4: true,
-      hls: true,
-      app: "live",
-
-    }]
-  }
+new Worker(join(__dirname, "src", "main-node-media-server.ts"), {
+  execArgv: ['-r', 'ts-node/register']
 })
-nodeMediaServer.run();
 
-const server = http.createServer();
-const browserToRtmpSerrver = new BrowserToRtmpServer(server, {
-  socketio: {
-    cors: {
-      origin: "*",
-      methods: ["GET", "POST"],
-      credentials: true,
+new Worker(join(__dirname, "src", "main-rtmp-server.ts"), {
+  execArgv: ['-r', 'ts-node/register']
+})
 
-    }
-  },
-  //@ts-expect-error
-  ffmpegPath: environment.FFMPEG,
-
-  hooks: {
-    /*start: (socket, config) => {
-      // for instance, you can here access the socket associated to the current request:
-      // const token = socket.handshake.auth.token; // retrieve the auth token
-      // ...
-      const rtmpEndpoint = "rtmp://localhost:11935/live/abcd" // you can generate here the RTMP endpoint url according to your need:
-      return {
-        ...config,
-        port: 11935,
-        rtmp: rtmpEndpoint
-      }
-    }*/
-  }
-});
-browserToRtmpSerrver.on("connection", (c) => {
-  console.log(`New media connection uuid: ${c.uuid}`);
-});
-browserToRtmpSerrver.on('error', (error, streamId) => {
-  console.error('[❌ RTMP Server Error]', streamId, error);
-});
-server.listen(21234);
 /*
 app.get('/dbtest', async (req, res) => {
     res.send('helloo worl.d');

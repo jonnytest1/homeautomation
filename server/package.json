@@ -72,7 +72,7 @@
     "test": "jest",
     "echo": "printf \"\\033c\"",
     "lint": "eslint . --ext .ts",
-    "start": "node -r ts-node/register --inspect=0.0.0.0:4747 ./index.ts",
+    "start": "node -r ts-node/register --inspect=0.0.0.0:4747 ./index.ts --max-old-space-size $MB_LIMIT",
     "image-graph": "madge --image graph-circular.svg ./src/**/* --circular --exclude 'module-src/quicktype-core'"
   },
   "author": "j",
