@@ -1,6 +1,19 @@
+import { logKibana } from './util/log';
 import BrowserToRtmpServer from '@api.video/browser-to-rtmp-server';
 import http from 'http';
 const server = http.createServer();
+
+
+process.on('uncaughtException', function (err) {
+  console.log(err);
+  logKibana("ERROR", "uncaught global exception", err);
+})
+
+process.on('unhandledRejection', function (err) {
+  console.log(err);
+  logKibana("ERROR", "uncaught promise reject", err);
+})
+
 const browserToRtmpSerrver = new BrowserToRtmpServer(server, {
   socketio: {
     cors: {
@@ -33,4 +46,6 @@ browserToRtmpSerrver.on("connection", (c) => {
 browserToRtmpSerrver.on('error', (error, streamId) => {
   console.error('[❌ RTMP Server Error]', streamId, error);
 });
+console.log("rtmp server listen")
 server.listen(21234);
+

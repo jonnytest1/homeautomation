@@ -1,5 +1,16 @@
 import { environment } from './environment';
+import { logKibana } from './util/log';
 import NodeMediaServer from 'node-media-server';
+
+process.on('uncaughtException', function (err) {
+  console.log(err);
+  logKibana("ERROR", "uncaught global exception", err);
+})
+
+process.on('unhandledRejection', function (err) {
+  console.log(err);
+  logKibana("ERROR", "uncaught promise reject", err);
+})
 
 const nodeMediaServer = new NodeMediaServer({
   rtmp: {
@@ -24,5 +35,5 @@ const nodeMediaServer = new NodeMediaServer({
     }]
   }
 })
-debugger
+console.log("node media server run")
 nodeMediaServer.run();
