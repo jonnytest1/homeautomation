@@ -1,18 +1,10 @@
-import { logKibana } from './util/log';
+import { environment } from './environment';
 import BrowserToRtmpServer from '@api.video/browser-to-rtmp-server';
 import http from 'http';
 const server = http.createServer();
 
 
-process.on('uncaughtException', function (err) {
-  console.log(err);
-  logKibana("ERROR", "uncaught global exception", err);
-})
-
-process.on('unhandledRejection', function (err) {
-  console.log(err);
-  logKibana("ERROR", "uncaught promise reject", err);
-})
+type Opts = ConstructorParameters<typeof BrowserToRtmpServer>["1"]
 
 const browserToRtmpSerrver = new BrowserToRtmpServer(server, {
   socketio: {
@@ -23,7 +15,6 @@ const browserToRtmpSerrver = new BrowserToRtmpServer(server, {
 
     }
   },
-  //@ts-expect-error
   ffmpegPath: environment.FFMPEG,
 
   hooks: {
@@ -39,7 +30,7 @@ const browserToRtmpSerrver = new BrowserToRtmpServer(server, {
       }
     }*/
   }
-});
+} as Opts);
 browserToRtmpSerrver.on("connection", (c) => {
   console.log(`New media connection uuid: ${c.uuid}`);
 });
