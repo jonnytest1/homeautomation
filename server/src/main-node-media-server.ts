@@ -1,7 +1,5 @@
 import { environment } from './environment';
 import NodeMediaServer from 'node-media-server';
-import { spawn, type ChildProcessWithoutNullStreams } from "child_process"
-import { join } from 'path';
 
 const ffmpegExe = environment.FFMPEG ?? "/usr/bin/ffmpeg";
 const mediaFolder = environment.MEDIA_ROOT ?? "./media";
@@ -22,13 +20,14 @@ const mediaServerConfig: ConstructorParameters<typeof NodeMediaServer>[0] = {
   trans: {
     ffmpeg: ffmpegExe,
     tasks: [{
-      mp4: false,
+      mp4: true,
+      mp4Flags: "[f=mp4:movflags=frag_keyframe+empty_moov]",
       app: "live",
     }]
   }
 };
 const nodeMediaServer = new NodeMediaServer(mediaServerConfig)
-
+/*
 const mkvMap: Record<string, ChildProcessWithoutNullStreams> = {}
 nodeMediaServer.on('postPublish', (id, streamPath, args) => {
 
@@ -71,7 +70,7 @@ nodeMediaServer.on('donePublish', (id, path, args) => {
   mkvMap[path]?.kill()
   console.warn("publish done " + path)
 });
-
+*/
 
 nodeMediaServer.run();
 console.log("node media server run")
