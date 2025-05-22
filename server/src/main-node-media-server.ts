@@ -34,14 +34,14 @@ nodeMediaServer.on('postPublish', (id, streamPath, args) => {
 
 
 
-  const streamMatch = streamPath.match(/live\/(?<name>[a-z]*)(\/|$)/);
+  const streamMatch = streamPath.match(/live\/(?<name>[a-z0-9]*)(\/|$)/);
   if (streamMatch?.groups?.name) {
     const inputStream = 'rtmp://127.0.0.1:' + mediaServerConfig.rtmp?.port + streamPath
     const now = new Date().toISOString().replace(/[:.]/g, "-");
     const out = join(mediaFolder, "live", streamMatch?.groups?.name, `stream_${streamMatch.groups.name}_${now}.mkv`)
     const ffmpegProcess = spawn(ffmpegExe, ["-i", inputStream, "-c", "copy", "-f", "matroska", out]);
     mkvMap[streamPath] = ffmpegProcess
-
+    console.log("started mkv stream recording")
 
     ffmpegProcess.on('error', (e) => {
       console.error(e)
