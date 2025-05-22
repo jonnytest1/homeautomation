@@ -14,6 +14,7 @@ import { selectNodeByUuid } from '../../generic-store/selectors';
 import { Timer } from '../../../../models/timer';
 import type { NodeEventData } from '../../typing/node-event-data';
 import { defaultCallTrace } from '../../node-trace';
+import { sharedPool } from '../../../../models/db-state';
 import { z } from 'zod';
 import type { JSONSchema6 } from 'json-schema';
 import { load } from 'hibernatets';
@@ -304,7 +305,9 @@ addTypeImpl({
     initPr.resolve()
 
 
-    load(Timer, "(alerted='false' OR endtimestamp > (UNIX_TIMESTAMP(DATE_ADD(NOW(),INTERVAL -1 DAY)))*1000) AND timerClassName='generic-event'").then((timers) => {
+    load(Timer, "(alerted='false' OR endtimestamp > (UNIX_TIMESTAMP(DATE_ADD(NOW(),INTERVAL -1 DAY)))*1000) AND timerClassName='generic-event'", [], {
+      db: sharedPool
+    }).then((timers) => {
       for (const timer of timers) {
         startRuntimeInterval(timer)
       }
