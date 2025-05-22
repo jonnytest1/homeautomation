@@ -108,7 +108,22 @@ export class MQTTIntegration {
         }
       })
 
-      this.connection.subscribe("#", { rh: 1, qos: 1 }, (err,) => {
+      this.connection.subscribe("cmnd/#", { rh: 1, qos: 1 }, (err,) => {
+        if (err) {
+          logKibana("ERROR", "error connecting to mqtt")
+        }
+      })
+      this.connection.subscribe("+/discovery/#", { rh: 1, qos: 1 }, (err,) => {
+        if (err) {
+          logKibana("ERROR", "error connecting to mqtt")
+        }
+      })
+      this.connection.subscribe("stat/#", { rh: 1, qos: 1 }, (err,) => {
+        if (err) {
+          logKibana("ERROR", "error connecting to mqtt")
+        }
+      })
+      this.connection.subscribe("tele/#", { rh: 1, qos: 1 }, (err,) => {
         if (err) {
           logKibana("ERROR", "error connecting to mqtt")
         }
