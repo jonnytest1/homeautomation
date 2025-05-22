@@ -117,11 +117,11 @@ updateDatabase(__dirname + '/src/models')
   });
 
 new Worker(join(__dirname, "src", "main-node-media-server.ts"), {
-  execArgv: ['-r', 'ts-node/register']
+  execArgv: ['-r', 'ts-node/register'], name: "node media server"
 })
 
 new Worker(join(__dirname, "src", "main-rtmp-server.ts"), {
-  execArgv: ['-r', 'ts-node/register']
+  execArgv: ['-r', 'ts-node/register'], name: "rtmp to nms proxy"
 })
 
 /*

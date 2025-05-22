@@ -1,18 +1,11 @@
 import { environment } from './environment';
-import { logKibana } from './util/log';
 import NodeMediaServer from 'node-media-server';
+import { spawn, type ChildProcessWithoutNullStreams } from "child_process"
+import { join } from 'path';
 
-process.on('uncaughtException', function (err) {
-  console.log(err);
-  logKibana("ERROR", "uncaught global exception", err);
-})
-
-process.on('unhandledRejection', function (err) {
-  console.log(err);
-  logKibana("ERROR", "uncaught promise reject", err);
-})
-
-const nodeMediaServer = new NodeMediaServer({
+const ffmpegExe = environment.FFMPEG ?? "/usr/bin/ffmpeg";
+const mediaFolder = environment.MEDIA_ROOT ?? "./media";
+const mediaServerConfig: ConstructorParameters<typeof NodeMediaServer>[0] = {
   rtmp: {
     port: 11935,
     chunk_size: 60000,
@@ -24,16 +17,61 @@ const nodeMediaServer = new NodeMediaServer({
   http: {
     port: 8000,
     allow_origin: '*',
-    mediaroot: environment.MEDIA_ROOT ?? "./media"
-
+    mediaroot: mediaFolder
   },
   trans: {
-    ffmpeg: environment.FFMPEG ?? "/usr/bin/ffmpeg",
+    ffmpeg: ffmpegExe,
     tasks: [{
-      mp4: true,
+      mp4: false,
       app: "live",
     }]
   }
-})
-console.log("node media server run")
+};
+const nodeMediaServer = new NodeMediaServer(mediaServerConfig)
+
+const mkvMap: Record<string, ChildProcessWithoutNullStreams> = {}
+nodeMediaServer.on('postPublish', (id, streamPath, args) => {
+
+
+
+  const streamMatch = streamPath.match(/live\/(?<name>[a-z]*)(\/|$)/);
+  if (streamMatch?.groups?.name) {
+    const inputStream = 'rtmp://127.0.0.1:' + mediaServerConfig.rtmp?.port + streamPath
+    const now = new Date().toISOString().replace(/[:.]/g, "-");
+    const out = join(mediaFolder, "live", streamMatch?.groups?.name, `stream_${streamMatch.groups.name}_${now}.mkv`)
+    const ffmpegProcess = spawn(ffmpegExe, ["-i", inputStream, "-c", "copy", "-f", "matroska", out]);
+    mkvMap[streamPath] = ffmpegProcess
+
+
+    ffmpegProcess.on('error', (e) => {
+      console.error(e)
+      debugger
+    });
+
+    ffmpegProcess.stdout.on('data', (data) => {
+      console.warn(data.toString())
+    });
+
+    ffmpegProcess.stderr.on('data', (data) => {
+      //console.error(data.toString())
+    });
+
+    ffmpegProcess.on('close', (code) => {
+
+      console.log("closed ffmpeg" + code)
+    });
+  }
+
+
+
+
+
+});
+nodeMediaServer.on('donePublish', (id, path, args) => {
+  mkvMap[path]?.kill()
+  console.warn("publish done " + path)
+});
+
+
 nodeMediaServer.run();
+console.log("node media server run")
