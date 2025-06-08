@@ -1,8 +1,9 @@
 import { Location } from "./location"
 import { Order } from './order';
-import { settable } from 'express-hibernate-wrapper';
+import { autosaveable, settable } from 'express-hibernate-wrapper';
 import { column, mapping, Mappings, primary, table } from 'hibernatets';
 @table()
+@autosaveable
 export class Item {
 
 
@@ -12,6 +13,13 @@ export class Item {
   @column()
   @settable
   description: string
+
+  @column()
+  @settable
+  customdescription?: string
+
+
+
 
   @mapping(Mappings.OneToOne, Location, l => l.id)
   location: Location

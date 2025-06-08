@@ -12,7 +12,7 @@ import { EventEmitter } from "events"
 const hookKeys = true;
 const copyDatabase = true
 const eventReplay = false
-const setMqttGlobals = true
+const setMqttGlobals = false
 
 
 const env = environment as typeof environment & {
@@ -91,11 +91,22 @@ if (copyDatabase) {
   const dataSelectDb = new MariaDbBase("smarthome")
   const dataInsertDb = new MariaDbBase("random")
 
+  const copyInv = true
+
+
   const tables = ["receiver"]
+
+  if (copyInv) {
+    tables.push("order")
+    tables.push("item")
+    tables.push("location")
+    tables.push("inventoryitem")
+  }
+
   schemaDb.selectQuery<{ TABLE_NAME: string }>("SELECT DISTINCT TABLE_NAME FROM `information_schema`.`COLUMNS` WHERE TABLE_SCHEMA='smarthome'",
     [])
     .then(async infoSchema => {
-
+      schemaDb.end()
       for (const tableResult of infoSchema) {
         const tableName = tableResult.TABLE_NAME
 
@@ -124,7 +135,7 @@ if (copyDatabase) {
           const sql = `INSERT INTO \`${tableName}\` (${columns}) VALUES ${entrySql} ON DUPLICATE KEY UPDATE ${updateSql}`
 
           try {
-            await dataInsertDb.sqlquery(sql, params)
+            await dataInsertDb.sqlquery({} as never, sql, params)
 
           } catch (e) {
             debugger
@@ -138,6 +149,9 @@ if (copyDatabase) {
 
     }).catch(e => {
       debugger
+    }).then(() => {
+      dataSelectDb.end()
+      dataInsertDb.end()
     })
 
 }

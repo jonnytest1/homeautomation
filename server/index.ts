@@ -20,7 +20,7 @@ if (environment.setup) {
   require("./test/local-setup.ts")
 }
 
-updateDatabase(__dirname + '/src/models')
+updateDatabase(__dirname + '/src/models', {})
   .then(async () => {
     setDbInit()
     console.log("updated database")
@@ -117,7 +117,7 @@ updateDatabase(__dirname + '/src/models')
   });
 
 new Worker(join(__dirname, "src", "main-node-media-server.ts"), {
-  execArgv: ['-r', 'ts-node/register'], name: "node media server"
+  execArgv: ['-r', 'ts-node/register'], name: "node media server",
 })
 
 new Worker(join(__dirname, "src", "main-rtmp-server.ts"), {

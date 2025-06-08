@@ -5,6 +5,7 @@ import { imageLaoder } from '../services/image-converter';
 import { logKibana } from '../util/log';
 import { Location } from "../models/inventory/location"
 import { sharedPool } from '../models/db-state';
+import { ResolvablePromise } from '../util/resolvable-promise';
 import { assign, GET, HttpRequest, HttpResponse, Path, POST } from 'express-hibernate-wrapper';
 import { load, queries, save, SqlCondition } from 'hibernatets';
 import { MariaDbBase } from 'hibernatets/dbs/mariadb-base';
@@ -26,6 +27,8 @@ let rootLoc: Location
 @Path('inventory')
 export class INventoryResource {
 
+  static inventoryLock = ResolvablePromise.delayed(0)
+
 
   @POST("")
   async addInventoryItem(req: HttpRequest, res: HttpResponse) {
@@ -35,74 +38,89 @@ export class INventoryResource {
     if (!(orderArray instanceof Array)) {
       orderArray = [orderArray]
     }
-    const items = await load(Item, SqlCondition.ALL, undefined, {
-      deep: ["order"],
-      db: pool
-    });
 
-    const trackingInfoMap: Record<string, Item> = {}
-    const productLinkMap = {}
-    items
-      .forEach(item => {
-        if (item.order?.orderId) {
-          trackingInfoMap[item.order.orderId] = item
-        }
-        if (item.productLink) {
-          productLinkMap[item.productLink] = item
-        }
+    await INventoryResource.inventoryLock.prRef
+    INventoryResource.inventoryLock = new ResolvablePromise()
+
+    try {
+
+
+      const items = await load(Item, SqlCondition.ALL, undefined, {
+        deep: ["order"],
+        db: pool,
+        skipFields: ["orderImageSrc"]
       });
 
-
-    for (const order of orderArray) {
-      let existing: Order | undefined = undefined
-
-      if (order.orderId) {
-        existing = trackingInfoMap[order.orderId]?.order
-      }
-
-      if (!existing) {
-        existing = new Order()
-
-
-      }
-
-      await assign(existing, order, { onlyWhenFalsy: true });
-      if (order.type) {
-        existing.type = order.type
-
-      }
-      if (order.orderStatus) {
-        existing.orderStatus = order.orderStatus
-      }
+      const trackingInfoMap: Record<string, Item> = {}
+      const productLinkMap = {}
+      items
+        .forEach(item => {
+          if (item.order?.orderId) {
+            trackingInfoMap[item.order.orderId] = item
+          }
+          if (item.productLink) {
+            productLinkMap[item.productLink] = item
+          }
+        });
 
 
-      if (!order.items?.length) {
-        logKibana("ERROR", {
-          message: "no items in order",
-          orderid: order.orderId
-        })
-        continue
-      }
+      const queriesList: Array<Promise<unknown>> = []
 
-      for (const item of order.items) {
-        if (item.orderImageSrc) {
-          item.orderImageSrc = await imageLaoder(item.orderImageSrc)
+      for (const order of orderArray) {
+        let existing: Order | undefined = undefined
+
+        if (order.orderId) {
+          existing = trackingInfoMap[order.orderId]?.order
         }
-        const storedItem = productLinkMap[item.productLink]
 
-        if (item.productLink && storedItem) {
-          await assign(storedItem, item, { onlyWhenFalsy: false })
-          await queries(storedItem)
-        } else {
-          const newItem = new Item()
-          newItem.order = existing
-          await assign(newItem, item);
-          await save(newItem)
+        if (!existing) {
+          existing = new Order()
+
+
+        }
+
+        await assign(existing, order, { onlyWhenFalsy: true });
+        if (order.type) {
+          existing.type = order.type
+
+        }
+        if (order.orderStatus) {
+          existing.orderStatus = order.orderStatus
+        }
+
+
+        if (!order.items?.length) {
+          logKibana("ERROR", {
+            message: "no items in order",
+            orderid: order.orderId
+          })
+          continue
+        }
+
+        for (const item of order.items) {
+          if (item.orderImageSrc) {
+            item.orderImageSrc = await imageLaoder(item.orderImageSrc)
+          }
+          const storedItem = productLinkMap[item.productLink]
+
+          if (item.productLink && storedItem) {
+            await assign(storedItem, item, { onlyWhenFalsy: false })
+            await queries(storedItem)
+          } else {
+            const newItem = new Item()
+            newItem.order = existing
+            await assign(newItem, item);
+            await save(newItem)
+            queriesList.push(queries(newItem))
+          }
         }
       }
+      res.send("done")
+      FrontendWebsocket.updateInventory(...FrontendWebsocket.websockets)
+      await Promise.all(queriesList)
+    } finally {
+      INventoryResource.inventoryLock.resolve()
     }
-    res.send("done")
-    FrontendWebsocket.updateInventory(...FrontendWebsocket.websockets)
   }
 
 
