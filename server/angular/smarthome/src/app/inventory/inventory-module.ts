@@ -5,6 +5,8 @@ import { RouterModule, type Route } from '@angular/router';
 import { InventoryComponent } from './inventory.component';
 import { InventoryDetailComponent } from './inventory-detail/inventory-detail.component';
 import { InventoryLocationComponent } from './inventory-location/inventory-location.component';
+import { AutosavingDirective } from '../autosaving/autosaving';
+import { AutosavingDirectiveProviderDirective } from '../autosaving/autosaveProvider';
 
 
 
@@ -29,9 +31,9 @@ export const routes: Array<Route> = [
 @NgModule({
   imports: [
     CommonModule,
-    RouterModule.forChild(routes)
+    RouterModule.forChild(routes),
   ],
-  declarations: [],
+
   providers: [InventoryService]
 })
 export class InventoryModule {

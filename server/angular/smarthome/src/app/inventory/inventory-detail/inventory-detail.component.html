@@ -1,7 +1,16 @@
 <ng-container *ngIf="item$|async;let item">
+
   <h3>{{item.id}}</h3><br> {{item.description}}<br>
+  <form autosaving-provider
+        [dataRef]="item.id"
+        dataRefName="itemRef"
+        resource="item">
 
+    <textarea name=customdescription
+              [(ngModel)]="item.customdescription"
+              autosaving>{{item.customdescription}}</textarea><br>
 
+  </form>
 
   <img [src]="item.orderImageSrc">
 

@@ -87,7 +87,13 @@ export class InventoryComponent implements OnInit, AfterViewInit {
         const regex = new RegExp(`(.*)${filter.split("").map(c => `(${c})`).join("(.*?)")}(.*)`)
 
         const pId = getProductId(data)
-        const strs: Array<string | { value: string, column?: string }> = ["description", { column: "productLink", value: pId }]
+        const strs: Array<string | { value: string, column?: string }> = [
+          "description", {
+            column: "customdescription",
+            value: data.customdescription?.split("\n")[0]
+          },
+          { column: "productLink", value: pId }
+        ]
         if (data.location) {
           strs.push({
             value: data.location.description,

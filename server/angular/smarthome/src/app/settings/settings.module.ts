@@ -2,8 +2,8 @@ import { SettingsComponent } from './settings.component';
 import { SenderBottomSheetComponent } from './sender-bottom-sheet/sender-bottom-sheet.component';
 import { ReceiverBottomsheetComponent } from './receiver-bottomsheet/receiver-bottomsheet.component';
 import { ConnectionBottomsheetComponent } from './connection-bottomsheet/connection-bottomsheet.component';
-import { AutosavingDirective, ROOT_AUTOSAVE_PATH } from './autosaving/autosaving';
-import { AutosavingDirectiveProviderDirective } from './autosaving/autosaveProvider';
+import { AutosavingDirective, ROOT_AUTOSAVE_PATH } from '../autosaving/autosaving';
+import { AutosavingDirectiveProviderDirective } from '../autosaving/autosaveProvider';
 import { TransformerDropDownComponent } from './sender-bottom-sheet/transformer-drop-down/transformer-drop-down.component';
 import { TimersComponent } from './sender-bottom-sheet/timers/timers.component';
 import { routes } from './settings.routes';
@@ -49,8 +49,6 @@ export class MyHammerConfig extends HammerGestureConfig {
     ConnectionBottomsheetComponent,
     SenderBottomSheetComponent,
     ReceiverBottomsheetComponent,
-    AutosavingDirective,
-    AutosavingDirectiveProviderDirective,
     CodeEditorComponent, MobileSenderComponent,
     TransformerDropDownComponent,
     TimersComponent,
@@ -65,7 +63,8 @@ export class MyHammerConfig extends HammerGestureConfig {
     MatGridListModule,
     RouterModule.forChild(routes),
     MatCardModule, MatSelectModule,
-
+    AutosavingDirective,
+    AutosavingDirectiveProviderDirective,
     NgCircleProgressModule.forRoot(),
     MatBottomSheetModule, HttpClientModule, MatDialogModule,
     MatSnackBarModule, MatInputModule, MatButtonModule

@@ -6,6 +6,7 @@ import { NgModel, NG_VALUE_ACCESSOR } from '@angular/forms';
 export const ROOT_AUTOSAVE_PATH = new InjectionToken<string>('AUTO_SAVE_PATH');
 @Directive({
   selector: '[autosaving]',
+  standalone: true
 })
 export class AutosavingDirective implements OnInit {
   constructor(

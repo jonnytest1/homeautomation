@@ -6,12 +6,18 @@ import { CommonModule } from '@angular/common';
 import { InventoryService } from '../inventory.service';
 import { LocationComponent } from './location/location.component';
 import { getProductId } from '../inventory-util';
+import { AutosavingDirectiveProviderDirective } from '../../autosaving/autosaveProvider';
+import { AutosavingDirective } from '../../autosaving/autosaving';
+import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-inventory-detail',
   templateUrl: './inventory-detail.component.html',
   styleUrls: ['./inventory-detail.component.scss'],
-  imports: [CommonModule, LocationComponent],
+  imports: [CommonModule, LocationComponent,
+    FormsModule,
+    AutosavingDirective,
+    AutosavingDirectiveProviderDirective],
   standalone: true
 })
 export class InventoryDetailComponent implements OnInit {
