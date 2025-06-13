@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { map, switchMap } from 'rxjs/operators';
 import { SettingsService } from '../../settings.service';
@@ -48,11 +48,10 @@ export class InventoryLocationComponent implements OnInit {
 
   )
 
-
+  public activeRoute = inject(ActivatedRoute)
   model: File
 
-  constructor(public activeRoute: ActivatedRoute,
-    private readonly dataService: SettingsService,
+  constructor(private readonly dataService: SettingsService,
     public inventoryService: InventoryService) {
     inventoryService.loadLocations()
   }

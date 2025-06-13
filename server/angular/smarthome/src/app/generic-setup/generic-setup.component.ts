@@ -20,7 +20,7 @@ import { BehaviorSubject, combineLatest } from 'rxjs';
 import { Store } from '@ngrx/store';
 import { backendActions } from './store/action';
 import { selectNodeDefs, selectNodeData, selectNode, selectTouchMode } from './store/selectors';
-import { LetModule } from '@ngrx/component';
+
 import { isSameConnection } from './line/line-util';
 import { ClipboardService } from './clipboard-service';
 import type { ActiveElement } from './generic-setup-types';
@@ -42,7 +42,7 @@ const dataHandler = new DropDataHandler<DropData>()
   styleUrls: ['./generic-setup.component.scss'],
   providers: [ClipboardService, TouchModeService],
   imports: [
-    CommonModule, PositionDirective, LineComponent, GenericNodeComponent, GenericOptionsComponent, LetModule,
+    CommonModule, PositionDirective, LineComponent, GenericNodeComponent, GenericOptionsComponent,
     DblClickDirective, MBDragStartDirective, MBDropDirective, MBDagOverDirective, MatIconModule
   ],
   standalone: true

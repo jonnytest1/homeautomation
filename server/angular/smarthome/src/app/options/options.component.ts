@@ -4,10 +4,17 @@ import type { OnInit } from '@angular/core';
 import { ChangeDetectorRef, Component, inject } from '@angular/core';
 import { DomSanitizer } from '@angular/platform-browser';
 import { FireBaseService } from '../foreground-firebase-service';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+import { FormsModule } from '@angular/forms';
+import { MatInputModule } from '@angular/material/input';
+import { AsyncPipe } from '@angular/common';
 @Component({
   selector: 'app-options',
   templateUrl: './options.component.html',
-  styleUrls: ['./options.component.less']
+  styleUrls: ['./options.component.less'],
+  standalone: true,
+  imports: [MatButtonModule, MatIconModule, FormsModule, MatInputModule, AsyncPipe]
 })
 export class OptionsComponent implements OnInit {
 

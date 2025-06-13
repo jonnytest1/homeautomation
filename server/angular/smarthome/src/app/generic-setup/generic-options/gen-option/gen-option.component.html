@@ -1,55 +1,44 @@
 <div (change)="paramChanged($event)">
-
-
-  @if (definition.type=='select') {
+  @if (definition.type == "select") {
     <app-select-option
       [name]="name"
       [value]="value"
-    [definition]="definition"></app-select-option>
+      [definition]="definition"
+    ></app-select-option>
+  } @else if (definition.type == "monaco") {
+    <app-monaco-option
+      [name]="name"
+      [value]="value"
+      [definition]="definition"
+      [node]="node"
+    >
+    </app-monaco-option>
+  } @else if (definition.type == "iframe") {
+    <app-frame-option
+      [definition]="definition"
+      [name]="name"
+      [currentValue]="value"
+    ></app-frame-option>
+  } @else if (definition.type == "boolean") {
+    <input type="checkbox" #inputRef name="{{ name }}" [checked]="value" />
+  } @else if (definition.type === "text" && definition.multiline) {
+    <textarea name="{{ name }}" (keyup)="$event.stopPropagation()">{{
+      value ?? ""
+    }}</textarea>
+  } @else if (definition.type === "button") {
+    <input type="hidden" #btninput name="{{ name }}" />
+    <button (click)="updateButtonInput(btninput)">
+      {{ definition.text ?? name }}
+    </button>
   } @else {
-    @if (definition.type=='monaco') {
-      <app-monaco-option [name]="name"
-        [value]="value"
-        [definition]="definition"
-        [node]="node">
-      </app-monaco-option>
-    } @else {
-      @if (definition.type=='iframe') {
-        <app-frame-option [definition]="definition"
-          [name]="name"
-        [currentValue]="value"></app-frame-option>
-      } @else {
-        @if (definition.type=='boolean') {
-          <input type="checkbox"
-            #inputRef
-            name="{{name}}"
-            [checked]="value">
-          } @else {
-            @if (definition.type==='text' && definition.multiline) {
-              <textarea name="{{name}}"
-              (keyup)="$event.stopPropagation()">{{value ??''}}</textarea>
-            } @else {
-              @if (definition.type==='button') {
-                <input type="hidden"
-                  #btninput
-                  name="{{name}}">
-                  <button (click)="updateButtonInput(btninput)">{{definition.text??name}}</button>
-                } @else {
-                  <input [type]="definition.type"
-                    #inputRef
-                    (keyup)="$event.stopPropagation()"
-                    name="{{name}}"
-                    [min]="definition.type=='number'?definition.min:undefined"
-                    [max]="definition.type=='number'?definition.max:undefined"
-                    [value]="value ??''">
-                  }
-                }
-              }
-            }
-          }
-        }
-
-
-
-
-      </div>
+    <input
+      [type]="definition.type"
+      #inputRef
+      (keyup)="$event.stopPropagation()"
+      name="{{ name }}"
+      [min]="definition.type == 'number' ? definition.min : undefined"
+      [max]="definition.type == 'number' ? definition.max : undefined"
+      [value]="value ?? ''"
+    />
+  }
+</div>

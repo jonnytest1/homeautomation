@@ -1,6 +1,3 @@
-@if (sender$|async let sender) {
-  <app-timers
-    [maxCols]="1"
-    [sender]="sender">
-  </app-timers>
+@if (sender$ | async; as sender) {
+  <app-timers [maxCols]="1" [sender]="sender"> </app-timers>
 }

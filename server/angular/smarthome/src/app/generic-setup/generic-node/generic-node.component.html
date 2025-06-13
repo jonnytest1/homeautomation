@@ -1,65 +1,73 @@
-<div class="node"
-  *ngrxLet="node$ |async let node">
-
-  <div class="border"
-    [class.selected]="selected"
-    [class.inputactive]="(is_Active|async)?.input"
-    [class.outputactive]="(is_Active|async)?.output"
-    [style.minHeight]="(((size$|async)??0)+1)*20+'px'">
-    <div class="icons">
-      @if (node?.runtimeContext?.outputSchema?.jsonSchema) {
-        <mat-icon>security</mat-icon>
-      }
-
-    </div>
-    @if (node?.runtimeContext?.inputSchema) {
-      <mat-icon class="inputSchema"
-      [title]="node?.runtimeContext?.inputSchema?.dts?.replace('export type ','')">security</mat-icon>
-    }
-    @for (n of inputsCt$|async; track n; let indx = $index) {
-      <div #input
-        class="connector inputs"
-        [class.editable]="editable"
-        [class.selected]="selected"
-        [style.top]="(indx*20+10+6+2)+'px'"
-        id="droptarget{{indx}}_{{prefix}}"
-        (mb-dragleave)="dragLeave(input)"
-        (mb-dragover)="dropAllowed($event,input)"
-        (mb-drop)="onDrop($event,indx)">
+<div class="node">
+  @if ({ node: node$ | async }; as node) {
+    <div
+      class="border"
+      [class.selected]="selected"
+      [class.inputactive]="(is_Active | async)?.input"
+      [class.outputactive]="(is_Active | async)?.output"
+      [style.minHeight]="(((size$ | async) ?? 0) + 1) * 20 + 'px'"
+    >
+      <div class="icons">
+        @if (node?.node?.runtimeContext?.outputSchema?.jsonSchema) {
+          <mat-icon>security</mat-icon>
+        }
       </div>
-    }
-    <span class="type"
-      [class.highlighted]="highlightText">
-      <ng-content></ng-content>
-    </span>
-    <div>
-      @if (node?.parameters?.name) {
-        <span
-        class="nodename">{{node?.parameters?.name}} - </span>
-        }@if (node?.runtimeContext?.info) {
-        <span
-        >{{node?.runtimeContext?.info}}</span>
+      @if (node?.node?.runtimeContext?.inputSchema) {
+        <mat-icon
+          class="inputSchema"
+          [title]="
+            node?.node?.runtimeContext?.inputSchema?.dts?.replace(
+              'export type ',
+              ''
+            )
+          "
+          >security</mat-icon
+        >
       }
-    </div>
-    @if ((activity$|async)?.output; as output) {
+      @for (n of inputsCt$ | async; track n; let indx = $index) {
+        <div
+          #input
+          class="connector inputs"
+          [class.editable]="editable"
+          [class.selected]="selected"
+          [style.top]="indx * 20 + 10 + 6 + 2 + 'px'"
+          id="droptarget{{ indx }}_{{ prefix }}"
+          (mb-dragleave)="dragLeave(input)"
+          (mb-dragover)="dropAllowed($event, input)"
+          (mb-drop)="onDrop($event, indx)"
+        ></div>
+      }
+      <span class="type" [class.highlighted]="highlightText">
+        <ng-content></ng-content>
+      </span>
       <div>
-        {{localeTime(output)}}
+        @if (node?.node?.parameters?.name) {
+          <span class="nodename">{{ node?.node?.parameters?.name }} - </span>
+        }
+        @if (node?.node?.runtimeContext?.info) {
+          <span>{{ node?.node?.runtimeContext?.info }}</span>
+        }
       </div>
-    }
-    @if ((con.debugMode|async) && !!node) {
-      <span>{{node.uuid}}</span>
-    }
-    @for (n of outputCt$|async; track n; let indx = $index) {
-      <div #output
-        class="connector ouputs"
-        [class.editable]="editable"
-        [class.selected]="selected"
-        [style.top]="(indx*20+10+6+2)+'px'"
-        (mousedown)="$event.stopPropagation()"
-        draggable="true"
-        (mb-dragstart)="startConnection($event,indx)">
-      </div>
-    }
-  </div>
-
+      @if ((activity$ | async)?.output; as output) {
+        <div>
+          {{ localeTime(output) }}
+        </div>
+      }
+      @if ((con.debugMode | async) && !!node) {
+        <span>{{ node.node?.uuid }}</span>
+      }
+      @for (n of outputCt$ | async; track n; let indx = $index) {
+        <div
+          #output
+          class="connector ouputs"
+          [class.editable]="editable"
+          [class.selected]="selected"
+          [style.top]="indx * 20 + 10 + 6 + 2 + 'px'"
+          (mousedown)="$event.stopPropagation()"
+          draggable="true"
+          (mb-dragstart)="startConnection($event, indx)"
+        ></div>
+      }
+    </div>
+  }
 </div>

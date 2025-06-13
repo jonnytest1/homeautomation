@@ -8,9 +8,10 @@ import { TimerParser } from '../utils/time-parser';
 @Component({
   selector: 'app-timers',
   templateUrl: './timers.component.html',
-  styleUrls: ['./timers.component.scss']
+  styleUrls: ['./timers.component.scss'],
+
 })
-export class TimersComponent implements OnInit, OnDestroy,AfterViewChecked {
+export class TimersComponent implements OnInit, OnDestroy, AfterViewChecked {
 
   timers: Array<TimerFe> = [];
 
@@ -27,21 +28,21 @@ export class TimersComponent implements OnInit, OnDestroy,AfterViewChecked {
   senders: Array<SenderFe>;
 
   @ViewChildren("timerWrapper")
-  items:QueryList<ElementRef<HTMLElement>>
+  items: QueryList<ElementRef<HTMLElement>>
 
   constructor(private service: SettingsService,
     private cdr: ChangeDetectorRef) {}
 
-     @HostListener('window:resize')
+  @HostListener('window:resize')
   ngAfterViewChecked(): void {
-    let smallest=Infinity
+    let smallest = Infinity
 
-    for(const item of this.items){
-      smallest= Math.min(item.nativeElement.getBoundingClientRect().width,smallest)
+    for (const item of this.items) {
+      smallest = Math.min(item.nativeElement.getBoundingClientRect().width, smallest)
     }
-  
-    for(const item of this.items){
-      item.nativeElement.style.maxWidth=Math.floor(smallest)+"px"
+
+    for (const item of this.items) {
+      item.nativeElement.style.maxWidth = Math.floor(smallest) + "px"
     }
 
   }

@@ -71,8 +71,6 @@ export class MyHammerConfig extends HammerGestureConfig {
       // or after 30 seconds (whichever comes first).
       registrationStrategy: 'registerWhenStable:30000'
     }),
-    provideFirebaseApp(() => initializeApp(environment.firebaseConfig)),
-    provideMessaging(() => getMessaging())
   ],
   providers: [
     SettingsService,
@@ -94,7 +92,8 @@ export class MyHammerConfig extends HammerGestureConfig {
       provide: ROOT_AUTOSAVE_PATH,
       useValue: environment.prefixPath + 'rest/auto/'
     },
-
+    provideFirebaseApp(() => initializeApp(environment.firebaseConfig)),
+    provideMessaging(() => getMessaging())
   ],
   bootstrap: [AppComponent]
 })

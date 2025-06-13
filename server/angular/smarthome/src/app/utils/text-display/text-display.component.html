@@ -1,42 +1,44 @@
 <span>
-
   <!--  <form autosaving-provider
   [dataRef]="item.id"
   dataRefName="itemRef"
   resource="item">
   -->
   <form>
-    <textarea hidden
-              #textref
-              [resource]="editable.resource"
-              [autosavingDisabled]="!editable"
-              [dataRefName]="editable.dataRefName??'itemRef'"
-              [dataRef]="editable.dataRef"
-              [name]="editable.name"
-              [ngModel]="text"
-              autosaving>
-    </textarea><br>
+    <textarea
+      hidden
+      #textref
+      [resource]="editable.resource"
+      [autosavingDisabled]="!editable"
+      [dataRefName]="editable.dataRefName ?? 'itemRef'"
+      [dataRef]="editable.dataRef"
+      [name]="editable.name"
+      [ngModel]="text"
+      autosaving
+    >
+    </textarea
+    ><br />
   </form>
 
-
   @for (word of parsedText; track word; let index = $index) {
-  @if (word.type==='url') {
-  <a [href]="word.value"
-     [contentEditable]="!!editable"
-     (input)="edited($event,index,textref)"
-     [target]="urlTarget">{{word.value}}</a>
-  } @else {
-  @if (word.type==='text') {
-  <span [contentEditable]="!!editable"
-        (input)="edited($event,index,textref)">{{word.value}}</span>
-  } @else {
-  @if (word.type==='break') {
-  <br>
-  } @else {
-  @if (word.type==='space';) {
-  <span>&nbsp;</span>
-  }
-  }
-  }
+    @if (word.type === "url") {
+      <a
+        [href]="word.value"
+        [contentEditable]="!!editable"
+        (input)="edited($event, index, textref)"
+        [target]="urlTarget"
+        >{{ word.value }}</a
+      >
+    } @else if (word.type === "text") {
+      <span
+        [contentEditable]="!!editable"
+        (input)="edited($event, index, textref)"
+        >{{ word.value }}</span
+      >
+    } @else if (word.type === "break") {
+      <br />
+    } @else if (word.type === "space") {
+      <span>&nbsp;</span>
+    }
   }
 </span>

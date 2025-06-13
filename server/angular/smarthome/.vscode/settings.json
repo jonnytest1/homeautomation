@@ -4,7 +4,7 @@
   "eslint.format.enable": true,
   "editor.suggestSelection": "first",
   "[html]": {
-    "editor.defaultFormatter": "vscode.html-language-features",
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
   },
   "html.format.wrapAttributes": "force-aligned",
   "javascript.preferences.importModuleSpecifier": "relative",

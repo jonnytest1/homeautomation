@@ -1,84 +1,84 @@
-<div class="gridinset"
-  (mousemove)="updatePosition($event,gridwrapper)"
-  (touchmove)="updatePosition($event,gridwrapper)"
+<div
+  class="gridinset"
+  (mousemove)="updatePosition($event, gridwrapper)"
+  (touchmove)="updatePosition($event, gridwrapper)"
   (mouseup)="drop()"
-  (touchend)="drop()">
-  <div class="gridwrapper"
-    [class.configuration]="state.isadding||state.isredrag"
-    #gridwrapper>
-
-    @for (config of (tempNodes??nodes); track track($index, config)) {
-      <div class="griditem"
-        >
+  (touchend)="drop()"
+>
+  <div
+    class="gridwrapper"
+    [class.configuration]="state.isadding || state.isredrag"
+    #gridwrapper
+  >
+    @for (config of tempNodes ?? nodes; track track($index, config)) {
+      <div class="griditem">
         @if (state.isedit) {
-          <mat-icon
-            class="delete"
-          (clickcpt)="removeCfg(config,$event);">delete</mat-icon>
+          <mat-icon class="delete" (clickcpt)="removeCfg(config, $event)"
+            >delete</mat-icon
+          >
         }
-        @if (state.isedit && config.type=='button') {
-          <mat-icon
-            class="background"
-          (clickcpt)="addBackground(config)">add</mat-icon>
+        @if (state.isedit && config.type == "button") {
+          <mat-icon class="background" (clickcpt)="addBackground(config)"
+            >add</mat-icon
+          >
         }
-        <div (longpress)="configPressed(config,$event)"
+        <div
+          (longpress)="configPressed(config, $event)"
           longpress
-          (mousedown)="redrag(config,$event)"
-          (touchstart)="redrag(config,$event)">
-          @if (config.type=='button') {
-            <app-button
-              [config]="config"
-              (actionTrigger)="baseAction(config)">
+          (mousedown)="redrag(config, $event)"
+          (touchstart)="redrag(config, $event)"
+        >
+          @if (config.type == "button") {
+            <app-button [config]="config" (actionTrigger)="baseAction(config)">
             </app-button>
           }
-          @if (config.type=='progress') {
-            <app-progress
-              [config]="config">
-            </app-progress>
+          @if (config.type == "progress") {
+            <app-progress [config]="config"> </app-progress>
           }
-          @if (config.type=='diagram') {
-            <app-diagram
-              [config]="config">
-            </app-diagram>
+          @if (config.type == "diagram") {
+            <app-diagram [config]="config"> </app-diagram>
           }
         </div>
       </div>
     }
-
-
   </div>
 </div>
 
-@if (state.ispickingadd||state.isadding||state.isaddbackground) {
-  <div class="actions-backdrop"
-    (tap)="state.setpressable()"
-    >
-    @if ((receivers$|async); as receivers) {
-      <div class="actions"
-        >
+@if (state.ispickingadd || state.isadding || state.isaddbackground) {
+  <div class="actions-backdrop" (tap)="state.setpressable()">
+    @if (receivers$ | async; as receivers) {
+      <div class="actions">
         @for (receiver of receivers; track receiver) {
           @if (receiver) {
             @for (action of receiver.actions; track action) {
               @if (!state.isaddbackground) {
-                <div class="actionchoice"
-                  (mousedown)="dragNewActionStart($event,receiver,action)"
-                  (touchstart)="dragNewActionStart($event,receiver,action)"
-                  (touchmove)="updatePosition($event,gridwrapper)"
-                  (touchend)="drop()">
-                  <app-action-template [action]="action"
-                  [receiver]="receiver"></app-action-template>
+                <div
+                  class="actionchoice"
+                  (mousedown)="dragNewActionStart($event, receiver, action)"
+                  (touchstart)="dragNewActionStart($event, receiver, action)"
+                  (touchmove)="updatePosition($event, gridwrapper)"
+                  (touchend)="drop()"
+                >
+                  <app-action-template
+                    [action]="action"
+                    [receiver]="receiver"
+                  ></app-action-template>
                 </div>
               }
             }
             @if (receiver.events) {
-              @if ({name:'events',type:'diagram'} let action) {
+              @if ({ name: "events", type: "diagram" }; as action) {
                 <div
                   class="actionchoice"
-                  (mousedown)="dragNewActionStart($event,receiver,action)"
-                  (touchstart)="dragNewActionStart($event,receiver,action)"
-                  (touchmove)="updatePosition($event,gridwrapper)"
-                  (touchend)="drop()">
-                  <app-action-template [action]="action"
-                  [receiver]="receiver"></app-action-template>
+                  (mousedown)="dragNewActionStart($event, receiver, action)"
+                  (touchstart)="dragNewActionStart($event, receiver, action)"
+                  (touchmove)="updatePosition($event, gridwrapper)"
+                  (touchend)="drop()"
+                >
+                  <app-action-template
+                    [action]="action"
+                    [receiver]="receiver"
+                  ></app-action-template>
                 </div>
               }
             }
@@ -90,12 +90,15 @@
 }
 
 @if (!!tempNodes && !!tempCursorPos && !!tempData) {
-  <div class="dragoverlay"
-    [style.top]="tempCursorPos.y+'px'"
-    [style.left]="tempCursorPos.x+'px'"
-    >
-    <app-action-template [action]="tempData.action"
-    [receiver]="tempData.receiver"></app-action-template>
+  <div
+    class="dragoverlay"
+    [style.top]="tempCursorPos.y + 'px'"
+    [style.left]="tempCursorPos.x + 'px'"
+  >
+    <app-action-template
+      [action]="tempData.action"
+      [receiver]="tempData.receiver"
+    ></app-action-template>
   </div>
 }
 
@@ -104,8 +107,6 @@
 class="edit-button">
 <mat-icon>edit</mat-icon>
 </button> -->
-<button mat-fab
-  (click)="configSwipe()"
-  class="add-button">
+<button mat-fab (click)="configSwipe()" class="add-button">
   <mat-icon>add</mat-icon>
 </button>

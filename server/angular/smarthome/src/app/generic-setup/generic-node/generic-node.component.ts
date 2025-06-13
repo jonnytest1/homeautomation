@@ -1,4 +1,4 @@
-import { CommonModule } from '@angular/common';
+import { AsyncPipe, CommonModule } from '@angular/common';
 import type { AfterContentChecked, AfterViewChecked, AfterViewInit, OnChanges, OnDestroy, SimpleChanges } from '@angular/core';
 import { Component, Input, ElementRef, ViewChildren, QueryList } from '@angular/core';
 import { GenericNodesDataService } from '../generic-node-data-service';
@@ -10,16 +10,14 @@ import { Observable, combineLatest, of, timer } from "rxjs"
 import { map, } from 'rxjs/operators';
 import { Store } from '@ngrx/store';
 import { selectNode } from '../store/selectors';
-import { LetModule } from '@ngrx/component';
 import { StoreService } from '../store/store-service';
-import { logKibana } from '../../global-error-handler';
 import { MBDagOverDirective, MBDragLeaveDirective, MBDragStartDirective, MBDropDirective, type MBDragEvent } from '../../utils/directive/drag-start.directive';
 const dataHandler = new DropDataHandler<DropData>()
 @Component({
   selector: 'app-generic-node',
   templateUrl: './generic-node.component.html',
   styleUrls: ['./generic-node.component.scss'],
-  imports: [CommonModule, MatIconModule, LetModule, MBDropDirective, MBDragStartDirective, MBDagOverDirective, MBDragLeaveDirective],
+  imports: [CommonModule, MatIconModule, MBDropDirective, MBDragStartDirective, MBDagOverDirective, MBDragLeaveDirective, AsyncPipe],
   standalone: true
 })
 export class GenericNodeComponent implements OnChanges, AfterViewInit, OnDestroy {
@@ -134,6 +132,7 @@ export class GenericNodeComponent implements OnChanges, AfterViewInit, OnDestroy
     if (this.nodeUuid) {
 
       this.node$ = this.store.select(selectNode(this.nodeUuid))
+
     }
   }
   ngOnDestroy(): void {
