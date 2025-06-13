@@ -1,20 +1,23 @@
-<div class="wrapper"
-     *ngIf="receiver$ |async;let receiver">
-
-
-  <button #buttonRef
-          (click)="buttonClick(buttonRef)"
-          [style.backgroundColor]="getBackgroundColor(receiver.receiver)">
-    <div *ngIf="config.backgroundConfig"
-         class="backgrounddiagram">
-      <app-diagram [config]="config.backgroundConfig"
-                   [backgroundMode]="true"></app-diagram>
-    </div>
-    <div class="content">
-      <span class="text">{{config.receiver}} - {{config.displayText}}</span>
-      <img *ngIf="receiver.iconStr"
-           [src]="receiver.iconStr">
-    </div>
-
-  </button>
-</div>
+@if (receiver$ |async; as receiver) {
+  <div class="wrapper"
+    >
+    <button #buttonRef
+      (click)="buttonClick(buttonRef)"
+      [style.backgroundColor]="getBackgroundColor(receiver.receiver)">
+      @if (config.backgroundConfig) {
+        <div
+          class="backgrounddiagram">
+          <app-diagram [config]="config.backgroundConfig"
+          [backgroundMode]="true"></app-diagram>
+        </div>
+      }
+      <div class="content">
+        <span class="text">{{config.receiver}} - {{config.displayText}}</span>
+        @if (receiver.iconStr) {
+          <img
+            [src]="receiver.iconStr">
+        }
+      </div>
+    </button>
+  </div>
+}

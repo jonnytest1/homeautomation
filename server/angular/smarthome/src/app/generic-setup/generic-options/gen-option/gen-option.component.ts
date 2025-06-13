@@ -1,7 +1,7 @@
 import type { OnChanges, SimpleChanges } from '@angular/core';
 import { Component, Input, ViewChild, ElementRef } from '@angular/core';
 import { ElementNode, NodeOptionTypes } from '../../../settings/interfaces';
-import { CommonModule } from '@angular/common';
+
 import { FormsModule } from '@angular/forms';
 import type { SafeHtml } from '@angular/platform-browser';
 import { FrameOptionComponent } from '../frame-option/frame-option.component';
@@ -20,7 +20,7 @@ import { SelectOptionComponent } from './select-option/select-option.component';
   selector: 'app-gen-option',
   templateUrl: './gen-option.component.html',
   styleUrls: ['./gen-option.component.scss'],
-  imports: [CommonModule, FormsModule, FrameOptionComponent, MonacoOptionComponent, MonacoHtmlComponent, SelectOptionComponent],
+  imports: [FormsModule, FrameOptionComponent, MonacoOptionComponent, MonacoHtmlComponent, SelectOptionComponent],
   standalone: true
 })
 export class GenOptionComponent implements OnChanges {

@@ -1,19 +1,21 @@
-<div *ngFor="let item of parsedData">
-    <div class="nested"
-         *ngIf="isArray(item);else conView">
+@for (item of parsedData; track item) {
+  <div>
+    @if (isArray(item)) {
+      <div class="nested"
+        >
         <app-net-display [data]="cast(item)"></app-net-display>
-    </div>
-    <ng-template #conView>
-        <app-connection-view *ngIf="isObj(item);let item;else text"
-                             [data]="item"></app-connection-view>
-    </ng-template>
-    <ng-template #text>
-        <ng-container *ngIf="isItem(item);let asItem">
-            <span (click)="click(asItem)">
-                {{asItem.name??asItem.constructor.name}}
-            </span>
-        </ng-container>
-    </ng-template>
-
-
-</div>
+      </div>
+    } @else {
+      @if (isObj(item); as item) {
+        <app-connection-view
+        [data]="item"></app-connection-view>
+      } @else {
+        @if (isItem(item); as asItem) {
+          <span (click)="click(asItem)">
+            {{asItem.name??asItem.constructor.name}}
+          </span>
+        }
+      }
+    }
+  </div>
+}

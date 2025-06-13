@@ -1,47 +1,55 @@
 <div class="container">
 
   <mat-form-field appearance="fill"
-                  class="transformerselection">
+    class="transformerselection">
     <mat-label>transformer</mat-label>
     <mat-select [(value)]="transformer"
-                [panelClass]="'dropdown'"
-                (valueChange)="checkNew($event)">
-      <mat-select-trigger *ngIf="transformer">
-        {{transformer.name}}({{transformer.transformationKey}})
-      </mat-select-trigger>
+      [panelClass]="'dropdown'"
+      (valueChange)="checkNew($event)">
+      @if (transformer) {
+        <mat-select-trigger>
+          {{transformer.name}}({{transformer.transformationKey}})
+        </mat-select-trigger>
+      }
 
 
-      <mat-option *ngFor="let transformation of data.transformation"
-                  [value]="transformation">
-        <span class="listitem">
-          <button mat-icon-button
-                  class="right"
-                  (click)="transformationLoeschen($event)"
-                  aria-label="Example icon button with a vertical three dot icon">
-            <mat-icon>delete</mat-icon>
-          </button>
-          {{transformation.name}} ({{transformation.transformationKey}})
-        </span>
-      </mat-option>
-      <mat-option *ngFor="let transformationStr of missingKeys"
-                  [value]="{id:undefined,transformationKey:transformationStr}">
-        {{transformationStr}}
-      </mat-option>
-      <mat-option *ngIf="!concat(missingKeys,data.transformation).length">
-      </mat-option>
+      @for (transformation of data.transformation; track transformation) {
+        <mat-option
+          [value]="transformation">
+          <span class="listitem">
+            <button mat-icon-button
+              class="right"
+              (click)="transformationLoeschen($event)"
+              aria-label="Example icon button with a vertical three dot icon">
+              <mat-icon>delete</mat-icon>
+            </button>
+            {{transformation.name}} ({{transformation.transformationKey}})
+          </span>
+        </mat-option>
+      }
+      @for (transformationStr of missingKeys; track transformationStr) {
+        <mat-option
+          [value]="{id:undefined,transformationKey:transformationStr}">
+          {{transformationStr}}
+        </mat-option>
+      }
+      @if (!concat(missingKeys,data.transformation).length) {
+        <mat-option>
+        </mat-option>
+      }
     </mat-select>
   </mat-form-field>
   <mat-form-field class="transofrmerName"
-                  [style.visibility]="(transformer&& transformer.id)?'':'hidden'">
+    [style.visibility]="(transformer&& transformer.id)?'':'hidden'">
 
     <textarea matInput
-              rows="1"
-              autosaving
-              name=name
-              resource="transformation"
-              [dataRef]="transformer.id"
-              placeholder="Transformer Name"
-              [(ngModel)]="transformer.name">
+      rows="1"
+      autosaving
+      name=name
+      resource="transformation"
+      [dataRef]="transformer.id"
+      placeholder="Transformer Name"
+      [(ngModel)]="transformer.name">
     </textarea>
 
   </mat-form-field>

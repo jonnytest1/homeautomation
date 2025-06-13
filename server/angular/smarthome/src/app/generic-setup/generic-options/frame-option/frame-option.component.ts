@@ -1,4 +1,4 @@
-import { CommonModule } from '@angular/common';
+
 import type { OnChanges, OnInit, SimpleChanges } from '@angular/core';
 import { Component, Input, ViewChild, type AfterViewInit, type ElementRef } from '@angular/core';
 import type { SafeHtml } from '@angular/platform-browser';
@@ -11,7 +11,7 @@ import { environment } from '../../../../environments/environment';
   selector: 'app-frame-option',
   templateUrl: './frame-option.component.html',
   styleUrls: ['./frame-option.component.scss'],
-  imports: [CommonModule],
+  imports: [],
   standalone: true
 })
 export class FrameOptionComponent implements OnInit, OnChanges, AfterViewInit {

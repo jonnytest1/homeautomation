@@ -1,111 +1,108 @@
-<div class="page"
-     *ngIf="hasNodeDefs$|async;let nodeDefs;else nodata">
-
-
-
-
-  <ng-container *ngIf="nodeData$|async;let nodeData">
-    <div class="wrapper"
-         #wrapperElement
-         id="wrapper-drop"
-         (mb-dragover)="dropAllowed($event)"
-         (mb-drop)="onDrop($event,wrapperElement)"
-         (mousemove)="mouseDragMove($event,wrapperElement)"
-         (touchmove)="mouseDragMove($event,wrapperElement)"
-         (mouseup)="mouseDragEnd($event,wrapperElement)"
-         [disableDragPreview]="true"
-         [mouseDrag]="true"
-         (mb-dragstart)="mouseDragSTart($event,wrapperElement)"
-         (wheel)="onscroll($event);$event.preventDefault()">
-
-
-
-      <div *ngrxLet="activeElements$|async ;let activeElements"
-           class="background"
-           [style.transform]="getTransform()"
-           [style.transformOrigin]="'0px 0px'"
-           id="background-drop"
-           (click)="setActiveNode(undefined)"
-           (mb-dragover)="dropAllowed($event)">
-        <!-- (dragleave)="state.setdragging()" -->
-
-
-        <button (click)="viewUp()"
-                class="arrow_up"
-                *ngIf="(touchMode$|async)===true && (activeView$ |async)">
-          <mat-icon>arrow_upward</mat-icon>
-        </button>
-
-        <div *ngFor="let node of nodeData.nodes.nodes;trackBy:nodeByUuid"
-             draggable="true"
-             (mb-dragstart)="startDragUpdate($event,node)"
-             (mousedown)="$event.stopPropagation()"
-             (click)="setActiveNode(node,$event)"
-             (dbltap)="doubleClick(node);"
-             class="node"
-             [position]="node.position">
-          <app-generic-node [prefix]="node.type"
-                            [ngClass]="['node_'+node.uuid]"
-                            [nodeUuid]="node.uuid"
-                            [selected]="isInElements(activeElements,node)"
-                            [editable]="true"
-                            [highlightText]="isInElements(activeElements,node,true)">
-            {{node.type}}
-          </app-generic-node>
-
+@if (hasNodeDefs$|async; as nodeDefs) {
+  <div class="page"
+    >
+    @if (nodeData$|async; as nodeData) {
+      <div class="wrapper"
+        #wrapperElement
+        id="wrapper-drop"
+        (mb-dragover)="dropAllowed($event)"
+        (mb-drop)="onDrop($event,wrapperElement)"
+        (mousemove)="mouseDragMove($event,wrapperElement)"
+        (touchmove)="mouseDragMove($event,wrapperElement)"
+        (mouseup)="mouseDragEnd($event,wrapperElement)"
+        [disableDragPreview]="true"
+        [mouseDrag]="true"
+        (mb-dragstart)="mouseDragSTart($event,wrapperElement)"
+        (wheel)="onscroll($event);$event.preventDefault()">
+        <div *ngrxLet="activeElements$|async ;let activeElements"
+          class="background"
+          [style.transform]="getTransform()"
+          [style.transformOrigin]="'0px 0px'"
+          id="background-drop"
+          (click)="setActiveNode(undefined)"
+          (mb-dragover)="dropAllowed($event)">
+          <!-- (dragleave)="state.setdragging()" -->
+          @if ((touchMode$|async)===true && (activeView$ |async)) {
+            <button (click)="viewUp()"
+              class="arrow_up"
+              >
+              <mat-icon>arrow_upward</mat-icon>
+            </button>
+          }
+          @for (node of nodeData.nodes.nodes; track nodeByUuid($index, node)) {
+            <div
+              draggable="true"
+              (mb-dragstart)="startDragUpdate($event,node)"
+              (mousedown)="$event.stopPropagation()"
+              (click)="setActiveNode(node,$event)"
+              (dbltap)="doubleClick(node);"
+              class="node"
+              [position]="node.position">
+              <app-generic-node [prefix]="node.type"
+                [ngClass]="['node_'+node.uuid]"
+                [nodeUuid]="node.uuid"
+                [selected]="isInElements(activeElements,node)"
+                [editable]="true"
+                [highlightText]="isInElements(activeElements,node,true)">
+                {{node.type}}
+              </app-generic-node>
+            </div>
+          }
         </div>
-
-
       </div>
-
-
-    </div>
-    <ng-container *ngrxLet="activeElements$|async ;let activeElements">
-      <div *ngFor="let line of nodeData.nodes.connections">
-        <app-line [line]="line"
-                  (clicked)="setActiveNode(line,$event)"
-                  [active]="isInElements(activeElements,line)">
-        </app-line>
+      <ng-container *ngrxLet="activeElements$|async ;let activeElements">
+        @for (line of nodeData.nodes.connections; track line) {
+          <div>
+            <app-line [line]="line"
+              (clicked)="setActiveNode(line,$event)"
+              [active]="isInElements(activeElements,line)">
+            </app-line>
+          </div>
+        }
+        @if (connections.pendingConnection|async let con) {
+          <div>
+            <app-line [line]="con"
+              [editing]="true">
+            </app-line>
+          </div>
+        }
+      </ng-container>
+    }
+    @if (activeElement$ |async; as activeEl) {
+      <div class="properties"
+        >
+        @if (activeEl.type==='node') {
+          @if (activeEl.node) {
+            <app-generic-options
+              [nodeUuid]="activeEl.node.uuid">
+            </app-generic-options>
+          }
+        }
+        @if (activeEl.type==='connection') {
+          <div>
+            active conection
+            {{activeEl.con.uuid}}
+          </div>
+        }
       </div>
-      <div *ngIf="connections.pendingConnection|async let con">
-        <app-line [line]="con"
-                  [editing]="true">
-        </app-line>
+    }
+    @if ((hideMenu$|async)!==true) {
+      <div class="nodelist"
+        >
+        @for (n of nodeDefs|keyvalue; track n) {
+          <div
+            class="dragelement"
+            draggable="true"
+            (mb-dragstart)="startDrag($event,n.value)">
+            <app-generic-node [prefix]="n.value.type">
+              {{n.value.type}}
+            </app-generic-node>
+          </div>
+        }
       </div>
-    </ng-container>
-
-
-  </ng-container>
-  <div class="properties"
-       *ngIf="activeElement$ |async;let activeEl">
-    <ng-container *ngIf="activeEl.type==='node'">
-      <app-generic-options *ngIf="activeEl.node"
-                           [nodeUuid]="activeEl.node.uuid">
-      </app-generic-options>
-    </ng-container>
-    <div *ngIf="activeEl.type==='connection'">
-      active conection
-
-      {{activeEl.con.uuid}}
-    </div>
+    }
   </div>
-
-  <div class="nodelist"
-       *ngIf="(hideMenu$|async)!==true">
-    <div *ngFor="let n of nodeDefs|keyvalue"
-         class="dragelement"
-         draggable="true"
-         (mb-dragstart)="startDrag($event,n.value)">
-
-      <app-generic-node [prefix]="n.value.type">
-        {{n.value.type}}
-      </app-generic-node>
-
-    </div>
-
-  </div>
-</div>
-
-<ng-template #nodata>
+} @else {
   loading ...
-</ng-template>
+}
+

@@ -1,4 +1,4 @@
-import { CommonModule } from '@angular/common';
+
 import { Component, Input, OnInit, ViewChild, type ElementRef } from '@angular/core';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 import { InMemoryLaodMAanger } from './in-memory-laod-manager';
@@ -9,7 +9,7 @@ import { OrbitControls } from "three/examples/jsm/controls/OrbitControls"
   templateUrl: './3ddisplay.component.html',
   styleUrls: ['./3ddisplay.component.scss'],
   standalone: true,
-  imports: [CommonModule]
+  imports: []
 })
 export class ThreeDdisplayComponent implements OnInit {
 

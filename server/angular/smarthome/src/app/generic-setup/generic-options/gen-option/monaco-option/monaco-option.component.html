@@ -1,27 +1,26 @@
 <div>
 
   <textarea hidden
-            [minLength]="1"
-            #hiddenValue
-            name="{{name}}"></textarea>
-  <ng-container *ngFor="let cd of [node.uuid]">
-
-    <ng-container *ngIf="definition.type==='monaco' && definition.mode==='html';else tsEditor">
+    [minLength]="1"
+    #hiddenValue
+  name="{{name}}"></textarea>
+  @for (cd of [node.uuid]; track cd) {
+    @if (definition.type==='monaco' && definition.mode==='html') {
       <app-monaco-html (keyup)="$event.stopPropagation()"
-                       (code)="updateCode($event)"
-                       [ngModel]="code">
+        (code)="updateCode($event)"
+        [ngModel]="code">
       </app-monaco-html>
-    </ng-container>
-    <ng-template #tsEditor>
-      <app-monaco-editor *ngIf="typeDefinition|async ;let types"
-                         (keyup)="$event.stopPropagation()"
-                         [definition]="types"
-                         (change)="$event.stopPropagation()"
-                         (code)="updateCode($event)"
-                         [jsCode]="additionalVal"
-                         [ngModel]="code">
-      </app-monaco-editor>
-    </ng-template>
-
-  </ng-container>
+    } @else {
+      @if (typeDefinition|async ; as types) {
+        <app-monaco-editor
+          (keyup)="$event.stopPropagation()"
+          [definition]="types"
+          (change)="$event.stopPropagation()"
+          (code)="updateCode($event)"
+          [jsCode]="additionalVal"
+          [ngModel]="code">
+        </app-monaco-editor>
+      }
+    }
+  }
 </div>

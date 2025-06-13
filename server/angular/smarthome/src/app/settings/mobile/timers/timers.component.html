@@ -1,4 +1,6 @@
-<app-timers *ngIf="sender$|async let sender"
-            [maxCols]="1"
-            [sender]="sender">
-</app-timers>
+@if (sender$|async let sender) {
+  <app-timers
+    [maxCols]="1"
+    [sender]="sender">
+  </app-timers>
+}

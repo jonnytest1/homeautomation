@@ -1,69 +1,82 @@
 <div class="container"
-     (click)="error=undefined">
+  (click)="error=undefined">
   <h3>Sounds</h3>
 
-  <div *ngIf="error"
-       class="error">{{error}}</div>
-  <div class="sound"
-       *ngFor="let f of sounds">
-
-    {{f.key}} <audio controls
-           [src]="f.url">
+  @if (error) {
+    <div
+    class="error">{{error}}</div>
+  }
+  @for (f of sounds; track f) {
+    <div class="sound"
+      >
+      {{f.key}} <audio controls
+      [src]="f.url">
       <source [src]="f.url"
-              type="audio/mp3">
-      Your browser does not support the audio element.
-    </audio>
-    <br>
-  </div>
-  <form #form="ngForm">
-    <input matInput
-           placeholder="soundKey"
-           [(ngModel)]="addingSound.key" />
+        type="audio/mp3">
+        Your browser does not support the audio element.
+      </audio>
+      <br>
+      </div>
+    }
+    <form #form="ngForm">
+      <input matInput
+        placeholder="soundKey"
+        [(ngModel)]="addingSound.key" />
 
 
-    <div (drop)="onDrop($event)"
-         (dragover)="$event.preventDefault()"
-         style="background-color: green;">
-      <mat-label>{{ soundName|| 'Drop Sound File here'}}
-        <div class="divider"
-             *ngIf="!this.addingSound.file && !this.addingSound.url"></div>
-        <div class=inputWrapper
-             *ngIf="!this.addingSound.file && !this.addingSound.url"
-             (drop)="linkDrop($event)">
-          or link here
+        <div (drop)="onDrop($event)"
+          (dragover)="$event.preventDefault()"
+          style="background-color: green;">
+          <mat-label>{{ soundName|| 'Drop Sound File here'}}
+            @if (!this.addingSound.file && !this.addingSound.url) {
+              <div class="divider"
+              ></div>
+            }
+            @if (!this.addingSound.file && !this.addingSound.url) {
+              <div class=inputWrapper
+                (drop)="linkDrop($event)">
+                or link here
+              </div>
+            }
+
+          </mat-label>
+
         </div>
 
-      </mat-label>
+        <button mat-icon-button
+          (click)="addFile();$event.stopPropagation()">
+          <mat-icon>add_circle</mat-icon>
+        </button>
 
-    </div>
-
-    <button mat-icon-button
-            (click)="addFile();$event.stopPropagation()">
-      <mat-icon>add_circle</mat-icon>
-    </button>
-
-    <audio controls
-           *ngIf="addingSound.url"
-           [src]="addingSound.url">
-      <source [src]="addingSound.url"
+        @if (addingSound.url) {
+          <audio controls
+            [src]="addingSound.url">
+            <source [src]="addingSound.url"
               type="audio/mp3">
-      Your browser does not support the audio element.
-    </audio>
-  </form>
+              Your browser does not support the audio element.
+            </audio>
+          }
+        </form>
 
 
-  <h2>Service Worker</h2>
-  <button (click)="registerServiceWorker()">
-    <span *ngIf="firebase.registration$|async;else:register">
-      update
-    </span>
-    <ng-template #register>
-      register
-    </ng-template>
-  </button>
+        <h2>Service Worker</h2>
+        <button (click)="registerServiceWorker()">
+          @if (firebase.registration$|async) {
+            <span>
+              update
+            </span>
+          } @else {
+            register
+          }
+          <ng-template #register>
+            register
+          </ng-template>
+        </button>
 
 
-  <button *ngIf="firebase.registration$|async"
+        @if (firebase.registration$|async) {
+          <button
           (click)="firebase.unregister()">unregister</button>
+        }
 
-</div>
+      </div>

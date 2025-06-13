@@ -1,161 +1,150 @@
-<div class="wrapper"
-     *ngIf="(inventory$|async) ;let inventory">
-
-  <a routerLink="location"
-     class="loc">locations</a>
-
-  <table mat-table
-         matSort
-         [dataSource]="dataSource"
-         class="mat-table">
-
-    <ng-container matColumnDef="id">
-      <th mat-header-cell
+@if ((inventory$|async) ; as inventory) {
+  <div class="wrapper"
+    >
+    <a routerLink="location"
+    class="loc">locations</a>
+    <table mat-table
+      matSort
+      [dataSource]="dataSource"
+      class="mat-table">
+      <ng-container matColumnDef="id">
+        <th mat-header-cell
           mat-sort-header
-          *matHeaderCellDef> No. </th>
-      <td mat-cell
-          *matCellDef="let element"> {{element.id}} </td>
-    </ng-container>
-
-    <ng-container matColumnDef="description">
-      <th mat-header-cell
+        *matHeaderCellDef> No. </th>
+        <td mat-cell
+        *matCellDef="let element"> {{element.id}} </td>
+      </ng-container>
+      <ng-container matColumnDef="description">
+        <th mat-header-cell
           mat-sort-header
           *matHeaderCellDef> Name
-        <mat-form-field class="filter"
-                        (keydown)="$event.stopPropagation()"
-                        (click)="$event.stopPropagation()">
-          <input matInput
-                 placeholder="filter"
-                 (input)="setFilter($event,inventory)">
-        </mat-form-field>
-      </th>
-      <td mat-cell
-          *matCellDef="let element">
-        <a [routerLink]="'item/'+element.id">
-          <app-regex-highlighted [data]="element"
-                                 [highlightInfo]="element?.highlightInfo|async"
-                                 [text]="element.description??'- empty -'"></app-regex-highlighted>
-
-        </a>
-      </td>
-    </ng-container>
-    <ng-container matColumnDef="customdescription">
-      <th mat-header-cell
-          mat-sort-header
-          *matHeaderCellDef> tags
-      </th>
-      <td mat-cell
-          *matCellDef="let element">
-        <a [routerLink]="'item/'+element.id">
-          <app-regex-highlighted [data]="element"
-                                 [highlightInfo]="element?.highlightInfo|async"
-                                 [text]="element.customdescription?.split('\n')[0]"></app-regex-highlighted>
-
-        </a>
-      </td>
-    </ng-container>
-
-    <ng-container matColumnDef="amount">
-      <th mat-header-cell
-          mat-sort-header
-          *matHeaderCellDef> Amount </th>
-      <td mat-cell
-          class="number"
-          *matCellDef="let element"> {{element.amount ??'null'}} </td>
-    </ng-container>
-
-    <ng-container matColumnDef="productLink">
-      <th mat-header-cell
-          mat-sort-header
-          *matHeaderCellDef> PrductLink </th>
-      <td mat-cell
-          *matCellDef="let element">
-        <a [href]="element.productLink">
-          {{element.order?.type??''}}<br>
-          <app-regex-highlighted [data]="element"
-                                 [highlightInfo]="element?.highlightInfo|async"
-                                 [text]="getProductId(element)">
-          </app-regex-highlighted>
-
-        </a>
-      </td>
-    </ng-container>
-    <ng-container matColumnDef="orderImageSrc">
-      <th mat-header-cell
-          *matHeaderCellDef> Image </th>
-      <td mat-cell
-          *matCellDef="let element">
-        <img class="orderImage"
-             [src]="element.orderImageSrc" />
-      </td>
-    </ng-container>
-    <ng-container matColumnDef="location">
-      <th mat-header-cell
-          mat-sort-header
-          *matHeaderCellDef> Loc </th>
-      <td mat-cell
-          class="location"
-          *matCellDef="let element;">
-        <ng-container *ngIf="(element.order?.orderStatus == 'pending'&&!element.location);else dsiplay">
-          <a [href]="getTrackingLink(element)"
-             target="_blank">(pending)</a>
+          <mat-form-field class="filter"
+            (keydown)="$event.stopPropagation()"
+            (click)="$event.stopPropagation()">
+            <input matInput
+              placeholder="filter"
+              (input)="setFilter($event,inventory)">
+            </mat-form-field>
+          </th>
+          <td mat-cell
+            *matCellDef="let element">
+            <a [routerLink]="'item/'+element.id">
+              <app-regex-highlighted [data]="element"
+                [highlightInfo]="element?.highlightInfo|async"
+              [text]="element.description??'- empty -'"></app-regex-highlighted>
+            </a>
+          </td>
         </ng-container>
-        <ng-template #dsiplay>
-          <a [routerLink]="'location/'+element.location?.id">
-            <app-regex-highlighted [data]="element"
-                                   [highlightInfo]="element?.highlightInfo|async"
-                                   [text]="getLocation(element)">
-            </app-regex-highlighted>
-          </a>
+        <ng-container matColumnDef="customdescription">
+          <th mat-header-cell
+            mat-sort-header
+            *matHeaderCellDef> tags
+          </th>
+          <td mat-cell
+            *matCellDef="let element">
+            <a [routerLink]="'item/'+element.id">
+              <app-regex-highlighted [data]="element"
+                [highlightInfo]="element?.highlightInfo|async"
+              [text]="element.customdescription?.split('\n')[0]"></app-regex-highlighted>
+            </a>
+          </td>
+        </ng-container>
+        <ng-container matColumnDef="amount">
+          <th mat-header-cell
+            mat-sort-header
+          *matHeaderCellDef> Amount </th>
+          <td mat-cell
+            class="number"
+          *matCellDef="let element"> {{element.amount ??'null'}} </td>
+        </ng-container>
+        <ng-container matColumnDef="productLink">
+          <th mat-header-cell
+            mat-sort-header
+          *matHeaderCellDef> PrductLink </th>
+          <td mat-cell
+            *matCellDef="let element">
+            <a [href]="element.productLink">
+              {{element.order?.type??''}}<br>
+              <app-regex-highlighted [data]="element"
+                [highlightInfo]="element?.highlightInfo|async"
+                [text]="getProductId(element)">
+              </app-regex-highlighted>
+            </a>
+          </td>
+        </ng-container>
+        <ng-container matColumnDef="orderImageSrc">
+          <th mat-header-cell
+          *matHeaderCellDef> Image </th>
+          <td mat-cell
+            *matCellDef="let element">
+            <img class="orderImage"
+              [src]="element.orderImageSrc" />
+            </td>
+          </ng-container>
+          <ng-container matColumnDef="location">
+            <th mat-header-cell
+              mat-sort-header
+            *matHeaderCellDef> Loc </th>
+            <td mat-cell
+              class="location"
+              *matCellDef="let element;">
+              @if ((element.order?.orderStatus == 'pending'&&!element.location)) {
+                <a [href]="getTrackingLink(element)"
+                target="_blank">(pending)</a>
+              } @else {
+                <a [routerLink]="'location/'+element.location?.id">
+                  <app-regex-highlighted [data]="element"
+                    [highlightInfo]="element?.highlightInfo|async"
+                    [text]="getLocation(element)">
+                  </app-regex-highlighted>
+                </a>
+              }
+            </td>
+          </ng-container>
+          <ng-container matColumnDef="order">
+            <th mat-header-cell
+              mat-sort-header
+            *matHeaderCellDef> Order </th>
+            <td mat-cell
+            *matCellDef="let element"> {{element.order?.id ?? ''}} </td>
+          </ng-container>
+          <tr mat-header-row
+          *matHeaderRowDef="keys;sticky:true"></tr>
+          <tr mat-row
+          *matRowDef="let row; columns: keys;"></tr>
+        </table>
+      </div>
+    }
 
-        </ng-template>
+    <button mat-fab
+      (click)="addItem(additemT)"
+      class="add-item">
+      <mat-icon>add</mat-icon>
+    </button>
 
-      </td>
-    </ng-container>
+    <ng-template #additemT>
+      <form #form>
+        name: <input name="description"><br>
+        image: <span (drop)="$event.preventDefault(); imageDrop($event,imageInpt,img)"
+      (dragover)="$event.preventDefault()">drop here</span>
+      <input type="hidden"
+        #imageInpt
+        name="image">
+        <img #img><br>
+        amount: <input #amount
+        (change)="amtdisplay.textContent=amount.value"
+        name="amount"
+        type="range"
+        value="1"
+        min="1" /><span #amtdisplay>{{amount.value}}</span><br>
 
-    <ng-container matColumnDef="order">
-      <th mat-header-cell
-          mat-sort-header
-          *matHeaderCellDef> Order </th>
-      <td mat-cell
-          *matCellDef="let element"> {{element.order?.id ?? ''}} </td>
-    </ng-container>
-    <tr mat-header-row
-        *matHeaderRowDef="keys;sticky:true"></tr>
-    <tr mat-row
-        *matRowDef="let row; columns: keys;"></tr>
-  </table>
-</div>
-
-<button mat-fab
-        (click)="addItem(additemT)"
-        class="add-item">
-  <mat-icon>add</mat-icon>
-</button>
-
-<ng-template #additemT>
-  <form #form>
-    name: <input name="description"><br>
-    image: <span (drop)="$event.preventDefault(); imageDrop($event,imageInpt,img)"
-          (dragover)="$event.preventDefault()">drop here</span>
-    <input type="hidden"
-           #imageInpt
-           name="image">
-    <img #img><br>
-    amount: <input #amount
-           (change)="amtdisplay.textContent=amount.value"
-           name="amount"
-           type="range"
-           value="1"
-           min="1" /><span #amtdisplay>{{amount.value}}</span><br>
-
-    status: <select name="status">
-      <option>delivered</option>
-      <option>pending</option>
-    </select>
+        status: <select name="status">
+        <option>delivered</option>
+        <option>pending</option>
+      </select>
 
 
-    <button (click)="submitNewItem(form)">submit</button>
-  </form>
+      <button (click)="submitNewItem(form)">submit</button>
+    </form>
 
-</ng-template>
+  </ng-template>

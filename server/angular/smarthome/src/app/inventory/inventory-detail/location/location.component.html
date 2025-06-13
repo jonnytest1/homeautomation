@@ -1,11 +1,13 @@
 <select #selectEl
-        (change)="updateLocation(selectEl.value)">
+  (change)="updateLocation(selectEl.value)">
   <option [value]=""></option>
-  <option *ngFor="let loc of inventoryService.locations$|async"
-          [selected]="item?.location?.id===loc.id"
-          [value]="loc.id">
-    {{loc.description}}
-  </option>
+  @for (loc of inventoryService.locations$|async; track loc) {
+    <option
+      [selected]="item?.location?.id===loc.id"
+      [value]="loc.id">
+      {{loc.description}}
+    </option>
+  }
 </select>
 <app-add-location></app-add-location>
 
@@ -14,7 +16,7 @@
 </a>
 
 <video #videoRef
-       style="display: none;"></video>
+style="display: none;"></video>
 
 <button (click)="scan_qr(videoRef)">
   <mat-icon>camera_alt</mat-icon>

@@ -1,13 +1,15 @@
 <div class="content-wrapper"
-     (click)="wrapperClick()">
+  (click)="wrapperClick()">
   <table>
     <tr>
       <th>
         Senders
       </th>
-      <th *ngIf="!(isMobile$|async)">
-        Connections
-      </th>
+      @if (!(isMobile$|async)) {
+        <th>
+          Connections
+        </th>
+      }
       <th>
         Receivers
       </th>
@@ -15,55 +17,61 @@
     <tr>
       <td>
         <mat-list>
-          <div *ngFor="let item of senders"
-               class="mat-list-item"
-               mat-list-item>
-            <div class="list-item">
-              <mat-card class="sender"
-                        [attr.item]="item.id"
-                        (click)="setActive(item,$event)">
-                <mat-card-title>
-                  {{item.id}} {{item.name}}
-                </mat-card-title>
-                <mat-card-subtitle>
-                  {{item.description}}
-                </mat-card-subtitle>
-              </mat-card>
-              <mat-icon class="startConnection"
-                        [class.active]="connectionHandler && connectionHandler.addingSender===item"
-                        (click)="senderAddClick(item);$event.stopPropagation()">
-                add_box
-              </mat-icon>
+          @for (item of senders; track item) {
+            <div
+              class="mat-list-item"
+              mat-list-item>
+              <div class="list-item">
+                <mat-card class="sender"
+                  [attr.item]="item.id"
+                  (click)="setActive(item,$event)">
+                  <mat-card-title>
+                    {{item.id}} {{item.name}}
+                  </mat-card-title>
+                  <mat-card-subtitle>
+                    {{item.description}}
+                  </mat-card-subtitle>
+                </mat-card>
+                <mat-icon class="startConnection"
+                  [class.active]="connectionHandler && connectionHandler.addingSender===item"
+                  (click)="senderAddClick(item);$event.stopPropagation()">
+                  add_box
+                </mat-icon>
+              </div>
             </div>
-          </div>
+          }
           <mat-list-item class="list-item iconlistitem"
-                         (click)="addManualSender()">
+            (click)="addManualSender()">
             <span matListItemTitle>Add Manual Sender</span>
             <mat-icon>add_circle</mat-icon>
           </mat-list-item>
         </mat-list>
       </td>
-      <td *ngIf="!(isMobile$|async)">
-        <canvas #canvas></canvas>
-      </td>
+      @if (!(isMobile$|async)) {
+        <td>
+          <canvas #canvas></canvas>
+        </td>
+      }
       <td>
         <mat-list>
-          <div mat-list-item
-               class="mat-list-item"
-               *ngFor="let item of receivers">
-            <div class="list-item">
-              <mat-card [attr.item]="item.id"
-                        (click)="receiverClick(item);$event.stopPropagation()"
-                        class="receiver">
-                <mat-card-title>
-                  {{item.name}}
-                </mat-card-title>
-                <mat-card-subtitle>
-                  {{item.description}}
-                </mat-card-subtitle>
-              </mat-card>
+          @for (item of receivers; track item) {
+            <div mat-list-item
+              class="mat-list-item"
+              >
+              <div class="list-item">
+                <mat-card [attr.item]="item.id"
+                  (click)="receiverClick(item);$event.stopPropagation()"
+                  class="receiver">
+                  <mat-card-title>
+                    {{item.name}}
+                  </mat-card-title>
+                  <mat-card-subtitle>
+                    {{item.description}}
+                  </mat-card-subtitle>
+                </mat-card>
+              </div>
             </div>
-          </div>
+          }
         </mat-list>
       </td>
     </tr>

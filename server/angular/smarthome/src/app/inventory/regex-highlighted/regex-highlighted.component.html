@@ -1,8 +1,15 @@
-<ng-container *ngIf="!isHighlighted;else highlighted">
+@if (!isHighlighted) {
   {{displayText}}
-</ng-container>
+} @else {
+  @for (part of parts; track part) {
+    <span
+    [ngClass]="{highlighted:part.highlighted}">{{part.str}}</span>
+  }
+}
 
 <ng-template #highlighted>
-  <span *ngFor="let part of parts"
-        [ngClass]="{highlighted:part.highlighted}">{{part.str}}</span>
+  @for (part of parts; track part) {
+    <span
+    [ngClass]="{highlighted:part.highlighted}">{{part.str}}</span>
+  }
 </ng-template>

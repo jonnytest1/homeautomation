@@ -1,13 +1,13 @@
 import { Component, Input, OnInit, ViewChild } from '@angular/core';
 import type { NodeOptionTypes } from '../../../../settings/interfaces';
-import { CommonModule } from '@angular/common';
+
 
 @Component({
   selector: 'app-select-option',
   templateUrl: './select-option.component.html',
   styleUrls: ['./select-option.component.scss'],
   standalone: true,
-  imports: [CommonModule]
+  imports: []
 })
 export class SelectOptionComponent implements OnInit {
 

@@ -1,62 +1,55 @@
 <div (change)="paramChanged($event)">
 
 
-  <app-select-option *ngIf="definition.type=='select';else checkMonaco"
-                     [name]="name"
-                     [value]="value"
-                     [definition]="definition"></app-select-option>
-
-  <ng-template #checkMonaco>
-    <ng-container *ngIf="definition.type=='monaco';else checkFrame">
+  @if (definition.type=='select') {
+    <app-select-option
+      [name]="name"
+      [value]="value"
+    [definition]="definition"></app-select-option>
+  } @else {
+    @if (definition.type=='monaco') {
       <app-monaco-option [name]="name"
-                         [value]="value"
-                         [definition]="definition"
-                         [node]="node">
+        [value]="value"
+        [definition]="definition"
+        [node]="node">
       </app-monaco-option>
-    </ng-container>
-  </ng-template>
-  <ng-template #checkFrame>
-    <ng-container *ngIf="definition.type=='iframe';else checkBool">
-      <app-frame-option [definition]="definition"
-                        [name]="name"
-                        [currentValue]="value"></app-frame-option>
-    </ng-container>
-  </ng-template>
-  <ng-template #checkBool>
-    <ng-container *ngIf="definition.type=='boolean';else checkTextArea">
-      <input type="checkbox"
-             #inputRef
-             name="{{name}}"
-             [checked]="value">
-    </ng-container>
-  </ng-template>
-  <ng-template #checkTextArea>
-    <ng-container *ngIf="definition.type==='text' && definition.multiline; else checkbtn">
-      <textarea name="{{name}}"
-                (keyup)="$event.stopPropagation()">{{value ??''}}</textarea>
-    </ng-container>
-  </ng-template>
+    } @else {
+      @if (definition.type=='iframe') {
+        <app-frame-option [definition]="definition"
+          [name]="name"
+        [currentValue]="value"></app-frame-option>
+      } @else {
+        @if (definition.type=='boolean') {
+          <input type="checkbox"
+            #inputRef
+            name="{{name}}"
+            [checked]="value">
+          } @else {
+            @if (definition.type==='text' && definition.multiline) {
+              <textarea name="{{name}}"
+              (keyup)="$event.stopPropagation()">{{value ??''}}</textarea>
+            } @else {
+              @if (definition.type==='button') {
+                <input type="hidden"
+                  #btninput
+                  name="{{name}}">
+                  <button (click)="updateButtonInput(btninput)">{{definition.text??name}}</button>
+                } @else {
+                  <input [type]="definition.type"
+                    #inputRef
+                    (keyup)="$event.stopPropagation()"
+                    name="{{name}}"
+                    [min]="definition.type=='number'?definition.min:undefined"
+                    [max]="definition.type=='number'?definition.max:undefined"
+                    [value]="value ??''">
+                  }
+                }
+              }
+            }
+          }
+        }
 
-  <ng-template #checkbtn>
-    <ng-container *ngIf="definition.type==='button'; else inputEl">
-
-      <input type="hidden"
-             #btninput
-             name="{{name}}">
-      <button (click)="updateButtonInput(btninput)">{{definition.text??name}}</button>
-    </ng-container>
-  </ng-template>
 
 
-  <ng-template #inputEl>
 
-    <input [type]="definition.type"
-           #inputRef
-           (keyup)="$event.stopPropagation()"
-           name="{{name}}"
-           [min]="definition.type=='number'?definition.min:undefined"
-           [max]="definition.type=='number'?definition.max:undefined"
-           [value]="value ??''">
-
-  </ng-template>
-</div>
+      </div>

@@ -1,18 +1,22 @@
-<div *ngIf="codetitle"
-     class="title">{{codetitle}}</div>
-<div *ngFor="let error of generalErrors"
-     class="error"
-     [innerHTML]="error">
-</div>
+@if (codetitle) {
+  <div
+  class="title">{{codetitle}}</div>
+}
+@for (error of generalErrors; track error) {
+  <div
+    class="error"
+    [innerHTML]="error">
+  </div>
+}
 <div #codeEditor
-     class="codeeditorref">
-     <button (click)="fs(codeEditor)"
-             class="fsButton"
-             mat-icon-button>
-          <mat-icon class="white-icon"
-                    fill="white">{{isFullscreeen(codeEditor)? 'fullscreen_exit':'fullscreen'}}</mat-icon>
+  class="codeeditorref">
+  <button (click)="fs(codeEditor)"
+    class="fsButton"
+    mat-icon-button>
+    <mat-icon class="white-icon"
+    fill="white">{{isFullscreeen(codeEditor)? 'fullscreen_exit':'fullscreen'}}</mat-icon>
 
-     </button>
-     <mat-icon [ngClass]="{hidden:!recentlySaved}"
-               class="white-icon savedIcon">save</mat-icon>
+  </button>
+  <mat-icon [ngClass]="{hidden:!recentlySaved}"
+  class="white-icon savedIcon">save</mat-icon>
 </div>

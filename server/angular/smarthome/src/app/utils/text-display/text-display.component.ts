@@ -1,4 +1,4 @@
-import { CommonModule } from '@angular/common';
+
 import { Component, Input, OnInit, ViewChild, type OnChanges, type SimpleChanges } from '@angular/core';
 import { AutosavingDirective } from '../../autosaving/autosaving';
 import { FormsModule, NgModel, ReactiveFormsModule } from '@angular/forms';
@@ -29,7 +29,7 @@ export interface EditingConfig<T> {
   templateUrl: './text-display.component.html',
   styleUrls: ['./text-display.component.scss'],
   standalone: true,
-  imports: [CommonModule, AutosavingDirective, FormsModule]
+  imports: [AutosavingDirective, FormsModule]
 })
 export class TextDisplayComponent implements OnChanges {
 

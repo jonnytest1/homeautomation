@@ -1,26 +1,28 @@
 <div class="swipe"
-     (swipeleft)="left()"
-     (swiperight)="right()">
+  (swipeleft)="left()"
+  (swiperight)="right()">
 
   <div class="title">{{tabs[currentIndex].title }}</div>
 
   <mat-list>
-    <div *ngFor="let item of tabs[currentIndex].items"
-         mat-list-item>
-      <div class="list-item">
-        <mat-card class="sender"
-                  [attr.item]="item.id"
-                  [routerLink]="getRouterLink(currentIndex,item.id)"
-                  (click)="setActive(item,$event)">
-          <mat-card-title>
-            {{item.id}} {{item.name}}
-          </mat-card-title>
-          <mat-card-subtitle>
-            {{item.description}}
-          </mat-card-subtitle>
-        </mat-card>
+    @for (item of tabs[currentIndex].items; track item) {
+      <div
+        mat-list-item>
+        <div class="list-item">
+          <mat-card class="sender"
+            [attr.item]="item.id"
+            [routerLink]="getRouterLink(currentIndex,item.id)"
+            (click)="setActive(item,$event)">
+            <mat-card-title>
+              {{item.id}} {{item.name}}
+            </mat-card-title>
+            <mat-card-subtitle>
+              {{item.description}}
+            </mat-card-subtitle>
+          </mat-card>
+        </div>
       </div>
-    </div>
+    }
   </mat-list>
 
 </div>

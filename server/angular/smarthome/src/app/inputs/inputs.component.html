@@ -2,11 +2,12 @@
   inputs works!
 </p>
 
-<ng-container *ngIf="keyMessages$|async ;let keys">
-  <div *ngFor="let keyValue of keys|keyvalue"
-       style="min-height: 70px;">
-    <h2>{{keyValue.key}}</h2>
-
-    {{keyValue.value}}
-  </div>
-</ng-container>
+@if (keyMessages$|async ; as keys) {
+  @for (keyValue of keys|keyvalue; track keyValue) {
+    <div
+      style="min-height: 70px;">
+      <h2>{{keyValue.key}}</h2>
+      {{keyValue.value}}
+    </div>
+  }
+}

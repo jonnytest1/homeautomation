@@ -1,21 +1,24 @@
 <div autosaving-provider
-     class="codeeditor"
-     [dataRef]="transformer.id"
-     resource="transformation"
-     dataRefName="itemRef">
+  class="codeeditor"
+  [dataRef]="transformer.id"
+  resource="transformation"
+  dataRefName="itemRef">
 
-  <app-monaco-editor *ngIf="transformer"
-                     [(ngModel)]="transformer.tsTransformation"
-                     [(jsCode)]="transformer.transformation"
-                     [definition]="transformer.definitionFile"
-                     autosaving
-                     name=tsTransformation>
-  </app-monaco-editor>
+  @if (transformer) {
+    <app-monaco-editor
+      [(ngModel)]="transformer.tsTransformation"
+      [(jsCode)]="transformer.transformation"
+      [definition]="transformer.definitionFile"
+      autosaving
+      name=tsTransformation>
+    </app-monaco-editor>
+  }
 
-  <input #jsTransform
-         hidden
-         *ngIf="transformer"
-         [(ngModel)]="transformer.transformation"
-         autosaving
-         name=transformation>
+  @if (transformer) {
+    <input #jsTransform
+      hidden
+      [(ngModel)]="transformer.transformation"
+      autosaving
+      name=transformation>
+  }
 </div>
