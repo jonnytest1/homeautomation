@@ -23,7 +23,7 @@ import { CommonModule } from '@angular/common';
 import { MatBottomSheetModule } from '@angular/material/bottom-sheet';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatInputModule } from '@angular/material/input';
-import { HttpClientModule } from '@angular/common/http';
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatGridListModule } from '@angular/material/grid-list';
@@ -43,36 +43,30 @@ export class MyHammerConfig extends HammerGestureConfig {
     rotate: { enable: false }
   };
 }
-@NgModule({
-  declarations: [
-    SettingsComponent,
-    ConnectionBottomsheetComponent,
-    SenderBottomSheetComponent,
-    ReceiverBottomsheetComponent,
-    CodeEditorComponent, MobileSenderComponent,
-    TransformerDropDownComponent,
-    TimersComponent,
-    TransformationEditorComponent, SettingsMobileComponent, DebounceClickDirective, MobileTimersComponent
-  ],
-  imports: [
-    MonacoEditorComponent,
-    CommonModule,
-    FormsModule,
-    MatListModule, MatTabsModule, HammerModule,
-    MatIconModule,
-    MatGridListModule,
-    RouterModule.forChild(routes),
-    MatCardModule, MatSelectModule,
-    AutosavingDirective,
-    AutosavingDirectiveProviderDirective,
-    NgCircleProgressModule.forRoot(),
-    MatBottomSheetModule, HttpClientModule, MatDialogModule,
-    MatSnackBarModule, MatInputModule, MatButtonModule
-  ],
-  providers: [{
-    provide: HAMMER_GESTURE_CONFIG,
-    useClass: MyHammerConfig
-  },],
-  bootstrap: []
-})
+@NgModule({ declarations: [
+        SettingsComponent,
+        ConnectionBottomsheetComponent,
+        SenderBottomSheetComponent,
+        ReceiverBottomsheetComponent,
+        CodeEditorComponent, MobileSenderComponent,
+        TransformerDropDownComponent,
+        TimersComponent,
+        TransformationEditorComponent, SettingsMobileComponent, DebounceClickDirective, MobileTimersComponent
+    ],
+    bootstrap: [], imports: [MonacoEditorComponent,
+        CommonModule,
+        FormsModule,
+        MatListModule, MatTabsModule, HammerModule,
+        MatIconModule,
+        MatGridListModule,
+        RouterModule.forChild(routes),
+        MatCardModule, MatSelectModule,
+        AutosavingDirective,
+        AutosavingDirectiveProviderDirective,
+        NgCircleProgressModule.forRoot(),
+        MatBottomSheetModule, MatDialogModule,
+        MatSnackBarModule, MatInputModule, MatButtonModule], providers: [{
+            provide: HAMMER_GESTURE_CONFIG,
+            useClass: MyHammerConfig
+        }, provideHttpClient(withInterceptorsFromDi()),] })
 export class SettingsModule {}
