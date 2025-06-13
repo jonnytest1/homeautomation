@@ -1,7 +1,8 @@
-import { settable } from 'express-hibernate-wrapper';
+import { autosaveable, settable } from 'express-hibernate-wrapper';
 import { column, mapping, Mappings, primary, table } from 'hibernatets';
 
 @table()
+@autosaveable
 export class Location {
   @primary()
   id: number
