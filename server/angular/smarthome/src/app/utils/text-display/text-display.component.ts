@@ -107,6 +107,10 @@ export class TextDisplayComponent implements OnChanges {
         return parsed.value
       }
     }).join("")
+      // no leading/trailing whitespace per line
+      .split("\n")
+      .map(l => l.trim())
+      .join("\n")
 
     this.text = newText
     textAreaRef.innerText = newText
