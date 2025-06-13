@@ -84,13 +84,13 @@ export class InventoryComponent implements OnInit, AfterViewInit {
     this.dataSource.sort = this.sort;
     this.dataSource.filterPredicate = (data, filter) => {
       try {
-        const regex = new RegExp(`(.*)${filter.split("").map(c => `(${c})`).join("(.*?)")}(.*)`)
+        const regex = new RegExp(`(.*?)${filter.split("").map(c => `(${c})`).join("(.*?)")}(.*)`)
 
         const pId = getProductId(data)
         const strs: Array<string | { value: string, column?: string }> = [
           "description", {
             column: "customdescription",
-            value: data.customdescription?.split("\n")[0]
+            value: data.customdescription?.split("\n")?.[0]
           },
           { column: "productLink", value: pId }
         ]
@@ -113,6 +113,7 @@ export class InventoryComponent implements OnInit, AfterViewInit {
           }
           const matches = regex.exec(str.value?.toLowerCase());
           if (matches) {
+            //  const emptySlots = matches.filter(m => m === "").length
             matches.shift()
             data.highlightInfo.next({
               ...data.highlightInfo.value,

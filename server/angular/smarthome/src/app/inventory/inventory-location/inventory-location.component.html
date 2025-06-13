@@ -1,6 +1,10 @@
 <div *ngIf="location$|async ;let location">
   <h1>{{location.id}}</h1>
-  <p>{{location.description}}</p>
+
+
+  <app-text-display [text]="location.description"
+                    [editable]="editConfig(location)"
+                    [parseUrls]="true"></app-text-display><br><br>
 
   <div (drop)="onDrop($event)"
        (dragover)="$event.preventDefault()"
@@ -51,7 +55,7 @@
 <div class="children">
   <div *ngFor="let child of childlocations$|async">
     <a routerLink="../{{child.id}}">{{child.id}}
-      {{child.description}}</a>
+      {{child.description.split("\n")[0]}}</a>
 
   </div>
 </div>

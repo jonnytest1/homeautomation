@@ -8,13 +8,14 @@ import { ThreeDdisplayComponent } from '../3ddisplay/3ddisplay.component';
 import { MatIcon, MatIconModule } from '@angular/material/icon';
 import { AddLocationComponent } from '../add-location/add-location.component';
 import type { LocationFe } from '../../settings/interfaces';
+import { TextDisplayComponent, type EditingConfig } from '../../utils/text-display/text-display.component';
 
 @Component({
   selector: 'app-inventory-location',
   templateUrl: './inventory-location.component.html',
   styleUrls: ['./inventory-location.component.scss'],
   standalone: true,
-  imports: [CommonModule, ThreeDdisplayComponent, RouterLink, MatIconModule, AddLocationComponent]
+  imports: [CommonModule, ThreeDdisplayComponent, RouterLink, MatIconModule, AddLocationComponent, TextDisplayComponent]
 })
 export class InventoryLocationComponent implements OnInit {
 
@@ -64,6 +65,14 @@ export class InventoryLocationComponent implements OnInit {
     this.model = evt.dataTransfer.files[0]
 
     evt.preventDefault()
+  }
+
+  editConfig(locaton: LocationFe): EditingConfig<LocationFe> {
+    return {
+      dataRef: locaton.id,
+      name: "description",
+      resource: "location",
+    }
   }
 
   updateParent(value: string, location: LocationFe, locs: Array<LocationFe>) {

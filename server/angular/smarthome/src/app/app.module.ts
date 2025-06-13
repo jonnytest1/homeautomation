@@ -34,7 +34,7 @@ import { ServiceWorkerModule } from '@angular/service-worker';
 import { environment } from '../environments/environment';
 import { provideFirebaseApp, getApp, initializeApp } from '@angular/fire/app';
 import { provideMessaging, getMessaging } from '@angular/fire/messaging';
-import { AutosavingDirective } from './autosaving/autosaving';
+import { AutosavingDirective, ROOT_AUTOSAVE_PATH } from './autosaving/autosaving';
 import { AutosavingDirectiveProviderDirective } from './autosaving/autosaveProvider';
 
 export class MyHammerConfig extends HammerGestureConfig {
@@ -90,6 +90,9 @@ export class MyHammerConfig extends HammerGestureConfig {
     {
       provide: HAMMER_GESTURE_CONFIG,
       useClass: MyHammerConfig
+    }, {
+      provide: ROOT_AUTOSAVE_PATH,
+      useValue: environment.prefixPath + 'rest/auto/'
     },
 
   ],

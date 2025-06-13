@@ -1,0 +1,48 @@
+<span>
+
+  <!--  <form autosaving-provider
+        [dataRef]="item.id"
+        dataRefName="itemRef"
+        resource="item">
+-->
+  <form>
+    <textarea hidden
+              #textref
+              [resource]="editable.resource"
+              [autosavingDisabled]="!editable"
+              [dataRefName]="editable.dataRefName??'itemRef'"
+              [dataRef]="editable.dataRef"
+              [name]="editable.name"
+              [ngModel]="text"
+              autosaving>
+  </textarea><br>
+  </form>
+
+
+  <ng-container *ngFor="let word of parsedText;let index=index">
+    <ng-container *ngIf="word.type==='url';else:text">
+      <a [href]="word.value"
+         [contentEditable]="!!editable"
+         (input)="edited($event,index,textref)"
+         [target]="urlTarget">{{word.value}}</a>
+    </ng-container>
+
+    <ng-template #text>
+      <ng-container *ngIf="word.type==='text';else:_2">
+        <span [contentEditable]="!!editable"
+              (input)="edited($event,index,textref)">{{word.value}}</span>
+      </ng-container>
+    </ng-template>
+    <ng-template #_2>
+      <ng-container *ngIf="word.type==='break';else:_last">
+        <br>
+      </ng-container>
+    </ng-template>
+    <ng-template #_last>
+      <ng-container *ngIf="word.type==='space';">
+        <span>&nbsp;</span>
+      </ng-container>
+    </ng-template>
+  </ng-container>
+
+</span>

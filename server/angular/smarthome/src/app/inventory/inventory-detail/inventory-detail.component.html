@@ -6,7 +6,10 @@
         dataRefName="itemRef"
         resource="item">
 
-    <textarea name=customdescription
+    <textarea (ngModelChange)="resizeTextArea(textref)"
+              (onAdded)="resizeTextArea(textref)"
+              #textref
+              name=customdescription
               [(ngModel)]="item.customdescription"
               autosaving>{{item.customdescription}}</textarea><br>
 

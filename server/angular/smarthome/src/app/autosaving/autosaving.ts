@@ -17,11 +17,12 @@ export class AutosavingDirective implements OnInit {
     private ngModelRef: NgModel,
 
     @Optional() @Self() @Inject(NG_VALUE_ACCESSOR) private asd: ControlValueAccessor[]) {
+    const self = this;
     ngModelRef.control.setAsyncValidators(async (control) => {
-      if (this.value === control.value || this.duringConstructor || control.pristine) {
+      if (self.value === control.value || self.duringConstructor || control.pristine || self.autosavingDisabled) {
         return null;
       }
-      this.value = control.value;
+      self.value = control.value;
       let dataRef = this.dataRef;
       let dataRefName = this.dataRefName;
       let resource = this.resource;
@@ -91,6 +92,9 @@ export class AutosavingDirective implements OnInit {
   }
 
   private static RequestMap = new Map<string, AbortController>();
+
+  @Input()
+  autosavingDisabled = false
 
   @Input()
   resource: string;

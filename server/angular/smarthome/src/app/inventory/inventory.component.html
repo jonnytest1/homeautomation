@@ -34,7 +34,7 @@
         <a [routerLink]="'item/'+element.id">
           <app-regex-highlighted [data]="element"
                                  [highlightInfo]="element?.highlightInfo|async"
-                                 [text]="element.description"></app-regex-highlighted>
+                                 [text]="element.description??'- empty -'"></app-regex-highlighted>
 
         </a>
       </td>
@@ -96,7 +96,7 @@
       <td mat-cell
           class="location"
           *matCellDef="let element;">
-        <ng-container *ngIf="element.order?.orderStatus == 'pending';else dsiplay">
+        <ng-container *ngIf="(element.order?.orderStatus == 'pending'&&!element.location);else dsiplay">
           <a [href]="getTrackingLink(element)"
              target="_blank">(pending)</a>
         </ng-container>
