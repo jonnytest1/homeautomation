@@ -52,7 +52,7 @@ export class INventoryResource {
       });
 
       const trackingInfoMap: Record<string, Item> = {}
-      const productLinkMap = {}
+      const productLinkMap: Record<string, Item> = {}
       items
         .forEach(item => {
           if (item.order?.orderId) {
@@ -103,7 +103,7 @@ export class INventoryResource {
           }
           const storedItem = productLinkMap[item.productLink]
 
-          if (item.productLink && storedItem) {
+          if (item.productLink && storedItem && storedItem.order.orderId == order.orderId) {
             await assign(storedItem, item, { onlyWhenFalsy: false })
             await queries(storedItem)
           } else {
