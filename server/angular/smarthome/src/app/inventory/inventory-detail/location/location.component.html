@@ -1,22 +1,18 @@
-<select #selectEl
-  (change)="updateLocation(selectEl.value)">
+<select #selectEl (change)="updateLocation(selectEl.value)">
   <option [value]=""></option>
-  @for (loc of inventoryService.locations$|async; track loc) {
-    <option
-      [selected]="item?.location?.id===loc.id"
-      [value]="loc.id">
-      {{loc.description}}
+  @for (loc of inventoryService.locations$ | async; track loc) {
+    <option [selected]="item?.location?.id === loc.id" [value]="loc.id">
+      {{ loc.id }}-{{ loc.description }}
     </option>
   }
 </select>
 <app-add-location></app-add-location>
 
-<a href="/inventory/location/{{item?.location?.id}}">
-  go to location ({{item?.location?.id}})
+<a href="/inventory/location/{{ item?.location?.id }}">
+  go to location ({{ item?.location?.id }})
 </a>
 
-<video #videoRef
-style="display: none;"></video>
+<video #videoRef style="display: none"></video>
 
 <button (click)="scan_qr(videoRef)">
   <mat-icon>camera_alt</mat-icon>
