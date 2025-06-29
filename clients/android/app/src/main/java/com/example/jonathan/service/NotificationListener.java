@@ -31,6 +31,7 @@ public class NotificationListener extends NotificationListenerService {
         String packageName = sbn.getPackageName();
         String notificationTitle = sbn.getNotification().extras.getString("android.title");
         String notificationText = sbn.getNotification().extras.getString("android.text");
+     
 
         Log.d("NotificationListener", "Notification posted:");
         Log.d("NotificationListener", "Package: " + packageName);
