@@ -1,0 +1,39 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "build myapp",
+      "type": "shell",
+      "options": {
+        "shell": {
+          "executable": "C:\\msys64\\mingw64.exe",
+        }
+      },
+      "command": "g++",
+      "args": [
+        "-g",
+        "-std=c++17",
+        "${workspaceFolder}/test/test_native/ble_test.cpp",
+        "-o",
+        "${workspaceFolder}/ble_test",
+        "-lbthprops"
+      ],
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared",
+        "showReuseMessage": true,
+        "clear": false,
+        "close": false
+      },
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "problemMatcher": [
+        "$gcc"
+      ]
+    }
+  ]
+}

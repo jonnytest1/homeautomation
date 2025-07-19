@@ -84,7 +84,7 @@ export class InventoryComponent implements OnInit, AfterViewInit {
     this.dataSource.sort = this.sort;
     this.dataSource.filterPredicate = (data, filter) => {
       try {
-        const regex = new RegExp(`(.*?)${filter.split("").map(c => `(${c})`).join("(.*?)")}(.*)`)
+        const regex = new RegExp(`(.*)${filter.split("").map(c => `(${c})`).join("(.*?)")}(.*)`)
 
         const pId = getProductId(data)
         const strs: Array<string | { value: string, column?: string }> = [
