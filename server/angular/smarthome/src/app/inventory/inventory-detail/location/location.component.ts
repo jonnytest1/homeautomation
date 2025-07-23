@@ -1,5 +1,5 @@
 import { Component, inject, Input, OnInit } from '@angular/core';
-import type { ItemFe } from '../../../settings/interfaces';
+import type { ItemFe, LocationFe } from '../../../settings/interfaces';
 import { CommonModule } from '@angular/common';
 import { InventoryService } from '../../inventory.service';
 import { MatIconModule } from '@angular/material/icon';
@@ -32,6 +32,26 @@ export class LocationComponent implements OnInit {
     this.item.location.id = +newLocId
     this.inventoryService.setLocation(this.item, newLocId)
   }
+
+  recurseParents(loc: LocationFe) {
+    let tLoc = loc;
+
+    let parentsstr = ""
+
+    for (let i = 0; i < 5; i++) {
+      tLoc = tLoc.parent
+      if (!tLoc) {
+        break
+      }
+
+      parentsstr = `/${tLoc.description.split("\n")[0]}${parentsstr}`
+    }
+    if (!parentsstr) {
+      return ""
+    }
+    return `(${parentsstr})`
+  }
+
 
 
   scan_qr(videoRef: HTMLVideoElement) {

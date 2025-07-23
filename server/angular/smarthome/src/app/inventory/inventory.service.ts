@@ -23,6 +23,15 @@ export class InventoryService {
   loadLocations() {
     this.httpClient.get<Array<LocationFe>>(`${environment.prefixPath}rest/inventory/location`).subscribe(locs => {
 
+      const locations: Record<number, LocationFe> = {}
+      for (const loc of locs) {
+        locations[loc.id] = loc
+      }
+      for (const loc of locs) {
+        if (loc.refs?.parent) {
+          loc.parent = locations[loc.refs.parent];
+        }
+      }
       this.locations$.next(locs)
     })
   }

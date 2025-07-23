@@ -44,6 +44,7 @@ export class EventScheduler {
       keepAliveDelay: 5000,
       idleTimeout: 560,
       maxAllowedPacket: 67108864,
+
       acquireTimeout: 20 * 1000,
       connectTimeout: 15 * 1000,
 

@@ -1,5 +1,5 @@
 import { autosaveable, settable } from 'express-hibernate-wrapper';
-import { column, mapping, Mappings, primary, table } from 'hibernatets';
+import { column, mapping, Mappings, primary, reference, table } from 'hibernatets';
 
 @table()
 @autosaveable
@@ -19,4 +19,6 @@ export class Location {
 
   parentOffset
 
+  @reference()
+  refs: Record<keyof this, number>
 }

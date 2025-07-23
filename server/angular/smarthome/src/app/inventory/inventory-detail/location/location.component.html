@@ -2,7 +2,8 @@
   <option [value]=""></option>
   @for (loc of inventoryService.locations$ | async; track loc) {
     <option [selected]="item?.location?.id === loc.id" [value]="loc.id">
-      {{ loc.id }}-{{ loc.description }}
+      {{ loc.id }}-{{ loc.description.split("\n")[0] }}
+      <span style="font-style: italic">{{ recurseParents(loc) }}</span>
     </option>
   }
 </select>

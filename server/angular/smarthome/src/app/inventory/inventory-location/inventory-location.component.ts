@@ -65,6 +65,24 @@ export class InventoryLocationComponent implements OnInit {
 
     evt.preventDefault()
   }
+  recurseParents(loc: LocationFe) {
+    let tLoc = loc;
+
+    let parentsstr = ""
+
+    for (let i = 0; i < 5; i++) {
+      tLoc = tLoc.parent
+      if (!tLoc) {
+        break
+      }
+
+      parentsstr = `/${tLoc.description.split("\n")[0]}${parentsstr}`
+    }
+    if (!parentsstr) {
+      return ""
+    }
+    return `(${parentsstr})`
+  }
 
   editConfig(locaton: LocationFe): EditingConfig<LocationFe> {
     return {

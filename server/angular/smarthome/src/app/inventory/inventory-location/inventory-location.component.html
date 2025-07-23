@@ -1,73 +1,77 @@
-@if (location$|async ; as location) {
+@if (location$ | async; as location) {
   <div>
-    <h1>{{location.id}}</h1>
-    <app-text-display [text]="location.description"
+    <h1>{{ location.id }}</h1>
+    <app-text-display
+      [text]="location.description"
       [editable]="editConfig(location)"
-    [parseUrls]="true"></app-text-display><br><br>
-    <div (drop)="onDrop($event)"
+      [parseUrls]="true"
+    ></app-text-display
+    ><br /><br />
+    <div
+      (drop)="onDrop($event)"
       (dragover)="$event.preventDefault()"
-      style="min-width: 200px;min-height: 40px;border: 1px solid black">
+      style="min-width: 200px; min-height: 40px; border: 1px solid black"
+    >
       model drop zone
     </div>
     @if (model) {
-      <app-3ddisplay
-      [model]="model"></app-3ddisplay>
+      <app-3ddisplay [model]="model"></app-3ddisplay>
     }
-    <br>
-      @if (this.inventoryService.locations$|async; as locations) {
-        <div class="parent"
+    <br />
+    @if (this.inventoryService.locations$ | async; as locations) {
+      <div class="parent">
+        <select
+          #parentSelect
+          (change)="updateParent(parentSelect.value, location, locations)"
+          [value]="null"
+        >
+          <option [selected]="!location.parent"></option>
+          @for (sellocation of locations; track sellocation) {
+            <option
+              [value]="sellocation.id"
+              [selected]="
+                location.parent?.id && sellocation.id === location.parent?.id
+              "
+            >
+              {{ sellocation.id }}
+              {{ sellocation.description.split("\n")[0] }}
+              {{ recurseParents(sellocation) }}
+            </option>
+          }
+        </select>
+        @if (location.parent) {
+          <a routerLink="../{{ location.parent.id }}"
+            ><mat-icon>open_in_new</mat-icon></a
           >
-          <select #parentSelect
-            (change)="updateParent(parentSelect.value,location,locations)"
-            [value]="null">
-            <option [selected]="!location.parent"></option>
-            @for (sellocation of locations; track sellocation) {
-              <option
-                [value]="sellocation.id"
-                [selected]="location.parent?.id && sellocation.id===location.parent?.id">
-                {{sellocation.id}}
-                {{sellocation.description}}
-              </option>
-            }
-          </select>
-          @if (location.parent) {
-            <a
-              routerLink="../{{location.parent.id}}"><mat-icon>open_in_new</mat-icon></a>
-            }
-            <app-add-location [parentId]="location.id"></app-add-location>
-          </div>
         }
+        <app-add-location [parentId]="location.id"></app-add-location>
       </div>
     }
+  </div>
+}
 
-
-
-
-
-
-
-    @if (items$|async; as items) {
+@if (items$ | async; as items) {
+  <div>
+    @if (items.length) {
+      <h5>items</h5>
+    }
+    @for (item of items; track item) {
       <div>
-        @if (items.length) {
-          <h5>items</h5>
-        }
-        @for (item of items; track item) {
-          <div>
-            <img class="orderImage"
-              [src]="item.orderImageSrc" />
-            <a href="/inventory/item/{{item.id}}">{{item.description}}</a>
-          </div>
-        }
+        <img class="orderImage" [src]="item.orderImageSrc" />
+        <a href="/inventory/item/{{ item.id }}">{{ item.description }}</a>
       </div>
     }
+  </div>
+}
 
-    <h5>children</h5>
+<h5>children</h5>
 
-    <div class="children">
-      @for (child of childlocations$|async; track child) {
-        <div>
-          <a routerLink="../{{child.id}}">{{child.id}}
-          {{child.description.split("\n")[0]}}</a>
-        </div>
-      }
+<div class="children">
+  @for (child of childlocations$ | async; track child) {
+    <div>
+      <a routerLink="../{{ child.id }}"
+        >{{ child.id }} {{ child.description.split("\n")[0] }}</a
+      >
     </div>
+  }
+</div>

@@ -129,12 +129,8 @@ export class INventoryResource {
   async getLocations(req: HttpRequest, res: HttpResponse) {
     const locations = await load(Location, SqlCondition.ALL, undefined, {
       db: pool,
-      deep: {
-        parent: {
-          filter: SqlCondition.ALL,
-          depths: 1
-        }
-      }
+      deep: false,
+      withShallowReferences: true
     });
 
     if (!locations.some(loc => loc.id === -1)) {
