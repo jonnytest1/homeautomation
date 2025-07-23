@@ -1,7 +1,8 @@
 
-import { Component, Input, OnInit, ViewChild, type OnChanges, type SimpleChanges } from '@angular/core';
+import { Component, ElementRef, inject, Input, OnInit, ViewChild, type AfterViewChecked, type OnChanges, type SimpleChanges } from '@angular/core';
 import { AutosavingDirective } from '../../autosaving/autosaving';
 import { FormsModule, NgModel, ReactiveFormsModule } from '@angular/forms';
+import { CommonModule } from '@angular/common';
 
 
 
@@ -29,9 +30,9 @@ export interface EditingConfig<T> {
   templateUrl: './text-display.component.html',
   styleUrls: ['./text-display.component.scss'],
   standalone: true,
-  imports: [AutosavingDirective, FormsModule]
+  imports: [AutosavingDirective, FormsModule, CommonModule]
 })
-export class TextDisplayComponent implements OnChanges {
+export class TextDisplayComponent implements OnChanges, AfterViewChecked {
 
   @Input()
   text: string
@@ -53,11 +54,36 @@ export class TextDisplayComponent implements OnChanges {
   @ViewChild("textref", { read: NgModel })
   textRefModel: NgModel
 
+  selection
+  ranges: { offset: number; index: number; };
+
+
+  needsReapplySelection = false;
+
+  readonly elRef = inject(ElementRef)
+
   constructor() {}
+  ngAfterViewChecked(): void {
+    if (this.needsReapplySelection && this.ranges) {
+      const sel = window.getSelection();
+
+      sel.removeAllRanges();
 
 
-  ngOnInit() {
+      const range = document.createRange();
+
+      const self = this.elRef.nativeElement
+      const node = self.querySelector(`.w_${this.ranges.index}`).childNodes[0]
+
+      range.setStart(node, this.ranges.offset)
+      range.setEnd(node, this.ranges.offset)
+      sel.addRange(range);
+    }
+    this.needsReapplySelection = false;
   }
+
+
+
   ngOnChanges(changes: SimpleChanges): void {
     this.parsedText = this.text.replace("\r", "").split(/([ \n])/).map(word => {
       if (word == " ") {
@@ -93,10 +119,13 @@ export class TextDisplayComponent implements OnChanges {
         value: word
       }
     })
+    this.needsReapplySelection = true;
   }
 
   edited(event: Event, index: number, textAreaRef?: HTMLTextAreaElement) {
+    const evt = event as InputEvent
     const target = event.target as HTMLSpanElement
+
     let text = target.innerText.replace("\n\n", "\n")
     const newText = this.parsedText.map((parsed, indx) => {
       if (indx === index) {
@@ -111,6 +140,14 @@ export class TextDisplayComponent implements OnChanges {
       .split("\n")
       .map(l => l.trim())
       .join("\n")
+
+    const selection = getSelection()
+    const range = selection.getRangeAt(0)
+
+    this.ranges = {
+      offset: range.endOffset,
+      index: index
+    }
 
     this.text = newText
     textAreaRef.innerText = newText

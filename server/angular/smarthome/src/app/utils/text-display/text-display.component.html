@@ -23,6 +23,7 @@
   @for (word of parsedText; track word; let index = $index) {
     @if (word.type === "url") {
       <a
+        [classList]="['w_' + index]"
         [href]="word.value"
         [contentEditable]="!!editable"
         (input)="edited($event, index, textref)"
@@ -31,6 +32,7 @@
       >
     } @else if (word.type === "text") {
       <span
+        [classList]="['w_' + index]"
         [contentEditable]="!!editable"
         (input)="edited($event, index, textref)"
         >{{ word.value }}</span

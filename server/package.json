@@ -18,7 +18,7 @@
     "chokidar": "^3.6.0",
     "dotenv": "",
     "express": "",
-    "express-hibernate-wrapper": "^1.0.25",
+    "express-hibernate-wrapper": "^1.0.28",
     "express-ws": "^4.0.0",
     "firebase-admin": "^12.3.0",
     "generic-type-guard": "^3.5.0",
