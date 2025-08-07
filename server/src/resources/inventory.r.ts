@@ -195,6 +195,7 @@ export class INventoryResource {
     await queries(location)
 
     res.send(location)
+    FrontendWebsocket.updateInventory(...FrontendWebsocket.websockets)
   }
 
 
@@ -220,6 +221,7 @@ export class INventoryResource {
     item.location = location
     await queries(item)
     res.send("ok")
+    FrontendWebsocket.updateInventory(...FrontendWebsocket.websockets)
   }
 
 
@@ -245,5 +247,6 @@ export class INventoryResource {
     location.parent = parentlocation
     await queries(location)
     res.send("{}")
+    FrontendWebsocket.updateInventory(...FrontendWebsocket.websockets)
   }
 }

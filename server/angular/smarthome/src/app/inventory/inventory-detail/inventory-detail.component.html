@@ -1,22 +1,29 @@
-@if (item$|async; as item) {
-  <h3>{{item.id}}</h3><br> {{item.description}}<br>
-  <form autosaving-provider
+@if (item$ | async; as item) {
+  <h3>{{ item.id }}</h3>
+  <br />
+  {{ item.description }}<br />
+  <form
+    autosaving-provider
     [dataRef]="item.id"
     dataRefName="itemRef"
-    resource="item">
-    <textarea (ngModelChange)="resizeTextArea(textref)"
+    resource="item"
+  >
+    <textarea
+      (ngModelChange)="resizeTextArea(textref)"
       (onAdded)="resizeTextArea(textref)"
       #textref
-      name=customdescription
+      name="customdescription"
       [(ngModel)]="item.customdescription"
-    autosaving>{{item.customdescription}}</textarea><br>
+      autosaving
+      >{{ item.customdescription }}</textarea
+    ><br />
   </form>
-  <img [src]="item.orderImageSrc">
-  <br>
-    <a [href]="item.productLink">
-      {{item.order?.type??''}} {{getProductId(item)}}
-    </a>
-    <br>
-      location:
-      <app-location [item]="item"></app-location>
-    }
+  <img [src]="item.orderImageSrc" />
+  <br />
+  <a [href]="item.productLink" target="_blank">
+    {{ item.order?.type ?? "" }} {{ getProductId(item) }}
+  </a>
+  <br />
+  location:
+  <app-location [item]="item"></app-location>
+}
