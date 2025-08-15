@@ -53,6 +53,9 @@ export class INventoryResource {
 
       const trackingInfoMap: Record<string, Item> = {}
       const productLinkMap: Record<string, Item> = {}
+      const productLinkOrderMap: Record<string, {
+        [orderId: string]: Item
+      }> = {}
       items
         .forEach(item => {
           if (item.order?.orderId) {
@@ -61,6 +64,9 @@ export class INventoryResource {
           if (item.productLink) {
             productLinkMap[item.productLink] = item
           }
+
+          productLinkOrderMap[item.order.orderId] ??= {}
+          productLinkOrderMap[item.order.orderId][item.productLink] = item
         });
 
 
@@ -101,11 +107,12 @@ export class INventoryResource {
           if (item.orderImageSrc) {
             item.orderImageSrc = await imageLaoder(item.orderImageSrc)
           }
-          const storedItem = productLinkMap[item.productLink]
+          //const storedItem = productLinkMap[item.productLink]
+          const storedOrderItem = productLinkOrderMap[order.orderId][item.productLink] = item
 
-          if (item.productLink && storedItem && storedItem.order.orderId == order.orderId) {
-            await assign(storedItem, item, { onlyWhenFalsy: false })
-            await queries(storedItem)
+          if (item.productLink && storedOrderItem) {
+            await assign(storedOrderItem, item, { onlyWhenFalsy: false })
+            await queries(storedOrderItem)
           } else {
             const newItem = new Item()
             newItem.order = existing
