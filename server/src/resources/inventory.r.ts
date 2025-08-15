@@ -64,9 +64,11 @@ export class INventoryResource {
           if (item.productLink) {
             productLinkMap[item.productLink] = item
           }
+          if (item.order?.orderId && item.productLink) {
+            productLinkOrderMap[item.order.orderId] ??= {}
+            productLinkOrderMap[item.order.orderId][item.productLink] = item
+          }
 
-          productLinkOrderMap[item.order.orderId] ??= {}
-          productLinkOrderMap[item.order.orderId][item.productLink] = item
         });
 
 
@@ -108,7 +110,7 @@ export class INventoryResource {
             item.orderImageSrc = await imageLaoder(item.orderImageSrc)
           }
           //const storedItem = productLinkMap[item.productLink]
-          const storedOrderItem = productLinkOrderMap[order.orderId][item.productLink] = item
+          const storedOrderItem = productLinkOrderMap[order.orderId][item.productLink]
 
           if (item.productLink && storedOrderItem) {
             await assign(storedOrderItem, item, { onlyWhenFalsy: false })
