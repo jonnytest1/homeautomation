@@ -110,7 +110,7 @@ export class INventoryResource {
             item.orderImageSrc = await imageLaoder(item.orderImageSrc)
           }
           //const storedItem = productLinkMap[item.productLink]
-          const storedOrderItem = productLinkOrderMap[order.orderId][item.productLink]
+          const storedOrderItem = productLinkOrderMap[order.orderId]?.[item.productLink]
 
           if (item.productLink && storedOrderItem) {
             await assign(storedOrderItem, item, { onlyWhenFalsy: false })
