@@ -27,6 +27,11 @@ async function archive() {
         INSERT INTO trackingeventarchive 
           SELECT * from trackingevent 
           where trackingevent.time_col < (NOW() - INTERVAL '20' DAY)`.replace(/\n/g, " "))
+    .catch(e => {
+      logKibana("ERROR", {
+        message: "error while archiving events (deleting remaining)"
+      }, e)
+    })
     .then(() => {
       return trackingPool.sqlquery({} as never, `
         DELETE FROM trackingevent 
@@ -36,17 +41,18 @@ async function archive() {
             trackingevent.id=trackingeventarchive.id
           );`.replace(/\n/g, " "))
     })
+    .catch(e => {
+      logKibana("ERROR", {
+        message: "error while deleting  remaining events"
+      }, e)
+    })
     .then(() => {
       logKibana("INFO", {
         message: "archived events",
         duration: Date.now() - start
       })
     })
-    .catch(e => {
-      logKibana("ERROR", {
-        message: "error while archiving events"
-      }, e)
-    })
+
 }
 
 addTypeImpl({
