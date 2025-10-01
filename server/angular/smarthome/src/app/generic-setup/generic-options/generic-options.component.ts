@@ -13,8 +13,11 @@ import { combineLatest, map, timer } from 'rxjs';
 import { StoreService } from '../store/store-service';
 import { RouterModule } from '@angular/router';
 
+
+export const GENERIC_OPTIONS_TAG = "app-generic-options"
+
 @Component({
-  selector: 'app-generic-options',
+  selector: GENERIC_OPTIONS_TAG,
   templateUrl: './generic-options.component.html',
   styleUrls: ['./generic-options.component.scss'],
   imports: [CommonModule, GenOptionComponent, MatIconModule, RouterModule],

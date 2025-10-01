@@ -9,6 +9,7 @@ import { extendCanvasContext } from '../../wiring/util/canvas-vector';
 import { pointIsInPoly } from '../../wiring/util/point-in-polygon';
 import { logKibana } from '../../global-error-handler';
 import { MBDragEvent } from "../../utils/directive/drag-start.directive"
+import { GENERIC_OPTIONS_TAG } from '../generic-options/generic-options.component';
 
 
 
@@ -19,6 +20,8 @@ import { MBDragEvent } from "../../utils/directive/drag-start.directive"
   standalone: true
 })
 export class LineComponent implements OnChanges, AfterViewChecked, AfterViewInit, OnDestroy {
+
+  static readonly overlayTags = [GENERIC_OPTIONS_TAG]
 
   static curveOffset = 40;
   @Input()
@@ -167,7 +170,7 @@ export class LineComponent implements OnChanges, AfterViewChecked, AfterViewInit
           to.added(marginLine).added(right)
         ];
       }
-      this.isHovering = this.mousePos && pointIsInPoly(this.mousePos, linePoints)
+      this.isHovering = this.mousePos && pointIsInPoly(this.mousePos, linePoints) && this.obstructingOverlay(this.mousePos)
 
 
       if (this.isHovering || this.active) {
@@ -210,6 +213,17 @@ export class LineComponent implements OnChanges, AfterViewChecked, AfterViewInit
        VectorDomUtils.applyRotation(this.elementLine.nativeElement, lineBox)
        VectorDomUtils.applyDimensionVector(this.elementLine.nativeElement, new Vector2(length, 4))*/
     }
+  }
+  obstructingOverlay(mousePos: Vector2): boolean {
+    const elements = document.elementsFromPoint(mousePos.x, mousePos.y)
+
+    for (const element of elements) {
+      if (LineComponent.overlayTags.includes(element.tagName.toLowerCase())) {
+        return false
+      }
+    }
+
+    return true
   }
   private drawLine(from: Vector2, to: Vector2, opts: { lineWidth?: number, } = {}) {
 

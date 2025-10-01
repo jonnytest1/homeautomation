@@ -51,7 +51,7 @@ export class InventoryComponent implements OnInit, AfterViewInit {
         const regexMatch = data?.highlightInfo?.value?.regexMatch;
         if (regexMatch) {
           const emotyStrings = regexMatch.reduce((col, entry) => col + (entry === "" ? 1 : 0), 0)
-          return new Array(emotyStrings).fill(" ").join("") + data[sortHeaderId].toLocaleLowerCase()
+          return new Array(emotyStrings).fill("_").join("") + data[sortHeaderId].toLocaleLowerCase()
         }
         return data[sortHeaderId].toLocaleLowerCase();
       }
