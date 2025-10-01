@@ -72,3 +72,6 @@ server/media/
 server/profiler
 clients/pc-receiver/services/py/dump.b64
 clients/pc-receiver/services/py/dump.elf
+clients/android/dumpstate*.zip
+
+**/.pio/**

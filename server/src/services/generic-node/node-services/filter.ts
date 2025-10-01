@@ -1,5 +1,6 @@
 
 
+import { nodeContext } from './code-utils/node-parameters';
 import { addTypeImpl } from '../generic-node-service';
 import type { ElementNode } from '../typing/element-node';
 import type { NodeDefOptinos, NodeDefToType } from '../typing/node-options';
@@ -169,7 +170,8 @@ addTypeImpl({
             addOutputHistoryEvent(node, copy, index);
             callbacks.continue(copy, index)
           }
-        }
+        },
+        nodeContext: () => nodeContext(node)
       };
       /*  logKibana("DEBUG", {
          message: "filter context",
@@ -315,6 +317,9 @@ type InputType=${connectionSchema.mainTypeName ??= mainTypeName}
       var setInfo:(text:string)=>void
       var emit(index:${node.parameters?.additional_output ? emitTypes(+node.parameters?.additional_output) : 'never'},data:any)=>void
       var context; 
+      var nodeContext:<T>()=> T & {
+         set:<K extends keyof T>(key:K,value:T[K]) => void
+      }
       `
       },
       nodeUuid: node.uuid
