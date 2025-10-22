@@ -456,11 +456,12 @@ async function processInput(data: { node: ElementNode, nodeinput: number, data: 
       logKibana("ERROR", {
         message: "error during process of node",
         nodetype: data.node.type,
-        nodeid: data.node.uuid
+        nodeid: data.node.uuid,
+        trace
       }, e)
     }
   } else if (hasLoaded$.value) {
-    logKibana("ERROR", { message: "missing node type implemenation", nodetype: data.node.type })
+    logKibana("ERROR", { message: "missing node type implemenation", nodetype: data.node.type, trace })
   }
 }
 
