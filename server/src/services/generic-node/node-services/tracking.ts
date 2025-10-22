@@ -5,10 +5,10 @@ import { mainTypeName } from '../json-schema-type-util';
 import { DAYS, HOUR, MINUTE } from '../../../constant';
 import { PsqlBase, save } from 'hibernatets';
 
+
 const trackingPool = new PsqlBase({
   keepAlive: true
 })
-
 
 const activeTrackingMap: Record<string, NodeJS.Timeout> = {}
 
@@ -75,13 +75,14 @@ addTypeImpl({
       clearTimeout(activeTrackingMap[node.uuid])
     }
 
+    const timeout = node.parameters?.activityTimeHours ? +node.parameters?.activityTimeHours * HOUR : MINUTE * 10;
     activeTrackingMap[node.uuid] = setTimeout(() => {
       logKibana("ERROR", {
-        message: "didnt receive tracking for 10 minutes",
+        message: `didnt receive tracking ${Math.floor(timeout / MINUTE)} minutes`,
         node: node.uuid,
         name: node.parameters?.name
       })
-    }, node.parameters?.activityTimeHours ? +node.parameters?.activityTimeHours * HOUR : MINUTE * 10)
+    }, timeout)
 
     trackingEventBuffer.push(evt)
     return
