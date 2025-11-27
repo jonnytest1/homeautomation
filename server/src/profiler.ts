@@ -32,7 +32,7 @@ async function heapSnapshot() {
   console.log('Used Heap Size:', formatBytes(heapStats.used_heap_size));
 
 
-  if (toMb(heapStats.used_heap_size) < 18000) {
+  if (toMb(memoryUsage.rss) < 18000) {
     return
   }
   console.log("snapshotting")
