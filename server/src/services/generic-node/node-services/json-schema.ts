@@ -66,6 +66,12 @@ addTypeImpl({
         enumKeyList,
         params
       )
+
+      if (updated.oneOf) {
+        throw new Error("shouldnt be one of")
+      }
+
+
       node.parameters ??= {}
       node.runtimeContext.parameters ??= {}
 
