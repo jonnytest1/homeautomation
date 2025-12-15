@@ -34,8 +34,9 @@ export type HistoryServerContext = {
 export function trackInputHistory<O extends NodeDefOptinos, R extends HistoryServerContext>(node: EvalNode<O, R>, data: NodeEvent) {
   const inputHistory = node.serverContext?.inputhistory ?? []
   const historyKey = `inputhistory${data.inputIndex > 0 ? data.inputIndex : ""}`
-  if (node.parameters?.[historyKey]?.length) {
-    const inputhistoryNum = +node.parameters?.[historyKey]
+  const historyKeyParam = node.parameters?.[historyKey];
+  if (historyKeyParam?.length) {
+    const inputhistoryNum = +historyKeyParam
     if (!isNaN(inputhistoryNum) && inputhistoryNum > 0) {
       const inputHistoryDays = inputhistoryNum * HOUR * 24
 
