@@ -87,8 +87,9 @@ export function addOutputHistoryEvent<O extends NodeDefOptinos & WithHistory, R 
   const key = `outputhistory${emitIndex || ''}`
 
 
-  if (node.parameters?.[key]?.length) {
-    const outputHistoryNum = +node.parameters?.[key];
+  const paramValue = node.parameters?.[key];
+  if (paramValue?.length) {
+    const outputHistoryNum = +paramValue;
     if (!isNaN(outputHistoryNum) && outputHistoryNum > 0) {
       const outputHistoryDays = outputHistoryNum * HOUR * 24;
 
