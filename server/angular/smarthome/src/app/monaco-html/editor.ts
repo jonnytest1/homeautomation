@@ -121,7 +121,5 @@ export interface Main {
 }
 
 declare global {
-  var monaco: {
-    editor: typeof editor
-  }
+  var monaco: MonacoGlobal
 }

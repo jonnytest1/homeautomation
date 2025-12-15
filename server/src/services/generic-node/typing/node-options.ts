@@ -59,13 +59,16 @@ type Invalidated<T extends string> = {
 type Titled = {
   title?: string
 }
-
+export type HiddenUnlessValue = {
+  hideWithoutValue?: boolean
+}
 type PlaceholderType<T extends PlaceHolder> = T["of"] extends Array<infer U> ? U : T["of"] extends "unknown" ? unknown : T["of"]
 
 export type NodeOptionTypes<Keys extends string = string> = (Select | Text | Code | PlaceHolder | Frame | NumberCfg | BooleanCfg | BtnCfg)
   & Order
   & Invalidated<Keys>
   & Titled
+  & HiddenUnlessValue
 
 export type NodeOptionTypeWithOptionalName = NodeOptionTypes & { name?: string }
 export type NodeOptionTypeWithName = NodeOptionTypes & { name: string }

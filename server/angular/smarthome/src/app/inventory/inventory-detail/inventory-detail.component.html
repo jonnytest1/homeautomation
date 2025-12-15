@@ -18,7 +18,7 @@
       >{{ item.customdescription }}</textarea
     ><br />
   </form>
-  <img [src]="item.orderImageSrc" />
+  <img [src]="item.orderImageSrc" style="max-height: 500px" />
   <br />
   <a [href]="item.productLink" target="_blank">
     {{ item.order?.type ?? "" }} {{ getProductId(item) }}

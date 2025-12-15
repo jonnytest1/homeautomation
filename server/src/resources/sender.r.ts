@@ -73,12 +73,11 @@ export class SenderResource {
         })
         if (sender.transformation.length) {
           sender.events.push(newEvent)
-          const cutoff = senderLoader.getLastEventsTime()
-          while (sender.events[0].timestamp < cutoff) {
-            sender.events.shift()
-          }
         }
-
+        const cutoff = senderLoader.getLastEventsTime()
+        while (sender.events[0].timestamp < cutoff) {
+          sender.events.shift()
+        }
 
 
         if (req.body.a_read1) {
@@ -158,6 +157,16 @@ export class SenderResource {
   })
   async getSenders(req, res: HttpResponse) {
     const senders = await senderLoader.loadSenders()
+
+
+    await Promise.all(senders.filter(s => s.transformation.length).map(async s => {
+      const oneMonthsAgo = Date.now() - (1000 * 60 * 60 * 24 * 30);
+      s.events = await load(EventHistory, {
+        filter: "`sender`=? and `timestamp` > ?",
+        params: [s.id, oneMonthsAgo],
+        options: {}
+      })
+    }))
 
     //const mqttSenders = mqttConnection.getDevices()
     res.send(senders);

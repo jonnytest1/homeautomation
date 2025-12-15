@@ -71,7 +71,7 @@ export function updateRuntimeParameter<T, P, K extends ((keyof P & keyof T & str
 
 
 
-  if (node.parameters?.[key] === undefined) {
+  if (node.parameters?.[key] === undefined && param) {
 
     let value: T[K] | undefined = undefined
     if (typeof inital === "string") {

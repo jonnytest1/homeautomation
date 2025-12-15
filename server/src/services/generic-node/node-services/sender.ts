@@ -1,8 +1,9 @@
 import { addTypeImpl } from '../generic-node-service'
-import type { Sender } from '../../../models/sender';
+import { Sender } from '../../../models/sender';
 import type { Transformation } from '../../../models/transformation';
 import { updateRuntimeParameter } from '../element-node-fnc';
 import { senderLoader } from '../../sender-loader';
+import { load } from 'hibernatets';
 
 
 function getHistoryCount(transformer: Transformation & { historyCount?: number }, events: Sender['events']) {
@@ -74,8 +75,17 @@ addTypeImpl({
     })
 
     if (node.parameters?.deviceKey) {
-      const sender = senders.find(sender => sender.deviceKey === node.parameters?.deviceKey)
-      const envtsCopy = [...sender?.events ?? []]
+      const oneMonthsAgo = Date.now() - (1000 * 60 * 60 * 24 * 30);
+      const senders = await load(Sender, {
+        filter: s => s.deviceKey = node.parameters.deviceKey,
+        options: {
+          deep: {
+            events: "`timestamp` > " + oneMonthsAgo,
+          }
+        }
+      })
+      const sender = senders[0]
+      const envtsCopy = [...sender.events]
       const transformations = sender?.transformation.sort((tr1, tr2) => {
         return getHistoryCount(tr2, envtsCopy) - getHistoryCount(tr1, envtsCopy);
       })?.filter(t => t.name?.length && t.transformationKey?.length)

@@ -6,10 +6,11 @@ import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 import type { Observable } from 'rxjs';
 import { BehaviorSubject, ReplaySubject, Subject } from 'rxjs';
-import { map, switchMap, tap } from 'rxjs/operators';
+import { map, skip, switchMap, tap } from 'rxjs/operators';
 import { v4 as uuid } from 'uuid';
 import { ResolvablePromise } from './utils/resolvable-promise';
 import { getDeviceData, logKibana } from './global-error-handler';
+import { getSessionStorage, setSessionStorage } from './utils/storage';
 
 
 let ws: WebSocket;
@@ -78,7 +79,7 @@ export class SettingsService extends AbstractHttpService {
 
   private readonly _receivers$ = new BehaviorSubject<Record<string, ReceiverFe>>({});
   readonly receivers$ = this._receivers$.asObservable();
-  private readonly _senders$ = new BehaviorSubject<Array<SenderFe>>([]);
+  private readonly _senders$ = new BehaviorSubject<Array<SenderFe>>(getSessionStorage("_senders_cache", []));
   readonly senders$ = this._senders$.asObservable();
 
   private readonly inventory = new BehaviorSubject<Array<ItemFe>>([]);
@@ -120,6 +121,16 @@ export class SettingsService extends AbstractHttpService {
     this.genericNodeSendingEvents.subscribe(ev => {
       sendSocketEvent(ev)
     })
+
+    this.senders$
+      .pipe(skip(1))
+      .subscribe(senders => {
+        const cleanedSenders = senders.map(s => ({
+          ...s,
+          events: []
+        }))
+        setSessionStorage("_senders_cache", cleanedSenders)
+      })
   }
 
   private isType<K extends keyof SocketResponses>(obj: ResponseData, key: K): obj is ResponseData<K> {

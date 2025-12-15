@@ -87,6 +87,9 @@ export class GenericOptionsComponent implements AfterViewInit, OnChanges {
         if (opt.type === "placeholder") {
           continue
         }
+        if (opt.hideWithoutValue && !node.parameters?.[option]) {
+          continue
+        }
         entries.push({
           name: option,
           value: opt
@@ -97,6 +100,9 @@ export class GenericOptionsComponent implements AfterViewInit, OnChanges {
           const opt = node.runtimeContext?.parameters[option]
           if (opt) {
             if (opt.type === "placeholder") {
+              continue
+            }
+            if (opt.hideWithoutValue && !node.parameters?.[option]) {
               continue
             }
             entries.push({

@@ -27,7 +27,7 @@
           "builder": "@angular-builders/custom-webpack:browser",
           "options": {
             "outputPath": "../../public/",
-            "deleteOutputPath": true,
+            "deleteOutputPath": false,
             "customWebpackConfig": {
               "path": "./webpack.config.js",
               "replaceDuplicatePlugins": true

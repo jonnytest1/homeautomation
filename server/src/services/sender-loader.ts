@@ -33,7 +33,7 @@ class SenderLoader {
       const loadedSender = await loadOne(Sender, s => s.deviceKey = deviceKey, [], {
         deep: {
           connections: "TRUE = TRUE",
-          events: "`timestamp` > " + twoMonthsAgo,
+          //events: "`timestamp` > " + twoMonthsAgo,
           batteryEntries: "`timestamp` > " + twoMonthsAgo,
           transformation: "TRUE = TRUE",
           receiver: "TRUE = TRUE",
@@ -64,7 +64,7 @@ class SenderLoader {
         const senders = await load(Sender, 'true = true', [oneMonthsAgo], {
           deep: {
             connections: "TRUE = TRUE",
-            events: "`timestamp` > " + oneMonthsAgo,
+            //events: "`timestamp` > " + oneMonthsAgo,
             batteryEntries: "`timestamp` > " + oneMonthsAgo,
             transformation: "TRUE = TRUE",
             receiver: "TRUE = TRUE",

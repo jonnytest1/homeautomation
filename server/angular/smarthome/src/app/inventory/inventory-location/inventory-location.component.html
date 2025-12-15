@@ -49,7 +49,7 @@
     }
   </div>
 }
-
+<h5>items:</h5>
 @if (items$ | async; as items) {
   <div>
     @if (items.length) {
@@ -64,14 +64,15 @@
   </div>
 }
 
-<h5>children</h5>
+<h5>children:</h5>
+depths <input type="number" [(ngModel)]="depth" min="1" />
 
-<div class="children">
-  @for (child of childlocations$ | async; track child) {
-    <div>
-      <a routerLink="../{{ child.id }}"
-        >{{ child.id }} {{ child.description.split("\n")[0] }}</a
-      >
-    </div>
+@if (location$ | async; as location) {
+  @if (locationData$ | async; as invData) {
+    <app-inventory-item-children
+      [depth]="+depth"
+      [locationId]="location.id"
+      [treeData]="invData"
+    ></app-inventory-item-children>
   }
-</div>
+}

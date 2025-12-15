@@ -20,7 +20,9 @@ if (environment.setup) {
   require("./test/local-setup.ts")
 }
 
-updateDatabase(__dirname + '/src/models', {})
+updateDatabase(__dirname + '/src/models', {
+
+})
   .then(async () => {
     setDbInit()
     console.log("updated database")
@@ -110,10 +112,9 @@ updateDatabase(__dirname + '/src/models', {})
     //tuyaSTuffs()
 
   }).catch(e => {
-    logKibana("ERROR", "failed updating database or server start", e);
-    setTimeout(() => {
+    logKibana("ERROR", "failed updating database or server start", e).finally(() => {
       process.exit(1);
-    }, 500)
+    });
   });
 
 new Worker(join(__dirname, "src", "main-node-media-server.ts"), {

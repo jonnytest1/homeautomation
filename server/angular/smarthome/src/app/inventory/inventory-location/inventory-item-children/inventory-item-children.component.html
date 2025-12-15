@@ -1,0 +1,32 @@
+@if (depth > 0 && treeData) {
+  @if (treeData.items?.[locationId]) {
+    <ul>
+      @for (item of treeData.items[locationId]; track item) {
+        <li>
+          <a href="/inventory/item/{{ item.id }}"
+            >{{ item.description
+            }}<img class="orderImage" [src]="item.orderImageSrc"
+          /></a>
+        </li>
+      }
+    </ul>
+  }
+  @if (treeData.locations?.[locationId]; as locations) {
+    <div>
+      @for (child of locations; track child) {
+        <div>
+          <a routerLink="/inventory/location/{{ child.id }}"
+            >{{ child.id }} {{ child.description.split("\n")[0] }}</a
+          >
+          <div class="nested">
+            <app-inventory-item-children
+              [depth]="depth - 1"
+              [locationId]="child.id"
+              [treeData]="treeData"
+            ></app-inventory-item-children>
+          </div>
+        </div>
+      }
+    </div>
+  }
+}

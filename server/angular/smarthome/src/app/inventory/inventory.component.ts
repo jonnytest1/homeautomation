@@ -18,6 +18,7 @@ import { MatBottomSheet } from '@angular/material/bottom-sheet';
 import { getBackendBaseUrl } from '../backend';
 import type { TableItemFe } from './inventory-type';
 import { getProductId } from './inventory-util';
+import type { FrontendOrder, Item } from '../../../../../src/models/inventory/item';
 
 @Component({
   selector: 'app-inventory',
@@ -144,7 +145,7 @@ export class InventoryComponent implements OnInit, AfterViewInit {
 
 
   getLocation(item: ItemFe) {
-    return item.location?.description || item.location as string || (item.order.orderStatus == "pending" ? "(pending)" : undefined) || '-'
+    return item.location?.description || item.location as string || (item.order?.orderStatus == "pending" ? "(pending)" : undefined) || '-'
   }
 
   getTrackingLink(item: ItemFe) {
@@ -170,9 +171,26 @@ export class InventoryComponent implements OnInit, AfterViewInit {
     this.matBottomSheet.open(addItemTemplate)
   }
 
-  async imageDrop(ev: DragEvent, target: HTMLInputElement, img: HTMLImageElement) {
-    const file = ev.dataTransfer.files[0];
+  async imageDrop(ev: DragEvent | ClipboardEvent, target: HTMLInputElement, img: HTMLImageElement) {
+    const dataTransfer = "dataTransfer" in ev ? ev.dataTransfer : ev.clipboardData
+
+
+    const file = dataTransfer.files[0];
     ev.preventDefault();
+
+    if (!file) {
+      const nativeImage = [...dataTransfer.items].find(i => i.kind === "application/x-moz-nativeimage")
+
+      nativeImage.getAsString(str => {
+        debugger
+      })
+
+
+    }
+
+    if (!file) {
+      return
+    }
     const buffer = await file?.arrayBuffer()
     const uint8Array = new Uint8Array(buffer);
 
@@ -187,7 +205,8 @@ export class InventoryComponent implements OnInit, AfterViewInit {
     target.value = `data:${file.type};base64,${base64String}`
   }
 
-  submitNewItem(form: HTMLFormElement) {
+  submitNewItem(form: HTMLFormElement, evt: MouseEvent) {
+    evt.preventDefault()
     const obj = Object.fromEntries(new FormData(form).entries())
 
 
@@ -199,8 +218,9 @@ export class InventoryComponent implements OnInit, AfterViewInit {
         amount: +obj.amount,
         description: obj.description as string,
         orderImageSrc: obj.image as string,
-      }]
-    }
+        productLink: obj.productlink as string
+      } as Item]
+    } as FrontendOrder
     const url = new URL(`rest/inventory`, getBackendBaseUrl())
     fetch(url, {
       method: "POST",
@@ -208,8 +228,16 @@ export class InventoryComponent implements OnInit, AfterViewInit {
       headers: {
         "content-type": "application/json"
       }
+    }).then(r => {
+      if (r.status !== 200) {
+        throw r
+      }
     })
 
-    debugger
+      .catch(e => {
+
+
+        debugger
+      })
   }
 }

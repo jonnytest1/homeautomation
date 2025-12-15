@@ -3,7 +3,7 @@ import { NG_VALUE_ACCESSOR, type ControlValueAccessor } from '@angular/forms';
 import type { Main, SandBox } from './editor';
 import { CommonModule } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
-import type { editor } from 'monaco-editor';
+import type { editor, languages } from 'monaco-editor';
 import { ResolvablePromise } from '../utils/resolvable-promise';
 
 interface Imports {
@@ -86,6 +86,25 @@ export class MonacoHtmlComponent implements OnInit, OnDestroy, ControlValueAcces
       await ResolvablePromise.delayed(6)
     }
     ref.createTheme()
+    monaco.languages.html.htmlDefaults.setOptions({
+      validate: true,
+      suggest: {
+        html5: true,
+        angular1: false,
+        ionic: false,
+        javascript: true,
+        typescript: true
+      },
+      format: true as any,
+      hover: true,
+      // This is the important part:
+      script: {
+        // enable JavaScript support inside <script>
+        embedded: true
+      }
+    } as languages.html.Options);
+
+
     ref.editor = monaco.editor.create(ref.monacoEditor.nativeElement, {
       language: "html",
       value: ref.cachedText || "",

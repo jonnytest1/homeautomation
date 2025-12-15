@@ -1,10 +1,8 @@
 <div class="container">
-
   @for (timer of timers; track timer) {
-    <div
-      class="timer-wrapper"
-      #timerWrapper>
-      <circle-progress [percent]="getPercent(timer)"
+    <div class="timer-wrapper" #timerWrapper>
+      <circle-progress
+        [percent]="getPercent(timer)"
         [responsive]="true"
         [subtitle]="getSubtitle(timer)"
         [outerStrokeWidth]="16"
@@ -12,13 +10,11 @@
         outerStrokeColor="#78C000"
         innerStrokeColor="#C7E596"
         [animation]="false"
-        [animationDuration]="100">
+        [animationDuration]="100"
+      >
       </circle-progress>
     </div>
-  }
-  @if (timers && !timers.length) {
-    <mat-grid-tile>
-      Keine aktiven Timer
-    </mat-grid-tile>
+  } @empty {
+    <span> Keine aktiven Timer </span>
   }
 </div>
