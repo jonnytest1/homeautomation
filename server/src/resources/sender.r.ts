@@ -75,7 +75,7 @@ export class SenderResource {
           sender.events.push(newEvent)
         }
         const cutoff = senderLoader.getLastEventsTime()
-        while (sender.events[0].timestamp < cutoff) {
+        while (sender.events[0] && sender.events[0].timestamp < cutoff) {
           sender.events.shift()
         }
 
