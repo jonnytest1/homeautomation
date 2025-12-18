@@ -3,6 +3,7 @@ import type { ConditionalServiceType } from './service-map';
 import type { Delayed, SenderResponse } from '../../models/connection-response';
 import { Timer } from '../../models/timer';
 import { FrontendWebsocket } from '../../resources/frontend-update';
+import { sharedPool } from '../../models/db-state';
 import { getId } from 'hibernatets/utils';
 import { save } from 'hibernatets';
 
@@ -35,7 +36,9 @@ export class TimerFactory {
       className: callbackClassName,
       data: timerData.sentData
     })
-    save(timer)
+    save(timer, {
+      db: sharedPool
+    })
       .then(() => {
         FrontendWebsocket.updateTimers()
       })
