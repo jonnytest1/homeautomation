@@ -156,24 +156,26 @@ export class SenderResource {
     path: ''
   })
   async getSenders(req, res: HttpResponse) {
-    let senders = await senderLoader.loadSenders()
+    const senders = await senderLoader.loadSenders()
 
 
-    senders = await Promise.all(senders.filter(s => s.transformation.length).map(async s => {
-      const oneMonthsAgo = Date.now() - (1000 * 60 * 60 * 24 * 30);
+    const responseSenders = await Promise.all(senders
+      .filter(s => s.transformation.length)
+      .map(async s => {
+        const oneMonthsAgo = Date.now() - (1000 * 60 * 60 * 24 * 30);
 
-      return {
-        ...s,
-        events: await load(EventHistory, {
-          filter: "`sender`=? and `timestamp` > ?",
-          params: [s.id, oneMonthsAgo],
-          options: {}
-        })
-      } as Sender
-    }))
+        return {
+          ...s,
+          events: await load(EventHistory, {
+            filter: "`sender`=? and `timestamp` > ?",
+            params: [s.id, oneMonthsAgo],
+            options: {}
+          })
+        } as Partial<Sender>
+      }))
 
     //const mqttSenders = mqttConnection.getDevices()
-    res.send(senders);
+    res.send(responseSenders);
   }
   @POST({
     path: ':senderid/transformation'

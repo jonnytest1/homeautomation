@@ -2,6 +2,7 @@ import { sharedPool } from '../models/db-state';
 import { Sender } from '../models/sender';
 import { Sound } from '../models/sound';
 import { TscCompiler } from '../util/tsc-compiler';
+import type { SettersIntercepted } from '../util/types';
 import { loadOne } from 'express-hibernate-wrapper';
 import { load } from 'hibernatets';
 
@@ -12,7 +13,7 @@ class SenderLoader {
   lastAllLoaded: number
   senderCache: Record<string, {
     loaded: number,
-    value: Sender
+    value: Sender & SettersIntercepted
   }> = {
 
     }
@@ -39,7 +40,7 @@ class SenderLoader {
           receiver: "TRUE = TRUE",
         },
         db: sharedPool
-      })
+      }) as Sender & SettersIntercepted
       this.senderCache[deviceKey] = {
         loaded: Date.now(),
         value: loadedSender
@@ -70,7 +71,7 @@ class SenderLoader {
             receiver: "TRUE = TRUE",
           },
           db: sharedPool
-        })
+        }) as Array<Sender & SettersIntercepted>
         for (const sender of senders) {
           this.senderCache[sender.deviceKey] = {
             loaded: Date.now(),
