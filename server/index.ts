@@ -19,12 +19,13 @@ console.log('server.ts iniz');
 if (environment.setup) {
   require("./test/local-setup.ts")
 }
-
+logKibana("INFO", "startup log");
 updateDatabase(__dirname + '/src/models', {
 
 })
   .then(async () => {
     setDbInit()
+    logKibana("INFO", "database updated");
     console.log("updated database")
     const redirected: string | null = null;
     await initialize(__dirname + '/src/resources', {
@@ -110,6 +111,9 @@ updateDatabase(__dirname + '/src/models', {
 
     await startNodeRed()
     //tuyaSTuffs()
+
+
+    logKibana("INFO", "server initialized");
 
   }).catch(e => {
     logKibana("ERROR", "failed updating database or server start", e).finally(() => {
