@@ -1,10 +1,12 @@
 import { environment } from './environment'
 import { logKibana } from './util/log'
+import { ResolvablePromise } from './util/resolvable-promise'
 import { existsSync, createWriteStream } from "fs"
 import { mkdir, rename } from "fs/promises"
 import { join } from 'path'
 import { getHeapSnapshot, getHeapStatistics } from "v8"
-
+import inspector from 'node:inspector';
+import { writeFileSync } from 'node:fs'
 
 const start = `profile_${encodeURIComponent(new Date().toISOString())}`
 let ct = 0
@@ -16,7 +18,74 @@ function formatBytes(bytes) {
   return `${(toMb(bytes)).toFixed(2)} MB`;
 }
 
+async function snapshot() {
+  heapSnapshot();
+  cpuSnapshot()
+}
+async function cpuSnapshot() {
 
+
+  const session = new inspector.Session();
+
+  session.connect();
+
+  session.post('Profiler.enable', async () => {
+    session.post('Profiler.start');
+
+
+    const cpuReadings: Array<number> = [];
+
+
+
+    for (let i = 0; i < 25; i++) {
+
+      const cpuUsageStart = process.cpuUsage();
+      const startTime = process.hrtime.bigint();
+
+      await ResolvablePromise.delayed(1000)
+      const cpuDiff = process.cpuUsage(cpuUsageStart);
+      console.log('Cpu system:', cpuDiff.system);
+      console.log('Cpu user:', cpuDiff.user);
+
+      const elapsedMs =
+        Number(process.hrtime.bigint() - startTime) / 1e6;
+
+
+      const processTime = cpuDiff.system + cpuDiff.user
+      const cpuMs = (processTime) / 1000;
+      const cpuPct = (cpuMs / elapsedMs) * 100;
+
+      cpuReadings.push(cpuPct)
+    }
+    const avg = cpuReadings.reduce((a, b) => a + b, 0) / cpuReadings.length;
+    console.log("average cpu %", avg)
+
+
+    session.post('Profiler.stop', async (err, { profile }) => {
+      if (err) {
+        logKibana("ERROR", "error profiling cpu", err)
+      }
+      logKibana("INFO", { message: "cpu stats", averagePercent: avg, cpuReadings })
+
+      if (avg < 120) {
+        return
+      }
+
+      const folder = environment.PROFILE_FOLDER ?? "/var/profiler"
+
+      if (!existsSync(folder)) {
+        await mkdir(folder, { recursive: true })
+      }
+      const filename = `${start}_${ct++}.cpuprofile`
+      const file = join(folder, filename)
+      writeFileSync(file, JSON.stringify(profile));
+      session.disconnect();
+      console.log('CPU profile written');
+    });
+
+
+  });
+}
 async function heapSnapshot() {
 
   const memoryUsage = process.memoryUsage();
@@ -65,6 +134,6 @@ async function heapSnapshot() {
 }
 
 if (environment.PROFILER_ENABLED) {
-  setInterval(heapSnapshot, 1000 * 60);
-  setTimeout(heapSnapshot, 1000 * 60)
+  setInterval(snapshot, 1000 * 60 * 5);
+  setTimeout(snapshot, 1000 * 60)
 }
