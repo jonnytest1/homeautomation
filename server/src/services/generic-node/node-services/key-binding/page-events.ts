@@ -1,4 +1,8 @@
 import type { ElementNode } from '../../typing/element-node'
+
+export type KeyEventData = { [board: string]: { [key: string]: number } }
+
+
 export type SocketMap = {
   type: "layouts"
   param: object
@@ -14,6 +18,10 @@ export type SocketMap = {
     key: string
   }
   response: void
+} | {
+  type: "key-events"
+  param: object
+  response: KeyEventData
 }
 
 export type SocketEvents = {

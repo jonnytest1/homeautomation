@@ -1,4 +1,4 @@
-import type { SocketMap } from './page-events'
+import type { KeyEventData, SocketMap } from './page-events'
 import type { DeviceConfig } from '../../../mqtt-tasmota'
 import type { ElementNodeImpl } from '../../element-node'
 import { addTypeImpl } from '../../generic-node-service'
@@ -26,6 +26,9 @@ const nodesMap: Record<string, ElementNodeImpl> = {}
 
 const layoutSubject = new BehaviorSubject<z.infer<typeof layoutType>>({})
 
+
+const lastKeyEmits: KeyEventData = {}
+
 // { board?: string, key?: string, mode?: "press" | "release" }
 addTypeImpl({
   context_type: (t: { board: string, device?: DeviceConfig }) => t,
@@ -34,6 +37,8 @@ addTypeImpl({
 
       if (emit.type === "layouts") {
         emit.___reply(layoutSubject.value)
+      } else if (emit.type === "key-events") {
+        emit.___reply(lastKeyEmits)
       } else if (emit.type === "page-trigger") {
         const key = emit.key
         Object.values(nodesMap).forEach(node => {
@@ -65,6 +70,16 @@ addTypeImpl({
     }
     const newEvt = evt.payload as { data: { [board: string]: Array<string> } }
     const newBoardData = newEvt.data[node?.parameters?.board]
+
+    for (const board in newEvt.data) {
+      for (const key of newEvt.data[board]) {
+        if (!lastEvent.payload.data[board]?.includes(key)) {
+          lastKeyEmits[board] ??= {}
+          lastKeyEmits[board][key] = Date.now()
+        }
+      }
+    }
+
     if (node.parameters.key) {
       if (prevBoardData.includes(node.parameters.key) && !newBoardData.includes(node.parameters.key)) {
         if (node.parameters.mode !== "press") {

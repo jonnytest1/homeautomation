@@ -43,9 +43,26 @@ export class GenericNodeResources {
             delete eventMap[evt.messageId];
           }
         })
+
+        class Subject{
         
-        function sendToNodeImplementation(event){
-            return new Promise(res=>{
+          constructor(cb){
+              cb((value)=>{
+                 this.cb?.(value);
+              })
+          }
+
+
+           subscribe(cb){
+              this.cb=cb;
+           }
+        }
+
+        
+        function sendToNodeImplementation(event,opts={}){
+            const returnType=opts.multiEmit?Subject:Promise
+
+            return new returnType(res=>{
               const messageId=\`\${Math.random()}\`
               eventMap[messageId]=res
               event.messageId=messageId

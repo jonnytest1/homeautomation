@@ -406,7 +406,7 @@ function getElementNodes(implementationType: string): ElementNodeImpl<never>[] {
   });
 }
 
-function createCallbacks(node: ElementNode, trace: CallTrace) {
+function createCallbacks(node: ElementNode, trace: CallTrace): Callbacks {
   const nodeUuid = node.uuid
 
   const emitPromises: Array<Promise<void>> = []
@@ -449,7 +449,7 @@ async function processInput(data: { node: ElementNode, nodeinput: number, data: 
 
       setLastEvent(data.node, eventCopy)
       // only awaiting promises until  process is finished
-      await Promise.all(callbacks.emitPromises)
+      await Promise.all(callbacks.emitPromises!)
 
 
     } catch (e) {

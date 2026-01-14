@@ -129,6 +129,7 @@ export class SettingsService extends AbstractHttpService {
           ...s,
           events: []
         }))
+        cleanedSenders.sort((a, b) => a.id - b.id)
         setSessionStorage("_senders_cache", cleanedSenders)
       })
   }
