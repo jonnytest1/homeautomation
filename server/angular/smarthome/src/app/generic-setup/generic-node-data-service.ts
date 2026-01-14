@@ -17,6 +17,8 @@ export type PendingConnection = {
 }
 
 
+const multiEmitSymbol = Symbol("multiemit")
+
 @Injectable({ providedIn: "root" })
 export class GenericNodesDataService {
 
@@ -72,7 +74,9 @@ export class GenericNodesDataService {
         ngrxStore.dispatch(messageEvent.data)
       } else if (messageEvent.type == 'reply') {
         this.eventRegister[messageEvent.messageId]?.(messageEvent.reply)
-        delete this.eventRegister[messageEvent.messageId]
+        if (!this.eventRegister[messageEvent.messageId][multiEmitSymbol]) {
+          delete this.eventRegister[messageEvent.messageId]
+        }
       } else {
         debugger
       }
@@ -112,21 +116,34 @@ export class GenericNodesDataService {
       data: action
     })
   }
-  public passPageAction(action: { messageId: string, type: string }, nodeType: string) {
+  public passPageAction(action: { messageId: string, type: string, multiEmit?: boolean }, nodeType: string) {
+    this.service.genericNodeSendingEvents.next({
+      type: "generic-node-event",
+      data: {
+        type: "page event",
+        data: {
+          nodeType,
+          data: action,
+          messageId: action.messageId
+        }
+      }
+    })
+    if (action.multiEmit) {
+      let callback;
+      this.eventRegister[action.messageId] = (data) => {
+        callback(data)
+      }
+      this.eventRegister[action.messageId][multiEmitSymbol] = true
+      return {
+        then(cb) {
+          callback = cb
+        }
+      }
+    }
+
 
     return new Promise(res => {
       this.eventRegister[action.messageId] = res
-      this.service.genericNodeSendingEvents.next({
-        type: "generic-node-event",
-        data: {
-          type: "page event",
-          data: {
-            nodeType,
-            data: action,
-            messageId: action.messageId
-          }
-        }
-      })
     })
 
   }

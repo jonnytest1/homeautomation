@@ -4,7 +4,7 @@ import type { ElementNodeImpl } from '../../element-node'
 import { addTypeImpl } from '../../generic-node-service'
 import { generateDtsFromSchema, mainTypeName } from '../../json-schema-type-util'
 import { getLastEvent } from '../../last-event-service'
-import type { TypeImplSocket } from '../../typing/generic-node-type'
+import type { SubjectEvent, TypeImplSocket } from '../../typing/generic-node-type'
 import { getClient, globalMqttConfig } from '../mqtt-global'
 import { updateRuntimeParameter } from '../../element-node-fnc'
 import { createNodeEvent } from '../../generic-store/node-event-factory'
@@ -29,6 +29,8 @@ const layoutSubject = new BehaviorSubject<z.infer<typeof layoutType>>({})
 
 const lastKeyEmits: KeyEventData = {}
 
+let lastKeyEmitsEvent: SubjectEvent<SocketMap & { type: "key-events" }>
+
 // { board?: string, key?: string, mode?: "press" | "release" }
 addTypeImpl({
   context_type: (t: { board: string, device?: DeviceConfig }) => t,
@@ -39,6 +41,7 @@ addTypeImpl({
         emit.___reply(layoutSubject.value)
       } else if (emit.type === "key-events") {
         emit.___reply(lastKeyEmits)
+        lastKeyEmitsEvent = emit
       } else if (emit.type === "page-trigger") {
         const key = emit.key
         Object.values(nodesMap).forEach(node => {
@@ -79,7 +82,7 @@ addTypeImpl({
         }
       }
     }
-
+    lastKeyEmitsEvent.___reply(lastKeyEmits)
     if (node.parameters.key) {
       if (prevBoardData.includes(node.parameters.key) && !newBoardData.includes(node.parameters.key)) {
         if (node.parameters.mode !== "press") {

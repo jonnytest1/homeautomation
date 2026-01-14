@@ -34,13 +34,15 @@ export class GenericNodeResources {
       const scriptEl = dom.window.document.createElement("script")
       scriptEl.textContent = `
         var eventMap={}
-
+        const multiEmitSymbol = Symbol("multiemit")
 
         addEventListener("message", m => {
           const evt = JSON.parse(m.data)
           if(evt.type==="response"){
             eventMap[evt.messageId]?.(evt.data);
-            delete eventMap[evt.messageId];
+            if(!eventMap[evt.messageId]?.[multiEmitSymbol]){
+              delete eventMap[evt.messageId];
+            }
           }
         })
 
@@ -65,7 +67,9 @@ export class GenericNodeResources {
             return new returnType(res=>{
               const messageId=\`\${Math.random()}\`
               eventMap[messageId]=res
+              eventMap[messageId][multiEmitSymbol]=true
               event.messageId=messageId
+              event.multiEmit=opts.multiEmit
               window.parent.postMessage(JSON.stringify(event), "*")
             })
         }

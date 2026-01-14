@@ -111,7 +111,17 @@ Promise.all([
       boardElement.style.setProperty("--min-width", `${minWidth}px`)
 
     }
-
+    sendToNodeImpl({
+      type: "key-events"
+    }, { multiEmit: true }).subscribe(events => {
+      for(board in events) {
+        for(const key in events[board]) {
+          activityMap[board] ??= {}
+          activityMap[board][key] = events[board][key]
+        }
+      }
+      debugger;
+    })
 
     addEventListener("message", m => {
       const evt = JSON.parse(m.data)
