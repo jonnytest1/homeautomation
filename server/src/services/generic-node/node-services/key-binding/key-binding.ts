@@ -82,7 +82,7 @@ addTypeImpl({
         }
       }
     }
-    lastKeyEmitsEvent.___reply(lastKeyEmits)
+    lastKeyEmitsEvent?.___reply(lastKeyEmits)
     if (node.parameters.key) {
       if (prevBoardData.includes(node.parameters.key) && !newBoardData.includes(node.parameters.key)) {
         if (node.parameters.mode !== "press") {

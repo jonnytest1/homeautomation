@@ -1,6 +1,6 @@
 import type { Action, ActionCreator, ActionCreatorProps, ActionReducer, NotAllowedCheck } from '@ngrx/store';
 import { createAction, props } from '@ngrx/store';
-import type { Connection, ElementNode, NodeData, NodeOptionTypes, SetConnectionError, UpdateEditorSchema, UpdateInputSchema, UpdateOutputSchema } from '../../settings/interfaces';
+import type { Connection, ElementNode, NodeData, NodeOptionTypes, SetConnectionError, UpdateCombinedSchema, UpdateEditorSchema, UpdateInputSchema, UpdateOutputSchema } from '../../settings/interfaces';
 import { type NodeDefintion } from '../../settings/interfaces';
 import type { GenericNodeState } from './reducers';
 import { patchNode } from './reducer-util';
@@ -27,6 +27,16 @@ function backendAction<T extends Record<string, ActionCreator>>(actions: T) {
 
 type Reducer<St, A> = (state: St, action: A) => St
 export const reducerMap = new Map<ActionCreator<string, any>, Reducer<GenericNodeState, Action>>();
+
+
+function createActionReducerFromProps<Props extends { type: string }>(type: Props extends { type: infer T } ? T : never, reducer: Reducer<GenericNodeState, Props>) {
+  type Prop = {
+    [K in keyof Props]: K extends "type" ? never : Props[K]
+  }
+
+  return createActionWithReducer(type, props<any>() as ActionCreatorProps<Prop> & NotAllowedCheck<Prop>, reducer)
+}
+
 
 function createActionWithReducer<T extends string, PropsT extends object>(type: T, config: ActionCreatorProps<PropsT> & NotAllowedCheck<PropsT>,
   reducer: Reducer<GenericNodeState, PropsT & { type: T }>) {

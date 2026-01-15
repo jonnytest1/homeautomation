@@ -242,11 +242,18 @@ export async function updateTypeSchema(node: ElementNode, nodeData: PreparedNode
   if (!nodeTypeImplemenations) {
     throw new Error("missing type implemenation for " + node.type)
   }
+  const prevOutputSchemaDts = node.runtimeContext.outputSchema?.dts
   await nodeTypeImplemenations.connectionTypeChanged?.(node, schema);
   clearTimeout(conChangeTimeout)
   if (node.runtimeContext?.editorSchema?.dts) {
     // just for debuging ... probably
     //  writeFile(join(typeData, `editorschema_${node.uuid}.ts`), node.runtimeContext?.editorSchema.dts)
+  }
+  const updatedNode = genericNodeDataStore.getOnce(selectNodeByUuid(node.uuid))
+
+
+  if (prevOutputSchemaDts === updatedNode.runtimeContext.outputSchema && prevOutputSchemaDts === node.runtimeContext.outputSchema?.dts) {
+    return
   }
 
   const outConnections = genericNodeDataStore.getOnce(selectConnectionsFromNodeUuid(node.uuid))

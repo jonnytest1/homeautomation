@@ -58,12 +58,12 @@ function startRuntimeInterval(timer: Timer) {
         return;
       }
 
-      const diffStr = convertTimeDiff({ milis: diff });
+      const diffStr = convertTimeDiff({ millis: diff });
       genericNodeDataStore.dispatch(backendToFrontendStoreActions.updateRuntimeInfo({
         nodeUuid: evt.node,
         info: `${node.parameters?.type} - ${diffStr}`
       }));
-    }, 500);
+    }, 800);
     timerUpdateMap[evt.node] = {
       intervalRef: intervalId
     }

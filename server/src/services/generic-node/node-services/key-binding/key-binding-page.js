@@ -96,13 +96,17 @@ Promise.all([
             const lastActive = activityMap[board]?.[item] ?? 0
 
             labelItem.querySelector(".active")?.remove()
-            if((Date.now() - lastActive) < 1000 * 5) {
+            const diff = Date.now() - lastActive
+
+
+            if(diff < (1000 * 5)) {
+              console.log(diff)
               const tSpan = document.createElement("span")
               tSpan.textContent = "*"
               tSpan.classList.add("active")
               labelItem.appendChild(tSpan)
             }
-          }, 500)
+          }, 400)
 
         }
 

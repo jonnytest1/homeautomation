@@ -1,9 +1,9 @@
 import { HOUR, MINUTE, SECOND } from '../constant'
 
 export function convertTimeDiff(opts: {
-  milis: number
+  millis: number
 }) {
-  let millis = opts.milis
+  let millis = opts.millis
   const hours = Math.floor(millis / HOUR)
   millis -= HOUR * hours
   const minutes = Math.floor(millis / MINUTE)
