@@ -1,17 +1,21 @@
-import { backendToFrontendStoreActions, setServerContext } from './generic-store/actions';
+import { backendToFrontendStoreActions, setServerContext, type ControlAction } from './generic-store/actions';
 import { genericNodeDataStore } from './generic-store/reference';
 import type { EvalNode, TypeImplementaiton } from './typing/generic-node-type';
 import type { ElementNode } from './typing/element-node';
 import type { MapTypeToParam, NodeDefOptinos, NodeOptionTypes, PlaceHolder } from './typing/node-options';
 
-export function updateServerContext<T, O extends NodeDefOptinos, K extends (keyof T & string)>(node: EvalNode<O, T>, opts: Partial<T>) {
 
-  const k = Object.keys(opts)[0]
+
+
+export function updateServerContext<T, O extends NodeDefOptinos, K extends (keyof T & string)>(node: EvalNode<O, T>, data: Partial<T>, opts: ControlAction = {}) {
+
+  const k = Object.keys(data)[0]
 
   genericNodeDataStore.dispatch(setServerContext({
     key: k,
-    value: opts[k],
-    nodeUuid: node.uuid
+    value: data[k],
+    nodeUuid: node.uuid,
+    ...opts
   }));
 }
 

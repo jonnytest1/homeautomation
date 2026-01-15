@@ -125,10 +125,14 @@ export const initializeStore = createAction("initialize node store", props<{
   data: NodeData
 }>())
 
+export type ControlAction = {
+  skipNodeUpdate?: boolean
+  skipTypeUpdate?: boolean
+}
 
 export const setServerContext = createAction("update server context", props<{
   nodeUuid: string,
   key: string
   value: unknown
-}>())
+} & ControlAction>())
 

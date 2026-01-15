@@ -1,6 +1,6 @@
 import type { Action, ActionCreator, ActionCreatorProps, ActionReducer, NotAllowedCheck } from '@ngrx/store';
 import { createAction, props } from '@ngrx/store';
-import type { Connection, ElementNode, NodeData, NodeOptionTypes, SetConnectionError, UpdateCombinedSchema, UpdateEditorSchema, UpdateInputSchema, UpdateOutputSchema } from '../../settings/interfaces';
+import type { Connection, ElementNode, NodeData, NodeOptionTypes, SetConnectionError, UpdateEditorSchema, UpdateInputSchema, UpdateOutputSchema } from '../../settings/interfaces';
 import { type NodeDefintion } from '../../settings/interfaces';
 import type { GenericNodeState } from './reducers';
 import { patchNode } from './reducer-util';

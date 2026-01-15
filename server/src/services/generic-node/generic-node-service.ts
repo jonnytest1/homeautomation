@@ -12,7 +12,7 @@ import { setLastEvent, setLastEventInputTime, setLastEventOutputTime } from './l
 import { ElementNodeImpl } from './element-node';
 import { init } from './validation/watcher';
 import { genericNodeDataStore } from './generic-store/reference';
-import { backendToFrontendStoreActions, initializeStore } from './generic-store/actions';
+import { backendToFrontendStoreActions, initializeStore, type ControlAction } from './generic-store/actions';
 import { nodeDataSelector, nodeglobalsSelector, selectGlobals, selectInitialized, selectNodeByUuid, selectNodesOfType, selectTargetConnectorForNodeUuid } from './generic-store/selectors';
 import { forNodes, selectConnectionsFromContinue } from './generic-store/flow-selectors';
 import { loadNodeData } from './generic-node-data-loader';
@@ -194,9 +194,10 @@ forNodes({
       .pipe(
         skip(action === "initialize node store" ? 1 : 0),
       )
-      .subscribe(async ([[node, updateAction], connwctions]) => {
+      .subscribe(async ([[node, updateAction], connections]) => {
+        const controlAction = updateAction as ControlAction
         actions.push(updateAction)
-        if (node) {
+        if (node && !controlAction?.skipNodeUpdate) {
           lastEmit = Date.now()
           if (lastNodeStore && lastNodeStore > (Date.now() - (1000 * 60))) {
             clearTimeout(lastNodeStoreTimeout)
@@ -246,18 +247,27 @@ forNodes({
                 })
               }
               const preTypeEmmit = lastEmit;
-              updateTypeSchema(nodeChanged, {
-                typeImpls: typeImplementations.value
-              })
-                .then(() => {
-                  if (preTypeEmmit === lastEmit) {
-                    // if there was an update from the node in the store we assume the node doesnt need manual update
-                    genericNodeDataStore.dispatch(backendToFrontendStoreActions.updateNode({
-                      newNode: nodeChanged
-                    }))
-                  }
 
-                })
+              let typeUpdatePr = Promise.resolve()
+
+
+              if (!controlAction?.skipTypeUpdate) {
+                typeUpdatePr = updateTypeSchema(nodeChanged, {
+                  typeImpls: typeImplementations.value
+                });
+              }
+
+
+
+              typeUpdatePr.then(() => {
+                if (preTypeEmmit === lastEmit) {
+                  // if there was an update from the node in the store we assume the node doesnt need manual update
+                  genericNodeDataStore.dispatch(backendToFrontendStoreActions.updateNode({
+                    newNode: nodeChanged
+                  }))
+                }
+
+              })
                 .catch(e => {
                   logKibana("ERROR", {
                     message: "error updating type schema",
