@@ -197,7 +197,7 @@ forNodes({
       .subscribe(async ([[node, updateAction], connections]) => {
         const controlAction = updateAction as ControlAction
         actions.push(updateAction)
-        if (node && !controlAction?.skipNodeUpdate) {
+        if (node) {
           lastEmit = Date.now()
           if (lastNodeStore && lastNodeStore > (Date.now() - (1000 * 60))) {
             clearTimeout(lastNodeStoreTimeout)
@@ -213,7 +213,7 @@ forNodes({
             lastNodeStoreTimeout = undefined
           }, 5000)
 
-          if (pendingCheck) {
+          if (pendingCheck || controlAction?.skipNodeUpdate) {
             return
           }
           const typeImpl = typeImplementations.value[node.type];
