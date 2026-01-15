@@ -19,7 +19,7 @@ export function nodeContext<O extends NodeDefOptinos, R>(node: EvalNode<O, R>) {
       paramObj[key] = value
       updateServerContext(node, {
         [`${paramPrefix}${key}`]: value
-      } as Partial<R>)
+      } as Partial<R>, { skipNodeUpdate: true })
     }
   }
   return paramObj
