@@ -1,5 +1,5 @@
+import type { CallTrace } from './trace';
 import type { NodeEvent } from '../node-event';
-import type { CallTrace } from '../node-trace';
 
 
 export type Callbacks = {

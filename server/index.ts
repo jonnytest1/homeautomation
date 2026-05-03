@@ -20,6 +20,7 @@ if (environment.setup) {
   require("./test/local-setup.ts")
 }
 logKibana("INFO", "startup log");
+
 updateDatabase(__dirname + '/src/models', {
 
 })

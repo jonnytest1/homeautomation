@@ -25,7 +25,8 @@ import { setSkip } from './emit-flag';
 import { NodeContextData as DataBackup } from './models/node-backup';
 import { NodeEntry } from './models/node-entry';
 import { NodeHistory } from './models/node-history';
-import { defaultCallTrace, type CallTrace, type RecursiveCallTrace } from './node-trace';
+import { defaultCallTrace } from './node-trace';
+import type { CallTrace, RecursiveCallTrace } from './typing/trace';
 import { logKibana } from '../../util/log';
 import { environment } from '../../environment';
 import { jsonClone } from '../../util/json-clone';
@@ -239,8 +240,8 @@ forNodes({
                   newNode: passedNode
                 }))
               } else if (JSON.stringify({ ...nodeCpy, trace: null }) !== JSON.stringify({ ...passedNode, trace: null })) {
-                debugger;
-                logKibana("ERROR", {
+
+                logKibana("WARN", {
                   message: "node changed with store update",
                   node: nodeCpy.uuid,
                   node_type: nodeCpy.type

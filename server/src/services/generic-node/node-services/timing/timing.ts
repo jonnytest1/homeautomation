@@ -283,22 +283,37 @@ addTypeImpl({
     }
   },
   async connectionTypeChanged(node, schema) {
-    const schemaParsed = schema.jsonSchema
-    if (!schemaParsed.properties?.payload) {
-      return
-    }
-    const payloadProp = jsonClone(schemaParsed.properties.payload)
-    if (typeof payloadProp == "object" && schemaParsed.definitions) {
-      payloadProp.definitions = jsonClone(schemaParsed.definitions)
+
+    if (node.parameters?.delayUnit === '<payload seconds>') {
+      const schemaParsed = schema.jsonSchema
+      if (!schemaParsed.properties?.payload) {
+        return
+      }
+      const payloadProp = jsonClone(schemaParsed.properties.payload)
+      if (typeof payloadProp == "object" && schemaParsed.definitions) {
+        payloadProp.definitions = jsonClone(schemaParsed.definitions)
+      }
+
+      if (payloadProp && typeof payloadProp == "object") {
+        node.runtimeContext.outputSchema = {
+          jsonSchema: payloadProp,
+          mainTypeName: "Main",
+          dts: await generateDtsFromSchema(payloadProp, `${node.type} -${node.uuid} -con change`)
+        }
+      }
+    } else {
+      genericNodeDataStore.dispatch(backendToFrontendStoreActions.updateOutputSchema({
+        nodeUuid: node.uuid,
+        schema: {
+          jsonSchema: schema.jsonSchema,
+          mainTypeName: "Main",
+          dts: await generateDtsFromSchema(schema.jsonSchema, `${node.type} -${node.uuid} -con change`)
+        }
+      }))
     }
 
-    if (payloadProp && typeof payloadProp == "object") {
-      node.runtimeContext.outputSchema = {
-        jsonSchema: payloadProp,
-        mainTypeName: "Main",
-        dts: await generateDtsFromSchema(payloadProp, `${node.type} -${node.uuid} -con change`)
-      }
-    }
+
+
   },
 
   initializeServer(nodes, globals) {

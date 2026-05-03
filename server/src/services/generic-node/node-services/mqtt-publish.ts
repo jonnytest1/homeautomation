@@ -10,15 +10,16 @@ import { argumentTypeToJsonSchema } from '../typing/node-optinon-to-json-schema'
 import { updateRuntimeParameter } from '../element-node-fnc'
 import type { ElementNode } from '../typing/element-node'
 import { ResolvablePromise } from '../../../util/resolvable-promise'
+import { getKey } from '../../../util/util'
 import type { ZodType } from 'zod'
 import type { ExtendedJsonSchema } from 'json-schema-merger'
-import type { MqttClient } from 'mqtt'
-
+import type { MqttClient, OnMessageCallback } from 'mqtt'
 
 const zodValidators: Record<string, Promise<ZodType>> = {}
 
 let mqttClient: MqttClient
 const connectedPr = new ResolvablePromise<boolean>()
+
 
 addTypeImpl({
   async process(node, evt, callbacks) {
@@ -65,24 +66,25 @@ addTypeImpl({
 
       if (commandObj?.argument instanceof Array) {
         for (const arg of commandObj.argument) {
-          mqttEvt[arg.name] = evt.payload?.[arg.name] ?? node.parameters?.[arg.name]
+
+          Object.assign(mqttEvt, {
+            [arg.name]: getKey(evt.payload, arg.name) ?? getKey(node.parameters, arg.name)
+          })
         }
       }
       argStr = JSON.stringify(mqttEvt)
 
       const responseTopic = `response/${config.mqttDeviceName}/${command}/${mqttEvt.timestamp}`
 
-
-
-
       mqttClient.subscribe(responseTopic, (e, grants) => {
         if (e) {
           console.error(e)
         }
       })
-      const messageHandler = (topic, msg) => {
+      const messageHandler: OnMessageCallback = (t, msg) => {
         if (topic === responseTopic) {
           mqttClient.off("message", messageHandler)
+          mqttClient.unsubscribe(responseTopic)
           const payload = {
             response: `${msg.toString()}`
           }
@@ -272,6 +274,11 @@ addTypeImpl({
           } else {
             //use empty string for no argument command
             node.parameters.argument = ""
+
+            updateRuntimeParameter(node, "argument", {
+              type: "placeholder",
+              of: "select"
+            })
           }
         }
       }

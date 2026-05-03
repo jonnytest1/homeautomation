@@ -1,5 +1,5 @@
 import { HOUR } from '../../../../constant';
-import { updateServerContext } from '../../element-node-fnc';
+import { updateServerContext, type ExactlyOne, } from '../../element-node-fnc';
 import type { NodeEvent } from '../../node-event';
 import type { EvalNode } from '../../typing/generic-node-type'
 import type { NodeDefOptinos } from '../../typing/node-options'
@@ -51,7 +51,7 @@ export function trackInputHistory<O extends NodeDefOptinos, R extends HistorySer
       }
       updateServerContext(node, {
         inputhistory: inputHistory
-      } as Partial<R>)
+      } as ExactlyOne<R>)
     }
   }
   return inputHistory
@@ -105,7 +105,7 @@ export function addOutputHistoryEvent<O extends NodeDefOptinos & WithHistory, R 
       }
       updateServerContext(node, {
         outputhistory: outputHistoryData
-      } as Partial<R>);
+      } as ExactlyOne<R>);
     }
   }
 }

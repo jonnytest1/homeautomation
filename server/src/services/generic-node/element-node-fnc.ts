@@ -4,10 +4,16 @@ import type { EvalNode, TypeImplementaiton } from './typing/generic-node-type';
 import type { ElementNode } from './typing/element-node';
 import type { MapTypeToParam, NodeDefOptinos, NodeOptionTypes, PlaceHolder } from './typing/node-options';
 
+export type ExactlyOne<T> = {
+  [K in keyof T]: {
+    [P in K]: T[P]
+  } & {
+    [P in Exclude<keyof T, K>]?: never
+  }
+}[keyof T];
 
 
-
-export function updateServerContext<T, O extends NodeDefOptinos, K extends (keyof T & string)>(node: EvalNode<O, T>, data: Partial<T>, opts: ControlAction = {}) {
+export function updateServerContext<T, O extends NodeDefOptinos, K extends (keyof T & string)>(node: EvalNode<O, T>, data: ExactlyOne<T>, opts: ControlAction = {}) {
 
   const k = Object.keys(data)[0]
 

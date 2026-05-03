@@ -2,6 +2,7 @@ import { DeviceConfig, DiscoveryConfigEvent, defaultCommandConfig } from './mqtt
 import { emitEvent } from './generic-node/generic-node-service'
 import type { CommandsEvent } from './mqtt-types'
 import { getClient } from './generic-node/node-services/mqtt-global'
+import { updateOsStats } from './mqtt-stats'
 import { environment } from '../environment'
 import { logKibana } from '../util/log'
 import { ResolvablePromise } from '../util/resolvable-promise'
@@ -14,6 +15,7 @@ import type { MqttClient } from "mqtt"
 export class MQTTIntegration {
 
   static discoveryRegex = /(?<factory>[^/]*)\/discovery\/(?<deviceid>[^/]*)\/config/
+  static osStatsRegex = /tele\/(?<deviceid>[^/]*)\/_OS_STATS/
   static commandaddonRegex = /(?<factory>[^/]*)\/discovery\/(?<deviceid>[^/]*)\/commands/
 
   private connection: MqttClient
@@ -22,6 +24,8 @@ export class MQTTIntegration {
 
   private deviceMap: Record<string, DeviceConfig> = {}
   private commandMap: Record<string, CommandsEvent> = {}
+
+
   constructor() {
     const mqttUrl = environment.MQTT_SERVER
     this.connection = getClient({
@@ -103,6 +107,15 @@ export class MQTTIntegration {
             }
             this.commandMap[commandAddOn.groups?.deviceid] = evt
           }
+
+          const osStats = topic.match(MQTTIntegration.osStatsRegex)
+          if (osStats?.groups?.deviceid) {
+            updateOsStats(messageStr, osStats?.groups?.deviceid)
+
+
+
+          }
+
         } catch (e) {
           debugger
         }
@@ -110,22 +123,22 @@ export class MQTTIntegration {
 
       this.connection.subscribe("cmnd/#", { rh: 1, qos: 1 }, (err,) => {
         if (err) {
-          logKibana("ERROR", "error connecting to mqtt")
+          logKibana("ERROR", "error subscribe to mqtt cmnd")
         }
       })
       this.connection.subscribe("+/discovery/#", { rh: 1, qos: 1 }, (err,) => {
         if (err) {
-          logKibana("ERROR", "error connecting to mqtt")
+          logKibana("ERROR", "error subscribe to mqtt disc")
         }
       })
       this.connection.subscribe("stat/#", { rh: 1, qos: 1 }, (err,) => {
         if (err) {
-          logKibana("ERROR", "error connecting to mqtt")
+          logKibana("ERROR", "error subscribe to mqtt stat")
         }
       })
       this.connection.subscribe("tele/#", { rh: 1, qos: 1 }, (err,) => {
         if (err) {
-          logKibana("ERROR", "error connecting to mqtt")
+          logKibana("ERROR", "error subscribe to mqtt tele")
         }
       })
     })

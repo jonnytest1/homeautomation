@@ -10,21 +10,21 @@ import { load, PsqlBase, type DataBaseBase } from 'hibernatets';
 const backupPool = new PsqlBase({
   keepAlive: true
 })
-export function loadNodeData(pool: DataBaseBase) {
+export async function loadNodeData(pool: DataBaseBase, retry = 5) {
+  try {
+
+    const today = new Date()
+    const todayStr = today.toISOString().split("T")[0]
+
+    const res = await load(NodeContextData, {
+      filter: `"id" =( SELECT MAX("id") FROM nodecontextdata )`,
+      options: {
+        first: true,
+        db: backupPool
+      }
+    })
 
 
-  const today = new Date()
-  const todayStr = today.toISOString().split("T")[0]
-
-
-
-  load(NodeContextData, {
-    filter: `"id" =( SELECT MAX("id") FROM nodecontextdata )`,
-    options: {
-      first: true,
-      db: backupPool
-    }
-  }).then(async (res) => {
     let data = res.data as NodeData
 
     const nodes = await loadNodeFiles();
@@ -40,8 +40,16 @@ export function loadNodeData(pool: DataBaseBase) {
     genericNodeDataStore.dispatch(initializeStore({
       data
     }))
-  })
 
+
+
+  } catch (e) {
+    if (retry >= 0) {
+      return await loadNodeData(pool, retry - 1)
+    }
+    console.error(e)
+    process.exit(1)
+  }
 
 }
 

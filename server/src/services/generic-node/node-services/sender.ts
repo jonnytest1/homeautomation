@@ -3,6 +3,8 @@ import { Sender } from '../../../models/sender';
 import type { Transformation } from '../../../models/transformation';
 import { updateRuntimeParameter } from '../element-node-fnc';
 import { senderLoader } from '../../sender-loader';
+import { genericNodeDataStore } from '../generic-store/reference';
+import { backendToFrontendStoreActions } from '../generic-store/actions';
 import { load } from 'hibernatets';
 
 
@@ -20,7 +22,7 @@ function getHistoryCount(transformer: Transformation & { historyCount?: number }
 
 addTypeImpl({
   context_type: (t: { deviceKey: string, transformation?: string, transformationCount: number }) => t,
-  payload_type: (p: { message?: string }) => p,
+  payload_type: (p: { message?: string, type?: "url" | "barcode", url?: string }) => p,
   async process(node, evt, callbacks) {
 
     if (!node.parameters?.deviceKey) {
@@ -29,9 +31,18 @@ addTypeImpl({
 
     const needsTransformation = !!evt.context.transformationCount
 
+    const type = node.parameters.type ?? "barcode"
+    const evtType = evt.payload.type ?? "barcode"
 
 
-    if (!evt.payload.message) {
+    if (type !== evtType) {
+      return
+    }
+
+    if (!evt.payload.message && evtType == "barcode") {
+      return
+    }
+    if (!evt.payload.url && evtType == "url") {
       return
     }
     if (node.parameters?.deviceKey != evt.context.deviceKey) {
@@ -57,6 +68,10 @@ addTypeImpl({
         type: "placeholder",
         of: "select",
         invalidates: ["transformation"]
+      },
+      type: {
+        type: "select",
+        options: ["url", "barcode"],
       },
       transformation: {
         type: "placeholder",
@@ -97,6 +112,15 @@ addTypeImpl({
       })
       //
     }
+
+    if (!node.parameters.type) {
+      genericNodeDataStore.dispatch(backendToFrontendStoreActions.updateParam({
+        node: node.uuid,
+        param: "type",
+        value: "barcode"
+      }))
+    }
+
 
     if (node.parameters.transformation) {
       node.runtimeContext.info = `${node.parameters?.deviceKey} - ${node.parameters.transformation.split("(")[0]}`

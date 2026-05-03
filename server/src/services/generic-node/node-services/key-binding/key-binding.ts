@@ -76,7 +76,7 @@ addTypeImpl({
 
     for (const board in newEvt.data) {
       for (const key of newEvt.data[board]) {
-        if (!lastEvent.payload.data[board]?.includes(key)) {
+        if (!lastEvent?.payload.data[board]?.includes(key)) {
           lastKeyEmits[board] ??= {}
           lastKeyEmits[board][key] = Date.now()
         }
@@ -137,8 +137,14 @@ addTypeImpl({
       options: Object.keys(layouts),
       order: 2
     })
-    if (!node.parameters?.board) {
-      node.parameters.board = Object.keys(layouts)[0]
+    let board = node.parameters?.board
+    if (!board) {
+      board = Object.keys(layouts)[0]
+      genericNodeDataStore.dispatch(backendToFrontendStoreActions.updateParam({
+        node: node.uuid,
+        param: "board",
+        value: board
+      }))
     }
     if (!node.runtimeContext?.outputSchema) {
 
@@ -214,18 +220,18 @@ addTypeImpl({
 
     const startInfo = node.runtimeContext.info
     let newInfo: string | undefined = undefined
-    if (node.parameters?.board) {
-      newInfo = node.parameters?.board
+    if (board) {
+      newInfo = board
 
       const fileContent = await readFile(join(__dirname, "key-binding-property.html"), { encoding: "utf8" })
 
       updateRuntimeParameter(node, "key", {
         type: "iframe",
         document: fileContent,
-        data: layouts[node.parameters?.board]
+        data: layouts[board]
       })
       if (node.parameters.key) {
-        newInfo = `${node.parameters?.board} - ${node.parameters?.key}`
+        newInfo = `${board} - ${node.parameters?.key}`
       }
     }
 

@@ -51,7 +51,9 @@ export const selectNodeMap = nodeDataSelector.chain(nodeData => {
 export const selectNodeByUuid = (uuid: string) => selectNodeMap.chain(nodeData => {
   return nodeData[uuid]
 })
-
+export const selectViewNodesByView = (viewuuid: string) => selectNodeMap.chain(nodeData => {
+  return Object.values(nodeData).filter(n => n.type === "view" && n.view == viewuuid);
+})
 export const selectNodesOfType = (type: string) => selectNodeMap.chain(nodeData => {
   return Object.values(nodeData).filter(n => n.type === type);
 })

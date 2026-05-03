@@ -124,7 +124,6 @@ Promise.all([
           activityMap[board][key] = events[board][key]
         }
       }
-      debugger;
     })
 
     addEventListener("message", m => {

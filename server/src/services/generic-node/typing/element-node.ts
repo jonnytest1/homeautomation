@@ -2,7 +2,6 @@ import type { Schemata } from './schemata';
 import type { NodeDefintion } from './node-definition';
 import type { NodeDefOptinos } from './node-options';
 
-
 export type ElementNode<T = { [optinoskey: string]: string; }, P = NodeDefOptinos, S = object> = {
   parameters?: Partial<T & { name?: string; }>;
   position: {
@@ -26,5 +25,6 @@ export type ElementNode<T = { [optinoskey: string]: string; }, P = NodeDefOptino
     parameters?: Partial<P>;
 
   };
+  trace?: any
   globalContext?: NodeDefOptinos;
 };

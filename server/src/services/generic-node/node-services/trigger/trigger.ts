@@ -48,7 +48,7 @@ addTypeImpl({
           debugger;
         }
       })
-
+      return
     }
 
     const fileContent = await readFile(join(__dirname, "trigger.html"), { encoding: "utf8" })

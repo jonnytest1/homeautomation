@@ -12,7 +12,7 @@ export class TransformationResource {
 
     const tranformations = await sharedPool.selectQuery<{ evkey: string }>(
       `SELECT evkey
-            FROM (SELECT DISTINCT SUBSTRING_INDEX(SUBSTRING_INDEX(\`data\`,'message":"',-1),'"',1) as evkey,sender 
+            FROM (SELECT DISTINCT JSON_EXTRACT(\`data\`,'$.message') as evkey,sender 
                 FROM eventhistory 
                 WHERE sender= ? ) ev
             WHERE ev.evkey NOT IN (

@@ -67,7 +67,7 @@ async function cpuSnapshot() {
       }
       logKibana("INFO", { message: "cpu stats", averagePercent: avg, cpuReadings })
 
-      if (avg < 120) {
+      if (avg < 130) {
         return
       }
 

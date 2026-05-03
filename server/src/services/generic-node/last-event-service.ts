@@ -125,8 +125,8 @@ export function setLastEvent(node: ElementNode, event: NodeEventJsonData) {
 
 
 
-export function getLastEvent<P>(node: { uuid: string }): NodeEventJsonData<P> {
-  return lastEventDataObs.value[node.uuid] as NodeEventJsonData<P>
+export function getLastEvent<P>(node: { uuid: string }): NodeEventJsonData<P> | undefined {
+  return lastEventDataObs.value[node.uuid] as NodeEventJsonData<P> | undefined
 }
 
 

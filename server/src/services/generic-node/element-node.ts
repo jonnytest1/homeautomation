@@ -2,7 +2,7 @@ import type { NodeDefOptinos } from './typing/node-options';
 import type { Callbacks } from './typing/node-callbacks';
 import type { ElementNode } from './typing/element-node';
 import type { NodeEvent } from './node-event';
-import type { CallTrace } from './node-trace';
+import type { CallTrace } from './typing/trace';
 export class ElementNodeImpl<T = { [optinoskey: string]: string }, P = Partial<NodeDefOptinos>> implements ElementNode<T, P>, Callbacks {
 
   parameters?: Partial<T & { name?: string }> | undefined;
@@ -11,7 +11,7 @@ export class ElementNodeImpl<T = { [optinoskey: string]: string }, P = Partial<N
   uuid: string;
   runtimeContext: ElementNode<T, P>["runtimeContext"]
   globalContext?: NodeDefOptinos | undefined;
-
+  view?: string
   trace
 
   constructor(node: ElementNode<T, P>, callbacks: Callbacks) {

@@ -17,11 +17,13 @@
       "type": "node",
       "request": "attach",
       "name": "(new)Attach to server",
+      "smartStep": false,
       "address": "smarthome",
       "timeout": 4000,
       "port": 14747,
       "localRoot": "${workspaceFolder}",
-      "remoteRoot": "/var/node"
+      "remoteRoot": "/var/node",
+      "restart": true
     },
     {
       "type": "node",

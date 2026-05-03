@@ -1,4 +1,4 @@
-import { updateServerContext } from '../../element-node-fnc';
+import { updateServerContext, type ExactlyOne } from '../../element-node-fnc';
 import type { EvalNode } from '../../typing/generic-node-type';
 import type { NodeDefOptinos } from '../../typing/node-options';
 
@@ -19,7 +19,7 @@ export function nodeContext<O extends NodeDefOptinos, R>(node: EvalNode<O, R>) {
       paramObj[key] = value
       updateServerContext(node, {
         [`${paramPrefix}${key}`]: value
-      } as Partial<R>, { skipNodeUpdate: true })
+      } as ExactlyOne<R>, { skipNodeUpdate: true })
     }
   }
   return paramObj
