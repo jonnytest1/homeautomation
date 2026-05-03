@@ -5,6 +5,7 @@ import { updateRuntimeParameter } from '../element-node-fnc';
 import { senderLoader } from '../../sender-loader';
 import { genericNodeDataStore } from '../generic-store/reference';
 import { backendToFrontendStoreActions } from '../generic-store/actions';
+import { generateDtsFromSchema, generateJsonSchemaFromDts } from '../json-schema-type-util';
 import { load } from 'hibernatets';
 
 
@@ -67,11 +68,12 @@ addTypeImpl({
       deviceKey: {
         type: "placeholder",
         of: "select",
-        invalidates: ["transformation"]
+        invalidates: ["transformation"],
+        order: 2
       },
       type: {
-        type: "select",
-        options: ["url", "barcode"],
+        type: "placeholder",
+        of: "select"
       },
       transformation: {
         type: "placeholder",
@@ -86,7 +88,8 @@ addTypeImpl({
 
     updateRuntimeParameter(node, "deviceKey", {
       type: "select",
-      options: deviceKeys
+      options: deviceKeys,
+      order: 2
     })
 
     if (node.parameters?.deviceKey) {
@@ -111,6 +114,31 @@ addTypeImpl({
         options: transformations
       })
       //
+
+
+      if (sender.schema) {
+        const schema = JSON.parse(sender.schema)
+
+        const dtsSchema = await generateDtsFromSchema(schema, `${node.type}-${node.uuid} -node schemagen`);
+
+        genericNodeDataStore.dispatch(backendToFrontendStoreActions.updateOutputSchema({
+          nodeUuid: node.uuid,
+          schema: {
+            jsonSchema: schema,
+            dts: dtsSchema,
+            mainTypeName: "Main",
+          },
+        }))
+
+
+        const typeProp = generateJsonSchemaFromDts(`
+        ${dtsSchema}
+        
+        export type TypePropType= Main.type
+        `, "TypePropType", `${node.type}-${node.uuid}-node yperesolution`)
+        console.log(typeProp);
+
+      }
     }
 
     if (!node.parameters.type) {
