@@ -1,25 +1,22 @@
 .wrapper {
-
   position: absolute;
   inset: 0px;
   display: flex;
   overflow: auto;
   background-size: 10px 10px;
-  background-image: linear-gradient(to right, rgba(158, 158, 158, 0.1) 1px, transparent 1px), linear-gradient(to bottom, rgba(158, 158, 158, 0.1) 1px, transparent 1px);
-
+  background-image:
+    linear-gradient(to right, rgba(158, 158, 158, 0.1) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(158, 158, 158, 0.1) 1px, transparent 1px);
 
   .arrow_up {
     position: absolute;
     left: 50%;
-    top: 12px
+    top: 12px;
   }
 
   .background {
     flex-grow: 1;
-
-
   }
-
 }
 
 .properties {
@@ -29,7 +26,6 @@
   background-color: wheat;
 
   padding: 4px;
-
 
   position: absolute;
   right: 20px;
@@ -45,11 +41,10 @@
   right: 30px;
 
   background-color: rgba(134, 134, 134, 0.315);
+  max-height: calc(100% - 16px);
+  overflow: auto;
 
   .dragelement {
     cursor: grab;
   }
-
-
-
 }

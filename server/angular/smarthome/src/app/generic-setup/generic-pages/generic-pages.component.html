@@ -1,0 +1,18 @@
+<div style="display: flex; flex-direction: column">
+  @if (nodeDefs | async; as defs) {
+    <select
+      #select
+      [ngModel]="choice$ | async"
+      (change)="navigate(select.value)"
+      style="align-self: end"
+    >
+      @for (item of defs | keyvalue; track item.key) {
+        @if (!!item.value.page) {
+          <option [value]="item.key">{{ item.key }}</option>
+        }
+      }
+    </select>
+  }
+
+  <router-outlet></router-outlet>
+</div>

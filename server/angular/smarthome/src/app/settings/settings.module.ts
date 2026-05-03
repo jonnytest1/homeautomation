@@ -5,7 +5,7 @@ import { ConnectionBottomsheetComponent } from './connection-bottomsheet/connect
 import { AutosavingDirective, ROOT_AUTOSAVE_PATH } from '../autosaving/autosaving';
 import { AutosavingDirectiveProviderDirective } from '../autosaving/autosaveProvider';
 import { TransformerDropDownComponent } from './sender-bottom-sheet/transformer-drop-down/transformer-drop-down.component';
-import { TimersComponent } from './sender-bottom-sheet/timers/timers.component';
+import { TimersBottomsheetComponent } from './sender-bottom-sheet/timers/timers.component';
 import { routes } from './settings.routes';
 import { TransformationEditorComponent } from './transformation-editor/transformation-editor.component';
 import { SettingsMobileComponent } from './mobile/settings.mobile.component';
@@ -43,30 +43,32 @@ export class MyHammerConfig extends HammerGestureConfig {
     rotate: { enable: false }
   };
 }
-@NgModule({ declarations: [
-        SettingsComponent,
-        ConnectionBottomsheetComponent,
-        SenderBottomSheetComponent,
-        ReceiverBottomsheetComponent,
-        CodeEditorComponent, MobileSenderComponent,
-        TransformerDropDownComponent,
-        TimersComponent,
-        TransformationEditorComponent, SettingsMobileComponent, DebounceClickDirective, MobileTimersComponent
-    ],
-    bootstrap: [], imports: [MonacoEditorComponent,
-        CommonModule,
-        FormsModule,
-        MatListModule, MatTabsModule, HammerModule,
-        MatIconModule,
-        MatGridListModule,
-        RouterModule.forChild(routes),
-        MatCardModule, MatSelectModule,
-        AutosavingDirective,
-        AutosavingDirectiveProviderDirective,
-        NgCircleProgressModule.forRoot(),
-        MatBottomSheetModule, MatDialogModule,
-        MatSnackBarModule, MatInputModule, MatButtonModule], providers: [{
-            provide: HAMMER_GESTURE_CONFIG,
-            useClass: MyHammerConfig
-        }, provideHttpClient(withInterceptorsFromDi()),] })
+@NgModule({
+  declarations: [
+    SettingsComponent,
+    ConnectionBottomsheetComponent,
+    SenderBottomSheetComponent,
+    ReceiverBottomsheetComponent,
+    CodeEditorComponent, MobileSenderComponent,
+    TransformerDropDownComponent,
+    TimersBottomsheetComponent,
+    TransformationEditorComponent, SettingsMobileComponent, DebounceClickDirective, MobileTimersComponent
+  ],
+  bootstrap: [], imports: [MonacoEditorComponent,
+    CommonModule,
+    FormsModule,
+    MatListModule, MatTabsModule, HammerModule,
+    MatIconModule,
+    MatGridListModule,
+    RouterModule.forChild(routes),
+    MatCardModule, MatSelectModule,
+    AutosavingDirective,
+    AutosavingDirectiveProviderDirective,
+    NgCircleProgressModule.forRoot(),
+    MatBottomSheetModule, MatDialogModule,
+    MatSnackBarModule, MatInputModule, MatButtonModule], providers: [{
+      provide: HAMMER_GESTURE_CONFIG,
+      useClass: MyHammerConfig
+    }, provideHttpClient(withInterceptorsFromDi()),]
+})
 export class SettingsModule {}

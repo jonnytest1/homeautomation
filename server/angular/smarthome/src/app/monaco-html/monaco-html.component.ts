@@ -114,6 +114,8 @@ export class MonacoHtmlComponent implements OnInit, OnDestroy, ControlValueAcces
 
 
       const value = ref.editor.getValue()
+
+      console.log(value)
       ref.saveCode(value)
     })
   }

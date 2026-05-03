@@ -11,12 +11,12 @@ import { TimerParser } from '../../../utils/time-parser';
 
 
 @Component({
-  selector: 'app-timers',
+  selector: 'app-timersbottomsheet',
   templateUrl: './timers.component.html',
   styleUrls: ['./timers.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class TimersComponent implements OnInit, OnDestroy {
+export class TimersBottomsheetComponent implements OnInit, OnDestroy {
 
   timers: Array<TimerFe> = [];
 

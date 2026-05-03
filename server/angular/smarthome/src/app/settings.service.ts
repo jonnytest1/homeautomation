@@ -129,7 +129,7 @@ export class SettingsService extends AbstractHttpService {
           ...s,
           events: []
         }))
-        cleanedSenders.sort((a, b) => a.id - b.id)
+        cleanedSenders.sort((a, b) => +a.id - +b.id)
         setSessionStorage("_senders_cache", cleanedSenders)
       })
   }
@@ -143,7 +143,9 @@ export class SettingsService extends AbstractHttpService {
     if (this.isType(messageEvent, 'timerUpdate')) {
       this.timers.next(messageEvent.data);
     } else if (messageEvent.type === 'senderUpdate') {
-      this.updateSenders(messageEvent.data as SenderFe[]);
+      const senders = messageEvent.data as SenderFe[];
+      senders.sort((a, b) => a.id - b.id)
+      this.updateSenders(senders);
     } else if (this.isType(messageEvent, 'inventoryUpdate')) {
       this.inventory.next(messageEvent.data)
     } else if (this.isType(messageEvent, 'receiverUpdate')) {

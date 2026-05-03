@@ -6,7 +6,6 @@ import { SettingsService } from '../settings.service';
 import { TimerParser } from '../utils/time-parser';
 
 @Component({
-  selector: 'app-timers',
   templateUrl: './timers.component.html',
   styleUrls: ['./timers.component.scss'],
 

@@ -1,24 +1,24 @@
 <div>
-
-  <textarea hidden
-    [minLength]="1"
-    #hiddenValue
-  name="{{name}}"></textarea>
+  <textarea hidden [minLength]="1" #hiddenValue name="{{ name }}"></textarea>
   @for (cd of [node.uuid]; track cd) {
-    @if (definition.type==='monaco' && definition.mode==='html') {
-      <app-monaco-html (keyup)="$event.stopPropagation()"
+    @if (definition.type === "monaco" && definition.mode === "html") {
+      <app-monaco-html
+        (keyup)="$event.stopPropagation()"
+        (change)="$event.stopPropagation()"
         (code)="updateCode($event)"
-        [ngModel]="code">
+        [ngModel]="code"
+      >
       </app-monaco-html>
     } @else {
-      @if (typeDefinition|async ; as types) {
+      @if (typeDefinition | async; as types) {
         <app-monaco-editor
           (keyup)="$event.stopPropagation()"
           [definition]="types"
           (change)="$event.stopPropagation()"
           (code)="updateCode($event)"
           [jsCode]="additionalVal"
-          [ngModel]="code">
+          [ngModel]="code"
+        >
         </app-monaco-editor>
       }
     }

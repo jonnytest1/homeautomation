@@ -7,6 +7,7 @@ import { RouterModule } from '@angular/router';
 import { GenericSEtupEffects } from './store/effects';
 import { GenericTypeComponent } from './generic-type/generic-type.component';
 import { sessionStorageMetaReducer } from './store/session-storage-meta-reducer';
+import { GenericPagesComponent } from './generic-pages/generic-pages.component';
 
 const storeMod = StoreModule.forFeature(featureName, genericReducer, { metaReducers: [sessionStorageMetaReducer] });
 
@@ -23,6 +24,13 @@ const storeMod = StoreModule.forFeature(featureName, genericReducer, { metaReduc
     }, {
       path: "type/:type",
       component: GenericTypeComponent
+    }, {
+      path: "pages",
+      component: GenericPagesComponent,
+      children: [{
+        path: ':type',
+        component: GenericTypeComponent
+      }]
     }])]
 })
 export class GenericSetupModule {

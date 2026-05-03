@@ -91,7 +91,10 @@ export class Vector2 {
 
   }
 
-  dividedBy(divisor: number): this {
+  dividedBy(divisor: number | Vector2): Vector2 {
+    if (divisor instanceof Vector2) {
+      return new Vector2(this.x / divisor.x, this.y / divisor.y)
+    }
     const newVector: this = this.clone();
     newVector.x = this.x / divisor;
     newVector.y = this.y / divisor;
@@ -109,8 +112,13 @@ export class Vector2 {
   }
 
 
-  multipliedBy(multiplicator: number, multiplicatorY?: number): this {
+  multipliedBy(multiplicator: number | Vector2, multiplicatorY?: number): Vector2 {
     const newVector: this = this.clone();
+
+
+    if (multiplicator instanceof Vector2) {
+      return new Vector2(this.x * multiplicator.x, this.y * multiplicator.y)
+    }
 
     newVector.x = this.x * multiplicator;
     if (multiplicatorY) {

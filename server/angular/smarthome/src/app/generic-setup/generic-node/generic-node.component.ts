@@ -11,13 +11,13 @@ import { map, } from 'rxjs/operators';
 import { Store } from '@ngrx/store';
 import { selectNode } from '../store/selectors';
 import { StoreService } from '../store/store-service';
-import { MBDagOverDirective, MBDragLeaveDirective, MBDragStartDirective, MBDropDirective, type MBDragEvent } from '../../utils/directive/drag-start.directive';
+import { MBDagOverDirective, MBDragEndDirective, MBDragLeaveDirective, MBDragStartDirective, MBDropDirective, type MBDragEvent } from '../../utils/directive/drag-start.directive';
 const dataHandler = new DropDataHandler<DropData>()
 @Component({
   selector: 'app-generic-node',
   templateUrl: './generic-node.component.html',
   styleUrls: ['./generic-node.component.scss'],
-  imports: [CommonModule, MatIconModule, MBDropDirective, MBDragStartDirective, MBDagOverDirective, MBDragLeaveDirective, AsyncPipe],
+  imports: [CommonModule, MatIconModule, MBDropDirective, MBDragStartDirective, MBDagOverDirective, MBDragLeaveDirective, MBDragEndDirective, AsyncPipe],
   standalone: true
 })
 export class GenericNodeComponent implements OnChanges, AfterViewInit, OnDestroy {
@@ -142,7 +142,9 @@ export class GenericNodeComponent implements OnChanges, AfterViewInit, OnDestroy
   }
 
 
-
+  abortConnection() {
+    this.con.pendingConnection.next(undefined)
+  }
   startConnection(evt: MBDragEvent, indx) {
     if (this.editable && this.nodeUuid) {
       this.con.addConnection(this.nodeUuid, indx)
@@ -150,6 +152,9 @@ export class GenericNodeComponent implements OnChanges, AfterViewInit, OnDestroy
       evt.stopPropagation()
     }
   }
+
+
+
   dropAllowed(evt: MBDragEvent, inpt: HTMLElement) {
     const isAllowed = dataHandler.hasKey(evt, "connectionDrag");
     if (isAllowed) {

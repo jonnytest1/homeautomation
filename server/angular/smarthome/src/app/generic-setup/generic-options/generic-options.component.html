@@ -34,8 +34,20 @@
             <mat-icon routerLink="type/{{ options.type }}">launch</mat-icon>
           </button>
         }
+        @if (node.type === "view") {
+          <button class="icon">
+            <mat-icon
+              routerLink="."
+              [queryParams]="{ view: node.uuid, active: null }"
+              queryParamsHandling="merge"
+              replaceUrl="true"
+              >launch</mat-icon
+            >
+          </button>
+        }
       </div>
       <h2>{{ node.type }}</h2>
+
       <form #form>
         @if (entries$ | async; as entries) {
           <div class="wrapper">

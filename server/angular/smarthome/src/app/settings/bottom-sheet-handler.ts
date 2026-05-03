@@ -19,6 +19,8 @@ export class BottomSheetHandler {
 
   registeredSenderIds: Array<number> = [];
 
+  destroyed = false
+
   constructor(
     private settingsComponent: SettingsComponent,
     private router: Router,
@@ -30,6 +32,10 @@ export class BottomSheetHandler {
   register() {
     combineLatest([this.settingsComponent.service.senders$, this.activeRoute.queryParams])
       .subscribe(([senders]) => {
+        if (this.destroyed) {
+          this.dismiss()
+          return
+        }
         if (!this.registeredSenderIds.some(id => id === +this.id)) {
           this.id = undefined;
         }
@@ -138,5 +144,6 @@ export class BottomSheetHandler {
       this.snackbarRef.dismiss();
       this.snackbarRef = undefined;
     }
+    this.destroyed = true
   }
 }

@@ -164,7 +164,7 @@ export class MonacoOptionComponent implements OnInit, OnChanges {
         this.elementRef.nativeElement.value = evt.html
         setTimeout(() => {
           this.elementRef.nativeElement.dispatchEvent(new Event('change', { 'bubbles': true }))
-        }, 1)
+        }, 5)
       }
       return
     }

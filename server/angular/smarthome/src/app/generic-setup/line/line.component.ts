@@ -59,6 +59,7 @@ export class LineComponent implements OnChanges, AfterViewChecked, AfterViewInit
     resize: () => {
       this.canvas.nativeElement.width = Math.floor(window.innerWidth);
       this.canvas.nativeElement.height = Math.floor(window.innerHeight);
+      this.lineCache = ""
     }
   }
 

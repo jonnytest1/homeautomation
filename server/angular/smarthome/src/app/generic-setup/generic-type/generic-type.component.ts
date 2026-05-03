@@ -1,5 +1,5 @@
 import type { ElementRef, OnInit } from '@angular/core';
-import { Component, ViewChild } from '@angular/core';
+import { Component, Input, ViewChild } from '@angular/core';
 import { GenericNodesDataService } from '../generic-node-data-service';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
@@ -27,6 +27,9 @@ export class GenericTypeComponent implements OnInit {
 
   public NodeDefErrors = NodeDefErrors
 
+  @Input()
+  type: string
+
   nodeDefType$ = this.activeRoute.paramMap
     .pipe(
       map(param => {
@@ -40,7 +43,7 @@ export class GenericTypeComponent implements OnInit {
   nodeDef$: Observable<(NodeDefintion & { url?: SafeUrl }) | NodeDefErrors>
 
   @ViewChild("pageframe")
-  frame: ElementRef<HTMLIFrameElement>
+  frame?: ElementRef<HTMLIFrameElement>
 
   constructor(
     private dataService: GenericNodesDataService,
@@ -93,7 +96,7 @@ export class GenericTypeComponent implements OnInit {
         }))
       }),
     ).subscribe((times => {
-      this.frame.nativeElement.contentWindow?.postMessage(JSON.stringify({
+      this.frame?.nativeElement?.contentWindow?.postMessage(JSON.stringify({
         type: "event-times",
         data: times
       }), "*")
@@ -106,7 +109,7 @@ export class GenericTypeComponent implements OnInit {
       if (e.source && e.source === this.frame?.nativeElement?.contentWindow) {
         const evt = JSON.parse(e.data)
         const respond = (response) => {
-          this.frame.nativeElement.contentWindow?.postMessage(JSON.stringify({
+          this.frame?.nativeElement?.contentWindow?.postMessage(JSON.stringify({
             type: "response",
             messageId: evt.messageId,
             data: response

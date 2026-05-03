@@ -14,7 +14,7 @@ import { GenericOptionsComponent } from './generic-options/generic-options.compo
 import { ActivatedRoute, Router } from '@angular/router';
 import type { Connection, ElementNode, NodeData, NodeDefintion } from '../settings/interfaces';
 import { logKibana } from '../global-error-handler';
-import { filter, map, combineLatestWith, first, tap, withLatestFrom } from 'rxjs/operators';
+import { filter, map, combineLatestWith, first, tap, withLatestFrom, distinctUntilChanged } from 'rxjs/operators';
 import type { Observable } from 'rxjs';
 import { BehaviorSubject, combineLatest } from 'rxjs';
 import { Store } from '@ngrx/store';
@@ -75,12 +75,14 @@ export class GenericSetupComponent implements OnInit {
 
   )
 
-  touchMode$ = this.store.select(selectTouchMode)
+  touchMode$ = this.store.select(selectTouchMode).pipe(distinctUntilChanged())
 
   private readonly storeNodeData$ = this.store.select(selectNodeData);
   private storeNodeDataBeh$ = new BehaviorSubject<NodeData | undefined>(undefined)
 
   public hasNodeDefs$ = this.store.select(selectNodeDefs)
+
+  private lastMousePosition: Vector2 | null = null
 
   nodeData$ = this.storeNodeData$.pipe(
     filter(n => !!n),
@@ -155,7 +157,7 @@ export class GenericSetupComponent implements OnInit {
         const activeNOde = query?.active
         if (activeNOde) {
           const newActive = nodeData.nodes.find(node => node.uuid === activeNOde)
-          if (newActive) {
+          if (newActive && (this.activeElements$.value ?? []).length <= 1) {
             this.activeElements$.next([{
               type: "node",
               node: newActive
@@ -224,7 +226,7 @@ export class GenericSetupComponent implements OnInit {
 
 
   getTransform() {
-    const zoomRounded = Math.round(100 * this.zoom) / 100
+    const zoomRounded = this.getZoomRounded()
     return `scale(${zoomRounded})`
   }
   getDimensions() {
@@ -240,7 +242,7 @@ export class GenericSetupComponent implements OnInit {
     dataHandler.setDropData(evt, "dragOffset", evt.offsetPosition)
 
     this.state.setmove(dragNode)
-
+    console.log("startposition:" + JSON.stringify(dragNode.position))
 
     evt.stopPropagation()
   }
@@ -256,17 +258,20 @@ export class GenericSetupComponent implements OnInit {
     if (isAllowed) {
       evt.preventDefault()
       //this.state.setdragpreview(new Vector2(evt))
-
-
     }
+
   }
 
 
   convertVectorZoom(position: Vector2) {
 
-    const zoomRounded = this.zoom
+    const zoomRounded = this.getZoomRounded()
 
     return position.dividedBy(zoomRounded)
+  }
+
+  private getZoomRounded() {
+    return Math.round(100 * this.zoom) / 100;
   }
 
   onscroll(ev: WheelEvent) {
@@ -277,6 +282,7 @@ export class GenericSetupComponent implements OnInit {
       } else {
         this.zoom /= 1.05
       }
+      sessionStorage.setItem("node_zoom", this.zoom + "");
       this.zoomTransform = new Vector2(ev)
     }
     return false
@@ -337,7 +343,7 @@ export class GenericSetupComponent implements OnInit {
 
       } else if (ev.key == "c") {
         if (ev.ctrlKey) {
-          this.clipboardService.storeToClipboard(this.activeElements$.value)
+          this.clipboardService.storeToClipboard(this.activeElements$.value, this.lastMousePosition!)
 
         } else {
           const currentlyActive = this.activeElements$.value
@@ -387,7 +393,7 @@ export class GenericSetupComponent implements OnInit {
 
       } else if (ev.key == "x") {
         if (ev.ctrlKey) {
-          this.clipboardService.storeToClipboard(this.activeElements$.value).then((activeelements) => {
+          this.clipboardService.storeToClipboard(this.activeElements$.value, this.lastMousePosition!).then((activeelements) => {
             if (!activeelements) {
               return
             }
@@ -404,7 +410,7 @@ export class GenericSetupComponent implements OnInit {
     }
     if (ev.key == "v") {
       if (ev.ctrlKey) {
-        this.clipboardService.loadFromClipboard(this.activeView$.value)
+        this.clipboardService.loadFromClipboard(this.activeView$.value, this.lastMousePosition)
 
       }
     }
@@ -463,7 +469,9 @@ export class GenericSetupComponent implements OnInit {
   }
 
   mouseDragSTart(mousevent: MBDragEvent, el: HTMLElement) {
-
+    if (mousevent.button == 2) {
+      return
+    }
     this.state.setmousedragview({
       mouseStart: mousevent.position,
       startOffset: new Vector2(el.scrollLeft, el.scrollTop)
@@ -471,6 +479,7 @@ export class GenericSetupComponent implements OnInit {
 
   }
   mouseDragMove(mousevent: MouseEvent | TouchEvent, el: HTMLElement) {
+    this.lastMousePosition = new Vector2(mousevent)
     if ("TouchEvent" in window && mousevent instanceof TouchEvent) {
       mousevent.preventDefault()
     }
@@ -539,6 +548,8 @@ export class GenericSetupComponent implements OnInit {
       this.activeElements$.next(undefined)
     }
 
+
+
     this.router.navigate([], {
       queryParams: {
         active: queryParam ?? null
@@ -553,10 +564,12 @@ export class GenericSetupComponent implements OnInit {
       if (!dragOffset) {
         return
       }
-      const newPosition = this.convertVectorZoom(evt.position.subtract(GenericSetupComponent.pageInset)
-        .subtract(new Vector2(dragOffset)).added(Vector2.fromStyles(scrollElement, "scroll")
-        )
+      const newPosition = this.convertVectorZoom(
+        evt.previewPosition!
+          .subtract(GenericSetupComponent.pageInset)
+          .added(Vector2.fromStyles(scrollElement, "scroll"))
       );
+
       this.store.dispatch(backendActions.updatePosition({
         node: this.state.getmove.uuid,
         position: newPosition
@@ -567,13 +580,14 @@ export class GenericSetupComponent implements OnInit {
       return
     }
     if (dataHandler.getDropData(evt, "connectionDrag")) {
+      this.connections.pendingConnection.next(undefined)
       return
     }
     this.state.setinitial()
 
     const def = dataHandler.getDropData(evt, "nodeDefinition")
     if (!def) {
-      logKibana("ERROR", "nodeDefinition not in dropdata")
+      //logKibana("ERROR", "nodeDefinition not in dropdata")
       return
     }
 
@@ -582,10 +596,14 @@ export class GenericSetupComponent implements OnInit {
       logKibana("ERROR", "dragOffset not in dropdata")
       return
     }
+
+    const position = this.convertVectorZoom(
+      evt.previewPosition!
+        .subtract(GenericSetupComponent.pageInset)
+        .added(Vector2.fromStyles(scrollElement, "scroll"))
+    );
     const newNode: ElementNode = {
-      position: evt.position
-        .subtract(new Vector2(dragOffset))
-        .subtract(GenericSetupComponent.pageInset),
+      position: position,
       type: def.type,
       uuid: v4(),
       runtimeContext: {}

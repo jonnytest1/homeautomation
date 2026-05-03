@@ -6,6 +6,8 @@ import type { Connection, ElementNode } from '../settings/interfaces';
 import { Vector2 } from '../wiring/util/vector';
 import { jsonClone } from '../utils/clone';
 import { v4 } from "uuid"
+import { logKibana } from '../global-error-handler';
+import { isFirefox } from "../utils/browser"
 @Injectable()
 export class ClipboardService {
 
@@ -57,42 +59,82 @@ export class ClipboardService {
     }
     return jsonClone(copyList)
   }
-  storeToClipboard(elements: ActiveElement[]) {
-    return navigator.permissions.query({
-      name: "clipboard-write" as never
-    }).then((result) => {
-      if (result.state === "granted" || result.state === "prompt") {
-        return navigator.clipboard.writeText(JSON.stringify(this.createActiveCopy(elements))).then(e => {
-          return elements
-        }).catch(e => {
-          debugger;
-        })
+
+
+  async getClipboard() {
+    if (!isFirefox()) {
+      const result = await navigator.permissions.query({
+        name: "clipboard-read" as never
+      })
+      if (!(result.state === "granted" || result.state === "prompt")) {
+        throw new Error("clipboard not granted")
       }
-    });
+    }
+    return navigator.clipboard.readText()
+  }
+  async writeClipboard(text: string) {
+    if (!isFirefox()) {
+      const result = await navigator.permissions.query({
+        name: "clipboard-write" as never
+      })
+      if (!(result.state === "granted" || result.state === "prompt")) {
+        throw new Error("clipboard not granted")
+      }
+    }
+    return navigator.clipboard.writeText(text)
   }
 
-  loadFromClipboard(activeView: string | undefined) {
-    navigator.permissions.query({
-      name: "clipboard-read" as never
-    }).then((result) => {
-      if (result.state === "granted" || result.state === "prompt") {
-        navigator.clipboard.readText().then(e => {
-          const nodes = JSON.parse(e) as Array<ActiveElement>
-          for (const node of nodes) {
-            if (node.type == "node") {
-              if (activeView) {
-                node.node.view = activeView
-              }
-              this.store.dispatch(backendActions.addNode(node))
-            } else if (node.type == "connection") {
-              this.store.dispatch(backendActions.addConnection({ connection: node.con }))
+  storeToClipboard(elements: ActiveElement[], pos: Vector2) {
+    return this.writeClipboard(JSON.stringify({
+      elements: this.createActiveCopy(elements),
+      cursor: {
+        x: pos.x,
+        y: pos.y
+      }
+    })).then(e => {
+      return elements
+    }).catch(e => {
+      debugger;
+      logKibana("ERROR", "error copying to clipboard", e)
+    })
+  }
+
+  loadFromClipboard(activeView: string | undefined, mousePos: Vector2 | null) {
+    this.getClipboard().then(e => {
+      const data = JSON.parse(e) as Array<ActiveElement> | { elements: Array<ActiveElement>, cursor: { x: number, y: number } }
+
+      let ev = null
+      let nodes: Array<ActiveElement>
+      if (data instanceof Array) {
+        nodes = data
+      } else {
+        nodes = data.elements
+        ev = data.cursor
+      }
+
+      for (const node of nodes) {
+        if (node.type == "node") {
+          if (activeView) {
+            node.node.view = activeView
+          }
+          if (ev && mousePos) {
+            const pos = new Vector2(node.node.position)
+              .subtract(new Vector2(ev))
+              .added(mousePos)
+            node.node.position = {
+              x: pos.x,
+              y: pos.y
             }
           }
-        }).catch(e => {
-          debugger;
-        })
+
+          this.store.dispatch(backendActions.addNode(node))
+        } else if (node.type == "connection") {
+          this.store.dispatch(backendActions.addConnection({ connection: node.con }))
+        }
       }
-    });
+    }).catch(e => {
+      debugger;
+    })
   }
 
 }

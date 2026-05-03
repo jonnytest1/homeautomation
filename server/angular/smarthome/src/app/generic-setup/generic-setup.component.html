@@ -2,7 +2,7 @@
   <div class="page">
     @if (nodeData$ | async; as nodeData) {
       <div
-        class="wrapper"
+        class="wrapper mb-scroll-parent"
         #wrapperElement
         id="wrapper-drop"
         (mb-dragover)="dropAllowed($event)"
@@ -88,7 +88,7 @@
         }
         @if (activeEl.type === "connection") {
           <div>
-            active conection
+            active connection
             {{ activeEl.con.uuid }}
           </div>
         }

@@ -1,6 +1,6 @@
 import { BatteryComponent } from './battery/battery.component';
 import { EventsComponent } from './events/events.component';
-import { TimersComponent } from './timers/timers.component';
+import { TimersBottomsheetComponent } from './timers/timers.component';
 import { SenderFe } from '../interfaces';
 import type { TransformFe } from '../interfaces';
 import { SettingsService } from '../../settings.service';
@@ -44,7 +44,7 @@ export class SenderBottomSheetComponent implements OnInit {
 
 
   displayTimers() {
-    this.dialog.open(TimersComponent, {
+    this.dialog.open(TimersBottomsheetComponent, {
       data: this.data,
       panelClass: 'unlimitedsnackbar',
     });

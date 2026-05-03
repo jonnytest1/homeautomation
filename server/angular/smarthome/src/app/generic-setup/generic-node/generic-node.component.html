@@ -66,6 +66,7 @@
           (mousedown)="$event.stopPropagation()"
           draggable="true"
           (mb-dragstart)="startConnection($event, indx)"
+          (mb-dragend)="abortConnection()"
         ></div>
       }
     </div>
