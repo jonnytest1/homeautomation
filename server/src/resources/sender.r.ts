@@ -126,6 +126,9 @@ export class SenderResource {
       db: sharedPool
     });
     if (existingSender) {
+      if (req.body.schema && req.body.schema !== existingSender.schema) {
+        existingSender.schema = req.body.schema
+      }
       if (req.body.a_read1) {
         const batteryLevel = new BatteryLevel(req.body.a_read1, req.body.a_read2, req.body.a_read3);
         if (batteryLevel.level !== -1) {
