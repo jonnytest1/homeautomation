@@ -5,7 +5,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.example.jonathan.service.BarcodeSender;
+import com.example.jonathan.service.MobileDeviceSender;
 import com.google.zxing.Result;
 
 import java.time.Instant;
@@ -17,7 +17,7 @@ import me.dm7.barcodescanner.zxing.ZXingScannerView;
 public class ScannerFragment extends Fragment implements ZXingScannerView.ResultHandler {
 
     private ZXingScannerView mScannerView;
-    private Instant lastSend=Instant.ofEpochMilli(0);
+    private Instant lastSend = Instant.ofEpochMilli(0);
 
     @Override
     public View onCreateView(
@@ -57,9 +57,11 @@ public class ScannerFragment extends Fragment implements ZXingScannerView.Result
 
     @Override
     public void handleResult(Result rawResult) {
-        if(lastSend.isBefore(Instant.now().minusSeconds(5))){
-            lastSend=Instant.now();
-            new Thread(new BarcodeSender(rawResult,getContext().getApplicationContext())).start();
+        if (lastSend.isBefore(Instant.now().minusSeconds(5))) {
+            lastSend = Instant.now();
+            String text = rawResult.getText();
+
+            new Thread(new MobileDeviceSender(text, getContext().getApplicationContext())).start();
         }
         mScannerView.resumeCameraPreview(this);
     }
