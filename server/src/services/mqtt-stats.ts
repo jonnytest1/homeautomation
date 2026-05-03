@@ -37,9 +37,10 @@ export function updateOsStats(statsString: string, deviceId: string) {
     stats[deviceId].shift()
   }
 
-  let allHaveNetworkDrops = true;
   const dropDiffs: Array<number> = []
   if (Object.keys(stats).length > 2) {
+
+    let allHaveNetworkDrops = true;
 
     for (const statKey of Object.keys(stats)) {
       const statList = stats[statKey]
@@ -76,13 +77,20 @@ export function updateOsStats(statsString: string, deviceId: string) {
         allHaveNetworkDrops = false
       }
     }
-  }
-
-  if (allHaveNetworkDrops) {
-    logKibana("ERROR", {
-      message: "there seem to be network drops across multiple devices - consider restarting the router",
+    if (allHaveNetworkDrops) {
+      logKibana("ERROR", {
+        message: "there seem to be network drops across multiple devices - consider restarting the router",
+        dropDiffs,
+        stats
+      })
+    }
+  } else {
+    logKibana("INFO", {
+      message: "not enouogh data for OsStats network drops check",
       dropDiffs,
       stats
     })
   }
+
+
 }
