@@ -163,7 +163,6 @@ addTypeImpl({
 
               if (propertySchema.properties) {
                 if (!("message" in propertySchema.properties)) {
-
                   genericNodeDataStore.dispatch(setServerContext({
                     nodeUuid: node.uuid,
                     key: "needsTransform",
