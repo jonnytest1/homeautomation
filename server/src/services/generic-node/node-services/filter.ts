@@ -119,7 +119,7 @@ addTypeImpl({
             }))
           }
         },
-        emit(index: number, event) {
+        emit(index: number, event: unknown) {
           if (index > 0) {
             const copy = data.clone()
             copy.updatePayload(event)
@@ -128,7 +128,7 @@ addTypeImpl({
           }
         },
         nodeContext: () => nodeContext(node),
-        setInputHistory: (days, index = 0) => {
+        setInputHistory: (days: number, index = 0) => {
           const key = `inputhistory${index || ''}`
           genericNodeDataStore.dispatch(backendToFrontendStoreActions.updateParam({
             node: node.uuid,
@@ -136,7 +136,7 @@ addTypeImpl({
             value: days as never
           }))
         },
-        setOutputHistory: (days, index = 0) => {
+        setOutputHistory: (days: number, index = 0) => {
           const key = `outputhistory${index || ''}`
           genericNodeDataStore.dispatch(backendToFrontendStoreActions.updateParam({
             node: node.uuid,
@@ -156,10 +156,11 @@ addTypeImpl({
     }
 
     if (typeof returnValue == "object") {
+      const retVal = returnValue as Record<number, any>
       for (let i = 1; i < +(node.parameters?.additional_output ?? 0) + 1; i++) {
-        if (returnValue[i]) {
+        if (retVal[i]) {
           const copy = data.clone()
-          copy.updatePayload(returnValue[i])
+          copy.updatePayload(retVal[i])
           addOutputHistoryEvent(node, copy, i);
           callbacks.continue(copy, i)
         }
@@ -229,7 +230,7 @@ addTypeImpl({
                 order: 1,
                 hideWithoutValue: true
               })
-            } else if (node.runtimeContext.parameters?.[`inputhistory${i}`]) {
+            } else if (node.runtimeContext.parameters?.[`inputhistory${i}` as keyof typeof node.runtimeContext.parameters]) {
               updateRuntimeParameter(node, `inputhistory${i}` as "inputhistory", undefined as any)
             } else {
               break;
@@ -254,7 +255,7 @@ addTypeImpl({
                 order: 1,
                 hideWithoutValue: true
               })
-            } else if (node.runtimeContext.parameters?.[`outputhistory${i}`]) {
+            } else if (node.runtimeContext.parameters?.[`outputhistory${i}` as keyof typeof node.runtimeContext.parameters]) {
               updateRuntimeParameter(node, `outputhistory${i}` as "outputhistory", undefined as any)
             } else {
               break;

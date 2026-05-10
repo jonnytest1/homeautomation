@@ -54,9 +54,10 @@ addTypeImpl({
       }
 
       for (const param in node.parameters ?? {}) {
-        const paramValue = node.parameters?.[param]
+        const paramKey = param as keyof typeof node.parameters
+        const paramValue = node.parameters?.[paramKey]
         if (paramValue !== undefined && param.startsWith("mergeLength_")) {
-          params[param] = +paramValue
+          params[paramKey] = +paramValue
         }
       }
 
@@ -78,11 +79,12 @@ addTypeImpl({
       let hasChange = false
       const enumSet = new Set(enumKeyList)
       for (const key in node.runtimeContext.parameters) {
-        if (key.startsWith("mergeLength_")) {
-          const prop = key.split("mergeLength_")[1]
+        const paramKey = key as keyof typeof node.runtimeContext.parameters
+        if (paramKey.startsWith("mergeLength_")) {
+          const prop = paramKey.split("mergeLength_")[1]
           if (!enumSet.has(prop)) {
             hasChange = true
-            delete node.runtimeContext.parameters[key]
+            delete node.runtimeContext.parameters[paramKey]
           }
         }
       }
@@ -91,13 +93,16 @@ addTypeImpl({
           type: "number",
           title: "if an enum length exceeds this length it will be merged into a parent type 'a'|'b' => string"
         }
-        if (JSON.stringify(newPArameter) !== JSON.stringify(node.runtimeContext.parameters[`mergeLength_${enumKey}`])) {
-          node.runtimeContext.parameters[`mergeLength_${enumKey}`] = newPArameter
+        const propKey = `mergeLength_${enumKey}` as const
+        const runtimeParamRef = node.runtimeContext.parameters as Record<typeof propKey, typeof newPArameter>
+        if (JSON.stringify(newPArameter) !== JSON.stringify(runtimeParamRef[propKey])) {
+          runtimeParamRef[propKey] = newPArameter
           hasChange = true
         }
+        const paramRef = node.parameters as Record<typeof propKey, number>
         const newMErgeLength = node.parameters?.mergeLength ? +node.parameters?.mergeLength : 10
-        if (newMErgeLength !== node.parameters[`mergeLength_${enumKey}`]) {
-          node.parameters[`mergeLength_${enumKey}`] = newMErgeLength
+        if (newMErgeLength !== paramRef[propKey]) {
+          paramRef[propKey] = newMErgeLength
           hasChange = true
         }
       }

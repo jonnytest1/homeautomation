@@ -13,9 +13,7 @@ import { getTypes } from '../validation/watcher';
 import { genericNodeDataStore } from '../generic-store/reference';
 import { backendToFrontendStoreActions } from '../generic-store/actions';
 import { setNodeParameter, updateRuntimeParameter, updateServerContext } from '../element-node-fnc';
-import { Json2dts } from "json2dts"
 import * as z from "zod"
-import { createCompilerHost } from 'typescript';
 import type { ExtendedJsonSchema } from 'json-schema-merger';
 import { Script } from 'vm';
 
@@ -28,11 +26,6 @@ declare module "typescript" {
 
 
 
-const host = createCompilerHost({})
-
-
-
-const json2dts = new Json2dts()
 
 const codeSchema = z.object({
   jsCode: z.string(),
@@ -58,7 +51,7 @@ type TransformationResponse = TransformationRes;
 `
 
 
-function getContext(sendData) {
+function getContext(sendData: unknown) {
   return {
     data: sendData,
     delay: (<T>(sekunden: number, objectToSend?: T): Delayed<T | void> | T => {
@@ -286,7 +279,7 @@ const genericTypes = addTypeImpl({
       }
 
     } catch (e) {
-      if (e.message == "Not supported: root type undefined") {
+      if (typeof e == "object" && e && "message" in e && e.message == "Not supported: root type undefined") {
         console.warn("undefined return type to functiuon")
       } else if (e instanceof CompilerError) {
         console.error(e)
