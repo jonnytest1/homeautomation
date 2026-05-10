@@ -46,7 +46,7 @@ while True:
             json_str = parts.pop(0)
             buff = "\n".join(parts)
 
-            response_data = json.loads(buff)
+            response_data = json.loads(json_str)
             for line in response_data["logs"]:
                 print(line)
             if "continue" in response_data:
