@@ -6,7 +6,7 @@ jobs:
   Explore-Gitea-Actions:
     runs-on: smarthome
     container:
-      image: "cert-runner"
+      image: 'cert-runner'
       volumes:
         - /var/run/dpl/c_dpl.sock:/var/run/dpl/c_dpl.sock
         - /home/smarthome/last_action:/var/run/dpl/last_action
@@ -27,4 +27,4 @@ jobs:
       #- run: whoami
       #- run: docker ps
       - run: python "./.gitea/workflows/setup.py" install
-      - run: python "./.gitea/workflows/deploy.py"
+      - run: python -u "./.gitea/workflows/deploy.py"

@@ -163,13 +163,7 @@ addTypeImpl({
 
               if (propertySchema.properties) {
                 if (!("message" in propertySchema.properties)) {
-                  genericNodeDataStore.dispatch(setServerContext({
-                    nodeUuid: node.uuid,
-                    key: "needsTransform",
-                    value: false,
-                    skipNodeUpdate: true,
-                    skipTypeUpdate: true
-                  }))
+
                   hasTransformation = false
                   updateRuntimeParameter(node, "transformation", {
                     type: "placeholder",
@@ -223,7 +217,13 @@ addTypeImpl({
           of: "select"
         })
       }
-
+      genericNodeDataStore.dispatch(setServerContext({
+        nodeUuid: node.uuid,
+        key: "needsTransform",
+        value: hasTransformation,
+        skipNodeUpdate: true,
+        skipTypeUpdate: true
+      }))
       if (hasTransformation) {
         const envtsCopy = [...sender.events]
         const transformations = sender?.transformation.sort((tr1, tr2) => {
