@@ -4,7 +4,7 @@ import type { Transformation } from '../../../models/transformation';
 import { updateRuntimeParameter } from '../element-node-fnc';
 import { senderLoader } from '../../sender-loader';
 import { genericNodeDataStore } from '../generic-store/reference';
-import { backendToFrontendStoreActions } from '../generic-store/actions';
+import { backendToFrontendStoreActions, setServerContext } from '../generic-store/actions';
 import { generateDtsFromSchema, generateJsonSchemaFromDts } from '../json-schema-type-util';
 import { logKibana } from '../../../util/log';
 import { load } from 'hibernatets';
@@ -25,13 +25,14 @@ function getHistoryCount(transformer: Transformation & { historyCount?: number }
 addTypeImpl({
   context_type: (t: { deviceKey: string, transformation?: string, transformationCount: number }) => t,
   payload_type: (p: { message?: string, type?: "url" | "barcode", url?: string }) => p,
+  server_context_type: (s: { needsTransform?: boolean }) => s,
   async process(node, evt, callbacks) {
 
     if (!node.parameters?.deviceKey) {
       return
     }
 
-    const needsTransformation = !!evt.context.transformationCount
+    const needsTransformation = !!evt.context.transformationCount && node.serverContext?.needsTransform !== false
 
     const type = node.parameters.type ?? "barcode"
     const evtType = evt.payload.type ?? "barcode"
@@ -162,6 +163,14 @@ addTypeImpl({
 
               if (propertySchema.properties) {
                 if (!("message" in propertySchema.properties)) {
+
+                  genericNodeDataStore.dispatch(setServerContext({
+                    nodeUuid: node.uuid,
+                    key: "needsTransform",
+                    value: false,
+                    skipNodeUpdate: true,
+                    skipTypeUpdate: true
+                  }))
                   hasTransformation = false
                   updateRuntimeParameter(node, "transformation", {
                     type: "placeholder",
