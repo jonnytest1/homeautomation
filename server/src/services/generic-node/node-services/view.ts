@@ -1,3 +1,4 @@
+import { logKibana } from '../../../util/log';
 import type { ElementNodeImpl } from '../element-node';
 import { updateRuntimeParameter } from '../element-node-fnc';
 import { addTypeImpl, emitFromNode } from '../generic-node-service';
@@ -28,7 +29,9 @@ addTypeImpl({
 
       const viewNodes = genericNodeDataStore.getOnce(selectViewNodesByView(node.uuid))
       const inputs = viewNodes.filter(node => node.parameters?.type == "view-input")
-
+      if (!inputs.length) {
+        logKibana("WARN", "view called without input nodes");
+      }
       for (const input of inputs) {
         const event = createNodeEvent(data)
 

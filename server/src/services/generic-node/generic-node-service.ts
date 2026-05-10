@@ -384,6 +384,7 @@ export function addTypeImpl<C, G extends NodeDefOptinos, O extends NodeDefOptino
 
       if (typeImplUpdate) {
         reloadNodes(elementNodes, implementationType, currerntTypeImpls);
+
       }
 
       console.log(`added type implementaiton for ${implementationType}`)
@@ -407,6 +408,7 @@ async function reloadNodes(elementNodes: ElementNodeImpl<never, Partial<NodeDefO
       typeImpls: typeImplementations.value
     });
   }
+  console.log("reloaded all nodes for " + implementationType);
   return elementNodes;
 }
 

@@ -193,6 +193,33 @@ describe("type operations", () => {
 
   it("schema to dts", async () => {
 
+    const schemaDistinctObject = await generateDtsFromSchema({
+      "oneOf": [
+        {
+          "type": "object",
+          "title": "DistinctKey1",
+          "properties": {
+            "type": { "const": "distinctkey1" },
+            "keyoneprop": { "type": "string" }
+          },
+          "required": ["type", "keyoneprop"],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "title": "DistinctKey2",
+          "properties": {
+            "type": { "const": "distinctkey2" },
+            "otherprop": { "type": "string" }
+          },
+          "required": ["type", "otherprop"],
+          "additionalProperties": false
+        }
+      ]
+    }, "schema to dts test", { distinctRootOneOf: true })
+    expect(schemaDistinctObject).toBe("export type Main = 'on';")
+
+
     const schemaCnst = await generateDtsFromSchema({
       "type": "string",
       const: "on"

@@ -6,6 +6,7 @@ import { senderLoader } from '../../sender-loader';
 import { genericNodeDataStore } from '../generic-store/reference';
 import { backendToFrontendStoreActions } from '../generic-store/actions';
 import { generateDtsFromSchema, generateJsonSchemaFromDts } from '../json-schema-type-util';
+import { logKibana } from '../../../util/log';
 import { load } from 'hibernatets';
 
 
@@ -69,11 +70,12 @@ addTypeImpl({
         type: "placeholder",
         of: "select",
         invalidates: ["transformation"],
-        order: 2
+        order: 3
       },
       type: {
         type: "placeholder",
-        of: "select"
+        of: "select",
+        order: 2
       },
       transformation: {
         type: "placeholder",
@@ -89,7 +91,7 @@ addTypeImpl({
     updateRuntimeParameter(node, "deviceKey", {
       type: "select",
       options: deviceKeys,
-      order: 2
+      order: 3
     })
 
     if (node.parameters?.deviceKey) {
@@ -99,6 +101,7 @@ addTypeImpl({
         options: {
           deep: {
             events: "`timestamp` > " + oneMonthsAgo,
+            transformation: "TRUE=TRUE"
           }
         }
       })
@@ -116,10 +119,13 @@ addTypeImpl({
       //
 
 
+      const nodeRef = node;
       if (sender.schema) {
         const schema = JSON.parse(sender.schema)
 
-        const dtsSchema = await generateDtsFromSchema(schema, `${node.type}-${node.uuid} -node schemagen`);
+        const dtsSchema = await generateDtsFromSchema(schema, `${node.type}-${node.uuid} -node schemagen`, {
+          distinctRootOneOf: true
+        });
 
         genericNodeDataStore.dispatch(backendToFrontendStoreActions.updateOutputSchema({
           nodeUuid: node.uuid,
@@ -130,24 +136,56 @@ addTypeImpl({
           },
         }))
 
-
-        const typeProp = generateJsonSchemaFromDts(`
+        try {
+          const TypeDts = `
         ${dtsSchema}
         
-        export type TypePropType= Main.type
-        `, "TypePropType", `${node.type}-${node.uuid}-node yperesolution`)
-        console.log(typeProp);
+        export type TypePropType=Main["type"]
+        `;
+          const typeProp = generateJsonSchemaFromDts(TypeDts, "TypePropType", `${node.type}-${node.uuid}-node yperesolution`)
+          console.log(typeProp);
+          if (typeProp && typeProp.type == "string" && "enum" in typeProp) {
+            updateRuntimeParameter(nodeRef, "type", {
+              type: "select",
+              options: typeProp.enum! as Array<string>,
+              order: 2
+            })
+            if (!node.parameters.type) {
+              genericNodeDataStore.dispatch(backendToFrontendStoreActions.updateParam({
+                node: node.uuid,
+                param: "type",
+                value: "barcode"
+              }))
+            } else {
+              generateJsonSchemaFromDts(TypeDts, "TypePropTypeMerged", `${node.type}-${node.uuid}-node yperesolution`)
+            }
+          } else {
+            updateRuntimeParameter(nodeRef, "type", {
+              type: "placeholder",
+              of: "select"
+            })
+          }
 
+
+        } catch (e) {
+          logKibana("WARN", {
+            message: "error during resolution of 'type' subprop",
+            dts: dtsSchema
+          }, e)
+          updateRuntimeParameter(nodeRef, "type", {
+            type: "placeholder",
+            of: "select"
+          })
+        }
+      } else {
+        updateRuntimeParameter(nodeRef, "type", {
+          type: "placeholder",
+          of: "select"
+        })
       }
     }
 
-    if (!node.parameters.type) {
-      genericNodeDataStore.dispatch(backendToFrontendStoreActions.updateParam({
-        node: node.uuid,
-        param: "type",
-        value: "barcode"
-      }))
-    }
+
 
 
     if (node.parameters.transformation) {

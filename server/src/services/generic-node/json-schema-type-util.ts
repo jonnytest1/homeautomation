@@ -106,7 +106,12 @@ function canDoSchema(jsonSchema: ExtendedJsonSchema | (JSONSchema6Definition & o
 }
 
 
-export async function generateDtsFromSchema(jsonSchema: ExtendedJsonSchema | (JSONSchema6Definition & object), traceId?: string) {
+export interface DtsGenerationOptions {
+  distinctRootOneOf?: boolean
+}
+
+
+export async function generateDtsFromSchema(jsonSchema: ExtendedJsonSchema | (JSONSchema6Definition & object), traceId?: string, opts: DtsGenerationOptions = {}): Promise<string> {
   if (traceId) {
     console.log("creating schema for " + traceId)
   } else {
@@ -114,10 +119,36 @@ export async function generateDtsFromSchema(jsonSchema: ExtendedJsonSchema | (JS
   }
 
 
+
+
+  if (opts?.distinctRootOneOf && "oneOf" in jsonSchema) {
+    const dtses = await Promise.all(jsonSchema.oneOf
+      ?.map((schema, i) => {
+        if (typeof schema == "object") {
+          return generateDtsFromSchema(schema, `${traceId}-${i}`)
+        } else {
+          throw new Error("not implemented")
+        }
+      }) ?? []);
+
+
+    const dtsMerged = dtses.map((dts, i) => `namespace oneOfMerge${i}{
+      ${dts}
+    }`).join("\n\n")
+
+    const mergeUnion = dtses.map((_, i) => `oneOfMerge${i}.Main`).join(" | ")
+    return `
+    ${dtsMerged}
+    
+    export type Main = ${mergeUnion}`
+
+
+
+  }
+
   if (jsonSchema.type === undefined) {
     return `export type ${mainTypeName} = any;`
   }
-
   let wrapper = false
   if (!canDoSchema(jsonSchema)) {
     wrapper = true
