@@ -118,14 +118,7 @@ addTypeImpl({
           distinctRootOneOf: true
         });
 
-        genericNodeDataStore.dispatch(backendToFrontendStoreActions.updateOutputSchema({
-          nodeUuid: node.uuid,
-          schema: {
-            jsonSchema: schema,
-            dts: dtsSchema,
-            mainTypeName: "Main",
-          },
-        }))
+        let hasSpecificOutputSchema = false
 
         try {
           const TypeDts = `
@@ -157,12 +150,12 @@ addTypeImpl({
               const propertySchema = generateJsonSchemaFromDts(propSchema, "TypedSchema", `${node.type}-${node.uuid}-node yperesolutionprop`)
               console.log(propertySchema)
 
-
+              hasSpecificOutputSchema = true
               genericNodeDataStore.dispatch(backendToFrontendStoreActions.updateOutputSchema({
                 nodeUuid: node.uuid,
                 schema: {
                   jsonSchema: propertySchema,
-                  dts: await generateDtsFromSchema(schema, `${node.type}-${node.uuid} -node schemagen narrowed`),
+                  dts: await generateDtsFromSchema(propertySchema, `${node.type}-${node.uuid} -node schemagen narrowed`),
                   mainTypeName: "Main",
                 },
               }))
@@ -194,7 +187,16 @@ addTypeImpl({
               of: "select"
             })
           }
-
+          if (!hasSpecificOutputSchema) {
+            genericNodeDataStore.dispatch(backendToFrontendStoreActions.updateOutputSchema({
+              nodeUuid: node.uuid,
+              schema: {
+                jsonSchema: schema,
+                dts: dtsSchema,
+                mainTypeName: "Main",
+              },
+            }))
+          }
 
         } catch (e) {
           const nodeRef = node;

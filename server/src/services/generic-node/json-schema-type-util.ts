@@ -291,13 +291,18 @@ export function allRequired(schema: ExtendedJsonSchema) {
   }
 }
 
-
+const jsonSchemaCache: Record<string, string> = {}
 export function generateJsonSchemaFromDts(dts: string, mainType: string | boolean, traceId: string) {
   if (traceId) {
     console.log("creating jscon schema from dts for " + traceId)
   } else {
     logKibana("WARN", "missing traceid for call")
   }
+
+  if (jsonSchemaCache[dts]) {
+    return JSON.parse(jsonSchemaCache[dts])
+  }
+
   const program = programFromSource("text.ts", `
       ${dts}
   `)
@@ -323,6 +328,7 @@ export function generateJsonSchemaFromDts(dts: string, mainType: string | boolea
     generated.definitions = gnerator?.reffedDefinitions
 
     postfix(generated)
+    jsonSchemaCache[dts] = JSON.stringify(generated)
     return generated as ExtendedJsonSchema
   }
   const schema = generateSchema(program.program, mainType, {
@@ -330,6 +336,7 @@ export function generateJsonSchemaFromDts(dts: string, mainType: string | boolea
   }, ["test.ts"])
   if (schema) {
     postfix(schema as ExtendedJsonSchema)
+    jsonSchemaCache[dts] = JSON.stringify(schema)
     return schema as ExtendedJsonSchema
   }
   throw new Error("didnt get a schema")
