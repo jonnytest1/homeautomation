@@ -117,10 +117,10 @@ export async function generateDtsFromSchema(jsonSchema: ExtendedJsonSchema | (JS
   } else {
     logKibana("WARN", "missing traceid for call")
   }
-  const schemaString = JSON.stringify(jsonSchema)
-
-  if (schemaCache[schemaString]) {
-    return schemaCache[schemaString]
+  const schemaCacheString = JSON.stringify(jsonSchema)
+  let schemaString = schemaCacheString
+  if (schemaCache[schemaCacheString]) {
+    return schemaCache[schemaCacheString]
   }
 
   if (opts?.distinctRootOneOf && "oneOf" in jsonSchema) {
@@ -147,7 +147,7 @@ export async function generateDtsFromSchema(jsonSchema: ExtendedJsonSchema | (JS
     
     export type Main = ${mergeUnion}`
 
-    schemaCache[schemaString] = finalSchema
+    schemaCache[schemaCacheString] = finalSchema
     return finalSchema
   }
 
@@ -165,6 +165,7 @@ export async function generateDtsFromSchema(jsonSchema: ExtendedJsonSchema | (JS
       required: ["wrapper"],
       additionalProperties: false
     }
+    schemaString = JSON.stringify(jsonSchema)
   }
 
   const definistionStr = ""
@@ -209,12 +210,12 @@ export async function generateDtsFromSchema(jsonSchema: ExtendedJsonSchema | (JS
     const dtsStr = `
         ${lines.join("\n")}
     `.trim()
-    schemaCache[schemaString] = dtsStr
+    schemaCache[schemaCacheString] = dtsStr
     return dtsStr
   }
 
   const str = lines.join("\n").trim()
-  schemaCache[schemaString] = str
+  schemaCache[schemaCacheString] = str
 
   return str
 }
