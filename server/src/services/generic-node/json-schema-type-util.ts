@@ -110,14 +110,18 @@ export interface DtsGenerationOptions {
   distinctRootOneOf?: boolean
 }
 
-
+const schemaCache: Record<string, string> = {}
 export async function generateDtsFromSchema(jsonSchema: ExtendedJsonSchema | (JSONSchema6Definition & object), traceId?: string, opts: DtsGenerationOptions = {}): Promise<string> {
   if (traceId) {
     console.log("creating schema for " + traceId)
   } else {
     logKibana("WARN", "missing traceid for call")
   }
+  const schemaString = JSON.stringify(jsonSchema)
 
+  if (schemaCache[schemaString]) {
+    return schemaCache[schemaString]
+  }
 
   if (opts?.distinctRootOneOf && "oneOf" in jsonSchema) {
     const dtses = await Promise.all(jsonSchema.oneOf
@@ -138,13 +142,13 @@ export async function generateDtsFromSchema(jsonSchema: ExtendedJsonSchema | (JS
     }`).join("\n\n")
 
     const mergeUnion = dtses.map((_, i) => `oneOfMerge${i}.Main`).join(" | ")
-    return `
+    const finalSchema = `
     ${dtsMerged}
     
     export type Main = ${mergeUnion}`
 
-
-
+    schemaCache[schemaString] = finalSchema
+    return finalSchema
   }
 
   if (jsonSchema.type === undefined) {
@@ -175,7 +179,7 @@ export async function generateDtsFromSchema(jsonSchema: ExtendedJsonSchema | (JS
   }*/
 
   const schemaInput = new JSONSchemaInput(new FetchingJSONSchemaStore());
-  await schemaInput.addSource({ name: mainTypeName, schema: JSON.stringify(jsonSchema) });
+  await schemaInput.addSource({ name: mainTypeName, schema: schemaString });
 
   const inputData = new InputData();
   inputData.addInput(schemaInput);
@@ -206,7 +210,7 @@ export async function generateDtsFromSchema(jsonSchema: ExtendedJsonSchema | (JS
   }
 
   const str = lines.join("\n").trim()
-
+  schemaCache[schemaString] = str
 
   return str
 }
@@ -286,6 +290,8 @@ export function allRequired(schema: ExtendedJsonSchema) {
     }
   }
 }
+
+
 export function generateJsonSchemaFromDts(dts: string, mainType: string | boolean, traceId: string) {
   if (traceId) {
     console.log("creating jscon schema from dts for " + traceId)

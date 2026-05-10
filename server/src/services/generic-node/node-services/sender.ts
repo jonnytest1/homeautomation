@@ -106,18 +106,9 @@ addTypeImpl({
         }
       })
       const sender = senders[0]
-      const envtsCopy = [...sender.events]
-      const transformations = sender?.transformation.sort((tr1, tr2) => {
-        return getHistoryCount(tr2, envtsCopy) - getHistoryCount(tr1, envtsCopy);
-      })?.filter(t => t.name?.length && t.transformationKey?.length)
-        ?.map(t => `${t.name} (${t.transformationKey})`)
-        ?.filter(n => n?.length) ?? []
-      updateRuntimeParameter(node, "transformation", {
-        type: "select",
-        options: transformations
-      })
-      //
 
+      //
+      let hasTransformation = true
 
       const nodeRef = node;
       if (sender.schema) {
@@ -166,8 +157,19 @@ addTypeImpl({
               const propertySchema = generateJsonSchemaFromDts(propSchema, "TypedSchema", `${node.type}-${node.uuid}-node yperesolutionprop`)
               console.log(propertySchema)
 
+
+              genericNodeDataStore.dispatch(backendToFrontendStoreActions.updateOutputSchema({
+                nodeUuid: node.uuid,
+                schema: {
+                  jsonSchema: propertySchema,
+                  dts: await generateDtsFromSchema(schema, `${node.type}-${node.uuid} -node schemagen narrowed`),
+                  mainTypeName: "Main",
+                },
+              }))
+
               if (propertySchema.properties) {
                 if (!("message" in propertySchema.properties)) {
+                  hasTransformation = false
                   updateRuntimeParameter(node, "transformation", {
                     type: "placeholder",
                     of: "select"
@@ -211,6 +213,21 @@ addTypeImpl({
           of: "select"
         })
       }
+
+      if (hasTransformation) {
+        const envtsCopy = [...sender.events]
+        const transformations = sender?.transformation.sort((tr1, tr2) => {
+          return getHistoryCount(tr2, envtsCopy) - getHistoryCount(tr1, envtsCopy);
+        })?.filter(t => t.name?.length && t.transformationKey?.length)
+          ?.map(t => `${t.name} (${t.transformationKey})`)
+          ?.filter(n => n?.length) ?? []
+        updateRuntimeParameter(node, "transformation", {
+          type: "select",
+          options: transformations
+        })
+      }
+
+
     }
 
 
