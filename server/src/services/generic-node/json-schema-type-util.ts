@@ -125,6 +125,9 @@ export async function generateDtsFromSchema(jsonSchema: ExtendedJsonSchema | (JS
     const dtses = await Promise.all(jsonSchema.oneOf
       ?.map((schema, i) => {
         if (typeof schema == "object") {
+          if ("type" in jsonSchema && !schema.type) {
+            schema.type = jsonSchema.type
+          }
           return generateDtsFromSchema(schema, `${traceId}-${i}`)
         } else {
           throw new Error("not implemented")
