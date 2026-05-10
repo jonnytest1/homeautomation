@@ -49,6 +49,8 @@ while True:
             response_data = json.loads(buff)
             for line in response_data["logs"]:
                 print(line)
+            if "continue" in response_data:
+                continue
 
         response_data = json.loads(buff)
 
