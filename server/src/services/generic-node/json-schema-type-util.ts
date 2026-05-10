@@ -204,9 +204,13 @@ export async function generateDtsFromSchema(jsonSchema: ExtendedJsonSchema | (JS
     lines[0] = ""
     lines[1] = lines[1].replace(/wrapper: ([^;]*);/, `export type ${mainTypeName} = $1;`).trim()
     lines[2] = ""
-    return `
+
+
+    const dtsStr = `
         ${lines.join("\n")}
     `.trim()
+    schemaCache[schemaString] = dtsStr
+    return dtsStr
   }
 
   const str = lines.join("\n").trim()
