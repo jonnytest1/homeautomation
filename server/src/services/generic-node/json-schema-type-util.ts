@@ -119,8 +119,6 @@ export async function generateDtsFromSchema(jsonSchema: ExtendedJsonSchema | (JS
   }
 
 
-
-
   if (opts?.distinctRootOneOf && "oneOf" in jsonSchema) {
     const dtses = await Promise.all(jsonSchema.oneOf
       ?.map((schema, i) => {
