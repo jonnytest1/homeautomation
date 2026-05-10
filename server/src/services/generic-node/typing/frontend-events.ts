@@ -52,7 +52,7 @@ export type UpdateParam = {
   type: "update param",
   node: string
   param: string
-  value: string
+  value: string | undefined
 }
 export type UpdateParamDefinition = {
   type: "update param definition",

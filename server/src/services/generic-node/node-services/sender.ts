@@ -93,11 +93,11 @@ addTypeImpl({
       options: deviceKeys,
       order: 3
     })
-
-    if (node.parameters?.deviceKey) {
+    const deviceKey = node.parameters?.deviceKey
+    if (deviceKey) {
       const oneMonthsAgo = Date.now() - (1000 * 60 * 60 * 24 * 30);
       const senders = await load(Sender, {
-        filter: s => s.deviceKey = node.parameters.deviceKey,
+        filter: s => s.deviceKey = deviceKey,
         options: {
           deep: {
             events: "`timestamp` > " + oneMonthsAgo,
@@ -157,7 +157,34 @@ addTypeImpl({
                 value: "barcode"
               }))
             } else {
-              generateJsonSchemaFromDts(TypeDts, "TypePropTypeMerged", `${node.type}-${node.uuid}-node yperesolution`)
+              const propSchema = `
+                ${dtsSchema}
+
+                export type TypedSchema =  Extract<Main, { type: "${node.parameters.type}" }>
+              `
+
+              const propertySchema = generateJsonSchemaFromDts(propSchema, "TypedSchema", `${node.type}-${node.uuid}-node yperesolutionprop`)
+              console.log(propertySchema)
+
+              if (propertySchema.properties) {
+                if (!("message" in propertySchema.properties)) {
+                  updateRuntimeParameter(node, "transformation", {
+                    type: "placeholder",
+                    of: "select"
+                  })
+                  delete node.parameters.transformation;
+                  genericNodeDataStore.dispatch(backendToFrontendStoreActions.updateParam({
+                    node: node.uuid,
+                    param: "transformation",
+                    value: undefined
+                  }))
+                }
+              }
+
+              genericNodeDataStore.dispatch(backendToFrontendStoreActions.updateRuntimeInfo({
+                nodeUuid: node.uuid,
+                info: `${node.parameters?.deviceKey} - ${node.parameters.type}`
+              }))
             }
           } else {
             updateRuntimeParameter(nodeRef, "type", {
@@ -168,6 +195,7 @@ addTypeImpl({
 
 
         } catch (e) {
+          const nodeRef = node;
           logKibana("WARN", {
             message: "error during resolution of 'type' subprop",
             dts: dtsSchema
@@ -189,7 +217,10 @@ addTypeImpl({
 
 
     if (node.parameters.transformation) {
-      node.runtimeContext.info = `${node.parameters?.deviceKey} - ${node.parameters.transformation.split("(")[0]}`
+      genericNodeDataStore.dispatch(backendToFrontendStoreActions.updateRuntimeInfo({
+        nodeUuid: node.uuid,
+        info: `${node.parameters?.deviceKey} - ${node.parameters.transformation.split("(")[0]}`
+      }))
     }
   }
 })

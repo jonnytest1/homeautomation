@@ -19,7 +19,7 @@ export function updateServerContext<T, O extends NodeDefOptinos, K extends (keyo
 
   genericNodeDataStore.dispatch(setServerContext({
     key: k,
-    value: data[k],
+    value: data[k as keyof T],
     nodeUuid: node.uuid,
     ...opts
   }));
@@ -30,7 +30,7 @@ type SetNodeOption<T extends string> = {
   [key in T]: NodeOptionTypes
 }
 type SetNodeParamVAlue<K extends string, V extends NodeOptionTypes> = {
-  [key in K]: MapTypeToParam<V, K>
+  [key in K]?: MapTypeToParam<V, K>
 }
 
 
@@ -121,10 +121,13 @@ export function checkInvalidations<T, P, K extends (keyof P & keyof T & string),
       const opt = def.options[key]
 
       if (opt.invalidates) {
-        if (prev?.parameters?.[key] && node?.parameters?.[key] && node?.parameters?.[key] !== prev?.parameters?.[key]) {
+
+        if (prev?.parameters?.[key as keyof T] && node?.parameters?.[key as keyof T] && node?.parameters?.[key as keyof T] !== prev?.parameters?.[key as keyof T]) {
           for (const invalidator of opt.invalidates) {
-            delete node.parameters[invalidator]
-            delete node.runtimeContext?.parameters?.[invalidator]
+
+            delete node.parameters[invalidator as keyof T]
+
+            delete node.runtimeContext?.parameters?.[invalidator as keyof P]
           }
         }
       }
