@@ -40,6 +40,16 @@ while True:
     try:
         buff += client.recv(1024).decode()
 
+        if "\n" in buff:
+            print("got new line in output")
+            parts = buff.split("\n")
+            json_str = parts.pop(0)
+            buff = "\n".join(parts)
+
+            response_data = json.loads(buff)
+            for line in response_data["logs"]:
+                print(line)
+
         response_data = json.loads(buff)
 
         for line in response_data["logs"]:
