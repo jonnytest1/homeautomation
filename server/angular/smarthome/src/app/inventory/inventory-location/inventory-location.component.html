@@ -40,7 +40,7 @@
           }
         </select>
         @if (location.parent) {
-          <a routerLink="../{{ location.parent.id }}"
+          <a routerLink="../{{ location.parent.id }}" title="go up"
             ><mat-icon>open_in_new</mat-icon></a
           >
         }
@@ -49,11 +49,10 @@
     }
   </div>
 }
-<h5>items:</h5>
 @if (items$ | async; as items) {
   <div>
     @if (items.length) {
-      <h5>items</h5>
+      <h5>items:</h5>
     }
     @for (item of items; track item) {
       <div>

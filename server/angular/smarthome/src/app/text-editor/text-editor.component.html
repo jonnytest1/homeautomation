@@ -1,0 +1,13 @@
+<!-- [innerText]="item.customdescription" -->
+
+<div
+  contenteditable="true"
+  name="customdescription"
+  #textref
+  autosaving
+  (input)="onContentInput(textref)"
+  (blur)="onBlur(textref)"
+  (click)="onClick($event)"
+  (paste)="onPaste($event)"
+  style="min-height: 80px; border: 1px solid #ccc; padding: 6px"
+></div>

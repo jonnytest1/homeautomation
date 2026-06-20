@@ -1,0 +1,5 @@
+div[contenteditable] {
+  ::ng-deep a {
+    cursor: pointer !important;
+  }
+}

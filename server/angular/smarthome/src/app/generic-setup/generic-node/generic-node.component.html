@@ -44,8 +44,9 @@
         @if (node?.node?.parameters?.name) {
           <span class="nodename">{{ node?.node?.parameters?.name }} - </span>
         }
-        @if (node?.node?.runtimeContext?.info) {
-          <span>{{ node?.node?.runtimeContext?.info }}</span>
+        @let info = node?.node?.runtimeContext?.info;
+        @if (info) {
+          <span>{{ replaceTemplates(info) }}</span>
         }
       </div>
       @if ((activity$ | async)?.output; as output) {

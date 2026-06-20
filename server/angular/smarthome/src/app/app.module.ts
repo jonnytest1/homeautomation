@@ -35,7 +35,6 @@ import { environment } from '../environments/environment';
 import { provideFirebaseApp, getApp, initializeApp } from '@angular/fire/app';
 import { provideMessaging, getMessaging } from '@angular/fire/messaging';
 import { AutosavingDirective, ROOT_AUTOSAVE_PATH } from './autosaving/autosaving';
-import { AutosavingDirectiveProviderDirective } from './autosaving/autosaveProvider';
 
 export class MyHammerConfig extends HammerGestureConfig {
   overrides = <any>{
@@ -50,7 +49,7 @@ export class MyHammerConfig extends HammerGestureConfig {
     TimersComponent,
     TodoComponent,
     IframeComponent,
-    InputsComponent,
+    InputsComponent
   ],
   imports: [
     BrowserModule, HammerModule,

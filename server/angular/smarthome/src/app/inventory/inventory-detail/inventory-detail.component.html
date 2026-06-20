@@ -8,15 +8,31 @@
     dataRefName="itemRef"
     resource="item"
   >
-    <textarea
+    <!--   <div
+  contenteditable="true"
+  name="customdescription"
+  #textref
+  autosaving
+  (input)="onContentInput(textref)"
+  (blur)="onContentInput(textref)"
+  [innerText]="item.customdescription"
+  (paste)="onPaste($event)"
+  style="min-height: 80px; border: 1px solid #ccc; padding: 6px;"
+
+
+  
       (ngModelChange)="resizeTextArea(textref)"
-      (onAdded)="resizeTextArea(textref)"
+></div>
+
+<br /> -->
+    <app-text-editor
       #textref
+      autosaving
       name="customdescription"
       [(ngModel)]="item.customdescription"
-      autosaving
-      >{{ item.customdescription }}</textarea
-    ><br />
+    >
+    </app-text-editor>
+    <br />
   </form>
   <img [src]="item.orderImageSrc" style="max-height: 500px" />
   <br />

@@ -12,6 +12,7 @@ import { Store } from '@ngrx/store';
 import { selectNode } from '../store/selectors';
 import { StoreService } from '../store/store-service';
 import { MBDagOverDirective, MBDragEndDirective, MBDragLeaveDirective, MBDragStartDirective, MBDropDirective, type MBDragEvent } from '../../utils/directive/drag-start.directive';
+import { TimerParser } from "../../utils/time-parser"
 const dataHandler = new DropDataHandler<DropData>()
 @Component({
   selector: 'app-generic-node',
@@ -186,4 +187,18 @@ export class GenericNodeComponent implements OnChanges, AfterViewInit, OnDestroy
 
     return time > (Date.now() - (1000 * 2))
   }
+
+  replaceTemplates(info: string) {
+    return info
+      .replace(/countdown:(\d*)::/, (match, endTsMillis) => {
+        const ms = endTsMillis - Date.now()
+        if (ms < 0) {
+          return "0"
+        }
+        return TimerParser.msToTime(ms, TimerParser.formats.ultrashort)
+
+      })
+  }
+
+
 }

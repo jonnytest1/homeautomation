@@ -9,6 +9,7 @@ import { getProductId } from '../inventory-util';
 import { AutosavingDirectiveProviderDirective } from '../../autosaving/autosaveProvider';
 import { AutosavingDirective } from '../../autosaving/autosaving';
 import { FormsModule } from '@angular/forms';
+import { TextEditorComponent } from '../../text-editor/text-editor.component';
 @Directive({
   selector: '[onAdded]', standalone: true
 })
@@ -27,7 +28,7 @@ export class OnAddedDirective implements AfterViewInit {
   imports: [CommonModule, LocationComponent,
     FormsModule,
     AutosavingDirective, OnAddedDirective,
-    AutosavingDirectiveProviderDirective],
+    AutosavingDirectiveProviderDirective, TextEditorComponent],
   standalone: true
 })
 export class InventoryDetailComponent implements OnInit {
@@ -51,17 +52,6 @@ export class InventoryDetailComponent implements OnInit {
   }
 
   ngOnInit() {
-  }
-
-
-  resizeTextArea(textarea: HTMLTextAreaElement) {
-    textarea.style.height = 'auto';
-    textarea.style.width = 'auto';
-
-    const maxWidth = window.innerWidth - 200
-
-    textarea.style.height = textarea.scrollHeight + 10 + 'px';
-    textarea.style.width = Math.min(textarea.scrollWidth + 10, maxWidth) + 'px';
   }
 
 }

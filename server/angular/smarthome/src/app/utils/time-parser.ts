@@ -1,7 +1,23 @@
 import type { TimerFe } from '../settings/interfaces';
 
+
+interface TimeParseOpts {
+  hoursLabel?: string
+  minutesLabel?: string
+}
+
+
+
 export class TimerParser {
-  static msToTime(duration: number) {
+
+  static readonly formats = {
+    "ultrashort": {
+      hoursLabel: "h",
+      minutesLabel: "m"
+    } as TimeParseOpts
+  }
+
+  static msToTime(duration: number, opts: TimeParseOpts = {}) {
     const seconds = Math.floor((duration / 1000) % 60);
     const minutes = Math.floor((duration / (1000 * 60)) % 60);
     const hours = Math.floor((duration / (1000 * 60 * 60)) % 24);
@@ -10,7 +26,12 @@ export class TimerParser {
     const strminutes = (minutes < 10) ? '0' + minutes : minutes;
     const strseconds = (seconds < 10) ? '0' + seconds : seconds;
 
-    return `${strhours}:${strminutes}:${strseconds}`;
+    let hoursLabel = opts.hoursLabel ?? ":"
+    let minutesLabel = opts.minutesLabel ?? ":"
+
+
+
+    return `${strhours}${hoursLabel}${strminutes}${minutesLabel}${strseconds}`;
   }
 
 
@@ -39,18 +60,32 @@ export class TimerParser {
     } else {
       const evt = timerData.parsedArguments[1]
       if (evt && "context" in evt) {
+        const nameParts: Array<string> = []
+
+
         const ctx = evt.context
         if (ctx && typeof ctx == "object" && "device" in ctx) {
           const dev = ctx.device
           if (dev && typeof dev == "object" && "friendlyName" in dev) {
             const fn = dev.friendlyName
             if (fn && typeof fn == "string") {
-              subTitleArray.push(fn)
+              nameParts.push(fn)
             }
 
           }
         }
+        if ("params" in evt) {
+          const params = evt.params
+          if (params && typeof params == "object" && "name" in params) {
+            const name = params.name
+            if (name && typeof name == "string") {
+              nameParts.push(name)
+            }
+          }
+        }
+        subTitleArray.push(nameParts.join(" / "))
       }
+
     }
     subTitleArray.push(
       `${transformer?.name ?? ''}`

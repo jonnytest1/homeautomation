@@ -1,7 +1,11 @@
-.parent{
+.parent {
   display: flex;
+
+  select {
+    max-width: calc(100vw - 75px);
+  }
 }
 
-input{
+input {
   width: 32px;
 }
