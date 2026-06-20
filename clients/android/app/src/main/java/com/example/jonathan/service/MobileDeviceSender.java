@@ -3,6 +3,8 @@ package com.example.jonathan.service;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
+import android.net.wifi.WifiInfo;
+import android.net.wifi.WifiManager;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
@@ -20,6 +22,8 @@ import java.net.URL;
 import java.time.Instant;
 
 import static com.example.jonathan.props.Environment.BACKEND_URL;
+import static com.example.jonathan.props.Environment.INTERNAL_WIFI;
+import static com.example.jonathan.props.Environment.PUBLIC_BACKEND_URL;
 import static com.example.jonathan.service.registration.Registration.BARCODE_SENDER_DEVICE_KEY;
 
 public class MobileDeviceSender implements Runnable {
@@ -66,10 +70,42 @@ public class MobileDeviceSender implements Runnable {
     @Override
     public void run() {
         Looper.prepare();
+
+        String backendBase = PUBLIC_BACKEND_URL;
+        boolean needsAuth = true;
+        WifiManager wifiManager = (WifiManager) applicationContext.getSystemService(Context.WIFI_SERVICE);
+
+        if (wifiManager != null && wifiManager.isWifiEnabled()) {
+            // Get the current Wi-Fi connection
+            WifiInfo wifiInfo = wifiManager.getConnectionInfo();
+
+            if (wifiInfo.getSSID().equals(INTERNAL_WIFI)) {
+                backendBase = BACKEND_URL;
+                needsAuth = false;
+            }
+        }
+        final String base = backendBase;
+        if (needsAuth) {
+            OAuthService.getAccessToken(applicationContext).thenAccept(token -> this.doRequest(base, token));
+            return;
+        }
         //String decoded = Base64.getEncoder().encodeToString(jsonObject.toString().getBytes());
+        doRequest(backendBase, null);
+    }
+
+    private void doRequest(String backendBase, String token) {
         try {
-            CustomResponse response = new CustomHttp().target(BACKEND_URL + "/rest/sender/trigger")
-                    .request().post(content.toString(), "application/json");
+            CustomHttp request = new CustomHttp()
+                    .target(backendBase + "/rest/sender/trigger");
+
+            if (token != null) {
+                request = request
+                        .header("Cookie", "Authorization=" + token);
+            }
+            CustomResponse response = request
+
+                    .request()
+                    .post(content.toString(), "application/json");
             final JsonNode responseNode = response.getJsonContent();
 
             if (type == "url") {

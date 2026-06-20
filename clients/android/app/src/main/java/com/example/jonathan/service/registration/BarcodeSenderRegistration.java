@@ -5,6 +5,7 @@ import android.util.Log;
 import com.example.jonathan.http.CustomHttp;
 import com.example.jonathan.http.CustomResponse;
 import com.example.jonathan.service.CLogging;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.node.TextNode;
@@ -22,26 +23,78 @@ public class BarcodeSenderRegistration implements Callable<Void> {
     private static final String TAG = "BarcodeSenderRegistration";
 
 
+    private ObjectNode urlSchema() throws JsonProcessingException {
+        return (ObjectNode) new ObjectMapper().readTree("""
+                    {
+                      "required": ["type","url"],
+                      "properties": {
+                        "type": { 
+                            "type": "string",
+                            "enum": ["url"] 
+                        },
+                        "url": { 
+                            "type": "string"
+                        }
+                      },
+                      "additionalProperties":false
+                    }
+                """);
+    }
+
+    private ObjectNode barcodeSchema() throws JsonProcessingException {
+        return (ObjectNode) new ObjectMapper().readTree("""
+                    {
+                      "required": ["type","message"],
+                      "properties": {
+                        "type": { 
+                            "type": "string",
+                            "enum": ["barcode"] 
+                        },
+                        "message": { 
+                            "type": "string"
+                        }
+                      },
+                      "additionalProperties":false
+                    }
+                """);
+    }
+
+    private ObjectNode getSchema() throws JsonProcessingException {
+        ObjectMapper objectMapper = new ObjectMapper();
+        ObjectNode jsonNode = objectMapper //
+                .createObjectNode();
+
+        jsonNode.put("type", "object");
+        jsonNode.set("oneOf", objectMapper.createArrayNode()
+                .add(urlSchema())
+                .add(barcodeSchema())
+        );
+        return jsonNode;
+    }
+
+
     @Override
     public Void call() throws Exception {
-        Log.d(TAG,"registering device");
+        Log.d(TAG, "registering device");
         ObjectNode jsonNode = new ObjectMapper() //
                 .createObjectNode();
-        jsonNode.set("deviceKey",new TextNode(BARCODE_SENDER_DEVICE_KEY));
-        jsonNode.set("name",new TextNode("Mobile Sender"));
-        jsonNode.put("connectionKey","message");
-        jsonNode.set("description",new TextNode("Sender auf dem Smartphone"));
-        CustomResponse postResponse=new CustomHttp().target(BACKEND_URL+"/rest/sender")
+        jsonNode.set("deviceKey", new TextNode(BARCODE_SENDER_DEVICE_KEY));
+        jsonNode.set("name", new TextNode("Mobile Sender"));
+        jsonNode.put("connectionKey", "message");
+        jsonNode.set("description", new TextNode("Sender auf dem Smartphone"));
+
+        jsonNode.put("schema", getSchema().toString());
+        CustomResponse postResponse = new CustomHttp().target(BACKEND_URL + "/rest/sender")
                 .request() //
-                .post(jsonNode.toString(),"application/json");
-        if (postResponse.getResponseCode() == 200||postResponse.getResponseCode() == 409) {
-            SENDER_ID= new ObjectMapper().readTree(postResponse.getContent()).get("id").asInt();
+                .post(jsonNode.toString(), "application/json");
+        if (postResponse.getResponseCode() == 200 || postResponse.getResponseCode() == 409) {
+            SENDER_ID = new ObjectMapper().readTree(postResponse.getContent()).get("id").asInt();
         } else {
-            Log.e(TAG,"failed creating receiver"+"\n"+postResponse.getResponseCode()+"\n"+postResponse.getContent());
+            Log.e(TAG, "failed creating receiver" + "\n" + postResponse.getResponseCode() + "\n" + postResponse.getContent());
             CLogging.log(CLogging.LogLevel.ERROR, Map.of(
-                    "message","failed creating receiver",
-                    "responsecode",postResponse.getResponseCode()+"",
-                    "rcontent",postResponse.getContent()));
+                    "message", "failed creating receiver",
+                    "responsecode", postResponse.getResponseCode() + "",
+                    "rcontent", postResponse.getContent()));
         }
         return null;
     }
