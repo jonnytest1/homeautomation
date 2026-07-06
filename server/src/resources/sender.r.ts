@@ -144,10 +144,7 @@ export class SenderResource {
       return;
     }
     const sender = new Sender();
-    addArrayItem(sender, "transformation", {
-      db: sharedPool,
-      items: [new Transformation()]
-    })
+    sender.transformation.push(new Transformation())
     await assign(sender, req.body);
     await save(sender);
     FrontendWebsocket.updateSenders();
