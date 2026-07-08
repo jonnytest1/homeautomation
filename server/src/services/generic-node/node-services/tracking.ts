@@ -76,14 +76,16 @@ addTypeImpl({
     if (typeof payload == "object" && payload) {
       const payloadObj = payload as Record<string, number>
       for (const key in payloadObj) {
-        evts.push(TrackingEvent.create({
-          payload: payloadObj[key]
-        }, {
-          uuid: node.uuid,
-          parameters: {
-            name: `${node.parameters?.name ?? ''}-${key.trim()}`
-          }
-        }))
+        if (typeof payloadObj[key] == "number") {
+          evts.push(TrackingEvent.create({
+            payload: payloadObj[key]
+          }, {
+            uuid: node.uuid,
+            parameters: {
+              name: `${node.parameters?.name ?? ''}-${key.trim()}`
+            }
+          }))
+        }
       }
 
     } else {
