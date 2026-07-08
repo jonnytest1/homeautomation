@@ -3,6 +3,8 @@ import { logKibana } from '../../../util/log';
 import { addTypeImpl } from '../generic-node-service';
 import { mainTypeName } from '../json-schema-type-util';
 import { DAYS, HOUR, MINUTE } from '../../../constant';
+import { genericNodeDataStore } from '../generic-store/reference';
+import { backendToFrontendStoreActions } from '../generic-store/actions';
 import { PsqlBase, save } from 'hibernatets';
 
 
@@ -107,22 +109,26 @@ addTypeImpl({
   },
   nodeChanged(node, prevNode) {
     node.runtimeContext ??= {}
-    node.runtimeContext.inputSchema = {
-      jsonSchema: {
-        oneOf: [{
-          type: "number"
-        },
-        {
-          type: "object",
-          minProperties: 1,
-          additionalProperties: {
+
+    genericNodeDataStore.dispatch(backendToFrontendStoreActions.updateInputSchema({
+      nodeUuid: node.uuid,
+      schema: {
+        dts: `export type ${mainTypeName}=number|Record<string,number>`,
+        jsonSchema: {
+          anyOf: [{
             type: "number"
-          }
-        }]
-      },
-      dts: `export type ${mainTypeName}=number|Record<string,number>`,
-      mainTypeName: mainTypeName
-    }
+          },
+          {
+            type: "object",
+            minProperties: 1,
+            additionalProperties: {
+              type: "number"
+            }
+          }]
+        },
+        mainTypeName: mainTypeName
+      }
+    }))
   },
   unload(nodeas, globals) {
     trackingPool.end()
