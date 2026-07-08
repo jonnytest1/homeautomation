@@ -92,7 +92,7 @@ export class INventoryResource {
           existing.type = order.type
 
         }
-        if (order.orderStatus) {
+        if (order.orderStatus && existing.orderStatus !== "storniert") {
           existing.orderStatus = order.orderStatus
         }
 

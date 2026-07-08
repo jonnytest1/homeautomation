@@ -69,7 +69,25 @@ addTypeImpl({
     }
   },
   process(node, data, callbacks) {
-    const evt = TrackingEvent.create(data, node)
+    const evts: Array<TrackingEvent> = []
+    const payload = data.payload
+    if (typeof payload == "object" && payload) {
+      const payloadObj = payload as Record<string, number>
+      for (const key in payloadObj) {
+        evts.push(TrackingEvent.create({
+          payload: payloadObj[key]
+        }, {
+          uuid: node.uuid,
+          parameters: {
+            name: `${node.parameters?.name ?? ''}-${key.trim()}`
+          }
+        }))
+      }
+
+    } else {
+      evts.push(TrackingEvent.create(data, node))
+    }
+
     console.log("add tracking event for " + node.parameters?.name)
     if (activeTrackingMap[node.uuid]) {
       clearTimeout(activeTrackingMap[node.uuid])
@@ -84,14 +102,25 @@ addTypeImpl({
       })
     }, timeout)
 
-    trackingEventBuffer.push(evt)
+    trackingEventBuffer.push(...evts)
     return
   },
   nodeChanged(node, prevNode) {
     node.runtimeContext ??= {}
     node.runtimeContext.inputSchema = {
-      jsonSchema: { type: "number" },
-      dts: `export type Main=number`,
+      jsonSchema: {
+        oneOf: [{
+          type: "number"
+        },
+        {
+          type: "object",
+          minProperties: 1,
+          additionalProperties: {
+            type: "number"
+          }
+        }]
+      },
+      dts: `export type ${mainTypeName}=number|Record<string,number>`,
       mainTypeName: mainTypeName
     }
   },

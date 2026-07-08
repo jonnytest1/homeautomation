@@ -328,6 +328,7 @@ function cacheNodeScript(node: ElementNode<NodeDefToType<{ code: { type: "monaco
         };
       }
     } catch (e) {
+
       debugger
     }
   }

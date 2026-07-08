@@ -1,6 +1,3 @@
-import type { NodeEvent } from '../node-event';
-import type { EvalNode } from '../typing/generic-node-type';
-import type { NodeDefOptinos } from '../typing/node-options';
 import { column, primary, table } from 'hibernatets';
 
 @table()
@@ -24,23 +21,34 @@ export class TrackingEvent {
   @column({ type: "date" })
   time_col: Date
 
-  static create(evnt: NodeEvent<unknown, unknown>, node: EvalNode<NodeDefOptinos, any>) {
+  static create(evnt: {
+    payload: unknown
+    context?: Record<string, unknown>
+  }, node: {
+    uuid: string,
+    parameters?: {
+      name?: string
+    }
+  }) {
     const evt = new TrackingEvent()
     evt.time_col = new Date()
     evt.nodeUuid = node.uuid
     if (evnt.payload === undefined) {
       throw new Error("payload undefined")
     }
+
+
+
     evt.payload = JSON.stringify(evnt.payload)
 
     evt.nodeName = node.parameters?.name ?? '';
 
-    const context = {}
+    const context: Record<string, string | number | boolean> = {}
     if (typeof evnt.context == "object") {
       for (const key in evnt.context) {
-        const varaibleType = typeof evnt.context[key];
-        if (varaibleType == "string" || varaibleType == "number" || varaibleType == "boolean") {
-          context[key] = evnt.context[key]
+        const contextValue = evnt.context[key];
+        if (typeof contextValue == "string" || typeof contextValue == "number" || typeof contextValue == "boolean") {
+          context[key] = contextValue
         }
       }
     }

@@ -485,37 +485,43 @@ export function emitEvent(type: string, data: NodeEventData) {
   if (environment.SMARTHOME_DISABLED) {
     return
   }
+  return new Promise<void>((res, err) => {
+    data.context.eventIndex = eventIndex++
+    const nodes = genericNodeDataStore.getOnce(selectNodesOfType(type))
+    nodes.forEach(node => {
+      const event = createNodeEvent(data)
 
-  data.context.eventIndex = eventIndex++
-  const nodes = genericNodeDataStore.getOnce(selectNodesOfType(type))
-  nodes.forEach(node => {
-    const event = createNodeEvent(data)
+      const start = Date.now()
 
-    const start = Date.now()
+      const trace = defaultCallTrace(node, "emitEvent call");
+      processInput({
+        node: node,
+        nodeinput: 0,
+        data: event
+      }, trace)
+        .then(() => {
+          res()
+          const end = Date.now()
 
-    const trace = defaultCallTrace(node, "emitEvent call");
-    processInput({
-      node: node,
-      nodeinput: 0,
-      data: event
-    }, trace).then(() => {
-      const end = Date.now()
+          const duration = end - start;
+          if (duration > 4000 || trace.logIt) {
+            logKibana(trace.logIt ? "ERROR" : "WARN", {
+              message: "handled event",
+              type,
+              context: JSON.stringify(data.context),
+              start,
+              end,
+              duration: duration,
+              trace
+            })
+          }
 
-      const duration = end - start;
-      if (duration > 4000 || trace.logIt) {
-        logKibana(trace.logIt ? "ERROR" : "WARN", {
-          message: "handled event",
-          type,
-          context: JSON.stringify(data.context),
-          start,
-          end,
-          duration: duration,
-          trace
+        }).catch(e => {
+          err(e)
         })
-      }
-
     })
   })
+
 }
 
 export const withSideEffects = true

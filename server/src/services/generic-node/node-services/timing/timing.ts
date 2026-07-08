@@ -9,7 +9,6 @@ import { updateRuntimeParameter } from '../../element-node-fnc';
 import { createNodeEvent } from '../../generic-store/node-event-factory';
 import { genericNodeDataStore } from '../../generic-store/reference';
 import { backendToFrontendStoreActions } from '../../generic-store/actions';
-import { convertTimeDiff } from '../../../../util/time';
 import { selectNodeByUuid } from '../../generic-store/selectors';
 import { Timer } from '../../../../models/timer';
 import type { NodeEventData } from '../../typing/node-event-data';
@@ -49,7 +48,10 @@ function startRuntimeInterval(timer: Timer) {
     const end = timer.endtimestamp
 
     const node = genericNodeDataStore.getOnce(selectNodeByUuid(evt.node))
-
+    genericNodeDataStore.dispatch(backendToFrontendStoreActions.updateRuntimeInfo({
+      nodeUuid: evt.node,
+      info: `${node.parameters?.type} - countdown:${end}::`
+    }));
     const intervalId = setInterval(() => {
       const diff = end - Date.now();
       if (diff < 0) {
@@ -58,11 +60,6 @@ function startRuntimeInterval(timer: Timer) {
         return;
       }
 
-      const diffStr = convertTimeDiff({ millis: diff });
-      genericNodeDataStore.dispatch(backendToFrontendStoreActions.updateRuntimeInfo({
-        nodeUuid: evt.node,
-        info: `${node.parameters?.type} - ${diffStr}`
-      }));
     }, 800);
     timerUpdateMap[evt.node] = {
       intervalRef: intervalId
