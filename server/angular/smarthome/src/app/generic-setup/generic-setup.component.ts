@@ -31,6 +31,7 @@ import { MBDagOverDirective, MBDragStartDirective, MBDropDirective, type MBDragE
 import { MatIconModule } from '@angular/material/icon';
 import { TouchModeService } from './touchmode-service';
 import { ResolvablePromise } from '../utils/resolvable-promise';
+import { Title } from '@angular/platform-browser';
 
 
 const dataHandler = new DropDataHandler<DropData>()
@@ -139,6 +140,7 @@ export class GenericSetupComponent implements OnInit {
 
   constructor(public connections: GenericNodesDataService, private router: Router, active: ActivatedRoute, private store: Store, private clipboardService: ClipboardService) {
     inject(TouchModeService)
+    inject(Title).setTitle("Smarthome - GenericSetup")
     connections.loadGenericData();
     this.storeNodeData$.subscribe(this.storeNodeDataBeh$)
     combineLatest([
@@ -289,9 +291,10 @@ export class GenericSetupComponent implements OnInit {
   }
   async doubleClick(node: ElementNode) {
     if (node.type === "view") {
+
       await this.router.navigate([], {
         queryParams: {
-          view: node.uuid,
+          view: node.parameters?.target ?? node.uuid,
           active: null
         },
         //single click-setActiveNode creates history entry so this replaces it

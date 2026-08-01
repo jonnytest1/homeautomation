@@ -7,8 +7,9 @@ import { AppComponent } from '../app.component';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import type { AfterViewInit, OnDestroy, OnInit } from '@angular/core';
-import { ChangeDetectorRef, ElementRef, Component, ViewChild } from '@angular/core';
+import { ChangeDetectorRef, ElementRef, Component, ViewChild, inject } from '@angular/core';
 import { filter, first } from 'rxjs/operators';
+import { Title } from '@angular/platform-browser';
 
 @Component({
   selector: 'app-settings',
@@ -34,7 +35,7 @@ export class SettingsComponent implements OnInit, AfterViewInit, OnDestroy {
     private activeRoute: ActivatedRoute,
     public service: SettingsService,
     private cdr: ChangeDetectorRef) {
-
+    inject(Title).setTitle("Smarthome - Setup")
     this.bottomSheetHandler = new BottomSheetHandler(this, this.router, this.activeRoute, snack);
     this.connectionHandler = new ConnectionHandler(service, data => {
       this.bottomSheetHandler.navigate('connection', data.con.id);

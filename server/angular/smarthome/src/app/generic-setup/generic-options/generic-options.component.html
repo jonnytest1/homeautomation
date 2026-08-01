@@ -38,7 +38,10 @@
           <button class="icon">
             <mat-icon
               routerLink="."
-              [queryParams]="{ view: node.uuid, active: null }"
+              [queryParams]="{
+                view: node.parameters?.target ?? node.uuid,
+                active: null,
+              }"
               queryParamsHandling="merge"
               replaceUrl="true"
               >launch</mat-icon

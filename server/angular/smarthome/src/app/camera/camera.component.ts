@@ -1,8 +1,9 @@
 import type { AfterViewInit, OnDestroy, OnInit } from '@angular/core';
-import { Component, ElementRef, ViewChild } from '@angular/core';
+import { Component, ElementRef, inject, ViewChild } from '@angular/core';
 import type flv from 'flv.js';
 import { v4 as uuid } from 'uuid';
 import { BrowserToRtmpClient } from "@api.video/browser-to-rtmp-client"
+import { Title } from '@angular/platform-browser';
 
 
 
@@ -30,7 +31,7 @@ export class CameraComponent implements AfterViewInit, OnInit, OnDestroy {
 
 
   constructor() {
-    //
+    inject(Title).setTitle("Smarthome - Camera")
   }
 
 

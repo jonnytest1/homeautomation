@@ -1,7 +1,9 @@
-import { Component, inject, Input, OnInit } from '@angular/core';
+import { Component, inject, Input, OnInit, TemplateRef } from '@angular/core';
 import { MatBottomSheet } from '@angular/material/bottom-sheet';
 import { MatIconModule } from '@angular/material/icon';
 import { InventoryService } from '../inventory.service';
+import type { LcoationFeCreateUpdate, LocationFe } from '../../settings/interfaces';
+import type { NgTemplateOutlet } from '@angular/common';
 
 @Component({
   selector: 'app-add-location',
@@ -16,22 +18,22 @@ export class AddLocationComponent implements OnInit {
   inventoryService = inject(InventoryService)
 
   @Input()
-  parentId?: number
+  parent?: LocationFe
 
   constructor() {}
 
   ngOnInit() {
   }
-  newLocation(newloc) {
+  newLocation(newloc: TemplateRef<unknown>) {
     this.bottomsheet.open(newloc)
   }
   createNewLcoation(event: SubmitEvent) {
     event.stopPropagation()
     event.preventDefault()
 
-    const lcoation: unknown = Object.fromEntries(new FormData(event.target as HTMLFormElement).entries())
-    lcoation["parent"] = this.parentId ?? -1;
-    this.inventoryService.updateLocation(lcoation)
+    const lcoation: LcoationFeCreateUpdate = Object.fromEntries(new FormData(event.target as HTMLFormElement).entries())
+    lcoation["parent"] = this.parent.id ?? -1;
+    this.inventoryService.createUpdateLocation(lcoation)
     this.bottomsheet.dismiss()
   }
 }

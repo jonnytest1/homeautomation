@@ -10,6 +10,7 @@
     "declaration": false,
     "module": "es2020",
     "moduleResolution": "node",
+    "skipLibCheck": true,
     "strictNullChecks": false,
     "emitDecoratorMetadata": true,
     "esModuleInterop": true,

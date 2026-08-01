@@ -3,7 +3,7 @@ import { inject, Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 import { environment } from '../../environments/environment';
 
-import type { ItemFe, LocationFe } from '../settings/interfaces';
+import type { ItemFe, LcoationFeCreateUpdate, LocationFe } from '../settings/interfaces';
 
 
 
@@ -46,7 +46,7 @@ export class InventoryService {
     }).subscribe()
   }
 
-  updateLocation(item: LocationFe) {
+  createUpdateLocation(item: LcoationFeCreateUpdate) {
     return this.httpClient.post<LocationFe>(`${environment.prefixPath}rest/inventory/location/new`, item).subscribe(loc => {
       this.locations$.next([...this.locations$.value, loc])
       this.loadLocations()

@@ -44,7 +44,7 @@
             ><mat-icon>open_in_new</mat-icon></a
           >
         }
-        <app-add-location [parentId]="location.id"></app-add-location>
+        <app-add-location [parent]="location"></app-add-location>
       </div>
     }
   </div>
@@ -56,8 +56,11 @@
     }
     @for (item of items; track item) {
       <div>
-        <img class="orderImage" [src]="item.orderImageSrc" />
-        <a href="/inventory/item/{{ item.id }}">{{ item.description }}</a>
+        <a href="/inventory/item/{{ item.id }}">
+          <img class="orderImage" [src]="item.orderImageSrc" />{{
+            item.description
+          }}
+        </a>
       </div>
     }
   </div>

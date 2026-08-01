@@ -1,5 +1,5 @@
 import type { OnInit } from '@angular/core';
-import { HostListener, Component, Input } from '@angular/core';
+import { HostListener, Component, Input, inject } from '@angular/core';
 import { ButtonComponent } from './button/button.component';
 import { CommonModule } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
@@ -22,6 +22,7 @@ import { Observable, combineLatest } from 'rxjs';
 import { ActionTemplateComponent } from './action-template/action-template.component';
 import { ShortcutReceiver, type ShortcutAction } from './shortcut-types';
 import { LongPressDirective } from '../utils/directive/longpress-directive';
+import { Title } from '@angular/platform-browser';
 
 
 
@@ -87,7 +88,7 @@ export class ShortcutComponent implements OnInit {
       })
     )
   constructor(private settingsService: SettingsService, private bottomSheet: MatBottomSheet, private genData: GenericNodesDataService) {
-
+    inject(Title).setTitle("Smarthome - Shortcuts")
     genData.loadActionTriggers()
   }
 

@@ -240,18 +240,20 @@ addTypeImpl({
               type: "number"
             },
             payload: {
-
+              type: "object"
             }
           },
           required: ["delay"],
           additionalProperties: false
         }
-        node.runtimeContext.inputSchema = {
-          jsonSchema: jsonSchema,
-          mainTypeName: mainTypeName,
-          dts: await generateDtsFromSchema(jsonSchema, `${node.type} -${node.uuid} -node change`)
-        }
-
+        genericNodeDataStore.dispatch(backendToFrontendStoreActions.updateInputSchema({
+          nodeUuid: node.uuid,
+          schema: {
+            jsonSchema: jsonSchema,
+            mainTypeName: mainTypeName,
+            dts: await generateDtsFromSchema(jsonSchema, `${node.type} -${node.uuid} -node change`)
+          }
+        }))
       } else {
         updateRuntimeParameter(node, "delay", {
           type: "number"
@@ -292,11 +294,14 @@ addTypeImpl({
       }
 
       if (payloadProp && typeof payloadProp == "object") {
-        node.runtimeContext.outputSchema = {
-          jsonSchema: payloadProp,
-          mainTypeName: "Main",
-          dts: await generateDtsFromSchema(payloadProp, `${node.type} -${node.uuid} -con change`)
-        }
+        genericNodeDataStore.dispatch(backendToFrontendStoreActions.updateOutputSchema({
+          nodeUuid: node.uuid,
+          schema: {
+            jsonSchema: payloadProp,
+            mainTypeName: "Main",
+            dts: await generateDtsFromSchema(payloadProp, `${node.type} -${node.uuid} -con change`)
+          }
+        }))
       }
     } else {
       genericNodeDataStore.dispatch(backendToFrontendStoreActions.updateOutputSchema({

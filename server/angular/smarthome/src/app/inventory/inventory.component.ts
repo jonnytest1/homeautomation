@@ -19,6 +19,7 @@ import { getBackendBaseUrl } from '../backend';
 import type { TableItemFe } from './inventory-type';
 import { getProductId } from './inventory-util';
 import type { FrontendOrder, Item } from '../../../../../src/models/inventory/item';
+import { Title } from '@angular/platform-browser';
 
 @Component({
   selector: 'app-inventory',
@@ -30,6 +31,7 @@ import type { FrontendOrder, Item } from '../../../../../src/models/inventory/it
   ]
 })
 export class InventoryComponent implements OnInit, AfterViewInit {
+
   inventory$: Observable<Array<TableItemFe>>;
 
   keys: Array<string>
@@ -45,19 +47,43 @@ export class InventoryComponent implements OnInit, AfterViewInit {
   applySort = false
   getProductId = getProductId;
 
-  constructor(private dataService: SettingsService, private cdr: ChangeDetectorRef) {
-    this.dataSource.sortingDataAccessor = (data: TableItemFe, sortHeaderId: string): string => {
 
-      if (typeof data[sortHeaderId] === 'string') {
+
+  isPending(item: TableItemFe) {
+    return item.order?.orderStatus == "pending" && !item.location
+  }
+  pendingClick($event: MouseEvent, inv: Array<TableItemFe>) {
+    if ($event.ctrlKey) {
+      $event.preventDefault();
+
+      const urls = inv.filter(this.isPending)
+        .map(this.getTrackingLink);
+
+      urls.forEach(url => {
+        window.open(url);
+      });
+    }
+  }
+
+
+  constructor(private dataService: SettingsService, private cdr: ChangeDetectorRef, title: Title) {
+    title.setTitle("Smarthome - Inventory")
+    this.dataSource.sortingDataAccessor = (data: TableItemFe, sortHeaderId: string): string | number => {
+      if (this.isPending(data) && sortHeaderId === "location") {
+        return -2;
+      }
+      const dataRecord = data as Record<string, string | number>
+      const dataValue = dataRecord[sortHeaderId];
+      if (typeof dataValue === 'string') {
         const regexMatch = data?.highlightInfo?.value?.regexMatch;
         if (regexMatch) {
           const emotyStrings = regexMatch.reduce((col, entry) => col + (entry === "" ? 1 : 0), 0)
-          return new Array(emotyStrings).fill("_").join("") + data[sortHeaderId].toLocaleLowerCase()
+          return new Array(emotyStrings).fill(" ").join("") + dataValue.toLocaleLowerCase()
         }
-        return data[sortHeaderId].toLocaleLowerCase();
+        return dataValue.toLocaleLowerCase();
       }
 
-      return data[sortHeaderId];
+      return dataValue ?? 0;
     };
 
   }
@@ -101,6 +127,12 @@ export class InventoryComponent implements OnInit, AfterViewInit {
             column: "location"
           })
         }
+        if (data.order?.orderStatus == "pending" && !data.location) {
+          strs.push({
+            value: "pending",
+            column: "location"
+          })
+        }
         data.highlightInfo.next({
           ...data.highlightInfo.value,
           regexMatch: undefined
@@ -108,7 +140,7 @@ export class InventoryComponent implements OnInit, AfterViewInit {
         for (let str of strs) {
           if (typeof str == "string") {
             str = {
-              value: data[str],
+              value: data[str as keyof TableItemFe] as string,
               column: str
             }
           }
@@ -149,7 +181,11 @@ export class InventoryComponent implements OnInit, AfterViewInit {
   }
 
   getTrackingLink(item: ItemFe) {
-    return `https://www.amazon.de/gp/your-account/order-details/ref=dp_iou_view_order_details?ie=UTF8&orderID=${item.order.orderId}`
+    if (item.order.type == "amazon") {
+      return `https://www.amazon.de/gp/your-account/order-details/ref=dp_iou_view_order_details?ie=UTF8&orderID=${item.order.orderId}`
+    } else if (item.order.type == "aliexpress") {
+      return `https://www.aliexpress.com/p/order/detail.html?orderId=${item.order.orderId}`
+    }
   }
 
   setFilter(event: Event, items: Array<TableItemFe>) {

@@ -98,3 +98,5 @@ export type ReceiverFe = ConnectionFe["receiver"];
 
 export type ItemFe = FrontendProperties<Item>
 export type LocationFe = FrontendProperties<Location>
+
+export type LcoationFeCreateUpdate = LocationFe & { parent?: number }

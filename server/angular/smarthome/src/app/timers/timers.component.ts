@@ -1,9 +1,10 @@
 import type { AfterViewChecked, ElementRef, OnDestroy, OnInit, QueryList } from '@angular/core';
-import { ChangeDetectorRef, Component, HostListener, ViewChildren } from '@angular/core';
+import { ChangeDetectorRef, Component, HostListener, inject, ViewChildren } from '@angular/core';
 import { combineLatest, Subscription, timer } from 'rxjs';
 import type { SenderFe, TimerFe } from '../settings/interfaces';
 import { SettingsService } from '../settings.service';
 import { TimerParser } from '../utils/time-parser';
+import { Title } from '@angular/platform-browser';
 
 @Component({
   templateUrl: './timers.component.html',
@@ -30,7 +31,9 @@ export class TimersComponent implements OnInit, OnDestroy, AfterViewChecked {
   items: QueryList<ElementRef<HTMLElement>>
 
   constructor(private service: SettingsService,
-    private cdr: ChangeDetectorRef) {}
+    private cdr: ChangeDetectorRef) {
+    inject(Title).setTitle("Smarthome - Timers")
+  }
 
   @HostListener('window:resize')
   ngAfterViewChecked(): void {

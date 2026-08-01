@@ -1,11 +1,17 @@
-<button (click)="newLocation(newloc)"
-        title="new location">
+<button
+  (click)="newLocation(newloc)"
+  [title]="
+    parent?.description
+      ? 'new location in (' + parent.description + ')'
+      : 'new location'
+  "
+>
   <mat-icon>add</mat-icon>
 </button>
 
 <ng-template #newloc>
   <form (submit)="createNewLcoation($event)">
-    description: <input name="description">
+    description: <input name="description" />
 
     <button type="submit">submit</button>
   </form>

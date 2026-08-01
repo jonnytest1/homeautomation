@@ -80,7 +80,7 @@ export function validateJsonSchema(context: ValidationContext) {
           //target = schemaOption
           foundMatch = true
         } catch (e) {
-          errors.push(e)
+          errors.push(e as SchemaMatchingError)
         }
       }
 

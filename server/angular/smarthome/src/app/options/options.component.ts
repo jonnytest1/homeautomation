@@ -2,7 +2,7 @@ import type { Sound } from './interface ';
 import { OptionsService } from './options.service';
 import type { OnInit } from '@angular/core';
 import { ChangeDetectorRef, Component, inject } from '@angular/core';
-import { DomSanitizer } from '@angular/platform-browser';
+import { DomSanitizer, Title } from '@angular/platform-browser';
 import { FireBaseService } from '../foreground-firebase-service';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -30,6 +30,7 @@ export class OptionsComponent implements OnInit {
   constructor(private optionsService: OptionsService,
     private cdr: ChangeDetectorRef,
     private domSanitizer: DomSanitizer) {
+    inject(Title).setTitle("Smarthome - Options")
 
   }
 

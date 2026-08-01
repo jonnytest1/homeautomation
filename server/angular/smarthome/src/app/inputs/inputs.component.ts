@@ -1,11 +1,12 @@
 import type { OnDestroy, OnInit } from '@angular/core';
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { ReconnectingWebsocket } from '../utils/reconnecting-socket';
 import { environment } from '../../environments/environment';
 import { filter, map } from 'rxjs/operators';
 import type { Observable, OperatorFunction } from 'rxjs';
 import { Subject } from 'rxjs';
 import { ActivatedRoute } from '@angular/router';
+import { Title } from '@angular/platform-browser';
 
 
 export function delayAtLeast<T>(delay: number): OperatorFunction<T, T> {
@@ -45,7 +46,7 @@ export class InputsComponent implements OnInit, OnDestroy {
   )
 
   constructor() {
-
+    inject(Title).setTitle("Smarthome - Inputs")
 
   }
 

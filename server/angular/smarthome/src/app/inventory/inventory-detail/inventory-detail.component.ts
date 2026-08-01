@@ -1,7 +1,7 @@
 import { Component, Directive, EventEmitter, OnInit, Output, type AfterViewInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { SettingsService } from '../../settings.service';
-import { map, switchMap } from 'rxjs';
+import { filter, map, switchMap } from 'rxjs';
 import { CommonModule } from '@angular/common';
 import { InventoryService } from '../inventory.service';
 import { LocationComponent } from './location/location.component';
@@ -10,6 +10,8 @@ import { AutosavingDirectiveProviderDirective } from '../../autosaving/autosaveP
 import { AutosavingDirective } from '../../autosaving/autosaving';
 import { FormsModule } from '@angular/forms';
 import { TextEditorComponent } from '../../text-editor/text-editor.component';
+import { first } from 'rxjs/operators';
+import { Title } from '@angular/platform-browser';
 @Directive({
   selector: '[onAdded]', standalone: true
 })
@@ -47,11 +49,18 @@ export class InventoryDetailComponent implements OnInit {
 
   constructor(public activeRoute: ActivatedRoute,
     private readonly dataService: SettingsService,
-    public inventoryService: InventoryService) {
+    public inventoryService: InventoryService, title: Title) {
     inventoryService.loadLocations()
+    this.item$.pipe(
+      filter(l => !!l),
+      first()
+    ).subscribe(item => {
+      title.setTitle("Smarthome - Item - " + item.id + ": " + item.description)
+    })
   }
 
   ngOnInit() {
+
   }
 
 }

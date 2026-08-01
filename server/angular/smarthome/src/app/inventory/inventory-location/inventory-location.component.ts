@@ -1,6 +1,6 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
-import { filter, map, switchMap } from 'rxjs/operators';
+import { filter, first, map, switchMap } from 'rxjs/operators';
 import { SettingsService } from '../../settings.service';
 import { InventoryService } from '../inventory.service';
 import { CommonModule } from '@angular/common';
@@ -12,6 +12,7 @@ import { TextDisplayComponent, type EditingConfig } from '../../utils/text-displ
 import { InventoryItemChildrenComponent, type InventoryTreeData } from './inventory-item-children/inventory-item-children.component';
 import { combineLatest } from 'rxjs';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { Title } from '@angular/platform-browser';
 
 @Component({
   selector: 'app-inventory-location',
@@ -82,6 +83,8 @@ export class InventoryLocationComponent implements OnInit {
 
 
   public activeRoute = inject(ActivatedRoute)
+  private title = inject(Title)
+
   model: File
 
   constructor(private readonly dataService: SettingsService,
@@ -90,6 +93,13 @@ export class InventoryLocationComponent implements OnInit {
   }
 
   ngOnInit() {
+    this.location$.pipe(
+      filter(l => !!l),
+      first()
+    ).subscribe(loc => {
+      this.title.setTitle("Smarthome - Location - " + loc.id + ": " + loc.description)
+    })
+
   }
 
 

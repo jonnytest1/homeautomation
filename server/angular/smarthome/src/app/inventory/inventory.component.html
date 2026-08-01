@@ -72,8 +72,13 @@
       <ng-container matColumnDef="location">
         <th mat-header-cell mat-sort-header *matHeaderCellDef>Loc</th>
         <td mat-cell class="location" *matCellDef="let element">
-          @if (element.order?.orderStatus == "pending" && !element.location) {
-            <a [href]="getTrackingLink(element)" target="_blank">(pending)</a>
+          @if (isPending(element)) {
+            <a
+              [href]="getTrackingLink(element)"
+              target="_blank"
+              (click)="pendingClick($event,inventory)"
+              >(pending)</a
+            >
           } @else {
             <a [routerLink]="'location/' + element.location?.id">
               <app-regex-highlighted

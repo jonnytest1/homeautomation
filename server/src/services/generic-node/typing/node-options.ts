@@ -32,9 +32,13 @@ export type Select<T extends string = string> = {
   optionDisplayNames?: Array<string>
   multiple?: boolean
 }
-export type PlaceHolder = {
+
+
+declare const pInst: unique symbol
+export type PlaceHolder<T extends NodeOptionTypes = NodeOptionInstanceTypes> = {
   type: "placeholder",
   of: Exclude<NodeOptionTypes<string>["type"], "placeholder"> | Array<Exclude<NodeOptionTypes<string>["type"], "placeholder">> | "unknown"
+  [pInst]?: T
 }
 
 export type Frame = {
@@ -62,9 +66,12 @@ type Titled = {
 export type HiddenUnlessValue = {
   hideWithoutValue?: boolean
 }
-type PlaceholderType<T extends PlaceHolder> = T["of"] extends Array<infer U> ? U : T["of"] extends "unknown" ? unknown : T["of"]
+type PlaceholderType<T extends PlaceHolder<any>> = T["of"] extends Array<infer U> ? U : T["of"] extends "unknown" ? unknown : T["of"]
 
-export type NodeOptionTypes<Keys extends string = string> = (Select | Text | Code | PlaceHolder | Frame | NumberCfg | BooleanCfg | BtnCfg)
+
+
+export type NodeOptionInstanceTypes = Select | Text | Code | Frame | NumberCfg | BooleanCfg | BtnCfg
+export type NodeOptionTypes<Keys extends string = string> = (NodeOptionInstanceTypes | PlaceHolder)
   & Order
   & Invalidated<Keys>
   & Titled
@@ -73,8 +80,8 @@ export type NodeOptionTypes<Keys extends string = string> = (Select | Text | Cod
 export type NodeOptionTypeWithOptionalName = NodeOptionTypes & { name?: string }
 export type NodeOptionTypeWithName = NodeOptionTypes & { name: string }
 
-export type NodeDefOptinos = {
-  [name: string]: NodeOptionTypes
+export type NodeDefOptinos<K extends string = string> = {
+  [key in K]: NodeOptionTypes<K>
 }
 
 
@@ -95,9 +102,11 @@ type NodeDefType<T extends NodeOptionTypes<string>> =
 
 
 export type MapTypeToParam<T extends NodeOptionTypes<string>, Key extends string> =
-  T extends PlaceHolder
-  ? NodeDefType<NodeOptionTypes<string> & { type: PlaceholderType<T> }>
+  T extends PlaceHolder<infer U>
+  ? NodeOptionInstanceTypes extends U ? NodeDefType<NodeOptionTypes<string> & { type: PlaceholderType<T> }> : NodeDefType<U>
   : NodeDefType<T>
+
+
 
 export type NodeDefToType<N extends NodeDefOptinos> = {
   [key in keyof N]?: MapTypeToParam<N[key], key & string>

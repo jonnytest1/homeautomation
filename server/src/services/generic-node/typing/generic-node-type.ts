@@ -14,7 +14,6 @@ type DefaultProps = {
 export type EvalNode<Opts extends NodeDefOptinos, S> = ElementNode<NodeDefToType<Opts & DefaultProps>, NodeDefToRUntime<Opts & DefaultProps>, S>
 
 
-
 export type GenericSocketEvent = {
   type: string,
   ___reply: (evt) => void

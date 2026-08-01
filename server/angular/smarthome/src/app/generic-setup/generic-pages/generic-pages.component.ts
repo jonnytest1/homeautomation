@@ -7,6 +7,7 @@ import { ActivatedRoute, Router, RouterOutlet } from '@angular/router';
 import { first, map, switchMap } from 'rxjs/operators';
 import { FormsModule } from '@angular/forms';
 import { EMPTY } from 'rxjs';
+import { Title } from '@angular/platform-browser';
 
 @Component({
   selector: 'app-generic-pages',
@@ -28,6 +29,7 @@ export class GenericPagesComponent {
   nodeDefs = this.store.select(selectNodeDefs)
 
   constructor() {
+    inject(Title).setTitle("Smarthome - GenericPage")
     if (!this.active.firstChild) {
       this.nodeDefs.pipe(first()).subscribe(defs => {
         const nodeDef = Object.values(defs).find(v => !!v.page)

@@ -79,7 +79,8 @@ addTypeImpl({
         const payloadValue = payloadObj[key]
         if (typeof payloadValue == "number") {
           evts.push(TrackingEvent.create({
-            payload: payloadValue
+            payload: payloadValue,
+            context: data.context
           }, {
             uuid: node.uuid,
             parameters: {
@@ -141,6 +142,11 @@ addTypeImpl({
     if (archiveInterV) {
       clearInterval(archiveInterV)
     }
+
+    Object.values(activeTrackingMap)
+      .filter(t => !!t)
+      .forEach(clearTimeout)
+
   },
   initializeServer() {
     interval = setInterval(() => {

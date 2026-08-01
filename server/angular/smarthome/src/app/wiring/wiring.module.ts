@@ -25,7 +25,7 @@ function provideToken<T extends InjectionToken<unknown>>(token: T, value: T exte
     RouterModule.forChild([{
       pathMatch: "prefix",
       path: "",
-      component: WiringComponent,
+      component: WiringComponent, title: "Smarthome - Wiring"
     }])
   ],
   declarations: [],
