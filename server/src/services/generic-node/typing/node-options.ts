@@ -41,6 +41,12 @@ export type PlaceHolder<T extends NodeOptionTypes = NodeOptionInstanceTypes> = {
   [pInst]?: T
 }
 
+export function wrapPlaceholder<Of extends NodeOptionTypes>() {
+  return <T extends PlaceHolder<Of>>(p: T) => {
+    return p as T & PlaceHolder<Of>
+  }
+}
+
 export type Frame = {
   type: "iframe"
   document: string,
@@ -66,7 +72,11 @@ type Titled = {
 export type HiddenUnlessValue = {
   hideWithoutValue?: boolean
 }
-type PlaceholderType<T extends PlaceHolder<any>> = T["of"] extends Array<infer U> ? U : T["of"] extends "unknown" ? unknown : T["of"]
+export type PlaceholderType<T extends PlaceHolder<any>> = T["of"] extends Array<infer U>
+  ? U
+  : T["of"] extends "unknown"
+  ? unknown
+  : T["of"]
 
 
 
@@ -116,5 +126,10 @@ export type NodeDefToType<N extends NodeDefOptinos> = {
 
 
 export type NodeDefToRUntime<N extends NodeDefOptinos> = {
-  [key in keyof N]?: N[key] extends PlaceHolder ? NodeOptionTypes<string> & { type: PlaceholderType<N[key]> } : N[key]
+  [key in keyof N]?: N[key] extends PlaceHolder<infer S>
+  ? NodeOptionInstanceTypes extends S ?
+
+  (NodeOptionTypes<string> & { type: PlaceholderType<N[key]> })
+  : S
+  : N[key]
 }

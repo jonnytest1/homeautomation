@@ -14,22 +14,16 @@ type DefaultProps = {
 export type EvalNode<Opts extends NodeDefOptinos, S> = ElementNode<NodeDefToType<Opts & DefaultProps>, NodeDefToRUntime<Opts & DefaultProps>, S>
 
 
-export type GenericSocketEvent = {
-  type: string,
-  ___reply: (evt) => void
-}
+export type NullTypeSubject = { type: string, response: unknown, param: unknown }
 
 
-export type NullTypeSubject = { type: string, response, param }
-
-
-export type SubjectEvent<SocketMap extends { type: string, response, param }> = {
-  [K in SocketMap["type"]]:
+export type SubjectEvent<SocketUnion extends NullTypeSubject> = {
+  [K in SocketUnion["type"]]:
   {
     type: K,
-    ___reply: (resp: (SocketMap & { type: K })["response"]) => void
-  } & (SocketMap & { type: K })["param"]
-}[SocketMap["type"]]
+    ___reply: (resp: (SocketUnion & { type: K })["response"]) => void
+  } & (SocketUnion & { type: K })["param"]
+}[SocketUnion["type"]]
 
 export type TypeImplSocket<T extends NullTypeSubject = NullTypeSubject> = Subject<SubjectEvent<T>>
 

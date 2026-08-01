@@ -7,7 +7,7 @@ import { createNodeEvent } from '../generic-store/node-event-factory';
 import { genericNodeDataStore } from '../generic-store/reference';
 import { selectNodeByUuid, selectNodesOfType, selectViewNodesByView } from '../generic-store/selectors';
 import { nestedCallTrace } from '../node-trace';
-import type { PlaceHolder, Select } from '../typing/node-options';
+import { wrapPlaceholder, type Select } from '../typing/node-options';
 
 
 const inputMap: Record<string, Array<ElementNodeImpl>> = {}
@@ -24,11 +24,11 @@ addTypeImpl({
     inputs: 1,
     outputs: 0,
     options: {
-      type: {
+      type: wrapPlaceholder<Select<ViewTypes>>()({
         type: "placeholder",
         of: "select",
         invalidates: ["target"]
-      } as PlaceHolder<Select<ViewTypes>>,
+      }),
       target: {
         type: "placeholder",
         of: "select"
@@ -50,9 +50,6 @@ addTypeImpl({
         event.context.viewsource.unshift(node.uuid)
         emitFromNode(input.uuid, event, 0, nestedCallTrace(input, callbacks.trace, "impliedFromViewInput"))
       }
-
-
-
     } else if (node.parameters?.type == "view-output" && node.view) {
       const event = createNodeEvent(data)
       const sourceNode = event.context.viewsource.shift() ?? node.view
@@ -61,11 +58,12 @@ addTypeImpl({
     }
   },
   nodeChanged(node, prevNode) {
+
     node.runtimeContext ??= {}
     if (node.view) {
       updateRuntimeParameter(node, "type", {
         type: "select",
-        options: ["collection", "view-input", "view-output"] as Array<ViewTypes>
+        options: ["collection", "view-input", "view-output"]
       })
     } else {
       updateRuntimeParameter(node, "type", {
