@@ -227,7 +227,7 @@ addTypeImpl({
               updateRuntimeParameter(node, `inputhistory${i}` as "inputhistory", {
                 type: "number",
                 title: `input history days index:${i}`,
-                order: "1",
+                order: 1,
                 hideWithoutValue: true
               })
             } else if (node.runtimeContext.parameters?.[`inputhistory${i}` as keyof typeof node.runtimeContext.parameters]) {
