@@ -120,6 +120,8 @@ export async function emitFromNode(nodeUuid: string, evt: NodeEvent, index: numb
 if (environment.WATCH_SERVICES && !environment.SMARTHOME_DISABLED) {
   startHotRelaodingWatcher().then(() => {
     hasLoaded$.next(true)
+  }).catch(e => {
+    logKibana("ERROR", { message: "error when setting up filewatcher" }, e)
   })
 
 }

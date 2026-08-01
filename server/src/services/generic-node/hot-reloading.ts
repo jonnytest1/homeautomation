@@ -8,13 +8,18 @@ export function getLaodingFile() {
   return loadingFile
 }
 export function startHotRelaodingWatcher() {
-  return new Promise<void>(res => {
+  return new Promise<void>((res, err) => {
     watch(serviceFolder, {})
       .on("add", e => {
         if (e.endsWith(".ts") && !e.endsWith("d.ts")) {
-          loadingFile = e
-          require(e)
-          loadingFile = undefined
+          try {
+            loadingFile = e
+            require(e)
+            loadingFile = undefined
+          } catch (e) {
+            err(e)
+            throw e
+          }
         }
       })
       .on("change", path => {
@@ -25,7 +30,8 @@ export function startHotRelaodingWatcher() {
             message: "Error during hot reload",
           }, e)
         }
-      }).on("ready", () => {
+      })
+      .on("ready", () => {
 
         setTimeout(() => {
           res()
@@ -46,7 +52,7 @@ function reload(path: string) {
       require(path)
       loadingFile = undefined
     } catch (e) {
-      if ("diagnosticText" in e) {
+      if (e && typeof e == "object" && "diagnosticText" in e) {
         const diagnostic = e.diagnosticText
         if (typeof diagnostic === "string") {
           // eslint-disable-next-line no-control-regex
