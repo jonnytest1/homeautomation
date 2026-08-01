@@ -81,11 +81,13 @@ export type PlaceholderType<T extends PlaceHolder<any>> = T["of"] extends Array<
 
 
 export type NodeOptionInstanceTypes = Select | Text | Code | Frame | NumberCfg | BooleanCfg | BtnCfg
-export type NodeOptionTypes<Keys extends string = string> = (NodeOptionInstanceTypes | PlaceHolder)
-  & Order
+
+export type NodeOptionUtilTypes<Keys extends string = string> = Order
   & Invalidated<Keys>
   & Titled
   & HiddenUnlessValue
+export type NodeOptionTypes<Keys extends string = string> = (NodeOptionInstanceTypes | PlaceHolder)
+  & NodeOptionUtilTypes<Keys>
 
 export type NodeOptionTypeWithOptionalName = NodeOptionTypes & { name?: string }
 export type NodeOptionTypeWithName = NodeOptionTypes & { name: string }

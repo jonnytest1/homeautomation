@@ -2,7 +2,7 @@ import { backendToFrontendStoreActions, setServerContext, type ControlAction } f
 import { genericNodeDataStore } from './generic-store/reference';
 import type { EvalNode, TypeImplementaiton } from './typing/generic-node-type';
 import type { ElementNode } from './typing/element-node';
-import type { MapTypeToParam, NodeDefOptinos, NodeOptionInstanceTypes, NodeOptionTypes, PlaceHolder } from './typing/node-options';
+import type { MapTypeToParam, NodeDefOptinos, NodeOptionInstanceTypes, NodeOptionTypes, NodeOptionUtilTypes, PlaceHolder } from './typing/node-options';
 
 export type ExactlyOne<T> = {
   [K in keyof T]: {
@@ -57,7 +57,7 @@ export function setNodeParameter<T, K extends ((keyof T & string)), V extends T[
 export function updateRuntimeParameter<T, P, K extends ((keyof P & keyof T & string)), V extends (NodeOptionInstanceTypes & P[K])>(
   node: ElementNode<T, P>,
   key: K,
-  param: V | PlaceHolder,
+  param: (V | PlaceHolder) & NodeOptionUtilTypes<((keyof P & keyof T & string))>,
   inital: number | string | false | Array<string> = 0): asserts node is ElementNode<T, P> & {
     parameters: SetNodeParamVAlue<K, V>,
     runtimeContext: {

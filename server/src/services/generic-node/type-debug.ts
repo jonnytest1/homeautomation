@@ -1,3 +1,4 @@
+import { updateRuntimeParameter } from './element-node-fnc';
 import type { EvalNode, NullTypeSubject, TypeImplementaiton } from './typing/generic-node-type';
 import { wrapPlaceholder, type NodeDefOptinos, type NodeDefToRUntime, type Select } from './typing/node-options';
 
@@ -43,6 +44,11 @@ const example = implFnc({
           of: "select",
           invalidates: ["target"]
         },
+        ex4: {
+          type: "number",
+          title: "input history days",
+          hideWithoutValue: true
+        }
       }
     }
   },
@@ -74,6 +80,24 @@ const example = implFnc({
     const ex3_3: ex3Rtype["options"][number] = "view-output"
     const ex3_4: ex3Rtype["options"][number] = "asdasd"
 
+
+
+    updateRuntimeParameter(node, "ex4", {
+      type: "number",
+      title: `title`,
+      order: 1,
+      hideWithoutValue: true,
+
+      invalidates: ["example1",]
+    })
+    updateRuntimeParameter(node, "ex4", {
+      type: "number",
+      title: `title`,
+      order: 1,
+      hideWithoutValue: true,
+      // @ts-expect-error
+      invalidates: ["asds",]
+    })
   },
   process(node, data, callbacks) {
 
