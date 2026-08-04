@@ -8,6 +8,7 @@ import { genericNodeDataStore } from '../generic-store/reference';
 import { selectNodeByUuid, selectNodesOfType, selectViewNodesByView } from '../generic-store/selectors';
 import { nestedCallTrace } from '../node-trace';
 import { wrapPlaceholder, type Select } from '../typing/node-options';
+import type { Schemata } from '../typing/schemata';
 
 
 const inputMap: Record<string, Array<ElementNodeImpl>> = {}
@@ -101,18 +102,45 @@ addTypeImpl({
         })
       }
 
-      if (node.parameters.target
-        && node.parameters.target !== prevNode?.parameters?.target
-        && !node.parameters.name) {
-        const targetNode = genericNodeDataStore.getOnce(selectNodeByUuid(node.parameters.target))
+      if (
+        node.parameters.target !== prevNode?.parameters?.target
+      ) {
+
+        if (node.parameters.target && !node.parameters.name) {
+          const targetNode = genericNodeDataStore.getOnce(selectNodeByUuid(node.parameters.target))
 
 
 
-        genericNodeDataStore.dispatch(backendToFrontendStoreActions.updateParam({
-          node: node.uuid,
-          param: "name",
-          value: `ref > ${targetNode.parameters?.name}`
-        }))
+          genericNodeDataStore.dispatch(backendToFrontendStoreActions.updateParam({
+            node: node.uuid,
+            param: "name",
+            value: `ref > ${targetNode.parameters?.name}`
+          }))
+        }
+        const viewUuid = node.parameters.target ?? node.uuid
+
+        const viewNodes = genericNodeDataStore.getOnce(selectViewNodesByView(viewUuid)) as Array<typeof node>
+        const viewINputs = viewNodes.filter(n => n.parameters?.type === "view-input")
+
+        for (const viewInput of viewINputs) {
+          // TODO: merge inputs 
+
+        }
+
+        const inputWithSchema = viewINputs.find(n => n.runtimeContext.inputSchema) as typeof node & { runtimeContext: { inputSchema: Schemata } }
+        if (inputWithSchema) {
+          genericNodeDataStore.dispatch(backendToFrontendStoreActions.updateInputSchema({
+            nodeUuid: node.uuid,
+            schema: inputWithSchema.runtimeContext.inputSchema
+          }))
+        } else {
+          genericNodeDataStore.dispatch(backendToFrontendStoreActions.updateInputSchema({
+            nodeUuid: node.uuid,
+            schema: undefined
+          }))
+        }
+
+
       }
 
     } else if (node.parameters?.type == "view-input") {
@@ -142,7 +170,27 @@ addTypeImpl({
         }))
       }
     }
-  }, initializeServer(nodes, globals) {
+  },
+  targetConnectionTypeChanged(node, schema) {
+    if (node.parameters?.type == "view-input" && schema) {
+      genericNodeDataStore.dispatch(backendToFrontendStoreActions.updateInputSchema({
+        nodeUuid: node.uuid,
+        schema: schema
+      }))
+
+      const viewNodes = genericNodeDataStore.getOnce(selectNodesOfType("view")) as Array<typeof node>
+      const refNodes = viewNodes.filter(n => (n.parameters?.type === "collection")
+        && (n.parameters?.target ?? n.uuid) === node.view)
+
+      for (const refNode of refNodes) {
+        genericNodeDataStore.dispatch(backendToFrontendStoreActions.updateInputSchema({
+          nodeUuid: refNode.uuid,
+          schema: schema
+        }))
+      }
+    }
+  },
+  initializeServer(nodes, globals) {
     for (const node of nodes) {
       if (node.parameters?.type == "view-input" && node.view) {
         inputMap[node.view] ??= []

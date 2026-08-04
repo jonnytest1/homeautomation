@@ -14,7 +14,7 @@ import { SqlCondition, load } from 'hibernatets'
 import type { ZodType } from 'zod'
 import * as z from "zod";
 
-export const DelayedSenderResponseSoundTypeNotificationDataSoundTypeSchema = z.object({
+export const DelayedSenderResponseSoundTypeNotificationDataSoundTypeSchema: z.AnyZodObject = z.object({
   "nestedObject": z.union([z.object({
     "attributes": z.union([z.object({
       "messageId": z.union([z.null(), z.string()]).optional(),
@@ -131,7 +131,7 @@ addTypeImpl({
       options: deviceKeys
     })
 
-    if (!node.runtimeContext.inputSchema) {
+    if (!node.runtimeContext.inputSchema || (TscCompiler.responseINterface && !node.runtimeContext.inputSchema.dts.includes(TscCompiler.responseINterface))) {
       computeTypeSchema(node)
     }
 

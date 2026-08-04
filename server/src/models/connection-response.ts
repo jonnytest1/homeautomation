@@ -62,6 +62,6 @@ export interface SenderResponse<SoundDef = SoundType, NotificationType = Notific
 
 }
 
-export type SoundType = soundListRuntime | '*' | Array<soundListRuntime>
+export type SoundType = soundListRuntime | ('*' & {}) | Array<soundListRuntime>
 
-type soundListRuntime = string
+type soundListRuntime = string & {}

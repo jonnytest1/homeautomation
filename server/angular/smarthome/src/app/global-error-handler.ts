@@ -44,7 +44,7 @@ export async function logKibana(level: 'INFO' | 'ERROR' | 'DEBUG', message: stri
   try {
     throw new Error('origin');
   } catch (e) {
-    logStack = base64safe(e.stack);
+    logStack = base64safe((e as Error).stack);
   }
 
   const devMode = location.host.includes("localhost");
@@ -125,6 +125,9 @@ export class CustomErrorHandler implements HttpInterceptor {
 export class CustomGlobalErrorHandler implements ErrorHandler {
 
   handleError(error: Error): void {
+    if (error.message === `can't access property "getValue", editor.getModel() is null`) {
+      return
+    }
     logKibana('ERROR', 'global error', error);
     console.error(error);
   }

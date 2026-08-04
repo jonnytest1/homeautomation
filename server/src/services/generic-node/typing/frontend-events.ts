@@ -87,7 +87,7 @@ export type UpdateOutputSchema = {
 export type UpdateInputSchema = {
   type: "update input schema",
   nodeUuid: string
-  schema: Schemata
+  schema: Schemata | undefined
 }
 export type UpdateOutputs = {
   type: "update outputs",

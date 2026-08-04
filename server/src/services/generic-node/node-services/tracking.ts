@@ -64,6 +64,7 @@ addTypeImpl({
       inputs: 1,
       options: {
         activityTimeHours: {
+          title: "hours after which there is an alert if no tracking event happened",
           type: "number",
           min: 20
         }

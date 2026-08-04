@@ -131,10 +131,10 @@ export async function updateTypeSchema(node: ElementNode, nodeData: PreparedNode
 
           } else {
             let firstError = e as DiagnosticRelatedInformation | DiagnosticMessageChain
+
             if (e instanceof CompilerError) {
               firstError = e.error_diagnostics[0] as Diagnostic
             }
-
             while (typeof firstError.messageText != "string" && firstError.messageText?.next?.[0]) {
               firstError = firstError.messageText.next?.[0]
             }
