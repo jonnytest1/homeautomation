@@ -145,9 +145,7 @@ addTypeImpl({
     }
 
     Object.values(activeTrackingMap)
-      .filter(t => !!t)
       .forEach(clearTimeout)
-
   },
   initializeServer() {
     interval = setInterval(() => {

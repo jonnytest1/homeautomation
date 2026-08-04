@@ -362,16 +362,16 @@ export function addTypeImpl<C, G extends NodeDefOptinos, O extends NodeDefOptino
 
 
       const typeImplUpdate = currerntTypeImpls[implementationType];
+      currerntTypeImpls[implementationType] = typeImpl as never
+      typeImplementations.next(currerntTypeImpls)
       if (typeImplUpdate?.unload) {
         if (!elementNodes) {
           elementNodes = getElementNodes(implementationType);
         }
         const globals = genericNodeDataStore.getOnce(selectGlobals)
-        currerntTypeImpls[implementationType]?.unload?.(elementNodes, globals as never)
+        typeImplUpdate?.unload?.(elementNodes, globals as never)
 
       }
-      currerntTypeImpls[implementationType] = typeImpl as never
-      typeImplementations.next(currerntTypeImpls)
 
 
       if (typeImpl.initializeServer) {
