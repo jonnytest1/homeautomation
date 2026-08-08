@@ -142,7 +142,7 @@ export function validateJsonSchema(context: ValidationContext) {
     }
   } else if (target.type === "string") {
     if (target.const) {
-      if (assigning.enum !== target.const && assigning.const !== target.const) {
+      if (assigning.enum !== target.const && assigning.const !== target.const && assigning.default !== target.const) {
         throw new SchemaMatchingError(context, `constant '${assigning.const}' is not part of the target const ${target.const}`)
       }
     }

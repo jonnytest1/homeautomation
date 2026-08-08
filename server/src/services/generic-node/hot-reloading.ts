@@ -28,6 +28,7 @@ export function startHotRelaodingWatcher() {
         } catch (e) {
           logKibana("ERROR", {
             message: "Error during hot reload",
+            type: `${path}`
           }, e)
         }
       })

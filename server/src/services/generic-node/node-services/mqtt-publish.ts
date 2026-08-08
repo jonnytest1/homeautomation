@@ -106,8 +106,9 @@ addTypeImpl({
 
       mqttClient.on("message", messageHandler)
     }
-    waitingforResponse = config.statResponse()
-    if (waitingforResponse) {
+    const statResponse = config.statResponse()
+    waitingforResponse ||= statResponse
+    if (statResponse) {
       const responseTopic = `stat/${config.mqttDeviceName}/RESULT`
 
       mqttClient.subscribe(responseTopic, (e, grants) => {
