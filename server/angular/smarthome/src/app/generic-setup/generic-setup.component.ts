@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import type { ElementRef, OnInit } from '@angular/core';
+import type { AfterViewInit, ElementRef, OnInit } from '@angular/core';
 import { Component, HostListener, inject, ViewChild } from '@angular/core';
 import { createStateMachine } from '../utils/state-machine';
 import { Vector2 } from '../wiring/util/vector';
@@ -32,7 +32,8 @@ import { MatIconModule } from '@angular/material/icon';
 import { TouchModeService } from './touchmode-service';
 import { ResolvablePromise } from '../utils/resolvable-promise';
 import { Title } from '@angular/platform-browser';
-
+import { PointerEventInput } from "hammerjs"
+import { ZoomUtils } from './zoom-utils';
 
 const dataHandler = new DropDataHandler<DropData>()
 
@@ -48,17 +49,19 @@ const dataHandler = new DropDataHandler<DropData>()
   ],
   standalone: true
 })
-export class GenericSetupComponent implements OnInit {
+export class GenericSetupComponent implements OnInit, AfterViewInit {
 
 
   static pageInset = new Vector2(0, 0)
-  zoom = 1;
-  zoomTransform: Vector2
+
+
+
+  zoomU = new ZoomUtils()
   hideMenu$ = new BehaviorSubject<boolean>(false)
 
 
   @ViewChild("wrapperElement")
-  private wrapperEl: ElementRef<HTMLElement>;
+  private wrapperEl!: ElementRef<HTMLElement>;
 
   readonly state = createStateMachine("initial", "dragging", "dragpreview", "move", "mousedragview").withData<{
     move: ElementNode,
@@ -190,8 +193,9 @@ export class GenericSetupComponent implements OnInit {
     });
   }
 
+
   async scrollIntoView(node: string) {
-    this.zoom = 3
+    this.zoomU.zoom = 3
     while (!this.wrapperEl?.nativeElement) {
       await ResolvablePromise.delayed(50)
     }
@@ -225,15 +229,14 @@ export class GenericSetupComponent implements OnInit {
   ngOnInit() {
   }
 
+  ngAfterViewInit(): void {
+    this.wrapperEl.nativeElement.addEventListener("wheel", e => {
+      e.preventDefault()
 
+      this.onscroll(e, this.wrapperEl.nativeElement)
+    }, { passive: false })
+  }
 
-  getTransform() {
-    const zoomRounded = this.getZoomRounded()
-    return `scale(${zoomRounded})`
-  }
-  getDimensions() {
-    return Math.floor(100 / this.zoom) + "%"
-  }
   startDrag(evt: MBDragEvent, nodeDefinition: NodeDefintion) {
     dataHandler.setDropData(evt, "nodeDrag", true)
     dataHandler.setDropData(evt, "nodeDefinition", nodeDefinition)
@@ -265,29 +268,52 @@ export class GenericSetupComponent implements OnInit {
   }
 
 
-  convertVectorZoom(position: Vector2) {
 
-    const zoomRounded = this.getZoomRounded()
+  onPinch(ev: any, scrollElement: HTMLElement) {
+    const evt = ev as PointerEventInput
+    this.zoomU.onPinch(evt)
 
-    return position.dividedBy(zoomRounded)
   }
-
-  private getZoomRounded() {
-    return Math.round(100 * this.zoom) / 100;
+  onPinchEnd(ev: any) {
+    this.zoomU.onPinchEnd(ev)
   }
+  onscroll(ev: WheelEvent, scrollElement: HTMLElement) {
 
-  onscroll(ev: WheelEvent) {
+    /*too many allocations
+    //
+    const scrollOffset = Vector2.fromStyles(scrollElement, "scroll"); // new Vector2(el.scrollLeft, el.scrollTop)
+    const windowPosAtCursor = this.zoomU.convertWindowPositionToViewPosition(
+      new Vector2(
+        ev.x - GenericSetupComponent.pageInset.x + scrollElement.scrollLeft,
+        ev.y - GenericSetupComponent.pageInset.y + scrollElement.scrollTop,
+      )
+    )
 
-    if (ev.deltaY) {
-      if (ev.deltaY < 0) {
-        this.zoom *= 1.05
-      } else {
-        this.zoom /= 1.05
-      }
-      sessionStorage.setItem("node_zoom", this.zoom + "");
-      this.zoomTransform = new Vector2(ev)
-    }
-    return false
+    this.zoomU.onscroll(ev)
+    // this.zoomU.updateBackgroundEl(scrollElement)
+    const cursorWindowPos = this.zoomU.convertViewPositionToWindowPosition(windowPosAtCursor)
+
+
+    const scrollOffsetAfterZoom = cursorWindowPos.subtract(pos)
+
+    scrollElement.scrollTo({
+      left: scrollOffsetAfterZoom.x,
+      top: scrollOffsetAfterZoom.y,
+      behavior: "instant"
+    })*/
+    const zoomRounded = this.zoomU.getZoomRounded()
+    const windowPosAtCursorX = (ev.x - GenericSetupComponent.pageInset.x + scrollElement.scrollLeft) / zoomRounded
+    const windowPosAtCursorY = (ev.y - GenericSetupComponent.pageInset.y + scrollElement.scrollTop) / zoomRounded
+
+    this.zoomU.onscroll(ev)
+
+    const zoomRoundedAfter = this.zoomU.getZoomRounded()
+    scrollElement.scrollTo({
+      left: (windowPosAtCursorX * zoomRoundedAfter) - ev.x,
+      top: (windowPosAtCursorY * zoomRoundedAfter) - ev.y,
+      behavior: "instant"
+    })
+
   }
   async doubleClick(node: ElementNode) {
     if (node.type === "view") {
@@ -490,28 +516,8 @@ export class GenericSetupComponent implements OnInit {
       const movementDiff = new Vector2(mousevent).subtract(this.state.getmousedragview.mouseStart)
       const newSCroll = this.state.getmousedragview.startOffset.subtract(movementDiff)
 
-      const backgroundEl = el.querySelector<HTMLElement>("#background-drop")
-      if (!backgroundEl) {
-        return
-      }
-      const contentDimensions = new BoundingBox(backgroundEl)
-      const parentDimensions = new BoundingBox(el)
+      this.zoomU.updateBackgroundEl(el, newSCroll)
 
-      if (newSCroll.y < 0) {
-        //backgroundEl.style.minHeight = contentDimensions.getHeight() - newSCroll.y + "px"
-      }
-      if (newSCroll.x < 0) {
-        //backgroundEl.style.minWidth = contentDimensions.getWidth() - newSCroll.x + "px"
-      }
-      const neededHeight = newSCroll.y + parentDimensions.getHeight();
-      if (neededHeight > contentDimensions.getHeight()) {
-        backgroundEl.style.minHeight = neededHeight - 12 + "px"
-      }
-
-      const neededWith = newSCroll.x + parentDimensions.getWidth();
-      if (neededWith > contentDimensions.getWidth()) {
-        backgroundEl.style.minWidth = neededWith - 12 + "px"
-      }
       el.scrollTo({
         //behavior: "instant",
         left: newSCroll.x,
@@ -567,7 +573,7 @@ export class GenericSetupComponent implements OnInit {
       if (!dragOffset) {
         return
       }
-      const newPosition = this.convertVectorZoom(
+      const newPosition = this.zoomU.convertWindowPositionToViewPosition(
         evt.previewPosition!
           .subtract(GenericSetupComponent.pageInset)
           .added(Vector2.fromStyles(scrollElement, "scroll"))
@@ -600,7 +606,7 @@ export class GenericSetupComponent implements OnInit {
       return
     }
 
-    const position = this.convertVectorZoom(
+    const position = this.zoomU.convertWindowPositionToViewPosition(
       evt.previewPosition!
         .subtract(GenericSetupComponent.pageInset)
         .added(Vector2.fromStyles(scrollElement, "scroll"))

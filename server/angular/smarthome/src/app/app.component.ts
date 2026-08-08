@@ -1,4 +1,5 @@
-import { ChangeDetectorRef, Component } from '@angular/core';
+import { ChangeDetectorRef, Component, ViewChild } from '@angular/core';
+import { MatSidenav } from '@angular/material/sidenav';
 import { ActivatedRoute } from '@angular/router';
 import { BehaviorSubject, fromEvent } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
@@ -28,9 +29,9 @@ export class AppComponent {
   title = 'smarthome';
 
   mobile$ = AppComponent.isMobile();
-  sidenavOpened$ = new BehaviorSubject(false);
 
-
+  @ViewChild(MatSidenav)
+  sideNav: MatSidenav
   lastOpen: number | null = null
 
   sideNavOpenTimeout: NodeJS.Timeout | undefined
@@ -54,7 +55,7 @@ export class AppComponent {
   }
   openSideNav() {
     this.sideNavOpenTimeout = setTimeout(() => {
-      this.sidenavOpened$.next(true)
+      this.sideNav.open()
       this.lastOpen = Date.now()
       console.log(this.lastOpen)
     }, 50)
@@ -72,7 +73,7 @@ export class AppComponent {
     console.log("sidenav init leave")
     this.delayedLeave(() => {
       console.log("sidenavOpened leave")
-      this.sidenavOpened$.next(false);
+      this.sideNav.close()
     })
   }
   async delayedLeave(cb: Function) {

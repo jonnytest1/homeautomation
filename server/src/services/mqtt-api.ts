@@ -44,7 +44,7 @@ export class MQTTIntegration {
     })
     this.connection.once("connect", () => {
 
-      this.connection.on("message", (topic, message) => {
+      this.connection.on("message", (topic, message, packet) => {
         try {
           const messageStr = message.toString()
 
@@ -60,7 +60,8 @@ export class MQTTIntegration {
               payload: messageStr,
               context: {
                 topic: topic,
-                device: matchedDevice
+                device: matchedDevice,
+                mqtt_retained: packet.retain
               }
             })
           }

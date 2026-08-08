@@ -27,6 +27,7 @@ import { NodeEntry } from './models/node-entry';
 import { NodeHistory } from './models/node-history';
 import { defaultCallTrace } from './node-trace';
 import type { CallTrace, RecursiveCallTrace } from './typing/trace';
+import type { JSONSchema } from './typing/jsonschema-type';
 import { logKibana } from '../../util/log';
 import { environment } from '../../environment';
 import { jsonClone } from '../../util/json-clone';
@@ -339,7 +340,14 @@ updateDatabase(__dirname + '/models', {
   throw e
 })
 
-export function addTypeImpl<C, G extends NodeDefOptinos, O extends NodeDefOptinos, P, S, TS extends NullTypeSubject>(typeImpl: TypeImplementaiton<C, G, O, P, S, TS>) {
+export function addTypeImpl<
+  ContextType extends JSONSchema,
+  GlobalsType extends NodeDefOptinos,
+  NodeOptionsType extends NodeDefOptinos,
+  PayloadType,
+  ServerContextType,
+  TS extends NullTypeSubject>(
+    typeImpl: TypeImplementaiton<ContextType, GlobalsType, NodeOptionsType, PayloadType, ServerContextType, TS>) {
 
   typeImpl._file = getCurrentlyLaodingFile()
   genericNodeDataStore.select(selectInitialized)
@@ -369,8 +377,11 @@ export function addTypeImpl<C, G extends NodeDefOptinos, O extends NodeDefOptino
           elementNodes = getElementNodes(implementationType);
         }
         const globals = genericNodeDataStore.getOnce(selectGlobals)
-        typeImplUpdate?.unload?.(elementNodes, globals as never)
-
+        try {
+          typeImplUpdate?.unload?.(elementNodes, globals as never)
+        } catch (e) {
+          logKibana("ERROR", "eception during unload", e)
+        }
       }
 
 
@@ -395,8 +406,8 @@ export function addTypeImpl<C, G extends NodeDefOptinos, O extends NodeDefOptino
 
   // just for typing
   return {} as {
-    server_context: S,
-    opts: O
+    server_context: ServerContextType,
+    opts: NodeOptionsType
   }
 }
 async function reloadNodes(elementNodes: ElementNodeImpl<never, Partial<NodeDefOptinos>>[] | null, implementationType: string, currerntTypeImpls: Record<string, TypeImplementaiton>) {

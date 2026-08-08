@@ -1,5 +1,5 @@
 @if (hasNodeDefs$ | async; as nodeDefs) {
-  <div class="page">
+  <div class="page" (wheel)="$event.preventDefault()">
     @if (nodeData$ | async; as nodeData) {
       <div
         class="wrapper mb-scroll-parent"
@@ -13,14 +13,16 @@
         [disableDragPreview]="true"
         [mouseDrag]="true"
         (mb-dragstart)="mouseDragSTart($event, wrapperElement)"
-        (wheel)="onscroll($event); $event.preventDefault()"
+        (pinchMove)="onPinch($event, wrapperElement)"
+        (pinchEnd)="onPinchEnd($event)"
       >
         @if ({ act: activeElements$ | async }; as activeElements) {
           <div
             class="background"
-            [style.transform]="getTransform()"
+            [style.transform]="zoomU.getTransform()"
             [style.transformOrigin]="'0px 0px'"
             id="background-drop"
+            (wheel)="$event.preventDefault()"
             (click)="setActiveNode(undefined)"
             (mb-dragover)="dropAllowed($event)"
           >
@@ -61,7 +63,7 @@
       @if ({ act: activeElements$ | async }; as activeElements) {
         <ng-container>
           @for (line of nodeData.nodes.connections; track line) {
-            <div>
+            <div (wheel)="$event.preventDefault()">
               <app-line
                 [line]="line"
                 (clicked)="setActiveNode(line, $event)"
@@ -71,7 +73,7 @@
             </div>
           }
           @if (connections.pendingConnection | async; as con) {
-            <div>
+            <div (wheel)="$event.preventDefault()">
               <app-line [line]="con" [editing]="true"> </app-line>
             </div>
           }
@@ -79,7 +81,7 @@
       }
     }
     @if (activeElement$ | async; as activeEl) {
-      <div class="properties">
+      <div class="properties" (wheel)="$event.preventDefault()">
         @if (activeEl.type === "node") {
           @if (activeEl.node) {
             <app-generic-options [nodeUuid]="activeEl.node.uuid">
@@ -95,7 +97,7 @@
       </div>
     }
     @if ((hideMenu$ | async) !== true) {
-      <div class="nodelist">
+      <div class="nodelist" (wheel)="$event.preventDefault()">
         @for (n of nodeDefs | keyvalue; track n) {
           <div
             class="dragelement"

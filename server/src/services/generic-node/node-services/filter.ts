@@ -102,7 +102,6 @@ addTypeImpl({
 
 
       shiftInputHistory(node, inputHistory)
-      // eslint-disable-next-line no-constant-condition
 
       const contextObject = {
         payload: data.payload,

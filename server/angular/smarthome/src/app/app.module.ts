@@ -35,10 +35,11 @@ import { environment } from '../environments/environment';
 import { provideFirebaseApp, getApp, initializeApp } from '@angular/fire/app';
 import { provideMessaging, getMessaging } from '@angular/fire/messaging';
 import { AutosavingDirective, ROOT_AUTOSAVE_PATH } from './autosaving/autosaving';
+import { DIRECTION_RIGHT } from 'hammerjs';
 
 export class MyHammerConfig extends HammerGestureConfig {
   overrides = <any>{
-    // swipe: { direction: DIRECTION_ALL },
+    swipe: { direction: DIRECTION_RIGHT },
   };
 }
 
@@ -92,7 +93,7 @@ export class MyHammerConfig extends HammerGestureConfig {
       useValue: environment.prefixPath + 'rest/auto/'
     },
     provideFirebaseApp(() => initializeApp(environment.firebaseConfig)),
-    provideMessaging(() => getMessaging())
+    provideMessaging(() => getMessaging()),
   ],
   bootstrap: [AppComponent]
 })

@@ -4,7 +4,6 @@
     #sidenav
     mode="push"
     class="sidenav"
-    [opened]="sidenavOpened$ | async"
     (mouseenter)="openSideNav()"
     (mouseleave)="leaveSideNav()"
   >
@@ -113,6 +112,7 @@
     <div class="content-wrapper">
       <div
         class="mouseenter"
+        (swipeRight)="openSideNav()"
         (mouseenter)="openFromContent()"
         (mouseleave)="leaveContentHover()"
       >

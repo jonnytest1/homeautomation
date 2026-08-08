@@ -23,7 +23,22 @@ function getHistoryCount(transformer: Transformation & { historyCount?: number }
 }
 
 addTypeImpl({
-  context_type: (t: { deviceKey: string, transformation?: string, transformationCount: number }) => t,
+  context_type: () => {
+    return {
+      type: "object",
+      properties: {
+        deviceKey: {
+          type: "string"
+        },
+        transformation: {
+          type: "string"
+        },
+        transformationCount: {
+          type: "string"
+        },
+      }
+    } as const
+  },
   payload_type: (p: { message?: string, type?: "url" | "barcode", url?: string }) => p,
   server_context_type: (s: { needsTransform?: boolean }) => s,
   async process(node, evt, callbacks) {

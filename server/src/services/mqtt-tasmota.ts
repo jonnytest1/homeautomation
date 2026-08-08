@@ -68,6 +68,10 @@ export class DeviceConfig {
   sendsResponse() {
     return this.topicPrefixes.includes("response")
   }
+
+  statResponse() {
+    return this.topicPrefixes.includes("stat")
+  }
 }
 
 

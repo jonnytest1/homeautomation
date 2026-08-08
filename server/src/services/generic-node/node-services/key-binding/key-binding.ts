@@ -1,5 +1,4 @@
 import type { KeyEventData, SocketMap } from './page-events'
-import type { DeviceConfig } from '../../../mqtt-tasmota'
 import type { ElementNodeImpl } from '../../element-node'
 import { addTypeImpl } from '../../generic-node-service'
 import { generateDtsFromSchema, mainTypeName } from '../../json-schema-type-util'
@@ -31,9 +30,21 @@ const lastKeyEmits: KeyEventData = {}
 
 let lastKeyEmitsEvent: SubjectEvent<SocketMap & { type: "key-events" }>
 
+
+
+
 // { board?: string, key?: string, mode?: "press" | "release" }
 addTypeImpl({
-  context_type: (t: { board: string, device?: DeviceConfig }) => t,
+  context_type: () => {
+    return {
+      type: "object",
+      properties: {
+        board: {
+          type: "string"
+        },
+      }
+    } as const
+  },
   messageSocket(s: TypeImplSocket<SocketMap>) {
     s.subscribe((emit) => {
 
@@ -92,6 +103,7 @@ addTypeImpl({
             key: node.parameters.key
 
           })
+          evt.context.board = node?.parameters?.board
           callbacks.continue(evt)
         }
 
@@ -102,6 +114,7 @@ addTypeImpl({
             key: node.parameters.key
 
           })
+          evt.context.board = node?.parameters?.board
           callbacks.continue(evt)
         }
       }

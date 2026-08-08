@@ -1,5 +1,6 @@
 import { updateRuntimeParameter } from './element-node-fnc';
 import type { EvalNode, NullTypeSubject, TypeImplementaiton } from './typing/generic-node-type';
+import type { JSONSchema } from './typing/jsonschema-type';
 import { wrapPlaceholder, type NodeDefOptinos, type NodeDefToRUntime, type Select } from './typing/node-options';
 
 if (3 > 1 + Math.random()) {
@@ -13,7 +14,7 @@ type Prettify<T> = T extends Array<infer U>
   } & {});
 
 
-function implFnc<C, G extends NodeDefOptinos, O extends NodeDefOptinos, P, S, TS extends NullTypeSubject>(typeImpl: TypeImplementaiton<C, G, O, P, S, TS>) {
+function implFnc<C extends JSONSchema, G extends NodeDefOptinos, O extends NodeDefOptinos, P, S, TS extends NullTypeSubject>(typeImpl: TypeImplementaiton<C, G, O, P, S, TS>) {
   return typeImpl
 }
 
@@ -21,8 +22,18 @@ function implFnc<C, G extends NodeDefOptinos, O extends NodeDefOptinos, P, S, TS
 
 type ViewTypes = "view-output" | "view-input" | "collection"
 const example = implFnc({
-  context_type(c: { viewsource: Array<string> }) {
-    return c
+  context_type() {
+    return {
+      type: "object",
+      properties: {
+        viewsource: {
+          type: "array",
+          items: {
+            type: "string"
+          }
+        },
+      }
+    } as const
   },
   nodeDefinition() {
     return {

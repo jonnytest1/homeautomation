@@ -34,12 +34,15 @@ import { RouterModule } from '@angular/router';
 import { MatTabsModule } from '@angular/material/tabs';
 import { HammerGestureConfig, HammerModule, HAMMER_GESTURE_CONFIG } from '@angular/platform-browser';
 import { MobileTimersComponent } from './mobile/timers/timers.component';
+import { DIRECTION_ALL } from "hammerjs"
+
+
 
 @Injectable()
 export class MyHammerConfig extends HammerGestureConfig {
   overrides = <any>{
-    // swipe: { direction: hammer.DIRECTION_ALL },
-    pinch: { enable: false },
+    swipe: { direction: DIRECTION_ALL },
+    pinch: { enable: true },
     rotate: { enable: false }
   };
 }

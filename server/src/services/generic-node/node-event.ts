@@ -10,14 +10,14 @@ export type NodeEventJsonData<P = unknown, C = unknown> = {
 
 
 
-export class NodeEvent<C = unknown, P = unknown, G extends NodeDefOptinos = NodeDefOptinos> {
+export class NodeEvent<C = object, P = unknown, G extends NodeDefOptinos = NodeDefOptinos> {
 
   declare payload: P
   declare context: C & { eventCount?: number, [key: string]: unknown }
 
   declare globalConfig: NodeDefToType<G>
 
-  inputIndex: number
+  declare inputIndex: number
 
   constructor(data: NodeEventData, globals: NodeDefToType<G>) {
 

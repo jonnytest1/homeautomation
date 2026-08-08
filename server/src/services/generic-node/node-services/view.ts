@@ -15,10 +15,20 @@ const inputMap: Record<string, Array<ElementNodeImpl>> = {}
 
 type ViewTypes = "view-output" | "view-input" | "collection"
 
-
 addTypeImpl({
-  context_type(c: { viewsource: Array<string> }) {
-    return c
+  context_type() {
+    return {
+      type: "object",
+      properties: {
+        viewsource: {
+          type: "array",
+          items: {
+            type: "string"
+          }
+        },
+      },
+      additionalProperties: false
+    } as const
   },
   nodeDefinition: () => ({
     type: "view",
@@ -53,7 +63,7 @@ addTypeImpl({
       }
     } else if (node.parameters?.type == "view-output" && node.view) {
       const event = createNodeEvent(data)
-      const sourceNode = event.context.viewsource.shift() ?? node.view
+      const sourceNode = event.context.viewsource?.shift() ?? node.view
       const viewNode = genericNodeDataStore.getOnce(selectNodeByUuid(sourceNode))
       emitFromNode(sourceNode, event, 0, nestedCallTrace(viewNode, callbacks.trace, "impliedForViewOutput"))
     }

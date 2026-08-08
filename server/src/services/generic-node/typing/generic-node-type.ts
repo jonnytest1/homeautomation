@@ -3,6 +3,7 @@ import type { ElementNode } from './element-node'
 import type { Callbacks } from './node-callbacks'
 import type { NodeDefintion } from './node-definition'
 import type { Schemata } from './schemata'
+import type { JSONSchema, SimpleSchemaType } from './jsonschema-type'
 import type { NodeEvent } from '../node-event'
 import type { ElementNodeImpl } from '../element-node'
 import type { Subject } from 'rxjs'
@@ -27,12 +28,12 @@ export type SubjectEvent<SocketUnion extends NullTypeSubject> = {
 
 export type TypeImplSocket<T extends NullTypeSubject = NullTypeSubject> = Subject<SubjectEvent<T>>
 
-export type TypeImplementaiton<Context = unknown, Globals extends NodeDefOptinos = NodeDefOptinos, Opts extends NodeDefOptinos = NodeDefOptinos, P = unknown, S = object, TypeS extends NullTypeSubject = NullTypeSubject> = {
-  context_type?(c: Context): Context
+export type TypeImplementaiton<Context extends JSONSchema = { type: "object" }, Globals extends NodeDefOptinos = NodeDefOptinos, Opts extends NodeDefOptinos = NodeDefOptinos, P = unknown, S = object, TypeS extends NullTypeSubject = NullTypeSubject> = {
+  context_type?(): Context
   payload_type?(p: P): P
   server_context_type?(s: S): S
   messageSocket?: (socket: TypeImplSocket<TypeS>) => void
-  process: (node: EvalNode<Opts, S>, data: NodeEvent<Context, P, Globals>, callbacks: Callbacks) => void | Promise<void>
+  process: (node: EvalNode<Opts, S>, data: NodeEvent<SimpleSchemaType<Context>, P, Globals>, callbacks: Callbacks) => void | Promise<void>
   nodeDefinition: () => NodeDefintion<Globals, Opts>
   nodeChanged?: (this: TypeImplementaiton, node: ElementNodeImpl<NodeDefToType<Opts>, NodeDefToRUntime<Opts>>, prevNode: ElementNode<NodeDefToType<Opts>> | null) => void | Promise<void>
   connectionTypeChanged?(node: EvalNode<Opts, S>, schema: Schemata): void | Promise<void>

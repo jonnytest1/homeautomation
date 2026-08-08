@@ -47,8 +47,6 @@ export class LineComponent implements OnChanges, AfterViewChecked, AfterViewInit
   callback = {
     mousemove: (e: MouseEvent) => {
       this.mousePos = new Vector2(e)
-
-
     },
     click: (e: MouseEvent) => {
       if (this.isHovering) {
@@ -125,8 +123,8 @@ export class LineComponent implements OnChanges, AfterViewChecked, AfterViewInit
       if (this.line.target instanceof DragEvent) {
         length -= 6
       }
-      const sourcePadding = 4
-      const scaledLine = lineVector.scaleTo(length - sourcePadding)
+      //const sourcePadding = 4
+      //const scaledLine = lineVector.scaleTo(length - sourcePadding)
 
 
       let from = source.added(lineVector.scaleTo(4))

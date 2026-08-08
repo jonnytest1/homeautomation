@@ -53,7 +53,7 @@ addTypeImpl({
     }
     let argStr = argument
 
-    const waitingforResponse = config?.sendsResponse() || commandObj?.responses
+    let waitingforResponse = config?.sendsResponse() || !!commandObj?.responses
     if (waitingforResponse) {
       const mqttEvt: { timestamp: number, argument?: string } = { timestamp: Date.now() }
       if (typeof argument === "string") {
@@ -106,6 +106,44 @@ addTypeImpl({
 
       mqttClient.on("message", messageHandler)
     }
+    waitingforResponse = config.statResponse()
+    if (waitingforResponse) {
+      const responseTopic = `stat/${config.mqttDeviceName}/RESULT`
+
+      mqttClient.subscribe(responseTopic, (e, grants) => {
+        if (e) {
+          console.error(e)
+        }
+      })
+      const messageHandler: OnMessageCallback = (t, msg) => {
+        if (topic === responseTopic) {
+          mqttClient.off("message", messageHandler)
+          mqttClient.unsubscribe(responseTopic)
+          const payload = {
+            response: `${msg.toString()}`
+          }
+
+          try {
+            const responseEvt = JSON.parse(payload.response)
+            if ("response" in responseEvt) {
+              Object.assign(payload, responseEvt)
+            }
+          } catch (e) {
+            //
+          }
+
+          evt.updatePayload(payload)
+          callbacks.continue(evt)
+
+        }
+      }
+
+      mqttClient.on("message", messageHandler)
+
+
+    }
+
+
     const finalTopic = `${topic}${command}`
     const finalArgStr = argStr
     if (finalArgStr === undefined) {
