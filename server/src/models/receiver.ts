@@ -173,7 +173,7 @@ export class Receiver {
 
             firebasemessageing.sendNotification(this.firebaseToken!, {
               type: "removeNotification",
-              id: evaluatedData.attributes.messageId
+              id: evaluatedData.attributes.messageId.split("messages/")[1]
             });
           }
         })
