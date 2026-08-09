@@ -8,7 +8,7 @@ import { logKibana } from '../util/log';
 import { autosaveable, settable } from 'express-hibernate-wrapper';
 import { column, mapping, Mappings, primary, table } from 'hibernatets';
 import { randomUUID } from "crypto"
-const fetch = require('node-fetch');
+const fetch = require('node-fetch') as typeof window["fetch"];
 @table()
 @autosaveable
 export class Receiver {
@@ -118,7 +118,7 @@ export class Receiver {
         if (response === "dismissed") {
           if (evaluatedData.attributes && evaluatedData.attributes.messageId) {
 
-            firebasemessageing.sendNotification(this.firebaseToken, {
+            firebasemessageing.sendNotification(this.firebaseToken!, {
               type: "removeNotification",
               id: evaluatedData.attributes.messageId
             });
@@ -179,7 +179,7 @@ export class Receiver {
 
 
     } catch (e) {
-      if (e.code == 'messaging/registration-token-not-registered') {
+      if (typeof e == "object" && e && "code" in e && e.code == 'messaging/registration-token-not-registered') {
         this.firebaseToken = null
         return 0
       }
