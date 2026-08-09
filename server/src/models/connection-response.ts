@@ -54,6 +54,7 @@ export interface SenderResponse<SoundDef = SoundType, NotificationType = Notific
 
   attributes?: {
     messageId?: string
+    dismissFncs?: Array<() => void>
   }
 
   read?: {

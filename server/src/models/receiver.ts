@@ -116,13 +116,7 @@ export class Receiver {
     ws.sendWebsocket(this.ip, evaluatedData)
       .then(response => {
         if (response === "dismissed") {
-          if (evaluatedData.attributes && evaluatedData.attributes.messageId) {
-
-            firebasemessageing.sendNotification(this.firebaseToken!, {
-              type: "removeNotification",
-              id: evaluatedData.attributes.messageId
-            });
-          }
+          evaluatedData.attributes?.dismissFncs?.forEach(fnc => fnc())
         }
       }).catch(e => {
         let errorLevel: "ERROR" | "WARN" = "ERROR"
@@ -169,11 +163,22 @@ export class Receiver {
            token: response.results[0].canonicalRegistrationToken
          });
        }*/
-      if (response && evaluatedData.attributes) {
+      if (response) {
+        evaluatedData.attributes ??= {}
         evaluatedData.attributes.messageId = response;
-      } else if (response) {
-        evaluatedData.attributes = { ...evaluatedData.attributes, messageId: response }
+        evaluatedData.attributes.dismissFncs ??= []
+        evaluatedData.attributes.dismissFncs.push(() => {
+          if (evaluatedData.attributes && evaluatedData.attributes.messageId) {
+
+            firebasemessageing.sendNotification(this.firebaseToken!, {
+              type: "removeNotification",
+              id: evaluatedData.attributes.messageId
+            });
+          }
+        })
       }
+
+
       //}
       return response ? 0 : 1;
 
