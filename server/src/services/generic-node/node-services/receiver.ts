@@ -34,6 +34,7 @@ export const NotificationDataSoundTypeSchema = z.object({
   "body": z.union([z.null(), z.string()]).optional(),
   "sound": z.union([z.array(z.string()), z.null(), z.string()]).optional(),
   "title": z.union([z.null(), z.string()]).optional(),
+  "tag": z.union([z.null(), z.string()]).optional(),
 });
 
 
@@ -87,6 +88,9 @@ addTypeImpl({
 
       const data = ConnectionSchema.parse(evt.payload)
       data.attributes ??= evt.context
+      if (data.notification) {
+        data.notification.tag ??= evt.context.uuid
+      }
       await receiver.send(new ReceiverData(data as ConnectionResponse))
     } else if (params?.deviceList?.length) {
       const devices = deviceKeyArraySchema.parse(JSON.parse(params?.deviceList))
@@ -98,6 +102,9 @@ addTypeImpl({
       const selected = receivers.filter(rec => devices.includes(rec.deviceKey))
       const data = ConnectionSchema.parse(evt.payload)
       data.attributes ??= evt.context
+      if (data.notification) {
+        data.notification.tag ??= evt.context.uuid
+      }
       const receiverData = new ReceiverData(data as ConnectionResponse)
       await Promise.all(selected.map(async rec => {
         try {

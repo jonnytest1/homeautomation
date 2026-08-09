@@ -13,6 +13,13 @@ const fetch = require('node-fetch') as typeof window["fetch"];
 @autosaveable
 export class Receiver {
 
+  private static PENDING_MESSAGES: {
+    [tag: string]: {
+      [receiver: string]: () => void
+    }
+  } = {}
+
+
   @column()
   @settable
   deviceKey: string;
@@ -22,7 +29,7 @@ export class Receiver {
   firebaseToken: string | null;
 
   @primary()
-  id;
+  id!: string;
 
   @settable
   @column()
@@ -108,6 +115,14 @@ export class Receiver {
     return 0;
   }
 
+  static dimiss(tag: string) {
+    const messageKeys = this.PENDING_MESSAGES[tag];
+    if (messageKeys) {
+      Object.values(messageKeys).forEach(valFnc => valFnc())
+      delete this.PENDING_MESSAGES[tag]
+    }
+
+  }
 
   private sendForWebsocket(evaluatedDataObj: EvaluatedData): number {
     const evaluatedData = evaluatedDataObj.data
@@ -116,7 +131,9 @@ export class Receiver {
     ws.sendWebsocket(this.ip, evaluatedData)
       .then(response => {
         if (response === "dismissed") {
-          evaluatedData.attributes?.reference?.dismissFncs?.forEach(fnc => fnc())
+          if (evaluatedData.notification?.tag) {
+            Receiver.dimiss(evaluatedData.notification?.tag)
+          }
         }
       }).catch(e => {
         let errorLevel: "ERROR" | "WARN" = "ERROR"
@@ -138,6 +155,7 @@ export class Receiver {
     if (firebaseData.notification && !firebaseData.notification.tag) {
       firebaseData.notification.tag = randomUUID()
     }
+    firebaseData.receiverId = this.id
     console.log(`sending push notification for ${this.name}`);
     if (this.firebaseToken == null) {
       console.debug("no firebase token")
@@ -166,17 +184,21 @@ export class Receiver {
       if (response) {
         evaluatedData.attributes ??= {}
         evaluatedData.attributes.messageId = response;
-        evaluatedData.attributes.reference ??= {}
-        evaluatedData.attributes.reference.dismissFncs ??= []
-        evaluatedData.attributes.reference.dismissFncs.push(() => {
-          if (evaluatedData.attributes && evaluatedData.attributes.messageId) {
 
-            firebasemessageing.sendNotification(this.firebaseToken!, {
-              type: "removeNotification",
-              id: evaluatedData.attributes.messageId.split("messages/")[1]
-            });
+        const notificationTag = evaluatedData.notification?.tag;
+        if (notificationTag) {
+          const messageId = evaluatedData.attributes.messageId.split("messages/")[1]
+          Receiver.PENDING_MESSAGES[notificationTag] ??= {}
+          Receiver.PENDING_MESSAGES[notificationTag][this.deviceKey] = () => {
+            if (evaluatedData.attributes && evaluatedData.attributes.messageId) {
+
+              firebasemessageing.sendNotification(this.firebaseToken!, {
+                type: "removeNotification",
+                id: messageId
+              });
+            }
           }
-        })
+        }
       }
 
 

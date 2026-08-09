@@ -46,6 +46,8 @@ interface NotificationData<SoundDef = SoundType> {
   title?: string;
   sound?: SoundDef;
   body?: string;
+
+  tag?: string
 }
 
 export interface SenderResponse<SoundDef = SoundType, NotificationType = NotificationData<SoundDef>> {
@@ -54,9 +56,9 @@ export interface SenderResponse<SoundDef = SoundType, NotificationType = Notific
 
   attributes?: {
     messageId?: string
-    reference?: {
-      dismissFncs?: Array<() => void>
-    }
+    //reference?: {
+    // dismissFncs?: Array<() => void>
+    //}
   }
 
   read?: {

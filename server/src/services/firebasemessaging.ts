@@ -31,6 +31,8 @@ export interface FireBaseMessagingPayload {
 
   type?: string
   id?: string
+
+  receiverId?: string
 }
 
 

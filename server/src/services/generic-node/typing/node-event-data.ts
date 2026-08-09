@@ -1,6 +1,11 @@
 
 
-export type ContextObject<T> = T & { eventCount?: number, [key: string]: unknown, reference?: Partial<T> }
+export type ContextObject<T> = T & {
+  eventCount?: number,
+  uuid: string
+  reference?: Partial<T>
+  [key: string]: unknown,
+}
 
 
 export type NodeEventData<C = object, T = unknown> = {

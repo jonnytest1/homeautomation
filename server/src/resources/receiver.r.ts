@@ -216,4 +216,17 @@ export class ReceiverResource {
     res.status(200).send();
 
   }
+
+  @POST({ path: '/notification_dismiss/:tag' })
+  async notification_dismiss(req: HttpRequest, res: HttpResponse) {
+    if (!req.params.tag) {
+      return res.status(400)
+        .send("missing tag");
+    }
+
+    Receiver.dimiss(req.params.tag)
+
+    res.status(200).send();
+
+  }
 }
