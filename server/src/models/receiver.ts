@@ -152,6 +152,7 @@ export class Receiver {
     try {
 
       const response = await firebasemessageing.sendNotification(this.firebaseToken, firebaseData);
+      console.log(`messaging id: ${response}`)
       /*if (!response) {
         logKibana('ERROR', {
           token: this.firebaseToken,

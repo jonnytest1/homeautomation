@@ -8,19 +8,6 @@ class FireBAseMessaging {
 
   }
 
-  async sendTestNotification(token) {
-    //const token = '';
-    return this.app.messaging()
-      .send({
-        token: token,
-        data: {
-          message: 'test'
-        },
-        notification: {
-          body: 'test',
-        },
-      });
-  }
   async sendNotification(token, payload: FireBaseMessagingPayload) {
     return this.app.messaging()
       .send({
