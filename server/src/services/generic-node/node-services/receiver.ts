@@ -63,6 +63,16 @@ const deviceKeyArraySchema = z.array(z.string())
 
 
 addTypeImpl({
+  context_type() {
+    return {
+      type: "object",
+      properties: {
+        messageId: {
+          type: "string"
+        }
+      }
+    } as const
+  },
   async process(node, evt, callbacks) {
     const params = node.parameters
 

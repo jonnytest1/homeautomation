@@ -13,7 +13,7 @@ export type NodeEventJsonData<P = unknown, C = unknown> = {
 export class NodeEvent<C = object, P = unknown, G extends NodeDefOptinos = NodeDefOptinos> {
 
   declare payload: P
-  declare context: C & { eventCount?: number, reference: C, [key: string]: unknown }
+  declare context: C & ContextObject<C>
 
   declare globalConfig: NodeDefToType<G>
 
@@ -54,7 +54,7 @@ export class NodeEvent<C = object, P = unknown, G extends NodeDefOptinos = NodeD
   }
 
   clone() {
-    const refctx = this.context.reference
+    const refctx = this.context.reference ?? {} as C
     const cpy = this.copy();
     cpy.context.reference = refctx
     return new NodeEvent<C>(cpy, this.globalConfig)

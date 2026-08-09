@@ -116,7 +116,7 @@ export class Receiver {
     ws.sendWebsocket(this.ip, evaluatedData)
       .then(response => {
         if (response === "dismissed") {
-          evaluatedData.attributes?.dismissFncs?.forEach(fnc => fnc())
+          evaluatedData.attributes?.reference?.dismissFncs?.forEach(fnc => fnc())
         }
       }).catch(e => {
         let errorLevel: "ERROR" | "WARN" = "ERROR"
@@ -166,8 +166,9 @@ export class Receiver {
       if (response) {
         evaluatedData.attributes ??= {}
         evaluatedData.attributes.messageId = response;
-        evaluatedData.attributes.dismissFncs ??= []
-        evaluatedData.attributes.dismissFncs.push(() => {
+        evaluatedData.attributes.reference ??= {}
+        evaluatedData.attributes.reference.dismissFncs ??= []
+        evaluatedData.attributes.reference.dismissFncs.push(() => {
           if (evaluatedData.attributes && evaluatedData.attributes.messageId) {
 
             firebasemessageing.sendNotification(this.firebaseToken!, {

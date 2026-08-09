@@ -341,12 +341,12 @@ updateDatabase(__dirname + '/models', {
 })
 
 export function addTypeImpl<
-  ContextType extends JSONSchema,
   GlobalsType extends NodeDefOptinos,
   NodeOptionsType extends NodeDefOptinos,
   PayloadType,
   ServerContextType,
-  TS extends NullTypeSubject>(
+  TS extends NullTypeSubject,
+  ContextType extends JSONSchema = { type: "object" },>(
     typeImpl: TypeImplementaiton<ContextType, GlobalsType, NodeOptionsType, PayloadType, ServerContextType, TS>) {
 
   typeImpl._file = getCurrentlyLaodingFile()
