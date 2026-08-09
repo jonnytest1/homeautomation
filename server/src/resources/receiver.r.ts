@@ -18,11 +18,11 @@ export class ReceiverResource {
   @POST({
     path: ''
   })
-  async register(req, res) {
+  async register(req: HttpRequest, res: HttpResponse) {
     const existingReceiver = await load(Receiver, s => s.deviceKey = req.body.deviceKey, [], { first: true, db: pool });
     if (existingReceiver) {
       if (existingReceiver.type == "ws" || existingReceiver.type == "ip" || existingReceiver.type == "http") {
-        let newIp = req.headers.http_x_forwarded_for
+        let newIp = req.headers.http_x_forwarded_for as string
         if (req.body.port) {
           newIp += `:${req.body.port}`;
         }
@@ -42,7 +42,7 @@ export class ReceiverResource {
     }
     const receiver = new Receiver();
     if (req.body.type === 'ip' || req.body.type === 'wss' || req.body.type === 'http') {
-      receiver.ip = req.headers.http_x_forwarded_for;
+      receiver.ip = req.headers.http_x_forwarded_for as string;
       if (req.body.port) {
         receiver.ip += `:${req.body.port}`;
       }
@@ -56,7 +56,7 @@ export class ReceiverResource {
   @GET({
     path: ''
   })
-  async getReceivers(req, res: HttpResponse) {
+  async getReceivers(req: HttpRequest, res: HttpResponse) {
     const receivers = await load(Receiver, SqlCondition.ALL, [], {
       deep: ["actions"],
       db: sharedPool

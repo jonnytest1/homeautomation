@@ -2,7 +2,7 @@
 
 export type ContextObject<T> = T & {
   eventCount?: number,
-  uuid: string
+  uuid?: string
   reference?: Partial<T>
   [key: string]: unknown,
 }

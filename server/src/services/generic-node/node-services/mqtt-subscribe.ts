@@ -1,7 +1,4 @@
 import { mqttConnection } from '../../mqtt-api'
-import type { DeviceConfig } from '../../mqtt-tasmota'
-import type { ElementNode } from '../typing/element-node'
-import type { NodeEvent } from '../node-event'
 import { addTypeImpl } from '../generic-node-service'
 import { updateRuntimeParameter } from '../element-node-fnc'
 import { genericNodeDataStore } from '../generic-store/reference'
@@ -11,7 +8,26 @@ import { backendToFrontendStoreActions } from '../generic-store/actions'
 
 
 addTypeImpl({
-  process(node: ElementNode<{ topic?: string }>, evt: NodeEvent<{ topic: string, device?: DeviceConfig }>, callbacks) {
+  context_type() {
+    return {
+      type: "object",
+      properties: {
+        topic: {
+          type: "string"
+        },
+        device: {
+          type: "object",
+          properties: {
+            friendlyName: {
+              type: "string"
+            },
+          }
+        },
+
+      }
+    } as const
+  },
+  process(node, evt, callbacks) {
     if (!node?.parameters?.topic) {
       return
     }
