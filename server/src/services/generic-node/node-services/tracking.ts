@@ -96,6 +96,7 @@ addTypeImpl({
     }
 
     console.log("add tracking event for " + node.parameters?.name)
+
     if (activeTrackingMap[node.uuid]) {
       clearTimeout(activeTrackingMap[node.uuid])
     }

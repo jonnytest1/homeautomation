@@ -8,13 +8,13 @@ class FireBAseMessaging {
 
   }
 
-  async sendNotification(token, payload: FireBaseMessagingPayload) {
+  async sendNotification(token: string, payload: FireBaseMessagingPayload) {
     return this.app.messaging()
       .send({
         token: token,
         data: {
           data: JSON.stringify(payload)
-        },
+        }
         /* notification: {
            body: payload.notification?.body,
            title: payload.notification?.title,

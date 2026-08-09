@@ -82,7 +82,7 @@ addTypeImpl({
         }
       })
       const messageHandler: OnMessageCallback = (t, msg) => {
-        if (topic === responseTopic) {
+        if (t === responseTopic) {
           mqttClient.off("message", messageHandler)
           mqttClient.unsubscribe(responseTopic)
           const payload = {
@@ -117,7 +117,7 @@ addTypeImpl({
         }
       })
       const messageHandler: OnMessageCallback = (t, msg) => {
-        if (topic === responseTopic) {
+        if (t === responseTopic) {
           mqttClient.off("message", messageHandler)
           mqttClient.unsubscribe(responseTopic)
           const payload = {
@@ -306,7 +306,7 @@ addTypeImpl({
                 nodeUuid: node.uuid,
                 schema: inputSchemaObj
               }))
-              zodValidators[node.uuid] = generateZodTypeFromSchema(inputSchema)
+              zodValidators[node.uuid] = generateZodTypeFromSchema(inputSchema, `mqttpub-${node.uuid}-arg-param`)
             } else {
               delete node.runtimeContext.inputSchema
             }

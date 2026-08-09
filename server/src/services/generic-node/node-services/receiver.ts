@@ -76,6 +76,7 @@ addTypeImpl({
       });
 
       const data = ConnectionSchema.parse(evt.payload)
+      data.attributes ??= evt.context
       await receiver.send(new ReceiverData(data as ConnectionResponse))
     } else if (params?.deviceList?.length) {
       const devices = deviceKeyArraySchema.parse(JSON.parse(params?.deviceList))
@@ -86,6 +87,7 @@ addTypeImpl({
 
       const selected = receivers.filter(rec => devices.includes(rec.deviceKey))
       const data = ConnectionSchema.parse(evt.payload)
+      data.attributes ??= evt.context
       const receiverData = new ReceiverData(data as ConnectionResponse)
       await Promise.all(selected.map(async rec => {
         try {

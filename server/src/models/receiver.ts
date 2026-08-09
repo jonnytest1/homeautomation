@@ -169,8 +169,10 @@ export class Receiver {
            token: response.results[0].canonicalRegistrationToken
          });
        }*/
-      if (response) {
-        evaluatedData.attributes = { ...evaluatedData.attributes, messageId: response };
+      if (response && evaluatedData.attributes) {
+        evaluatedData.attributes.messageId = response;
+      } else if (response) {
+        evaluatedData.attributes = { ...evaluatedData.attributes, messageId: response }
       }
       //}
       return response ? 0 : 1;
