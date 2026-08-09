@@ -17,6 +17,7 @@ export class ReceiverData {
       return this.evaluatedData
     }
     const dataCopy: ConnectionResponse = JSON.parse(JSON.stringify(this.data))
+    dataCopy.attributes = this.data.attributes
 
     if (dataCopy.notification?.sound) {
       dataCopy.notification.sound = await this.evaluateSound(dataCopy.notification?.sound)
