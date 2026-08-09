@@ -15,12 +15,12 @@ class FireBAseMessaging {
         data: {
           data: JSON.stringify(payload)
         },
-        notification: {
-          body: payload.notification?.body,
-          title: payload.notification?.title,
-          imageUrl: payload.notification?.icon,
-
-        }
+        /* notification: {
+           body: payload.notification?.body,
+           title: payload.notification?.title,
+           imageUrl: payload.notification?.icon,
+ 
+         }*/
       });
   }
 
