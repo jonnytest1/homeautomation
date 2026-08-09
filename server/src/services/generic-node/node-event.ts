@@ -49,12 +49,12 @@ export class NodeEvent<C = object, P = unknown, G extends NodeDefOptinos = NodeD
   }
 
 
-  copy(): NodeEventJsonData<unknown, C & { reference: C }> {
+  copy(): NodeEventJsonData<unknown, C> {
     return JSON.parse(JSON.stringify(this))
   }
 
   clone() {
-    const refctx = this.context.reference ?? {} as C
+    const refctx = this.context.reference ?? {} as Partial<C>
     const cpy = this.copy();
     cpy.context.reference = refctx
     return new NodeEvent<C>(cpy, this.globalConfig)
