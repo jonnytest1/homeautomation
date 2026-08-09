@@ -35,6 +35,7 @@ import type { Action } from '../../util/data-store/action';
 import { BehaviorSubject, combineLatest, Subject, type Subscription } from "rxjs"
 import { filter, first, skip } from "rxjs/operators"
 import { load, PsqlBase, save, updateDatabase } from 'hibernatets';
+import { v4 } from 'uuid';
 
 
 
@@ -500,6 +501,7 @@ export function emitEvent(type: string, data: NodeEventData) {
   }
   return new Promise<void>((res, err) => {
     data.context.eventIndex = eventIndex++
+    data.context.uuid ??= v4()
     const nodes = genericNodeDataStore.getOnce(selectNodesOfType(type))
     nodes.forEach(node => {
       const event = createNodeEvent(data)

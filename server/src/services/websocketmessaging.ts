@@ -25,35 +25,39 @@ class WebsocketMessaging {
     //
   }
 
-  sendWebsocket(ip: string, data: SenderResponse): Promise<string | null> {
-    return new Promise((resolver, err) => {
-      console.log('sending websocket connection');
-      this.client = new WebSocketClient();
-      this.client.on('connect', (connection) => {
-        connection.on('error', function (error) {
-          console.log('Connection Error: ' + error.toString());
-          err(new WebsocketError(error.message, "error after connect"));
-        });
-        connection.on('close', () => {
-          console.log('Connection Closed');
-          resolver(null)
+  sendWebsocket(ip: string, data: SenderResponse): { response: Promise<string | null>, client: WebSocketClient } {
+    console.log('sending websocket connection');
+    this.client = new WebSocketClient();
+    return {
+      client: this.client,
+      response: new Promise((resolver, err) => {
 
+        this.client.on('connect', (connection) => {
+          connection.on('error', function (error) {
+            console.log('Connection Error: ' + error.toString());
+            err(new WebsocketError(error.message, "error after connect"));
+          });
+          connection.on('close', () => {
+            console.log('Connection Closed');
+            resolver(null)
+
+          });
+          connection.on('message', (data) => {
+            if (data.type == "utf8") {
+              console.log(`received response '${data.utf8Data}'`);
+              resolver(data.utf8Data)
+            }
+          });
         });
-        connection.on('message', (data) => {
-          if (data.type == "utf8") {
-            console.log(`received response '${data.utf8Data}'`);
-            resolver(data.utf8Data)
-          }
+        this.client.on('connectFailed', () => {
+          console.log(`connection to ws://${ip} failed`);
+          err(new WebsocketError(`connection to ws://${ip} failed`, "connectFailed"));
         });
-      });
-      this.client.on('connectFailed', () => {
-        console.log(`connection to ws://${ip} failed`);
-        err(new WebsocketError(`connection to ws://${ip} failed`, "connectFailed"));
-      });
-      const connectionUrl = new URL(`ws://${ip}`);
-      connectionUrl.searchParams.append('data', JSON.stringify(data));
-      this.client.connect(connectionUrl.href, 'echo-protocol');
-    });
+        const connectionUrl = new URL(`ws://${ip}`);
+        connectionUrl.searchParams.append('data', JSON.stringify(data));
+        this.client.connect(connectionUrl.href, 'echo-protocol');
+      })
+    };
   }
 
   send(deviceKey: string, data: SenderResponse) {

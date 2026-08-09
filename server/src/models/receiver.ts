@@ -128,7 +128,8 @@ export class Receiver {
     const evaluatedData = evaluatedDataObj.data
     console.log(`notification to ${this.ip} for ${evaluatedData.notification?.title}`)
     const ts = new Date().toISOString()
-    ws.sendWebsocket(this.ip, evaluatedData)
+    const socket = ws.sendWebsocket(this.ip, evaluatedData);
+    socket.response
       .then(response => {
         if (response === "dismissed") {
           if (evaluatedData.notification?.tag) {
@@ -145,6 +146,19 @@ export class Receiver {
           evluatedObj: evaluatedDataObj
         }, e)
       })
+    const tag = evaluatedData.notification?.tag;
+    if (tag) {
+
+      Receiver.PENDING_MESSAGES[tag][this.deviceKey] = () => {
+        socket.client.emit(JSON.stringify({
+          type: "removeNotification",
+          id: tag
+        }))
+      }
+    }
+
+
+
     return 0;
   }
 
