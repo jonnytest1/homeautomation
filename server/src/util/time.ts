@@ -310,7 +310,7 @@ function explainSchedule(input: string | Schedule, date = new Date(), options = 
 
   for (const window of schedule.windows) {
     const { start, end } = window;
-    let startDate = null;
+    let startDate: Date | null = null;
 
     if (start <= end) {
       const inside = schedule.inclusiveEnd
