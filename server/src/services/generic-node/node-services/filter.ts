@@ -10,6 +10,7 @@ import { genericNodeDataStore } from '../generic-store/reference';
 import { backendToFrontendStoreActions } from '../generic-store/actions';
 import { lastEventTimesForNode } from '../last-event-service';
 import { updateRuntimeParameter, updateServerContext } from '../element-node-fnc';
+import { DateTimeUtil } from '../../../util/time';
 import * as z from "zod"
 import { Script } from 'vm';
 
@@ -107,6 +108,7 @@ addTypeImpl({
         payload: data.payload,
         inputs: inputs,
         Date: DateMock,
+        DateTimeUtil: DateTimeUtil,
         lastOutputTs,
         inputhistory: inputHistory,
         outputhistory: node.serverContext?.outputhistory ?? [],
@@ -298,6 +300,9 @@ type InputType=${connectionSchema.mainTypeName ??= mainTypeName}
       }
       var setInputHistory:(days:number, index = 0)=>void
       var setOutputHistory:(days:number, index = 0)=>void
+      var DateTimeUtil:{
+         match:(def:str)=>boolean
+      }
       `
       },
       nodeUuid: node.uuid
