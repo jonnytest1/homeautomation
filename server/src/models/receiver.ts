@@ -148,7 +148,7 @@ export class Receiver {
       })
     const tag = evaluatedData.notification?.tag;
     if (tag) {
-
+      Receiver.PENDING_MESSAGES[tag] ??= {}
       Receiver.PENDING_MESSAGES[tag][this.deviceKey] = () => {
         socket.client.emit(JSON.stringify({
           type: "removeNotification",
